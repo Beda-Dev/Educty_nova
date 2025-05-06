@@ -1,0 +1,62 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(request: NextRequest) {
+  try {
+    const data = await fetch('https://educty.digifaz.com/api/document').then(res => res.json());
+    return NextResponse.json(data, { status: 200 });
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données :', error);
+    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData(); // Récupérer FormData depuis la requête
+
+    const response = await fetch('https://educty.digifaz.com/api/document', {
+      method: 'POST',
+      body: formData, // Envoyer FormData directement
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: 201 });
+  } catch (error) {
+    console.error("Erreur lors de l'ajout des données :", error);
+    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const id = new URL(request.url).searchParams.get('id');
+
+    const response = await fetch(`https://educty.digifaz.com/api/document/${id}`, {
+      method: 'PUT',
+      body: formData, // Envoyer FormData directement
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour des données :", error);
+    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { id } = await request.json();
+
+    const response = await fetch(`https://educty.digifaz.com/api/document/${id}`, {
+      method: 'DELETE',
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la suppression des données :", error);
+    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+  }
+}
