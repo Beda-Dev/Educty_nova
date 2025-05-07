@@ -26,7 +26,7 @@ export default function EncaissementPage() {
   const lang = params.lang as string;
 
   const getLocalizedPath = (path: string) => {
-    return `/${lang}/encaissement/${path}`;
+    return `/${lang}/${path}`;
   };
 
   const menuItems = [

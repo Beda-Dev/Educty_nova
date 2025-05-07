@@ -9,6 +9,8 @@ import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
 import DataFetcher from "./update";
 import NetworkStatus from "./network-status";
+
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {

@@ -37,10 +37,13 @@ const RegistrationFinal = ({ registration, finance }: DataProps) => {
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    
     if (registration.student_id && students.length > 0) {
       const foundStudent = findStudentById(registration.student_id, students);
       setStudent(foundStudent);
     }
+
+    
   }, [registration.student_id, students]);
 
   const generatePDF = async (action: "download" | "print") => {
@@ -129,34 +132,14 @@ const RegistrationFinal = ({ registration, finance }: DataProps) => {
           <div className="col-span-2">
             <h3 className="text-base font-bold mb-2">INFORMATIONS ÉLÈVE</h3>
             <div className="grid grid-cols-2 gap-y-2 text-sm">
-              <Info label="Nom complet" value={`${student?.name} ${student?.first_name}`} />
-              <Info label="Matricule" value={student?.registration_number} />
-              <Info label="Sexe" value={student?.sexe} />
+              <Info label="Nom complet" value={`${registration.student?.name} ${registration.student?.first_name}`} />
+              <Info label="Matricule" value={registration.student?.registration_number} />
+              <Info label="Sexe" value={registration.student?.sexe} />
               <Info label="Classe" value={registration.classe.label} />
             </div>
           </div>
 
-          {/* Photo élève */}
-          <div className="flex flex-col items-center">
-            {student?.photo ? (
-              <img
-                src={student.photo}
-                alt="Photo élève"
-                width={100}
-                height={100}
-                className="rounded border border-gray-300 mb-2 object-cover"
-                onError={(e) => {
-                  const el = e.target as HTMLImageElement;
-                  el.style.display = "none";
-                }}
-              />
-            ) : (
-              <div className="w-24 h-24 rounded border border-gray-300 flex items-center justify-center bg-gray-100 mb-2">
-                <User className="w-10 h-10 text-gray-400" />
-              </div>
-            )}
-            <span className="text-xs text-gray-500">Photo de l'élève</span>
-          </div>
+
         </div>
 
         {/* Détails frais */}
@@ -184,20 +167,6 @@ const RegistrationFinal = ({ registration, finance }: DataProps) => {
             <div className="w-64 border-t-2 border-gray-300 pt-2 font-bold flex justify-between">
               <span>TOTAL :</span>
               <span>{finance.total.toLocaleString("fr-FR")} FCFA</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Responsable légal */}
-        <div className="grid  gap-6 mb-8">
-          <div className="border p-3">
-            <h3 className="text-base font-bold mb-2 flex items-center gap-2">
-              <User className="w-4 h-4" /> RESPONSABLE LÉGAL
-            </h3>
-            <div className="text-sm space-y-1">
-              <p><strong>Nom :</strong> {student?.tutor_name}</p>
-              <p><strong>Prénom :</strong> {student?.tutor_first_name}</p>
-              <p className=""><strong>Contact :</strong> +225 {student?.tutor_number}</p>
             </div>
           </div>
         </div>

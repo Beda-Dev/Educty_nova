@@ -10,38 +10,40 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HandCoins, ListChecks } from "lucide-react";
+import { List, Tags } from "lucide-react";
 import { useParams } from "next/navigation";
 
+// Couleurs personnalisées pour chaque item
 const itemColors = [
-  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300",
-  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300"
+  "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
+  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300"
 ];
 
-export default function DecaissementPage() {
+export default function FraisScolairesPage() {
   const router = useRouter();
   const params = useParams();
   const lang = params.lang as string;
 
   const getLocalizedPath = (path: string) => {
-    return `/${lang}/${path}`;
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `/${lang}/${cleanPath}`;
   };
 
   const menuItems = [
     {
-      id: "effectuer-decaissement",
-      title: "Effectuer décaissement",
-      description: "Enregistrer une nouvelle dépense",
-      icon: <HandCoins className="w-6 h-6" />,
-      path: "depense",
+      id: "fees_type",
+      title: "Types de frais",
+      description: "Gérer les différents types de frais scolaires",
+      icon: <List className="w-6 h-6" />,
+      path: "fees_type",
       color: itemColors[0]
     },
     {
-      id: "types-decaissement",
-      title: "Types de décaissement",
-      description: "Gérer les catégories de dépenses",
-      icon: <ListChecks className="w-6 h-6" />,
-      path: "type_depense",
+      id: "pricing",
+      title: "Tarification",
+      description: "Configurer les tarifs et montants des frais",
+      icon: <Tags className="w-6 h-6" />,
+      path: "pricing",
       color: itemColors[1]
     }
   ];
@@ -75,6 +77,9 @@ export default function DecaissementPage() {
         duration: 0.3,
         ease: "easeOut"
       },
+    },
+    tap: {
+      scale: 0.98,
     }
   };
 
@@ -84,14 +89,14 @@ export default function DecaissementPage() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
-              <HandCoins className="w-8 h-8 text-primary" />
+              <Tags className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-red-600 bg-clip-text text-transparent">
-                Décaissements
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+                Frais Scolaires
               </h1>
               <p className="text-sm text-muted-foreground">
-                Gestion des sorties financières de l'établissement
+                Gestion des types de frais et de leur tarification
               </p>
             </div>
           </div>
@@ -110,6 +115,7 @@ export default function DecaissementPage() {
                     <motion.div
                       variants={itemVariants}
                       whileHover="hover"
+                      whileTap="tap"
                       className={cn(
                         "p-6 rounded-xl border cursor-pointer transition-all",
                         "flex flex-col items-start gap-4",
@@ -133,10 +139,18 @@ export default function DecaissementPage() {
                           {item.description}
                         </p>
                       </div>
+                      <motion.div 
+                        className="absolute bottom-4 right-4 text-sm font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        →
+                      </motion.div>
                     </motion.div>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-primary text-white">
-                    <p>Accéder à {item.title.toLowerCase()}</p>
+                    <p>Cliquez pour accéder à {item.title.toLowerCase()}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -179,6 +179,7 @@ export interface Pricing {
   academic_year: AcademicYear;
   level: Level;
   fee_type: FeeType;
+  installments?: Installment[];
 }
 
 export interface Classe {

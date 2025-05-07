@@ -7,21 +7,20 @@ import { useSchoolStore } from "@/store";
 import { fetchAcademicYears } from "@/store/schoolservice";
 import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-import {updateStudentCountByClass , verificationPermission } from "@/lib/fonction";
+import { updateStudentCountByClass, verificationPermission } from "@/lib/fonction";
 
 interface AcademicYearsDisplayProps {
   data: AcademicYear[];
   user: User;
-  Mobile: boolean;
+  Mobile?: boolean; // Rendre optionnel mais conservé pour compatibilité
 }
 
 const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({ 
   data, 
-  user, 
-  Mobile 
+  user
 }) => {
   const permissionRequis = ["activer annee_Academique", "creer annee_Academique", "modifier annee_Academique"];
-  const { setAcademicYearCurrent, academicYearCurrent, setAcademicYears , classes , registrations , roles , permissions } = useSchoolStore();
+  const { setAcademicYearCurrent, academicYearCurrent, setAcademicYears, classes, registrations } = useSchoolStore();
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,8 +68,9 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
         throw new Error("Année académique non trouvée");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Une erreur inconnue est survenue");
-      toast.error(error || "Erreur lors de la mise à jour");
+      const errorMessage = err instanceof Error ? err.message : "Une erreur inconnue est survenue";
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error("Erreur:", err);
       // Revert selection on error
       setSelectedYear(currentAcademicYear?.id.toString() || "");
@@ -81,16 +81,16 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <p className={`text-${Mobile ? "xs" : "sm"} text-muted-foreground`}>
+      <p className="text-sm text-muted-foreground">
         Aucune année académique disponible
       </p>
     );
   }
 
   return (
-    <div className={`text-${Mobile ? "xs" : "sm"} text-muted-foreground p-${Mobile ? "1" : "2"}`}>
+    <div className="text-sm text-muted-foreground p-2">
       {hasAdminAccess ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2">
           <span className="whitespace-nowrap">
             Année académique :
           </span>
@@ -100,7 +100,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
             onValueChange={handleYearChange}
             disabled={isLoading}
           >
-            <SelectTrigger className={`w-[${Mobile ? "120px" : "180px"}]`}>
+            <SelectTrigger className="w-[180px]">
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -116,7 +116,6 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
                 <SelectItem 
                   key={year.id} 
                   value={year.id.toString()}
-                  className={Mobile ? "text-xs" : "text-sm"}
                 >
                   {year.label}
                 </SelectItem>
@@ -125,8 +124,8 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
           </Select>
         </div>
       ) : (
-        <p className={Mobile ? "text-xs" : "text-sm"}>
-          Année académique : {currentAcademicYear?.label || "Non définie"}
+        <p className="text-sm">
+          Année académique : <span className="font-medium">{currentAcademicYear?.label || "Non définie"}</span>
         </p>
       )}
     </div>
