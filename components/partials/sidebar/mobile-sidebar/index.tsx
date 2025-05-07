@@ -11,11 +11,12 @@ import { usePathname } from "next/navigation";
 import SingleMenuItem from "./single-menu-item";
 import SubMenuHandler from "./sub-menu-handler";
 import NestedSubMenu from "../common/nested-menus";
+import type { MenuItem } from "./type";
 const MobileSidebar = ({ className, trans }: { className?: string, trans: any }) => {
   const { sidebarBg, mobileMenu, setMobileMenu } = useSidebar();
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
   const [activeMultiMenu, setMultiMenu] = useState<number | null>(null);
-  const menus = menusConfig?.sidebarNav?.classic || [];
+  const menus: MenuItem[] = menusConfig?.sidebarNav?.classic || [];
   const { collapsed } = useSidebar();
 
   const toggleSubmenu = (i: number) => {
