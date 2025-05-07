@@ -88,13 +88,6 @@ export default function EncaissementPage() {
     }
   };
 
-  console.log({
-    Card,
-    Tooltip,
-    CreditCard,
-    History,
-    CashRegister
-  });
 
   return (
     <div className="p-4 md:p-6">
