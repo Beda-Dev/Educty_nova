@@ -55,6 +55,10 @@ const menuDefinitions = {
   decaissement: [
     { id: "depense", title: "Dépense", path: "depense", icon: "💸" },
     { id: "type_depense", title: "Type de dépense", path: "type_depenses", icon: "🏷️" }
+  ],
+  frais: [
+    { id: "fees_type", title: "Type de frais", path: "fees_type", icon: "💵" },
+    { id: "pricing", title: "Tarification", path: "pricing", icon: "💲" }
   ]
 };
 
@@ -73,6 +77,10 @@ export default function DynamicMenu() {
 
     if (['depense', 'type_depense'].includes(lastPathSegment)) {
       return 'decaissement';
+    }
+
+    if (['fees_type', 'pricing'].includes(lastPathSegment)) {
+      return 'frais';
     }
     
 

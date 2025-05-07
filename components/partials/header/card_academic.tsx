@@ -81,14 +81,14 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-xs text-muted-foreground">
         Aucune année académique disponible
       </p>
     );
   }
 
   return (
-    <div className="text-sm text-muted-foreground p-2">
+    <div className="text-xs text-muted-foreground p-2">
       {hasAdminAccess ? (
         <div className="flex items-center gap-2">
           <span className="whitespace-nowrap">
@@ -100,7 +100,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
             onValueChange={handleYearChange}
             disabled={isLoading}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[150px]">
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -124,7 +124,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
           </Select>
         </div>
       ) : (
-        <p className="text-sm">
+        <p className="text-xs">
           Année académique : <span className="font-medium">{currentAcademicYear?.label || "Non définie"}</span>
         </p>
       )}
