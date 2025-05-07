@@ -15,6 +15,7 @@ import { useSchoolStore } from "@/store";
 import { verificationPermission } from "@/lib/fonction";
 import { Role } from "@/lib/interface";
 
+
 const hasAccess = (
   userPermissions: string[],
   userRoles: string[],
