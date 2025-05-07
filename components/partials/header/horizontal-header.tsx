@@ -13,7 +13,7 @@ const horizontalHeader: React.FC<{ handleOpenSearch: () => void }> = ({ handleOp
           <SiteLogo className="h-7 w-7" />
           <span className=" text-xl font-semibold lg:inline-block hidden">
             {" "}
-            Educty
+            Educty Nova
           </span>
         </Link>
       </div>

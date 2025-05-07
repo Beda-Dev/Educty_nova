@@ -21,7 +21,7 @@ const DocCard = ({ item }: { item: Document }) => {
           </div>
           <div className="bg-background py-3 rounded-b-sm border-t border-default-300">
             <div className="text-base font-medium text-default-900 mb-1 px-4">
-              Educty
+            Educty Nova
             </div>
             <div className="flex items-center justify-between gap-1 px-4">
               <div className="flex-1 flex items-center gap-1">

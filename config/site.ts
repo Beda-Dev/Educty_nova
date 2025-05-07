@@ -2,7 +2,7 @@
 
 
 export const siteConfig = {
-  name: "Educty",
+  name: "Educty Nova",
   description: null,
   theme: "blue",
   // yellow, blue, orange, rose, red, neutral, gray, stone, slate, zinc

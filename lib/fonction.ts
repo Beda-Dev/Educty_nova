@@ -213,7 +213,7 @@ export function verificationPermission(
   export async function envoiSms({
     phoneNumber,
     message,
-    sender = 'Educty',
+    sender = 'Educty Nova',
     smsType = 'transactional'
   }: {
     phoneNumber: string;

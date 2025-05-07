@@ -51,7 +51,8 @@ import {
   Level,
   Freetype,
   Documents,
-  Docs
+  Docs,
+  Settings
 } from "@/components/svg";
 
 export interface MenuItemProps {
@@ -343,141 +344,175 @@ export const menusConfig = {
         icon: DashBoard,
         href: "/dashboard",
       },
+      // {
+      //   title: "Admin",
+      //   icon: Sheild,
+      //   child: [
+      //     {
+      //       title: "Users",
+      //       href: "/users",
+      //       icon: "heroicons:user-circle",
+      //     },
+      //     {
+      //       title: "Roles",
+      //       href: "/roles",
+      //       icon: "heroicons:tag-20-solid",
+      //     },
+      //     {
+      //       title: "Permissions",
+      //       href: "/permission",
+      //       icon: "heroicons:key",
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "students",
+      //   icon: UserGroup,
+      //   child: [
+      //     {
+      //       title: "Inscription",
+      //       href: "/registration",
+      //       icon: "heroicons:key",
+      //     },
+      //     {
+      //       title: "eleves inscrit",
+      //       href: "/students",
+      //       icon: "heroicons:tag-20-solid",
+      //     },
+      //     {
+      //       title: "Historique d'inscritption",
+      //       href: "/historique",
+      //       icon: "heroicons:tag-20-solid",
+      //     },
+      //     {
+      //       title: "Historique de document",
+      //       href: "/historique",
+      //       icon: "heroicons:tag-20-solid",
+      //     },
+
+      //   ],
+      // },
+
       {
-        title: "Admin",
-        icon: Sheild,
-        child: [
-          {
-            title: "Users",
-            href: "/users",
-            icon: "heroicons:user-circle",
-          },
-          {
-            title: "Roles",
-            href: "/roles",
-            icon: "heroicons:tag-20-solid",
-          },
-          {
-            title: "Permissions",
-            href: "/permission",
-            icon: "heroicons:key",
-          },
-        ],
+        title: "settings",
+        icon: Settings,
+        href: "/parametres",
       },
       {
-        title: "students",
+        title: "eleves",
         icon: UserGroup,
-        child: [
-          {
-            title: "Inscription",
-            href: "/registration",
-            icon: "heroicons:key",
-          },
-          {
-            title: "eleves inscrit",
-            href: "/students",
-            icon: "heroicons:tag-20-solid",
-          },
-          {
-            title: "Historique d'inscritption",
-            href: "/historique",
-            icon: "heroicons:tag-20-solid",
-          },
-        ],
+        href: "/eleves",
       },
 
       {
-        isHeader: true,
-        title: "settings",
-      },
-      {
-        title: "level",
-        icon: Level,
-        href: "/level",
-      },
-      {
-        title: "class",
-        icon: Class,
-        href: "/classe",
-      },
-      {
-        title: "academic year",
-        icon: Note2,
-        href: "/academic_year",
-      },
-      {
-        title: "school fees",
-        icon: fees,
-        child: [
-          {
-            title: "fee type",
-            icon: "Freetype",
-            href: "/fees_type",
-          },
-          {
-            title: "pricing",
-            icon: "",
-            href: "/pricing",
-          },
-        ],
-      },
-      {
-        title: "documents",
-        icon: Docs,
-        child: [
-          {
-            title: "documents fournis",
-            icon: "Freetype",
-            href: "/documents",
-          },
-          {
-            title: "type de document",
-            icon: "",
-            href: "/type_document",
-          },
-        ],
-      },
-      {
-        isHeader: true,
         title: "cash register",
-      },
-      {
-        title: "paiments",
         icon: Payment,
-        child: [
-          {
-            title: "paiement",
-            icon: "Freetype",
-            href: "/paiement",
-          },
-          {
-            title: "historique",
-            icon: "",
-            href: "/historique_paiement",
-          },
-          {
-            title: "caisses d'enregistrement",
-            icon: "",
-            href: "/caisses",
-          },
-        ],
+        href: "/caisse_comptabilite",
       },
       {
-        title: "expenses",
-        icon: Authentication,
-        child: [
-          {
-            title: "déboursement",
-            icon: "",
-            href: "/depense",
-          },
-          {
-            title: "type depenses",
-            icon: "",
-            href: "/type_depense",
-          },
-        ],
+        title: "vie scolaire",
+        icon: fees,
+        href: "/vie_scolaire",
       },
+      {
+        title: "pedagogie",
+        icon: Docs,
+        href: "/pedagogie",
+      },
+      {
+        title: "inventaire",
+        icon: Note2,
+        href: "/inventaire",
+      },
+
+      // {
+      //   title: "level",
+      //   icon: Level,
+      //   href: "/level",
+      // },
+      // {
+      //   title: "class",
+      //   icon: Class,
+      //   href: "/classe",
+      // },
+      // {
+      //   title: "academic year",
+      //   icon: Note2,
+      //   href: "/academic_year",
+      // },
+      // {
+      //   title: "school fees",
+      //   icon: fees,
+      //   child: [
+      //     {
+      //       title: "fee type",
+      //       icon: "Freetype",
+      //       href: "/fees_type",
+      //     },
+      //     {
+      //       title: "pricing",
+      //       icon: "",
+      //       href: "/pricing",
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "documents",
+      //   icon: Docs,
+      //   child: [
+      //     {
+      //       title: "documents fournis",
+      //       icon: "Freetype",
+      //       href: "/documents",
+      //     },
+      //     {
+      //       title: "type de document",
+      //       icon: "",
+      //       href: "/type_document",
+      //     },
+      //   ],
+      // },
+      // {
+      //   isHeader: true,
+      //   title: "cash register",
+      // },
+      // {
+      //   title: "paiments",
+      //   icon: Payment,
+      //   child: [
+      //     {
+      //       title: "paiement",
+      //       icon: "Freetype",
+      //       href: "/paiement",
+      //     },
+      //     {
+      //       title: "historique",
+      //       icon: "",
+      //       href: "/historique_paiement",
+      //     },
+      //     {
+      //       title: "caisses d'enregistrement",
+      //       icon: "",
+      //       href: "/caisses",
+      //     },
+      //   ],
+      // },
+      // {
+      //   title: "expenses",
+      //   icon: Authentication,
+      //   child: [
+      //     {
+      //       title: "déboursement",
+      //       icon: "",
+      //       href: "/depense",
+      //     },
+      //     {
+      //       title: "type depenses",
+      //       icon: "",
+      //       href: "/type_depense",
+      //     },
+      //   ],
+      // },
     ],
   },
 };

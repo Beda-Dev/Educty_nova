@@ -287,7 +287,7 @@ const InvoicePage = () => {
         const smsResult = await envoiSms({
           phoneNumber: donneesEtudiant.informationsEtudiant.tutor_number,
           message: messageToSend,
-          sender: "Educty",
+          sender: "Educty Nova",
         });
 
         if (!smsResult.success) {

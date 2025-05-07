@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "caisse d'enregistrement",
+  title: "parametres",
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
