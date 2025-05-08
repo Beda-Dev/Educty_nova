@@ -42,7 +42,7 @@ const menuDefinitions = {
   ],
   pedagogie: [
     { id: "grades", title: "Notes", path: "notes", icon: "📝" },
-    { id: "schedule", title: "Emploi du temps", path: "emploi-du-temps", icon: "⏰" },
+    { id: "schedule", title: "Emploi du temps", path: "emploi_du_temps", icon: "⏰" },
     { id: "cahier-text", title: "Cahier de text", path: "cahier-text", icon: "📓" },
     { id: "presence", title: "Liste de présence", path: "liste-presence", icon: "✅" },
     { id: "library", title: "Bibliothèque", path: "bibliotheque", icon: "📚" }
@@ -54,12 +54,17 @@ const menuDefinitions = {
   ],
   decaissement: [
     { id: "depense", title: "Dépense", path: "depense", icon: "💸" },
-    { id: "type_depense", title: "Type de dépense", path: "type_depenses", icon: "🏷️" }
+    { id: "type_depense", title: "Type de dépense", path: "type_depense", icon: "🏷️" }
   ],
   frais: [
     { id: "fees_type", title: "Type de frais", path: "fees_type", icon: "💵" },
     { id: "pricing", title: "Tarification", path: "pricing", icon: "💲" }
+  ],
+  schedule: [ 
+    { id: "schedule_teach", title: "horaire enseignant", path: "emploi_du_temps_professeur", icon: "🧑‍🏫" }, 
+    { id: "schedule_stud", title: "horaire classes", path: "emploi_du_temps_classe", icon: "🏫" }
   ]
+  
 };
 
 export default function DynamicMenu() {
@@ -81,6 +86,10 @@ export default function DynamicMenu() {
 
     if (['fees_type', 'pricing'].includes(lastPathSegment)) {
       return 'frais';
+    }
+
+    if (['emploi_du_temps_professeur', 'emploi_du_temps_classe'].includes(lastPathSegment)) {
+      return 'schedule';
     }
     
 

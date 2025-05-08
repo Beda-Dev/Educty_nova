@@ -1,9 +1,6 @@
 "use client";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useThemeStore } from "@/store";
-import { useTheme } from "next-themes";
-import { themes } from "@/config/thems";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -13,86 +10,41 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Users,
-  Calendar,
-  Layers,
-  School,
-  DollarSign,
-  FileText,
-  Briefcase,
-  UserCog,
-  Settings,
-  Clock,
-  BookOpen,
-  Calculator,
-  Mail
-} from "lucide-react";
+import { Calendar, User, Clock } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
   "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
-  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300",
-  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300",
-  "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-300",
-  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300",
-  "bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300",
-  "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300",
-  "bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-300",
-  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300",
-  "bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-300",
-  "bg-lime-100 dark:bg-lime-900/50 text-lime-600 dark:text-lime-300",
-  "bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-300"
+  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300"
 ];
 
-export default function Page() {
+export default function EmploiDuTempsPage() {
   const router = useRouter();
-  const { theme: config } = useThemeStore();
-  const { theme: mode } = useTheme();
-  const theme = themes.find((theme) => theme.name === config);
   const params = useParams();
   const lang = params.lang as string;
 
   const getLocalizedPath = (path: string) => {
-    // Supprime le slash initial s'il existe pour éviter les doubles slashes
     const cleanPath = path.startsWith('/') ? path.slice(1) : path;
     return `/${lang}/${cleanPath}`;
   };
 
   const menuItems = [
-    // Nouveaux éléments ajoutés
     {
-      id: "schedule",
-      title: "Emploi du temps",
-      description: "Gérer les plannings et horaires",
-      icon: <Clock className="w-6 h-6" />,
-      path: "/emploi_du_temps",
-      color: itemColors[8]
+      id: "eleves",
+      title: "Emploi du temps classes",
+      description: "Gestion des emplois du temps des élèves",
+      icon: <User className="w-6 h-6" />,
+      path: "emploi_du_temps_classe",
+      color: itemColors[0]
     },
     {
-      id: "grades",
-      title: "Notes",
-      description: "Saisie et consultation des notes",
-      icon: <BookOpen className="w-6 h-6" />,
-      path: "/notes",
-      color: itemColors[9]
-    },
-    {
-      id: "averages",
-      title: "Moyennes",
-      description: "Calcul et gestion des moyennes",
-      icon: <Calculator className="w-6 h-6" />,
-      path: "/moyennes",
-      color: itemColors[10]
-    },
-    {
-      id: "correspondence",
-      title: "Carnet de correspondance",
-      description: "Communication école-famille",
-      icon: <Mail className="w-6 h-6" />,
-      path: "/carnet-correspondance",
-      color: itemColors[11]
+      id: "professeurs",
+      title: "Emploi du temps professeurs",
+      description: "Gestion des emplois du temps des enseignants",
+      icon: <Calendar className="w-6 h-6" />,
+      path: "emploi_du_temps_professeur",
+      color: itemColors[1]
     }
   ];
 
@@ -137,21 +89,21 @@ export default function Page() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
-              <Settings className="w-8 h-8 text-primary" />
+              <Clock className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                Vie scolaire
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                Gestion des Emplois du Temps
               </h1>
               <p className="text-sm text-muted-foreground">
-              Tous les outils pour administrer votre établissement
+                Organisation des plannings des élèves et professeurs
               </p>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
