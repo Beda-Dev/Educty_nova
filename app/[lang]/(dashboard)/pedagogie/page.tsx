@@ -53,7 +53,7 @@ export default function PedagogiePage() {
       title: "Emploi du temps",
       description: "Planning des cours et activités",
       icon: <Clock className="w-6 h-6" />,
-      path: "emploi-du-temps",
+      path: "emploi_du_temps",
       color: itemColors[1]
     },
     {
