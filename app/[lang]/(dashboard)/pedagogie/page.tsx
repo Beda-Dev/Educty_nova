@@ -45,7 +45,7 @@ export default function PedagogiePage() {
       title: "Notes",
       description: "Gestion des notes et évaluations",
       icon: <BookOpen className="w-6 h-6" />,
-      path: "notes",
+      path: "pedagogie/notes",
       color: itemColors[0]
     },
     {

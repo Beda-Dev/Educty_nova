@@ -75,7 +75,7 @@ export default function Page() {
       title: "Notes",
       description: "Saisie et consultation des notes",
       icon: <BookOpen className="w-6 h-6" />,
-      path: "/notes",
+      path: "/vie_scolaire/notes",
       color: itemColors[9]
     },
     {

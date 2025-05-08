@@ -90,7 +90,7 @@
     "eslint": "8.48.0",
     "eslint-config-next": "14.0.1",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.10.0",
+    "framer-motion": "^12.10.4",
     "google-map-react": "^2.2.1",
     "html-to-image": "^1.11.11",
     "html2canvas": "^1.4.1",

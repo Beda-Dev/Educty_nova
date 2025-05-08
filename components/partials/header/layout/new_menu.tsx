@@ -61,7 +61,7 @@ const menuItems: MenuCategory ={
           title: "Utilisateurs",
           description: "Gérer les utilisateurs",
           icon: <Users className="w-4 h-4" />,
-          path: "parametres/users"
+          path: "users"
         }
       ]
     },
@@ -76,21 +76,21 @@ const menuItems: MenuCategory ={
           title: "Année",
           description: "Année scolaire",
           icon: <Calendar className="w-4 h-4" />,
-          path: "parametres/academic_year"
+          path: "academic_year"
         },
         {
           id: "levels",
           title: "Niveaux",
           description: "Niveaux d'études",
           icon: <Layers className="w-4 h-4" />,
-          path: "parametres/level"
+          path: "level"
         },
         {
           id: "classes",
           title: "Classes",
           description: "Gérer les classes",
           icon: <School className="w-4 h-4" />,
-          path: "parametres/classe"
+          path: "classe"
         }
       ]
     },
@@ -105,14 +105,14 @@ const menuItems: MenuCategory ={
           title: "Frais",
           description: "Frais et paiements",
           icon: <DollarSign className="w-4 h-4" />,
-          path: "parametres/frais-scolaires"
+          path: "frais-scolaires"
         },
         {
           id: "documents",
           title: "Documents",
           description: "Modèles de documents",
           icon: <FileText className="w-4 h-4" />,
-          path: "parametres/type_document"
+          path: "type_document"
         }
       ]
     },
@@ -281,7 +281,7 @@ const menuItems: MenuCategory ={
     { 
       id: "grades", 
       title: "Notes", 
-      path: "pedagogie/notes", 
+      path: "vie_scolaire/notes", 
       icon: <FileText className="w-4 h-4" />,
       children: [] 
     },
@@ -331,6 +331,34 @@ export default function DynamicMenu() {
     router.push(`/${lang}/${path}`);
   };
 
+  // Vérifie si l'URL correspond à un menu ou un de ses enfants
+  const shouldShowMenu = () => {
+    const currentPath = pathname.split('/').filter(Boolean);
+    
+    // Vérifie tous les menus et leurs enfants
+    for (const menuKey in menuItems) {
+      const menu = menuItems[menuKey as MenuKey];
+      
+      for (const item of menu) {
+        // Vérifie si l'URL correspond à un menu parent
+        if (pathname.endsWith(item.path)) {
+          return true;
+        }
+        
+        // Vérifie si l'URL correspond à un enfant
+        if (item.children) {
+          for (const child of item.children) {
+            if (pathname.endsWith(child.path)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    
+    return false;
+  };
+
   // Détecter le menu actif basé sur l'URL
   const currentPath = pathname.split('/').filter(Boolean);
   let activeMenu: MenuKey = 'parametres';
@@ -342,15 +370,11 @@ export default function DynamicMenu() {
     }
   }
 
-  // Condition pour cacher le menu si le dernier segment correspond au menu actif
-  const lastPathSegment = currentPath[currentPath.length - 1];
-  const shouldHideMenu = Object.keys(menuItems).includes(lastPathSegment);
-
   const currentMenuItems = menuItems[activeMenu] || menuItems.parametres;
 
   // Vérifier si un élément est actif
   const isItemActive = (path: string): boolean => {
-    return pathname.includes(path);
+    return pathname.endsWith(path);
   };
 
   // Gestion de l'ouverture/fermeture des popovers
@@ -391,7 +415,7 @@ export default function DynamicMenu() {
               whileHover={{ scale: 1.03 }}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer hover:bg-muted transition-all",
-                isItemActive(item.path) ? "bg-primary/10 text-primary font-medium" : "text-foreground/90"
+                isItemActive(item.path) ? "bg-primary/15 text-primary font-medium" : "text-foreground/90"
               )}
             >
               <div className="flex items-center justify-center w-5 h-5">
@@ -414,7 +438,7 @@ export default function DynamicMenu() {
         <AnimatePresence>
           {hasChildren && (
             <PopoverContent 
-              className="p-2 w-56 z-50 shadow-lg border-none" 
+              className="p-2 w-56 z-50 shadow-lg bg-background/90 backdrop-blur border border-border/50" 
               align="start"
               sideOffset={5}
               onMouseEnter={() => setIsHovering(true)}
@@ -427,27 +451,25 @@ export default function DynamicMenu() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.15 }}
               >
-                <Card className="overflow-hidden">
-                  <div className="flex flex-col gap-1">
-                    {item.children?.map((child) => (
-                      <motion.div
-                        key={child.id}
-                        whileHover={{ x: 2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted cursor-pointer transition-colors",
-                          isItemActive(child.path) ? "bg-primary/10 text-primary" : "text-foreground/80"
-                        )}
-                        onClick={() => navigate(child.path)}
-                      >
-                        <div className="flex items-center justify-center w-5 h-5">
-                          {child.icon}
-                        </div>
-                        <span className="text-sm">{child.title}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </Card>
+                <div className="flex flex-col gap-1">
+                  {item.children?.map((child) => (
+                    <motion.div
+                      key={child.id}
+                      whileHover={{ x: 2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/80 cursor-pointer transition-colors",
+                        isItemActive(child.path) ? "bg-primary/15 text-primary" : "text-foreground/80"
+                      )}
+                      onClick={() => navigate(child.path)}
+                    >
+                      <div className="flex items-center justify-center w-5 h-5">
+                        {child.icon}
+                      </div>
+                      <span className="text-sm">{child.title}</span>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
             </PopoverContent>
           )}
@@ -456,7 +478,7 @@ export default function DynamicMenu() {
     );
   };
 
-  if (shouldHideMenu) {
+  if (!shouldShowMenu()) {
     return null;
   }
 
