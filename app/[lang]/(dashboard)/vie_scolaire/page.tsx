@@ -83,7 +83,7 @@ export default function Page() {
       title: "Moyennes",
       description: "Calcul et gestion des moyennes",
       icon: <Calculator className="w-6 h-6" />,
-      path: "/moyennes",
+      path: "/vie_scolaire/moyennes",
       color: itemColors[10]
     },
     {
