@@ -22,7 +22,7 @@ type MenuItemChild = {
   description?: string;
   icon: React.ReactNode;
   path: string;
-  children?: never;
+  children?: MenuItemChild[];
 };
 
 type MenuItemParent = {
@@ -34,7 +34,7 @@ type MenuItemParent = {
   description?: never; // Les parents n'ont pas de description
 };
 
-type MenuItem = MenuItemParent | (Omit<MenuItemParent, 'children'> & { children?: never });
+type MenuItem = MenuItemParent | (Omit<MenuItemParent, 'children'> & { children?: MenuItemChild[] }); // Permet d'avoir des enfants ou pas
 
 type MenuCategory = {
   parametres: MenuItem[];
@@ -292,17 +292,10 @@ const menuItems: MenuCategory ={
       icon: <Calendar className="w-4 h-4" />,
       children: [] 
     },
-    { 
-      id: "cahier-text", 
-      title: "Cahier de text", 
-      path: "pedagogie/cahier-text", 
-      icon: <Book className="w-4 h-4" />,
-      children: []
-    },
     {
           id: "averages",
           title: "Moyennes",
-          path: "/moyennes",
+          path: "/vie_scolaire/moyennes",
           icon: <Calculator className="w-6 h-6" />,
           children: []
 
@@ -310,7 +303,7 @@ const menuItems: MenuCategory ={
     {
           id: "correspondence",
           title: "Carnet de correspondance",
-          path: "/carnet-correspondance",
+          path: "/vie_scolaire/carnet-correspondance",
           icon: <Mail className="w-6 h-6" />,
           children: []
     }
@@ -331,32 +324,24 @@ export default function DynamicMenu() {
     router.push(`/${lang}/${path}`);
   };
 
-  // Vérifie si l'URL correspond à un menu ou un de ses enfants
-  const shouldShowMenu = () => {
-    const currentPath = pathname.split('/').filter(Boolean);
-    
-    // Vérifie tous les menus et leurs enfants
-    for (const menuKey in menuItems) {
-      const menu = menuItems[menuKey as MenuKey];
-      
-      for (const item of menu) {
-        // Vérifie si l'URL correspond à un menu parent
+  // Fonction récursive pour vérifier les URLs dans tous les niveaux d'enfants
+  const checkPathRecursive = (items: (MenuItem | MenuItemChild)[]): boolean => {
+      for (const item of items) {
         if (pathname.endsWith(item.path)) {
           return true;
         }
         
-        // Vérifie si l'URL correspond à un enfant
         if (item.children) {
-          for (const child of item.children) {
-            if (pathname.endsWith(child.path)) {
-              return true;
-            }
+          if (checkPathRecursive(item.children)) {
+            return true;
           }
         }
       }
-    }
-    
-    return false;
+      return false;
+    };
+
+  const shouldShowMenu = () => {
+    return checkPathRecursive(Object.values(menuItems).flat());
   };
 
   // Détecter le menu actif basé sur l'URL
@@ -372,24 +357,32 @@ export default function DynamicMenu() {
 
   const currentMenuItems = menuItems[activeMenu] || menuItems.parametres;
 
-  // Vérifier si un élément est actif
-  const isItemActive = (path: string): boolean => {
-    return pathname.endsWith(path);
+  // Vérifier si un élément est actif (version récursive)
+  const isItemActive = (path: string, children?: MenuItemChild[]): boolean => {
+    if (pathname.endsWith(path)) return true;
+    
+    if (children) {
+      return children.some(child => 
+        isItemActive(child.path, child.children)
+      );
+    }
+    
+    return false;
   };
 
-  // Gestion de l'ouverture/fermeture des popovers
   useEffect(() => {
     if (!isHovering && openPopoverId) {
       const timer = setTimeout(() => {
         setOpenPopoverId(null);
-      }, 200);
+      }, 500);
       return () => clearTimeout(timer);
     }
   }, [isHovering, openPopoverId]);
 
-  // Composant pour un item de menu
-  const MenuItemComponent = ({ item }: { item: MenuItem }) => {
+  // Composant récursif pour les items de menu
+  const MenuItemComponent = ({ item, level = 0 }: { item: MenuItem | MenuItemChild, level?: number }) => {
     const hasChildren = item.children && item.children.length > 0;
+    const isParentItem = level === 0;
     
     return (
       <Popover 
@@ -412,11 +405,15 @@ export default function DynamicMenu() {
             }}
           >
             <motion.div
-              whileHover={{ scale: 1.03 }}
+              whileHover={{ scale: isParentItem ? 1.03 : 1.02 }}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer hover:bg-muted transition-all",
-                isItemActive(item.path) ? "bg-primary/15 text-primary font-medium" : "text-foreground/90"
+                isItemActive(item.path, item.children) 
+                  ? "bg-primary/15 text-primary font-medium" 
+                  : "text-foreground/90",
+                !isParentItem && "px-3 py-1.5" // Style différent pour les enfants
               )}
+              onClick={() => !hasChildren && navigate(item.path)}
             >
               <div className="flex items-center justify-center w-5 h-5">
                 {item.icon}
@@ -438,8 +435,11 @@ export default function DynamicMenu() {
         <AnimatePresence>
           {hasChildren && (
             <PopoverContent 
-              className="p-2 w-56 z-50 shadow-lg bg-background/90 backdrop-blur border border-border/50" 
-              align="start"
+              className={cn(
+                "p-2 z-50 shadow-lg bg-background/95 backdrop-blur border border-border/50",
+                level === 0 ? "w-56" : "w-48" // Largeur différente selon le niveau
+              )} 
+              align={level === 0 ? "start" : "end"}
               sideOffset={5}
               onMouseEnter={() => setIsHovering(true)}
               onMouseLeave={() => setIsHovering(false)}
@@ -453,21 +453,11 @@ export default function DynamicMenu() {
               >
                 <div className="flex flex-col gap-1">
                   {item.children?.map((child) => (
-                    <motion.div
-                      key={child.id}
-                      whileHover={{ x: 2 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/80 cursor-pointer transition-colors",
-                        isItemActive(child.path) ? "bg-primary/15 text-primary" : "text-foreground/80"
-                      )}
-                      onClick={() => navigate(child.path)}
-                    >
-                      <div className="flex items-center justify-center w-5 h-5">
-                        {child.icon}
-                      </div>
-                      <span className="text-sm">{child.title}</span>
-                    </motion.div>
+                    <MenuItemComponent 
+                      key={child.id} 
+                      item={child} 
+                      level={level + 1} 
+                    />
                   ))}
                 </div>
               </motion.div>

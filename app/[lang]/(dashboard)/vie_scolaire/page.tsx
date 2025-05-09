@@ -91,7 +91,7 @@ export default function Page() {
       title: "Carnet de correspondance",
       description: "Communication école-famille",
       icon: <Mail className="w-6 h-6" />,
-      path: "/carnet-correspondance",
+      path: "/vie_scolaire/carnet-correspondance",
       color: itemColors[11]
     }
   ];
