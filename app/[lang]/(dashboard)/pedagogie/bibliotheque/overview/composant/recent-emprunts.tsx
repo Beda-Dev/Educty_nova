@@ -28,8 +28,8 @@ export function RecentEmprunts({ extended = false }: RecentEmpruntsProps) {
               {emprunt.dateRetour}
             </div>
             <Badge
-              variant={
-                emprunt.statut === "En cours" ? "default" : emprunt.statut === "En retard" ? "destructive" : "outline"
+              color={
+                emprunt.statut === "En cours" ? "default" : emprunt.statut === "En retard" ? "destructive" : "info"
               }
             >
               {emprunt.statut}
