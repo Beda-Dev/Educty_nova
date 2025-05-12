@@ -74,7 +74,7 @@ export default function Page() {
       title: "Documents",
       description: "Gérer les modèles de documents",
       icon: <FileText className="w-6 h-6" />,
-      path: "/type_document",
+      path: "parametres/scolarite/type_document",
       color: itemColors[5]
     }
   ];

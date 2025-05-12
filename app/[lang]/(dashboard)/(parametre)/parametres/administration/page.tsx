@@ -41,7 +41,7 @@ export default function Page() {
       title: "Fonctions",
       description: "Gérer les rôles et fonctions du personnel",
       icon: <Briefcase className="w-6 h-6" />,
-      path: "/fonctions",
+      path: "parametres/administration/fonctions",
       color: itemColors[0]
     },
     {
@@ -49,7 +49,7 @@ export default function Page() {
       title: "Employés",
       description: "Gérer le personnel administratif et enseignant",
       icon: <UserCog className="w-6 h-6" />,
-      path: "/employes",
+      path: "parametres/administration/employes",
       color: itemColors[1]
     }
   ];

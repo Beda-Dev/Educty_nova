@@ -509,7 +509,7 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                               variant="outline"
                               className="p-2"
                               onClick={() =>
-                                router.push(`/historique/${registration.id}`)
+                                router.push(`/eleves/historique/${registration.id}`)
                               }
                             >
                               <Eye className="h-5 w-5" />

@@ -45,7 +45,7 @@ export default function InventairePage() {
       title: "Entrepôts",
       description: "Gestion des lieux de stockage",
       icon: <Warehouse className="w-6 h-6" />,
-      path: "entrepots",
+      path: "inventaire/entrepots",
       color: itemColors[0]
     },
     {
@@ -53,7 +53,7 @@ export default function InventairePage() {
       title: "Produits",
       description: "Gestion des articles en stock",
       icon: <Package className="w-6 h-6" />,
-      path: "produits",
+      path: "inventaire/produits",
       color: itemColors[1]
     },
     {
@@ -61,7 +61,7 @@ export default function InventairePage() {
       title: "Opérations",
       description: "Mouvements de stock",
       icon: <ClipboardCheck className="w-6 h-6" />,
-      path: "operations",
+      path: "inventaire/operations",
       color: itemColors[2]
     },
     // {

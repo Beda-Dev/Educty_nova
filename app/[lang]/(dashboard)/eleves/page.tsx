@@ -45,7 +45,7 @@ export default function GestionElevesPage() {
       title: "Inscription",
       description: "Nouvelle inscription d'élève",
       icon: <UserPlus className="w-6 h-6" />,
-      path: "registration",
+      path: "eleves/registration",
       color: itemColors[0]
     },
     {
@@ -53,7 +53,7 @@ export default function GestionElevesPage() {
       title: "Élèves inscrits",
       description: "Liste des élèves actuellement inscrits",
       icon: <Users className="w-6 h-6" />,
-      path: "students",
+      path: "eleves/students",
       color: itemColors[1]
     },
     {
@@ -61,7 +61,7 @@ export default function GestionElevesPage() {
       title: "Historique inscription",
       description: "Archive des inscriptions passées",
       icon: <History className="w-6 h-6" />,
-      path: "historique",
+      path: "eleves/historique",
       color: itemColors[2]
     },
     {
@@ -69,7 +69,7 @@ export default function GestionElevesPage() {
       title: "Historique documents",
       description: "Documents administratifs des élèves",
       icon: <FileArchive className="w-6 h-6" />,
-      path: "documents",
+      path: "eleves/documents",
       color: itemColors[3]
      },
     // {

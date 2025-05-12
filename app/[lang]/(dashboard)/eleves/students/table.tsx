@@ -301,7 +301,7 @@ const StudentTableStatus = ({
 
   const handleViewStudent = (student: RegistrationMerge["student"]) => {
     if (student?.registration_number) {
-      router.push(`/students/${student.registration_number}`);
+      router.push(`students/${student.registration_number}`);
     }
   };
 
