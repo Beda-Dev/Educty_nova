@@ -430,16 +430,24 @@ export default function DynamicMenu() {
     "/type_depense",
   ];
 
-  const isCaisseRoute = caisseRoutes.some((route) => pathname.endsWith(route));
+  const elevesSpecialRoutes = [
+  "/new_registration",
+  "/re-registration"
+];
 
-  if (isCaisseRoute) {
-    activeMenu = "caisse_comptabilite";
-  } else if (currentPath.length >= 2) {
-    const pathSegment = currentPath[1];
-    if (Object.keys(menuItems).includes(pathSegment)) {
-      activeMenu = pathSegment as MenuKey;
-    }
+  const isCaisseRoute = caisseRoutes.some((route) => pathname.endsWith(route));
+  const isElevesSpecialRoute = elevesSpecialRoutes.some((route) => pathname.endsWith(route));
+
+if (isCaisseRoute) {
+  activeMenu = "caisse_comptabilite";
+} else if (isElevesSpecialRoute) {
+  activeMenu = "eleves";
+} else if (currentPath.length >= 2) {
+  const pathSegment = currentPath[1];
+  if (Object.keys(menuItems).includes(pathSegment)) {
+    activeMenu = pathSegment as MenuKey;
   }
+}
 
   const currentMenuItems = menuItems[activeMenu] || menuItems.parametres;
 

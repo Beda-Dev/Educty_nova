@@ -123,7 +123,7 @@ export default function NewReregistration() {
 
     if (activeStep === steps.length - 1 ) {
       setReRegistrations(null);
-      router.push('/registration')
+      router.push('/eleves/registration')
       
 
       //setIsValidAdd(true);

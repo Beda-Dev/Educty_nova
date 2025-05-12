@@ -15,3 +15,11 @@ export function findCurrentAcademicYear(data : AcademicYear[]):AcademicYear{
 export function findStudentById(id: number, Students: Student[]): Student | null {
   return Students.find(student => Number(student.id) === Number(id) ) || null;
 } 
+
+export function formatFileSize(bytes: number): string {
+  const sizes = ['octets', 'Ko', 'Mo', 'Go', 'To'];
+  if (bytes === 0) return '0 octet';
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = bytes / Math.pow(1024, i);
+  return `${size.toFixed(1)} ${sizes[i]}`;
+}

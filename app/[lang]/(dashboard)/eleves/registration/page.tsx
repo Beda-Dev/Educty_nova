@@ -93,7 +93,7 @@ export default function HomePage() {
       );
       
       setIsModalOpen(false);
-      router.push(`/registration/re-registration`);
+      router.push(`/eleves/registration/re-registration`);
     } catch (error) {
       toast.error(
         <div className="flex items-center gap-2">
@@ -143,7 +143,7 @@ export default function HomePage() {
           <Button
             className="w-full sm:w-auto justify-start gap-2 h-14"
             variant="outline"
-            onClick={() => router.push("/registration/new_registration")}
+            onClick={() => router.push("/eleves/registration/new_registration")}
           >
             <UserPlus className="w-5 h-5" />
             <span className="flex-1 text-left">Nouvelle inscription</span>
