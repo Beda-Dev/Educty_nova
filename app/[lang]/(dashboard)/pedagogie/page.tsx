@@ -58,10 +58,10 @@ export default function PedagogiePage() {
     },
     {
       id: "cahier-text",
-      title: "Cahier de text",
+      title: "Cahier de texte",
       description: "Travaux et devoirs à faire",
       icon: <Notebook className="w-6 h-6" />,
-      path: "pedagogie/cahier-text",
+      path: "pedagogie/cahier-texte",
       color: itemColors[2]
     },
     {

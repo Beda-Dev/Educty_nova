@@ -299,7 +299,7 @@ const menuItems: MenuCategory = {
     {
       id: "cahier-text",
       title: "Cahier de texte",
-      path: "pedagogie/cahier-text",
+      path: "pedagogie/cahier-texte",
       icon: <Book className="w-4 h-4" />,
       children: [],
     },
