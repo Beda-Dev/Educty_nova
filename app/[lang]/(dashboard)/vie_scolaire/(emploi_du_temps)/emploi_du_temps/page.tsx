@@ -35,7 +35,7 @@ export default function EmploiDuTempsPage() {
       title: "Emploi du temps classes",
       description: "Gestion des emplois du temps des élèves",
       icon: <User className="w-6 h-6" />,
-      path: "emploi_du_temps_classe",
+      path: "vie_scolaire/emploi_du_temps_classe",
       color: itemColors[0]
     },
     {
@@ -43,7 +43,7 @@ export default function EmploiDuTempsPage() {
       title: "Emploi du temps professeurs",
       description: "Gestion des emplois du temps des enseignants",
       icon: <Calendar className="w-6 h-6" />,
-      path: "emploi_du_temps_professeur",
+      path: "vie_scolaire/emploi_du_temps_professeur",
       color: itemColors[1]
     }
   ];

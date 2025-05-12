@@ -18,6 +18,7 @@
     "@emoji-mart/data": "^1.1.2",
     "@emoji-mart/react": "^1.1.1",
     "@formatjs/intl-localematcher": "^0.5.4",
+    "@formkit/auto-animate": "^0.8.2",
     "@fullcalendar/core": "^6.1.13",
     "@fullcalendar/daygrid": "^6.1.9",
     "@fullcalendar/interaction": "^6.1.9",

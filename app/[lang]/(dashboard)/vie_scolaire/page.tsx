@@ -67,7 +67,7 @@ export default function Page() {
       title: "Emploi du temps",
       description: "Gérer les plannings et horaires",
       icon: <Clock className="w-6 h-6" />,
-      path: "/emploi_du_temps",
+      path: "vie_scolaire/emploi_du_temps",
       color: itemColors[8]
     },
     {
