@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Settings, BookOpen, School, Users } from "lucide-react";
+import { Settings, BookOpen, School, Users, CreditCard } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
@@ -21,7 +21,8 @@ const itemColors = [
   "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
   "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300",
   "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300",
-  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300"
+  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300",
+  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300"
 ];
 
 export default function Page() {
@@ -69,6 +70,14 @@ export default function Page() {
       icon: <Users className="w-6 h-6" />,
       path: "/parametres/administration",
       color: itemColors[3]
+    },
+    {
+      id: "caisse",
+      title: "Caisse",
+      description: "Gestion des parametre de caisse, encaissements et décaissements",
+      icon: <CreditCard className="w-6 h-6" />,
+      path: "/parametres/caisse",
+      color: itemColors[4]
     }
   ];
 
@@ -120,14 +129,14 @@ export default function Page() {
                 Paramètres
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configurez les paramètres du système selon vos besoins
+                Configuration des paramètres du système selon vos besoins
               </p>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"

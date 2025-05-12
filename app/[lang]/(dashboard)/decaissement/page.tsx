@@ -35,14 +35,6 @@ export default function DecaissementPage() {
       icon: <HandCoins className="w-6 h-6" />,
       path: "depense",
       color: itemColors[0]
-    },
-    {
-      id: "types-decaissement",
-      title: "Types de décaissement",
-      description: "Gérer les catégories de dépenses",
-      icon: <ListChecks className="w-6 h-6" />,
-      path: "type_depense",
-      color: itemColors[1]
     }
   ];
 

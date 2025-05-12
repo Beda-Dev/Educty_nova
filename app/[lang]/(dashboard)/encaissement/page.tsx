@@ -45,14 +45,6 @@ export default function EncaissementPage() {
       icon: <History className="w-6 h-6" />,
       path: "historique_paiement",
       color: itemColors[1]
-    },
-    {
-      id: "caisse-enregistrement",
-      title: "Caisse d'enregistrement",
-      description: "Gestion des caisses enregistreuses",
-      icon: <ShoppingCart className="w-6 h-6" />,
-      path: "caisses",
-      color: itemColors[2]
     }
   ];
 

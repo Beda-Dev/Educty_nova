@@ -13,40 +13,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Users,
-  Calendar,
-  Layers,
-  School,
-  DollarSign,
-  FileText,
-  Briefcase,
-  UserCog,
-  Settings,
-  Clock,
-  BookOpen,
-  Calculator,
-  Mail
-} from "lucide-react";
+import { CreditCard, Wallet, List, Banknote } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
   "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
-  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300",
-  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300",
-  "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-300",
-  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300",
-  "bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-300",
-  "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300",
-  "bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-300",
-  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300",
-  "bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-300",
-  "bg-lime-100 dark:bg-lime-900/50 text-lime-600 dark:text-lime-300",
-  "bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-300"
+  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300"
 ];
 
-export default function Page() {
+export default function CashSettingsPage() {
   const router = useRouter();
   const { theme: config } = useThemeStore();
   const { theme: mode } = useTheme();
@@ -55,27 +31,26 @@ export default function Page() {
   const lang = params.lang as string;
 
   const getLocalizedPath = (path: string) => {
-    // Supprime le slash initial s'il existe pour éviter les doubles slashes
     const cleanPath = path.startsWith('/') ? path.slice(1) : path;
     return `/${lang}/${cleanPath}`;
   };
 
   const menuItems = [
     {
-      id: "fees",
-      title: "Frais Scolaires",
-      description: "Configurer les frais et paiements",
-      icon: <DollarSign className="w-6 h-6" />,
-      path: "/frais-scolaires",
-      color: itemColors[4]
+      id: "expense-types",
+      title: "Types de Dépenses",
+      description: "Gestion des catégories de dépenses et budgets",
+      icon: <List className="w-6 h-6" />,
+      path: "/parametres/caisse/type_depense",
+      color: itemColors[0]
     },
     {
-      id: "documents",
-      title: "Documents",
-      description: "Gérer les modèles de documents",
-      icon: <FileText className="w-6 h-6" />,
-      path: "parametres/scolarite/type_document",
-      color: itemColors[5]
+      id: "cash-registers",
+      title: "Caisses d'Enregistrement",
+      description: "Configuration des caisses et comptes de trésorerie",
+      icon: <Wallet className="w-6 h-6" />,
+      path: "/parametres/caisse/caisses_enregistrement",
+      color: itemColors[1]
     }
   ];
 
@@ -120,21 +95,21 @@ export default function Page() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
-              <Settings className="w-8 h-8 text-primary" />
+              <Banknote className="w-8 h-8 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                Paramètre scolaire
+                Paramètres de Caisse
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configuration des paramètres scolaire selon vos besoins
+                Configuration des paramètres financiers et de trésorerie
               </p>
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -181,7 +156,7 @@ export default function Page() {
                     </motion.div>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-primary text-white">
-                    <p>Cliquez pour gérer {item.title.toLowerCase()}</p>
+                    <p>Configurer les {item.title.toLowerCase()}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

@@ -64,7 +64,7 @@ export default function Page() {
     {
       id: "users",
       title: "Utilisateurs",
-      description: "Gérer les comptes utilisateurs et permissions",
+      description: "Gestion des comptes utilisateurs et permissions",
       icon: <Users className="w-6 h-6" />,
       path: "parametres/general/users",
       color: itemColors[0]

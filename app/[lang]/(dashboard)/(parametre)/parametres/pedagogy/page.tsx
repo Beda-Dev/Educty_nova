@@ -111,7 +111,7 @@ export default function Page() {
                 Gestion Scolaire
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configurez les paramètres liés à l'organisation scolaire
+                Configuration des paramètres liés à l'organisation scolaire
               </p>
             </div>
           </div>

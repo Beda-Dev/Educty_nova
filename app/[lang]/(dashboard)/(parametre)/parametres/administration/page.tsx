@@ -39,7 +39,7 @@ export default function Page() {
     {
       id: "roles",
       title: "Fonctions",
-      description: "Gérer les rôles et fonctions du personnel",
+      description: "Gestion des rôles et fonctions du personnel",
       icon: <Briefcase className="w-6 h-6" />,
       path: "parametres/administration/fonctions",
       color: itemColors[0]
@@ -47,7 +47,7 @@ export default function Page() {
     {
       id: "employees",
       title: "Employés",
-      description: "Gérer le personnel administratif et enseignant",
+      description: "Gestion du personnel administratif et enseignant",
       icon: <UserCog className="w-6 h-6" />,
       path: "parametres/administration/employes",
       color: itemColors[1]
@@ -102,7 +102,7 @@ export default function Page() {
                 Gestion du Personnel
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configurez les paramètres relatifs au personnel de l'établissement
+                Configuration des paramètres relatifs au personnel de l'établissement
               </p>
             </div>
           </div>

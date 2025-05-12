@@ -59,7 +59,7 @@ export default function InventairePage() {
     {
       id: "operations",
       title: "Opérations",
-      description: "Mouvements de stock",
+      description: "Gestion des mouvements de stock",
       icon: <ClipboardCheck className="w-6 h-6" />,
       path: "inventaire/operations",
       color: itemColors[2]

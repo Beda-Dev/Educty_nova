@@ -30,7 +30,7 @@ import {
   ChevronDown,
   Calculator,
   Mail,
-  Home
+  Home,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -72,7 +72,7 @@ const menuItems: MenuCategory = {
   parametres: [
     {
       id: "general",
-      title: "Général",
+      title: "Généraux",
       icon: <Settings className="w-4 h-4" />,
       path: "parametres/general",
       children: [
@@ -158,6 +158,26 @@ const menuItems: MenuCategory = {
         },
       ],
     },
+    {
+      id: "caisse",
+      title: "Caisse",
+      icon: <DollarSign className="w-4 h-4" />,
+      path: "parametres/caisse",
+      children: [
+        {
+          id: "caisses",
+          title: "Caisses d'enregitrement",
+          path: "parametres/caisse/caisses_enregistrement",
+          icon: <Warehouse className="w-4 h-4" />,
+        },
+        {
+          id: "type_depense",
+          title: "Type de dépense",
+          path: "parametres/caisse/type_depense",
+          icon: <ClipboardList className="w-4 h-4" />,
+        },
+      ],
+    },
   ],
   inventaire: [
     {
@@ -231,12 +251,6 @@ const menuItems: MenuCategory = {
           path: "historique_paiement",
           icon: <Clock className="w-4 h-4" />,
         },
-        {
-          id: "caisses",
-          title: "Caisses",
-          path: "caisses",
-          icon: <Warehouse className="w-4 h-4" />,
-        },
       ],
     },
     {
@@ -250,13 +264,7 @@ const menuItems: MenuCategory = {
           title: "Dépense",
           path: "depense",
           icon: <DollarSign className="w-4 h-4" />,
-        },
-        {
-          id: "type_depense",
-          title: "Type de dépense",
-          path: "type_depense",
-          icon: <ClipboardList className="w-4 h-4" />,
-        },
+        }
       ],
     },
   ],
@@ -290,7 +298,7 @@ const menuItems: MenuCategory = {
     },
     {
       id: "cahier-text",
-      title: "Cahier de text",
+      title: "Cahier de texte",
       path: "pedagogie/cahier-text",
       icon: <Book className="w-4 h-4" />,
       children: [],
@@ -308,33 +316,33 @@ const menuItems: MenuCategory = {
       path: "pedagogie/bibliotheque",
       icon: <BookOpen className="w-4 h-4" />,
       children: [
-            {
-              id: "overview",
-              title: "Vue d'ensemble",
-              icon: <Home className="w-6 h-6" />,
-              path: "pedagogie/bibliotheque/overview",
-            },
-            {
-              id: "books",
-              title: "Livres",
-              description: "Gestion du catalogue et des exemplaires",
-              icon: <Book className="w-6 h-6" />,
-              path: "pedagogie/bibliotheque/livres",
-            },
-            {
-              id: "loans",
-              title: "Emprunts",
-              description: "Suivi des prêts et retours",
-              icon: <Clock className="w-6 h-6" />,
-              path: "pedagogie/bibliotheque/emprunts",
-            },
-            {
-              id: "borrowers",
-              title: "Emprunteurs",
-              description: "Gestion des membres et cartes de lecteur",
-              icon: <Users className="w-6 h-6" />,
-              path: "pedagogie/bibliotheque/emprunteurs",
-            }
+        {
+          id: "overview",
+          title: "Vue d'ensemble",
+          icon: <Home className="w-6 h-6" />,
+          path: "pedagogie/bibliotheque/overview",
+        },
+        {
+          id: "books",
+          title: "Livres",
+          description: "Gestion du catalogue et des exemplaires",
+          icon: <Book className="w-6 h-6" />,
+          path: "pedagogie/bibliotheque/livres",
+        },
+        {
+          id: "loans",
+          title: "Emprunts",
+          description: "Suivi des prêts et retours",
+          icon: <Clock className="w-6 h-6" />,
+          path: "pedagogie/bibliotheque/emprunts",
+        },
+        {
+          id: "borrowers",
+          title: "Emprunteurs",
+          description: "Gestion des membres et cartes de lecteur",
+          icon: <Users className="w-6 h-6" />,
+          path: "pedagogie/bibliotheque/emprunteurs",
+        },
       ],
     },
   ],
@@ -425,29 +433,26 @@ export default function DynamicMenu() {
     "/historique_paiement",
     "/encaissement",
     "/decaissement",
-    "/caisses",
     "/depense",
-    "/type_depense",
   ];
 
-  const elevesSpecialRoutes = [
-  "/new_registration",
-  "/re-registration"
-];
+  const elevesSpecialRoutes = ["/new_registration", "/re-registration"];
 
   const isCaisseRoute = caisseRoutes.some((route) => pathname.endsWith(route));
-  const isElevesSpecialRoute = elevesSpecialRoutes.some((route) => pathname.endsWith(route));
+  const isElevesSpecialRoute = elevesSpecialRoutes.some((route) =>
+    pathname.endsWith(route)
+  );
 
-if (isCaisseRoute) {
-  activeMenu = "caisse_comptabilite";
-} else if (isElevesSpecialRoute) {
-  activeMenu = "eleves";
-} else if (currentPath.length >= 2) {
-  const pathSegment = currentPath[1];
-  if (Object.keys(menuItems).includes(pathSegment)) {
-    activeMenu = pathSegment as MenuKey;
+  if (isCaisseRoute) {
+    activeMenu = "caisse_comptabilite";
+  } else if (isElevesSpecialRoute) {
+    activeMenu = "eleves";
+  } else if (currentPath.length >= 2) {
+    const pathSegment = currentPath[1];
+    if (Object.keys(menuItems).includes(pathSegment)) {
+      activeMenu = pathSegment as MenuKey;
+    }
   }
-}
 
   const currentMenuItems = menuItems[activeMenu] || menuItems.parametres;
 
