@@ -183,7 +183,7 @@ export default function ProduitsPage() {
                     <SelectTrigger id="categorie">
                       <SelectValue placeholder="Sélectionner une catégorie" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[9999]" >
                       <SelectItem value="Fournitures">Fournitures</SelectItem>
                       <SelectItem value="Manuels">Manuels</SelectItem>
                       <SelectItem value="Équipements">Équipements</SelectItem>
@@ -209,7 +209,7 @@ export default function ProduitsPage() {
                     <SelectTrigger id="entrepot">
                       <SelectValue placeholder="Sélectionner un entrepôt" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[9999]" >
                       <SelectItem value="Entrepôt Principal">Entrepôt Principal</SelectItem>
                       <SelectItem value="Bibliothèque">Bibliothèque</SelectItem>
                       <SelectItem value="Entrepôt Secondaire">Entrepôt Secondaire</SelectItem>

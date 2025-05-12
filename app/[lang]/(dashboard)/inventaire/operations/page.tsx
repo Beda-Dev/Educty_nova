@@ -170,7 +170,7 @@ export default function OperationsPage() {
                     <SelectTrigger id="type">
                       <SelectValue placeholder="Sélectionner un type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[9999]">
                       <SelectItem value="Entrée">Entrée</SelectItem>
                       <SelectItem value="Sortie">Sortie</SelectItem>
                       <SelectItem value="Transfert">Transfert</SelectItem>
@@ -186,7 +186,7 @@ export default function OperationsPage() {
                     <SelectTrigger id="produit">
                       <SelectValue placeholder="Sélectionner un produit" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent  className="z-[9999]" >
                       <SelectItem value="Cahiers">Cahiers</SelectItem>
                       <SelectItem value="Stylos">Stylos</SelectItem>
                       <SelectItem value="Livres de Mathématiques">Livres de Mathématiques</SelectItem>
@@ -214,7 +214,7 @@ export default function OperationsPage() {
                     <SelectTrigger id="entrepot">
                       <SelectValue placeholder="Sélectionner un entrepôt" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-[9999]" >
                       <SelectItem value="Entrepôt Principal">Entrepôt Principal</SelectItem>
                       <SelectItem value="Bibliothèque">Bibliothèque</SelectItem>
                       <SelectItem value="Entrepôt Secondaire">Entrepôt Secondaire</SelectItem>
