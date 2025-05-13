@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Search } from "lucide-react";
 import {
   ColumnDef,
   SortingState,
@@ -14,7 +14,7 @@ import {
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {Label} from "@/components/ui/label";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetClose,
@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/sheet";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CashRegister } from "@/lib/interface";
@@ -43,6 +43,8 @@ import { useSchoolStore } from "@/store";
 import { fetchCashRegister } from "@/store/schoolservice";
 import { DataTablePagination } from "./data-table-pagination";
 import { debounce } from "lodash";
+import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const cashRegisterSchema = z.object({
   cash_register_number: z.string().trim().min(1, "Le numéro est requis"),
@@ -50,13 +52,12 @@ const cashRegisterSchema = z.object({
 
 type CashRegisterFormValues = z.infer<typeof cashRegisterSchema>;
 
-// Composant séparé pour l'ajout d'une caisse
-const AddCashRegisterSheet = ({ 
+const AddCashRegisterSheet = ({
   isLoading,
   errors,
   register,
   handleSubmit,
-  onSubmit
+  onSubmit,
 }: {
   isLoading: boolean;
   errors: any;
@@ -76,22 +77,38 @@ const AddCashRegisterSheet = ({
             id="cash_register_number"
             {...register("cash_register_number")}
             placeholder="Ex: CAISSE-001"
+            disabled={isLoading}
           />
           {errors.cash_register_number && (
-            <p className="text-sm text-red-500">
+            <motion.p 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm text-red-500"
+            >
               {errors.cash_register_number.message}
-            </p>
+            </motion.p>
           )}
         </div>
         
         <SheetFooter className="flex justify-end gap-2 pt-4">
           <SheetClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={isLoading}>
               Annuler
             </Button>
           </SheetClose>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "En cours..." : "Enregistrer"}
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                />
+                Enregistrement...
+              </span>
+            ) : (
+              "Enregistrer"
+            )}
           </Button>
         </SheetFooter>
       </form>
@@ -99,14 +116,13 @@ const AddCashRegisterSheet = ({
   );
 };
 
-// Composant séparé pour la modification d'une caisse
-const EditCashRegisterSheet = ({ 
+const EditCashRegisterSheet = ({
   cashRegister,
   isLoading,
   errors,
   register,
   handleSubmit,
-  onSubmit
+  onSubmit,
 }: {
   cashRegister: CashRegister;
   isLoading: boolean;
@@ -118,7 +134,12 @@ const EditCashRegisterSheet = ({
   return (
     <SheetContent className="sm:max-w-md">
       <SheetHeader>
-        <SheetTitle>Modifier la caisse {cashRegister.cash_register_number}</SheetTitle>
+        <SheetTitle>
+          <span className="flex items-center gap-2">
+            <Pencil className="h-5 w-5" />
+            Modifier la caisse {cashRegister.cash_register_number}
+          </span>
+        </SheetTitle>
       </SheetHeader>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
         <div className="space-y-2">
@@ -127,28 +148,55 @@ const EditCashRegisterSheet = ({
             id="cash_register_number"
             {...register("cash_register_number")}
             placeholder="Ex: CAISSE-001"
+            disabled={isLoading}
           />
           {errors.cash_register_number && (
-            <p className="text-sm text-red-500">
+            <motion.p 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-sm text-red-500"
+            >
               {errors.cash_register_number.message}
-            </p>
+            </motion.p>
           )}
         </div>
         
         <SheetFooter className="flex justify-end gap-2 pt-4">
           <SheetClose asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" disabled={isLoading}>
               Annuler
             </Button>
           </SheetClose>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "En cours..." : "Enregistrer"}
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <motion.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  className="block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                />
+                Enregistrement...
+              </span>
+            ) : (
+              "Enregistrer"
+            )}
           </Button>
         </SheetFooter>
       </form>
     </SheetContent>
   );
 };
+
+const TableRowSkeleton = () => (
+  <TableRow>
+    <TableCell colSpan={2} className="text-center">
+      <div className="flex items-center justify-center space-x-4">
+        <Skeleton className="h-4 w-[200px]" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </div>
+    </TableCell>
+  </TableRow>
+);
 
 export function CashRegisterTable({ data }: { data: CashRegister[] }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -168,14 +216,31 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = formMethods;
 
-  const handleSearchChange = debounce((value: string) => {
-    setGlobalFilter(value);
-  }, 300);
+  const handleSearchChange = React.useMemo(
+    () => debounce((value: string) => {
+      setGlobalFilter(value);
+    }, 300),
+    []
+  );
 
-  const createCashRegister = async (formData: CashRegisterFormValues) => {
+  React.useEffect(() => {
+    return () => {
+      handleSearchChange.cancel();
+    };
+  }, [handleSearchChange]);
+
+  const handleCashRegisterOperation = async (
+    method: "POST" | "PUT",
+    formData: CashRegisterFormValues,
+    id?: number
+  ) => {
     try {
-      const response = await fetch("/api/cashRegister", {
-        method: "POST",
+      const url = id 
+        ? `/api/cashRegister?id=${id}`
+        : "/api/cashRegister";
+      
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
@@ -184,49 +249,36 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
         throw new Error(
           response.status === 400 
             ? "Données invalides" 
-            : "Erreur lors de la création"
+            : method === "POST"
+              ? "Erreur lors de la création"
+              : "Erreur lors de la mise à jour"
         );
       }
 
       const updatedCashRegisters = await fetchCashRegister();
       setCashRegisters(updatedCashRegisters);
-      toast.success("Caisse créée avec succès");
-      router.refresh();
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Une erreur inconnue s'est produite"
+      
+      toast.success(
+        method === "POST" 
+          ? "Caisse créée avec succès" 
+          : "Caisse mise à jour avec succès",
+        {
+          position: "top-right",
+          duration: 3000,
+        }
       );
-      throw error;
-    }
-  };
-
-  const updateCashRegister = async (id: number, formData: CashRegisterFormValues) => {
-    try {
-      const response = await fetch(`/api/cashRegister?id=${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          response.status === 400
-            ? "Données invalides"
-            : "Erreur lors de la mise à jour"
-        );
-      }
-
-      const updatedCashRegisters = await fetchCashRegister();
-      setCashRegisters(updatedCashRegisters);
-      toast.success("Caisse mise à jour avec succès");
+      
       router.refresh();
+      return true;
     } catch (error) {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Une erreur inconnue s'est produite"
+          : "Une erreur inconnue s'est produite",
+        {
+          position: "top-right",
+          duration: 5000,
+        }
       );
       throw error;
     }
@@ -235,15 +287,16 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
   const onSubmit = async (formData: CashRegisterFormValues) => {
     setIsLoading(true);
     try {
-      if (editingId) {
-        await updateCashRegister(editingId, formData);
-      } else {
-        await createCashRegister(formData);
+      const success = editingId
+        ? await handleCashRegisterOperation("PUT", formData, editingId)
+        : await handleCashRegisterOperation("POST", formData);
+      
+      if (success) {
+        setEditingId(null);
+        reset();
       }
     } finally {
       setIsLoading(false);
-      setEditingId(null);
-      reset();
     }
   };
 
@@ -255,16 +308,20 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
   const columns: ColumnDef<CashRegister>[] = [
     {
       accessorKey: "cash_register_number",
-      header: "Numéro de caisse",
+      header: () => <span className="font-semibold">Numéro de caisse</span>,
       cell: ({ row }) => (
-        <div className="font-medium text-center">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="font-medium text-center"
+        >
           {row.getValue("cash_register_number")}
-        </div>
+        </motion.div>
       ),
     },
     {
       id: "actions",
-      header: () => <div className="text-center">Actions</div>,
+      header: () => <span className="font-semibold">Actions</span>,
       cell: ({ row }) => {
         const cashRegister = row.original;
         return (
@@ -275,6 +332,7 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
                   variant="outline"
                   size="icon"
                   onClick={() => handleEdit(cashRegister)}
+                  className="hover:bg-primary/10 hover:text-primary transition-colors"
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -312,90 +370,133 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
   });
 
   return (
-    <Card className="p-6">
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-        <Input
-          placeholder="Rechercher par numéro..."
-          defaultValue={globalFilter}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="w-full sm:w-64"
-        />
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setEditingId(null);
-                reset();
-              }}
-              className="w-full sm:w-auto"
-            >
-              <Plus className="h-4 w-4 mr-2" /> Ajouter une caisse
-            </Button>
-          </SheetTrigger>
-          <AddCashRegisterSheet
-            isLoading={isLoading}
-            errors={errors}
-            register={register}
-            handleSubmit={handleSubmit}
-            onSubmit={onSubmit}
-          />
-        </Sheet>
-      </div>
-      
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-center">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="p-6 shadow-sm">
+        <CardHeader className="p-0 pb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle className="text-xl font-semibold">
+                Gestion des caisses
+              </CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Liste et gestion des caisses enregistrées
+              </p>
+            </div>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  color="default"
+                  onClick={() => {
+                    setEditingId(null);
+                    reset();
+                  }}
+                  className="w-full sm:w-auto"
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="text-center">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+                  <Plus className="h-4 w-4 mr-2" /> 
+                  <span>Ajouter une caisse</span>
+                </Button>
+              </SheetTrigger>
+              <AddCashRegisterSheet
+                isLoading={isLoading}
+                errors={errors}
+                register={register}
+                handleSubmit={handleSubmit}
+                onSubmit={onSubmit}
+              />
+            </Sheet>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="p-0">
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher par numéro..."
+              defaultValue={globalFilter}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full sm:w-64 pl-9"
+            />
+          </div>
+          
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead 
+                        key={header.id} 
+                        className="text-center hover:bg-muted/75 transition-colors"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      className="hover:bg-muted/25 transition-colors"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="text-center">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      {globalFilter ? (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-muted-foreground"
+                        >
+                          Aucune caisse ne correspond à votre recherche.
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-muted-foreground"
+                        >
+                          Aucune caisse enregistrée pour le moment.
+                        </motion.div>
                       )}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Aucun résultat trouvé.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      
-      <div className="mt-4">
-        <DataTablePagination table={table} />
-      </div>
-    </Card>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          
+          <div className="mt-4">
+            <DataTablePagination table={table} />
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
 

@@ -20,7 +20,8 @@ import {
   Expense,
   ExpenseType,
   Permission,
-  InterfaceOTP
+  InterfaceOTP,
+  PaymentMethod
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -189,6 +190,9 @@ interface SchoolStore {
 
   CodeOTP: InterfaceOTP | null ;
   setCodeOTP: (data: InterfaceOTP | null) => void;
+
+  methodPayment: PaymentMethod[] ;
+  setmethodPayment: (data: PaymentMethod[]) => void;
 }
 
 export const useSchoolStore = create<SchoolStore>()(
@@ -262,6 +266,9 @@ export const useSchoolStore = create<SchoolStore>()(
 
       CodeOTP: null ,
       setCodeOTP: (data) => set({CodeOTP: data}),
+
+      methodPayment: [],
+      setmethodPayment: (data: PaymentMethod[]) => set({methodPayment: data}),
 
     }),
     {

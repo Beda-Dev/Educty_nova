@@ -143,7 +143,7 @@ export default function OldReregistration() {
       try {
         const requestBody = { ...Data, sexe: reRegistration?.student.sexe };
         const res = await fetch(
-          `https://educty.digifaz.com/api/student/${reRegistration?.student_id}`,
+          `/api/students?id=${reRegistration?.student_id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -186,7 +186,7 @@ export default function OldReregistration() {
       }
 
       try {
-        const res = await fetch(`https://educty.digifaz.com/api/registration`, {
+        const res = await fetch(`/api/registration`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -442,7 +442,7 @@ export default function OldReregistration() {
                   </Card>
                 )}
 
-                <Card title="Tarification" >
+                <Card title="frais de scolarité" >
                   <TarificationTable
                     tarifications={pricing}
                     level_id={levelChoice}

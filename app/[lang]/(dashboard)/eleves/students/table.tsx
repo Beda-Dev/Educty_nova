@@ -130,13 +130,18 @@ const StudentTableStatus = ({
   };
 
   // Fonction de filtrage personnalisée pour les données imbriquées
-  const nestedFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
-    const value = getNestedValue(row.original, columnId);
-    if (!value) return false;
-    return String(value)
-      .toLowerCase()
-      .includes(String(filterValue).toLowerCase());
-  };
+ const nestedFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
+  if (!filterValue) return true; // Si pas de filtre, tout inclure
+  
+  const value = getNestedValue(row.original, columnId);
+  if (!value) return false;
+  
+  // Normaliser les valeurs pour la comparaison
+  const normalizedValue = String(value).trim().toLowerCase();
+  const normalizedFilter = String(filterValue).trim().toLowerCase();
+  
+  return normalizedValue === normalizedFilter;
+};
 
   // Helper pour accéder aux valeurs imbriquées
   const getNestedValue = (obj: any, path: string) => {
@@ -249,7 +254,7 @@ const StudentTableStatus = ({
     },
     initialState: {
       pagination: {
-        pageSize: 50,
+        pageSize: 15,
         pageIndex: 0,
       },
     },
@@ -325,6 +330,7 @@ const StudentTableStatus = ({
       }),
     });
   };
+
 
   return (
     <>

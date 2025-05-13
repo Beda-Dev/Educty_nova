@@ -274,4 +274,61 @@ export function verificationPermission(
     }
   }
 
+  // fonction pour creer un numero d'inscription 
+
+type ReceiptType = "encaissement" | "decaissement" | "inscription";
+
+export  const generationNumero = (
+  id: string | number,
+  createdAt: Date | string,
+  type: ReceiptType
+): string => {
+  const date = new Date(createdAt);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  const formattedDate = [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+    pad(date.getSeconds()),
+  ].join("");
+
+  const prefix = {
+    encaissement: "Enc",
+    decaissement: "Dec",
+    inscription: "Ins",
+  }[type];
+
+  return `${prefix}/${id}/${formattedDate}`;
+};
+
+
+interface ParsedReceipt {
+  id: string;
+  createdAt: string;
+  type: ReceiptType;
+}
+
+export const RetrouverNumero = (receiptNumber: string): ParsedReceipt => {
+  const [prefix, id, dateStr] = receiptNumber.split("/");
+
+  const typeMap: Record<string, ReceiptType> = {
+    Enc: "encaissement",
+    Dec: "decaissement",
+    Ins: "inscription",
+  };
+
+  const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}T${dateStr.slice(8, 10)}:${dateStr.slice(10, 12)}:${dateStr.slice(12, 14)}`;
+
+  return {
+    id,
+    createdAt: formattedDate,
+    type: typeMap[prefix],
+  };
+};
+
+
+
   

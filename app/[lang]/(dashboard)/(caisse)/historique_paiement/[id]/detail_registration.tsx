@@ -18,6 +18,7 @@ import jsPDF from "jspdf";
 import { Payment } from "@/lib/interface";
 import { DetailsPaiement } from "./fonction";
 import { motion } from "framer-motion";
+import {generationNumero} from "@/lib/fonction"
 
 interface Props {
   payment: Payment;
@@ -139,7 +140,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
                     Reçu de paiement
                   </div>
                   <div className="text-2xl font-bold text-primary-600">
-                    #{payment.id}
+                    # {generationNumero(payment.id.toString(), payment.created_at, "encaissement")}
                   </div>
                   <div className="mt-2 text-sm text-gray-500">
                     Émis le:{" "}

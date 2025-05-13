@@ -27,6 +27,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
+import {generationNumero} from "@/lib/fonction"
 
 
 interface dataProps {
@@ -255,7 +256,7 @@ const PaymentDetail = ({ registration, studentData }: dataProps) => {
                     Reçu de paiement
                   </div>
                   <div className="text-2xl font-bold text-primary-600">
-                    #{registration.id}
+                    # {generationNumero(registration.id.toString(), registration.created_at, "encaissement")}
                   </div>
                   <div className="mt-2 text-sm text-gray-500">
                     Émis le:{" "}

@@ -31,6 +31,7 @@ import {
   Calculator,
   Mail,
   Home,
+  CreditCard,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -176,6 +177,13 @@ const menuItems: MenuCategory = {
           path: "parametres/caisse/type_depense",
           icon: <ClipboardList className="w-4 h-4" />,
         },
+
+        {
+          id: "payment-methods",
+          title: "Méthodes de Paiement",
+          path: "parametres/caisse/methodes_paiement",
+          icon: <CreditCard className="w-6 h-6" />,
+        },
       ],
     },
   ],
@@ -264,7 +272,7 @@ const menuItems: MenuCategory = {
           title: "Dépense",
           path: "depense",
           icon: <DollarSign className="w-4 h-4" />,
-        }
+        },
       ],
     },
   ],

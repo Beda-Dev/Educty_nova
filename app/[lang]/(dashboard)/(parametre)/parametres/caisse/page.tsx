@@ -19,7 +19,8 @@ import { useParams } from "next/navigation";
 // Couleurs personnalisées pour chaque item
 const itemColors = [
   "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
-  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300"
+  "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300",
+  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300"
 ];
 
 export default function CashSettingsPage() {
@@ -51,6 +52,14 @@ export default function CashSettingsPage() {
       icon: <Wallet className="w-6 h-6" />,
       path: "/parametres/caisse/caisses_enregistrement",
       color: itemColors[1]
+    },
+    {
+      id: "payment-methods",
+      title: "Méthodes de Paiement",
+      description: "Gestion des modes de paiement acceptés",
+      icon: <CreditCard className="w-6 h-6" />,
+      path: "/parametres/caisse/methodes_paiement",
+      color: itemColors[2]
     }
   ];
 
@@ -109,7 +118,7 @@ export default function CashSettingsPage() {
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"

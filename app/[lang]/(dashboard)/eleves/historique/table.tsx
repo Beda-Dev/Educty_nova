@@ -114,7 +114,7 @@ export function AdvancedDataTable({ data }: { data: Registration[] }) {
         <Button
           variant="outline"
           className="p-2"
-          onClick={() => router.push(`eleves/historique/${row.original.id}`)}
+          onClick={() => router.push(`/eleves/historique/${row.original.id}`)}
         >
           <Eye className="h-5 w-5" />
         </Button>

@@ -1,3 +1,4 @@
+
 // for calendar
 export interface CalendarEvent {
   id: string;
@@ -16,6 +17,14 @@ export interface CalendarCategory {
   activeClass?: string;
   className?: string;
 }
+
+export interface PaymentMethod {
+  id: number;
+  label: string;
+  created_at: string;
+  updated_at: string;
+}
+
 
 export interface Permission {
   id: number;
