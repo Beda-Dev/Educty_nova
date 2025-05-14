@@ -35,7 +35,7 @@ export default function FraisScolairesPage() {
       title: "Types de frais",
       description: "Gérer les différents types de frais scolaires",
       icon: <List className="w-6 h-6" />,
-      path: "frais-scolaires/fees_type",
+      path: "parametres/scolarite/frais-scolaires/fees_type",
       color: itemColors[0]
     },
     {
@@ -43,7 +43,7 @@ export default function FraisScolairesPage() {
       title: "Tarification",
       description: "Configurer les tarifs et montants des frais",
       icon: <Tags className="w-6 h-6" />,
-      path: "frais-scolaires/pricing",
+      path: "parametres/scolarite/frais-scolaires/pricing",
       color: itemColors[1]
     }
   ];

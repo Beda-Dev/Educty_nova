@@ -32,8 +32,31 @@ import {
   Mail,
   Home,
   CreditCard,
+  List,
+  Tags,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { forwardRef } from "react";
+
+const MenuTrigger = forwardRef<
+  HTMLDivElement,
+  React.PropsWithChildren<{
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+  }>
+>(({ children, onMouseEnter, onMouseLeave }, ref) => (
+  <motion.div
+    ref={ref}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+    initial={{ scale: 1 }}
+    whileHover={{ scale: 1.02 }}
+    className="relative"
+  >
+    {children}
+  </motion.div>
+));
+MenuTrigger.displayName = "MenuTrigger";
 
 // Types
 type MenuItemChild = {
@@ -126,7 +149,23 @@ const menuItems: MenuCategory = {
           title: "Frais",
           description: "Frais et paiements",
           icon: <DollarSign className="w-4 h-4" />,
-          path: "frais-scolaires",
+          path: "parametres/scolarite/frais-scolaires",
+          children: [
+            // {
+            //   id: "fees_type",
+            //   title: "Types de frais",
+            //   description: "Gérer les différents types de frais scolaires",
+            //   icon: <List className="w-6 h-6" />,
+            //   path: "parametres/scolarite/frais-scolaires/fees_type",
+            // },
+            // {
+            //   id: "pricing",
+            //   title: "Tarification",
+            //   description: "Configurer les tarifs et montants des frais",
+            //   icon: <Tags className="w-6 h-6" />,
+            //   path: "parametres/scolarite/frais-scolaires/pricing",
+            // },
+          ],
         },
         {
           id: "documents",
@@ -475,14 +514,17 @@ export default function DynamicMenu() {
     return false;
   };
 
-  useEffect(() => {
-    if (!isHovering && openPopoverId) {
-      const timer = setTimeout(() => {
+useEffect(() => {
+  if (!isHovering) {
+    const timer = setTimeout(() => {
+      // Vérifier à nouveau pour éviter les fermetures intempestives
+      if (!isHovering) {
         setOpenPopoverId(null);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isHovering, openPopoverId]);
+      }
+    }, 300); // Réduit à 300ms pour une réponse plus rapide
+    return () => clearTimeout(timer);
+  }
+}, [isHovering, openPopoverId]);
 
   // Composant récursif pour les items de menu
   const MenuItemComponent = ({
@@ -498,23 +540,17 @@ export default function DynamicMenu() {
     return (
       <Popover
         open={openPopoverId === item.id}
-        onOpenChange={(open) => setOpenPopoverId(open ? item.id : null)}
+        onOpenChange={(open) => {
+          if (open) {
+            setOpenPopoverId(item.id);
+          } else if (!isHovering) {
+            // Ne fermer que si la souris n'est plus dans la zone du menu
+            setOpenPopoverId(null);
+          }
+        }}
       >
         <PopoverTrigger asChild>
-          <motion.div
-            className="relative"
-            onMouseEnter={() => {
-              setHoveredItem(item.id);
-              setIsHovering(true);
-              if (hasChildren) {
-                setOpenPopoverId(item.id);
-              }
-            }}
-            onMouseLeave={() => {
-              setIsHovering(false);
-              setHoveredItem(null);
-            }}
-          >
+          <div className="relative">
             <motion.div
               whileHover={{ scale: isParentItem ? 1.03 : 1.02 }}
               className={cn(
@@ -522,9 +558,20 @@ export default function DynamicMenu() {
                 isItemActive(item.path, item.children)
                   ? "bg-primary/15 text-primary font-medium"
                   : "text-foreground/90",
-                !isParentItem && "px-3 py-1.5" // Style différent pour les enfants
+                !isParentItem && "px-3 py-1.5"
               )}
               onClick={() => !hasChildren && navigate(item.path)}
+              onMouseEnter={() => {
+                setHoveredItem(item.id);
+                setIsHovering(true);
+                if (hasChildren) {
+                  setOpenPopoverId(item.id);
+                }
+              }}
+              onMouseLeave={() => {
+                // Ne pas immédiatement fermer, laisser le timeout gérer
+                setIsHovering(false);
+              }}
             >
               <div className="flex items-center justify-center w-5 h-5">
                 {item.icon}
@@ -540,20 +587,26 @@ export default function DynamicMenu() {
                 </motion.div>
               )}
             </motion.div>
-          </motion.div>
+          </div>
         </PopoverTrigger>
-
-        <AnimatePresence>
-          {hasChildren && (
+        {hasChildren && (
+          <AnimatePresence>
             <PopoverContent
               className={cn(
                 "p-2 z-50 shadow-lg bg-background/95 backdrop-blur border border-border/50",
-                level === 0 ? "w-56" : "w-48" // Largeur différente selon le niveau
+                level === 0 ? "w-56" : "w-48",
+                level > 0 ? "ml-1" : ""
               )}
               align={level === 0 ? "start" : "end"}
               sideOffset={5}
-              onMouseEnter={() => setIsHovering(true)}
-              onMouseLeave={() => setIsHovering(false)}
+              side={level === 0 ? "bottom" : "right"}
+              onMouseEnter={() => {
+                setIsHovering(true);
+                setOpenPopoverId(item.id);
+              }}
+              onMouseLeave={() => {
+                setIsHovering(false);
+              }}
               forceMount
             >
               <motion.div
@@ -573,8 +626,8 @@ export default function DynamicMenu() {
                 </div>
               </motion.div>
             </PopoverContent>
-          )}
-        </AnimatePresence>
+          </AnimatePresence>
+        )}
       </Popover>
     );
   };

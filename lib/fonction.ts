@@ -287,7 +287,6 @@ export  const generationNumero = (
   const pad = (n: number) => n.toString().padStart(2, "0");
 
   const formattedDate = [
-    date.getFullYear(),
     pad(date.getMonth() + 1),
     pad(date.getDate()),
     pad(date.getHours()),
@@ -320,7 +319,7 @@ export const RetrouverNumero = (receiptNumber: string): ParsedReceipt => {
     Ins: "inscription",
   };
 
-  const formattedDate = `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}T${dateStr.slice(8, 10)}:${dateStr.slice(10, 12)}:${dateStr.slice(12, 14)}`;
+  const formattedDate = `${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}T${dateStr.slice(8, 10)}:${dateStr.slice(10, 12)}:${dateStr.slice(12, 14)}`;
 
   return {
     id,

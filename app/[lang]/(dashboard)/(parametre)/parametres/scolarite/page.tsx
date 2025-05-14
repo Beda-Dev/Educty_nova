@@ -66,7 +66,7 @@ export default function Page() {
       title: "Frais Scolaires",
       description: "Configurer les frais et paiements",
       icon: <DollarSign className="w-6 h-6" />,
-      path: "/frais-scolaires",
+      path: "parametres/scolarite/frais-scolaires",
       color: itemColors[4]
     },
     {

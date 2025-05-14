@@ -1,4 +1,3 @@
-
 // for calendar
 export interface CalendarEvent {
   id: string;
@@ -23,8 +22,8 @@ export interface PaymentMethod {
   label: string;
   created_at: string;
   updated_at: string;
+  payments?: Payment[];
 }
-
 
 export interface Permission {
   id: number;
@@ -92,6 +91,7 @@ export interface Role {
 
 export interface User {
   id: number;
+  hierarchical_id?: number;
   name: string;
   email: string;
   email_verified_at: null;
@@ -104,6 +104,7 @@ export interface User {
 
 export interface UserSingle {
   id: number;
+  hierarchical_id?: number;
   name: string;
   email: string;
   email_verified_at: null;
@@ -311,3 +312,23 @@ export interface InterfaceOTP {
   email: string;
   expiresAt: string;
 }
+
+export interface CashRegisterSession {
+  id: number;
+  user_id: number;
+  cash_register_id: number;
+  opening_date: string;
+  closing_date: string;
+  opening_amount: string;
+  closing_amount: string;
+  status: "closed" | "open";
+  created_at: string;
+  updated_at: string;
+  user: UserSingle;
+  cash_register: CashRegister;
+}
+
+
+
+
+

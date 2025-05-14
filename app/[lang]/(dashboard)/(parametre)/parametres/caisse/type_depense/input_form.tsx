@@ -92,15 +92,6 @@ const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
 
   return (
     <Card className="p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Icon icon="heroicons:plus-circle" className="h-5 w-5" />
-          Ajouter un type de dépense
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Remplissez le formulaire pour créer un nouveau type de dépense
-        </p>
-      </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -130,6 +121,7 @@ const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
               type="submit"
               disabled={isLoading}
               className="min-w-[120px]"
+              variant="outline"
             >
               {isLoading ? (
                 <>

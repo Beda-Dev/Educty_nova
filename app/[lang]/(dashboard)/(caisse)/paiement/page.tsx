@@ -62,7 +62,16 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Loading from "./loading"; // Ensure this is a valid React component
 import { DonneesEtudiantFusionnees } from "./fonction";
-import { CheckIcon, InfoIcon, Loader2Icon, PhoneIcon, SearchIcon, SquareIcon, UserIcon, WalletIcon } from "lucide-react";
+import {
+  CheckIcon,
+  InfoIcon,
+  Loader2Icon,
+  PhoneIcon,
+  SearchIcon,
+  SquareIcon,
+  UserIcon,
+  WalletIcon,
+} from "lucide-react";
 
 interface PaiementData {
   student_id: number;
@@ -130,6 +139,22 @@ const InvoicePage = () => {
   const handleRecherche = async () => {
     if (!matricule.trim()) {
       toast.error("Veuillez entrer un matricule");
+      return;
+    }
+    const etudiantInscrit = registrations.some(
+      (registration) => registration.student.registration_number === matricule
+    );
+
+    const etudiantInscritCetteAnnee = registrations.filter((re) => re.academic_year_id === academicYearCurrent.id  ).some(
+      (registration) => registration.student.registration_number === matricule
+    );
+
+    if (!etudiantInscrit) {
+      toast.error("Cet étudiant n'est pas inscrit");
+      return;
+    }
+    if (!etudiantInscritCetteAnnee) {
+      toast.error("Cet étudiant n'est pas inscrit cette année");
       return;
     }
 
@@ -527,112 +552,118 @@ const PaymentDialog = ({
   loading: boolean;
   totalRestant: number;
 }) => (
-<Dialog>
-  <DialogTrigger asChild>
-    <Button className="gap-2">
-      <WalletIcon className="h-4 w-4" />
-      Enregistrer un Paiement
-    </Button>
-  </DialogTrigger>
-  <DialogContent className="max-w-2xl">
-    <DialogHeader>
-      <DialogTitle className="flex items-center gap-2">
-        <WalletIcon className="h-5 w-5" />
-        Nouveau Paiement
-      </DialogTitle>
-    </DialogHeader>
-    <div className="space-y-6">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader className="bg-muted/50">
-            <TableRow>
-              <TableHead>Type de Frais</TableHead>
-              <TableHead className="text-right">Reste à Payer</TableHead>
-              <TableHead className="text-right">Montant à Payer</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {donneesEtudiant.detailsFrais?.map((frais: any, index: number) => (
-              <TableRow key={index}>
-                <TableCell>{frais.typeFrais}</TableCell>
-                <TableCell className="text-right font-mono">
-                  {frais.resteAPayer.toLocaleString()} CFA
-                </TableCell>
-                <TableCell className="text-right">
-                  <Input
-                    type="number"
-                    value={montantsPaiement[index] || ""}
-                    onChange={(e) => handleChangeMontant(index, e.target.value)}
-                    className="w-32 text-right font-mono"
-                    placeholder="0"
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex justify-end items-center gap-4">
-        <Label className="text-sm">Total:</Label>
-        <div className="w-32 p-2 border rounded-md text-right font-mono bg-muted/50">
-          {calculerTotalPaiement().toLocaleString()} CFA
-        </div>
-      </div>
-
-      <div className="grid gap-4">
-        <div>
-          <Label>Caisse</Label>
-          <Select
-            value={caisseSelectionnee}
-            onValueChange={setCaisseSelectionnee}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionnez une caisse" />
-            </SelectTrigger>
-            <SelectContent className="z-[9999]" >
-              {cashRegisters.map((caisse) => (
-                <SelectItem key={caisse.id} value={String(caisse.id)}>
-                  <div className="flex items-center gap-2">
-                    <SquareIcon className="h-4 w-4" />
-                    Caisse {caisse.cash_register_number}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {formErrors.caisse && (
-            <p className="text-sm text-destructive mt-1">{formErrors.caisse}</p>
-          )}
-        </div>
-      </div>
-
-      {formErrors.montant && (
-        <Alert color="destructive" >
-          <AlertDescription>{formErrors.montant}</AlertDescription>
-        </Alert>
-      )}
-
-      <Button
-        onClick={handlePaiement}
-        className="w-full gap-2"
-        disabled={totalRestant <= 0 || loading}
-      >
-        {loading ? (
-          <>
-            <Loader2Icon className="h-4 w-4 animate-spin" />
-            Enregistrement...
-          </>
-        ) : (
-          <>
-            <CheckIcon className="h-4 w-4" />
-            Enregistrer les Paiements
-          </>
-        )}
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button className="gap-2">
+        <WalletIcon className="h-4 w-4" />
+        Enregistrer un Paiement
       </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+    </DialogTrigger>
+    <DialogContent className="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <WalletIcon className="h-5 w-5" />
+          Nouveau Paiement
+        </DialogTitle>
+      </DialogHeader>
+      <div className="space-y-6">
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader className="bg-muted/50">
+              <TableRow>
+                <TableHead>Type de Frais</TableHead>
+                <TableHead className="text-right">Reste à Payer</TableHead>
+                <TableHead className="text-right">Montant à Payer</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {donneesEtudiant.detailsFrais?.map(
+                (frais: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{frais.typeFrais}</TableCell>
+                    <TableCell className="text-right font-mono">
+                      {frais.resteAPayer.toLocaleString()} CFA
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Input
+                        type="number"
+                        value={montantsPaiement[index] || ""}
+                        onChange={(e) =>
+                          handleChangeMontant(index, e.target.value)
+                        }
+                        className="w-32 text-right font-mono"
+                        placeholder="0"
+                      />
+                    </TableCell>
+                  </TableRow>
+                )
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="flex justify-end items-center gap-4">
+          <Label className="text-sm">Total:</Label>
+          <div className="w-32 p-2 border rounded-md text-right font-mono bg-muted/50">
+            {calculerTotalPaiement().toLocaleString()} CFA
+          </div>
+        </div>
+
+        <div className="grid gap-4">
+          <div>
+            <Label>Caisse</Label>
+            <Select
+              value={caisseSelectionnee}
+              onValueChange={setCaisseSelectionnee}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionnez une caisse" />
+              </SelectTrigger>
+              <SelectContent className="z-[9999]">
+                {cashRegisters.map((caisse) => (
+                  <SelectItem key={caisse.id} value={String(caisse.id)}>
+                    <div className="flex items-center gap-2">
+                      <SquareIcon className="h-4 w-4" />
+                      Caisse {caisse.cash_register_number}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {formErrors.caisse && (
+              <p className="text-sm text-destructive mt-1">
+                {formErrors.caisse}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {formErrors.montant && (
+          <Alert color="destructive">
+            <AlertDescription>{formErrors.montant}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button
+          onClick={handlePaiement}
+          className="w-full gap-2"
+          disabled={totalRestant <= 0 || loading}
+        >
+          {loading ? (
+            <>
+              <Loader2Icon className="h-4 w-4 animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <CheckIcon className="h-4 w-4" />
+              Enregistrer les Paiements
+            </>
+          )}
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
 );
 
 const StudentInfoCard = ({

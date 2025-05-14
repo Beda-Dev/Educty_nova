@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { Pencil, Plus, Search } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import {
   ColumnDef,
   SortingState,
@@ -23,16 +23,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -41,9 +39,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CashRegister } from "@/lib/interface";
 import { useSchoolStore } from "@/store";
 import { fetchCashRegister } from "@/store/schoolservice";
-import { DataTablePagination } from "./data-table-pagination";
-import { debounce } from "lodash";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Icon } from "@iconify/react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const cashRegisterSchema = z.object({
@@ -52,160 +58,30 @@ const cashRegisterSchema = z.object({
 
 type CashRegisterFormValues = z.infer<typeof cashRegisterSchema>;
 
-const AddCashRegisterSheet = ({
-  isLoading,
-  errors,
-  register,
-  handleSubmit,
-  onSubmit,
-}: {
-  isLoading: boolean;
-  errors: any;
-  register: any;
-  handleSubmit: any;
-  onSubmit: (data: CashRegisterFormValues) => Promise<void>;
-}) => {
-  return (
-    <SheetContent className="sm:max-w-md">
-      <SheetHeader>
-        <SheetTitle>Ajouter une caisse</SheetTitle>
-      </SheetHeader>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-        <div className="space-y-2">
-          <Label htmlFor="cash_register_number">Numéro de caisse</Label>
-          <Input
-            id="cash_register_number"
-            {...register("cash_register_number")}
-            placeholder="Ex: CAISSE-001"
-            disabled={isLoading}
-          />
-          {errors.cash_register_number && (
-            <motion.p 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-sm text-red-500"
-            >
-              {errors.cash_register_number.message}
-            </motion.p>
-          )}
-        </div>
-        
-        <SheetFooter className="flex justify-end gap-2 pt-4">
-          <SheetClose asChild>
-            <Button type="button" variant="outline" disabled={isLoading}>
-              Annuler
-            </Button>
-          </SheetClose>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <motion.span
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                />
-                Enregistrement...
-              </span>
-            ) : (
-              "Enregistrer"
-            )}
-          </Button>
-        </SheetFooter>
-      </form>
-    </SheetContent>
-  );
-};
+interface Props {
+  data: CashRegister[];
+}
 
-const EditCashRegisterSheet = ({
-  cashRegister,
-  isLoading,
-  errors,
-  register,
-  handleSubmit,
-  onSubmit,
-}: {
-  cashRegister: CashRegister;
-  isLoading: boolean;
-  errors: any;
-  register: any;
-  handleSubmit: any;
-  onSubmit: (data: CashRegisterFormValues) => Promise<void>;
-}) => {
-  return (
-    <SheetContent className="sm:max-w-md">
-      <SheetHeader>
-        <SheetTitle>
-          <span className="flex items-center gap-2">
-            <Pencil className="h-5 w-5" />
-            Modifier la caisse {cashRegister.cash_register_number}
-          </span>
-        </SheetTitle>
-      </SheetHeader>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-        <div className="space-y-2">
-          <Label htmlFor="cash_register_number">Numéro de caisse</Label>
-          <Input
-            id="cash_register_number"
-            {...register("cash_register_number")}
-            placeholder="Ex: CAISSE-001"
-            disabled={isLoading}
-          />
-          {errors.cash_register_number && (
-            <motion.p 
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-sm text-red-500"
-            >
-              {errors.cash_register_number.message}
-            </motion.p>
-          )}
-        </div>
-        
-        <SheetFooter className="flex justify-end gap-2 pt-4">
-          <SheetClose asChild>
-            <Button type="button" variant="outline" disabled={isLoading}>
-              Annuler
-            </Button>
-          </SheetClose>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <span className="flex items-center gap-2">
-                <motion.span
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="block w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                />
-                Enregistrement...
-              </span>
-            ) : (
-              "Enregistrer"
-            )}
-          </Button>
-        </SheetFooter>
-      </form>
-    </SheetContent>
-  );
-};
-
-const TableRowSkeleton = () => (
-  <TableRow>
-    <TableCell colSpan={2} className="text-center">
-      <div className="flex items-center justify-center space-x-4">
-        <Skeleton className="h-4 w-[200px]" />
-        <Skeleton className="h-8 w-8 rounded-full" />
-      </div>
-    </TableCell>
-  </TableRow>
-);
-
-export function CashRegisterTable({ data }: { data: CashRegister[] }) {
+export function CashRegisterTable({ data }: Props) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [editingId, setEditingId] = React.useState<number | null>(null);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const router = useRouter();
   const { cashRegisters, setCashRegisters } = useSchoolStore();
+
+  const itemsPerPage = 5;
+  const filteredData = data.filter(item =>
+    item.cash_register_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const formMethods = useForm<CashRegisterFormValues>({
     resolver: zodResolver(cashRegisterSchema),
@@ -216,18 +92,13 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = formMethods;
 
-  const handleSearchChange = React.useMemo(
-    () => debounce((value: string) => {
-      setGlobalFilter(value);
-    }, 300),
-    []
-  );
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
 
-  React.useEffect(() => {
-    return () => {
-      handleSearchChange.cancel();
-    };
-  }, [handleSearchChange]);
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const handleCashRegisterOperation = async (
     method: "POST" | "PUT",
@@ -294,6 +165,7 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
       if (success) {
         setEditingId(null);
         reset();
+        setIsModalOpen(false);
       }
     } finally {
       setIsLoading(false);
@@ -303,186 +175,128 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
   const handleEdit = (cashRegister: CashRegister) => {
     setEditingId(cashRegister.id);
     setValue("cash_register_number", cashRegister.cash_register_number);
+    setIsModalOpen(true);
   };
 
-  const columns: ColumnDef<CashRegister>[] = [
-    {
-      accessorKey: "cash_register_number",
-      header: () => <span className="font-semibold">Numéro de caisse</span>,
-      cell: ({ row }) => (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="font-medium text-center"
-        >
-          {row.getValue("cash_register_number")}
-        </motion.div>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <span className="font-semibold">Actions</span>,
-      cell: ({ row }) => {
-        const cashRegister = row.original;
-        return (
-          <div className="flex justify-center gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleEdit(cashRegister)}
-                  className="hover:bg-primary/10 hover:text-primary transition-colors"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <EditCashRegisterSheet
-                cashRegister={cashRegister}
-                isLoading={isLoading}
-                errors={errors}
-                register={register}
-                handleSubmit={handleSubmit}
-                onSubmit={onSubmit}
-              />
-            </Sheet>
-          </div>
-        );
-      },
-    },
+  const columns = [
+    { key: "cash_register_number", label: "Numéro de caisse" },
+    { key: "actions", label: "Actions" },
   ];
 
-  const table = useReactTable({
-    data,
-    columns,
-    state: { 
-      sorting, 
-      columnFilters,
-      globalFilter 
-    },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  });
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      <Card className="p-6 shadow-sm">
-        <CardHeader className="p-0 pb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="text-xl font-semibold">
-                Gestion des caisses
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Liste et gestion des caisses enregistrées
-              </p>
-            </div>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button
-                  color="default"
-                  onClick={() => {
-                    setEditingId(null);
-                    reset();
-                  }}
-                  className="w-full sm:w-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" /> 
-                  <span>Ajouter une caisse</span>
-                </Button>
-              </SheetTrigger>
-              <AddCashRegisterSheet
-                isLoading={isLoading}
-                errors={errors}
-                register={register}
-                handleSubmit={handleSubmit}
-                onSubmit={onSubmit}
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
+        {/* Carte du formulaire d'ajout */}
+        <Card className="lg:col-span-1 p-6 shadow-sm border-0 bg-gradient-to-br from-primary/5 to-primary/10">
+        <Card className="p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-lg font-semibold">Ajouter une caisse</h2>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="cash_register_number">Numéro de caisse *</Label>
+              <Input
+                id="cash_register_number"
+                {...register("cash_register_number")}
+                placeholder="Ex: CAISSE-001"
               />
-            </Sheet>
+              {errors.cash_register_number && (
+                <p className="text-sm text-destructive">
+                  {errors.cash_register_number.message}
+                </p>
+              )}
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Icon
+                    icon="heroicons:arrow-path"
+                    className="h-4 w-4 animate-spin mr-2"
+                  />
+                  Enregistrement...
+                </>
+              ) : (
+                "Ajouter la caisse"
+              )}
+            </Button>
+          </form>
+          </Card>
+        </Card>
+
+        {/* Carte de la liste des caisses */}
+        <Card className="lg:col-span-2 p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold">Liste des caisses</h2>
+            </div>
+            <div className="mb-4 flex items-center gap-3">
+              <Input
+                type="text"
+                placeholder="Rechercher une caisse..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="max-w-sm"
+              />
+            </div>
           </div>
-        </CardHeader>
-        
-        <CardContent className="p-0">
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Rechercher par numéro..."
-              defaultValue={globalFilter}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full sm:w-64 pl-9"
-            />
-          </div>
-          
-          <div className="rounded-md border overflow-hidden">
+
+          <div className="rounded-md border">
             <Table>
-              <TableHeader className="bg-muted/50">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableHead 
-                        key={header.id} 
-                        className="text-center hover:bg-muted/75 transition-colors"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                ))}
+              <TableHeader className="bg-primary/5">
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableHead key={column.key} className="font-medium">
+                      {column.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
               </TableHeader>
               <TableBody>
-                {table.getRowModel().rows?.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      data-state={row.getIsSelected() && "selected"}
-                      className="hover:bg-muted/25 transition-colors"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="text-center">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
+                {filteredData.length > 0 ? (
+                  <AnimatePresence>
+                    {paginatedData.map((item) => (
+                      <motion.tr
+                        key={item.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="hover:bg-primary/5"
+                      >
+                        <TableCell className="font-medium">
+                          {item.cash_register_number}
                         </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(item)}
+                            className="text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
                 ) : (
                   <TableRow>
                     <TableCell
                       colSpan={columns.length}
-                      className="h-24 text-center"
+                      className="h-24 text-center text-muted-foreground"
                     >
-                      {globalFilter ? (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-muted-foreground"
-                        >
-                          Aucune caisse ne correspond à votre recherche.
-                        </motion.div>
+                      {searchTerm ? (
+                        "Aucune caisse ne correspond à votre recherche."
                       ) : (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-muted-foreground"
-                        >
-                          Aucune caisse enregistrée pour le moment.
-                        </motion.div>
+                        "Aucune caisse enregistrée pour le moment."
                       )}
                     </TableCell>
                   </TableRow>
@@ -490,14 +304,130 @@ export function CashRegisterTable({ data }: { data: CashRegister[] }) {
               </TableBody>
             </Table>
           </div>
-          
-          <div className="mt-4">
-            <DataTablePagination table={table} />
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+
+          {/* Pagination */}
+          {filteredData.length > itemsPerPage && (
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    {currentPage === 1 ? (
+                      <PaginationPrevious className="cursor-not-allowed opacity-50" />
+                    ) : (
+                      <PaginationPrevious onClick={handlePreviousPage} />
+                    )}
+                  </PaginationItem>
+
+                  {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <PaginationItem key={page}>
+                        <Button
+                          variant={currentPage === page ? "soft" : "ghost"}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  {totalPages > 3 && currentPage < totalPages - 1 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  {totalPages > 3 && currentPage < totalPages && (
+                    <PaginationItem>
+                      <Button
+                        variant={
+                          currentPage === totalPages ? "outline" : "ghost"
+                        }
+                        onClick={() => setCurrentPage(totalPages)}
+                      >
+                        {totalPages}
+                      </Button>
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    {currentPage === totalPages ? (
+                      <PaginationNext className="cursor-not-allowed opacity-50" />
+                    ) : (
+                      <PaginationNext onClick={handleNextPage} />
+                    )}
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </Card>
+      </motion.div>
+
+      {/* Modale de modification */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              Modifier la caisse
+            </DialogTitle>
+            <DialogDescription>
+              Mettez à jour les informations de la caisse
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label htmlFor="cash_register_number">Numéro de caisse *</Label>
+              <Input
+                id="cash_register_number"
+                {...register("cash_register_number", {
+                  required: "Le numéro est requis",
+                })}
+                placeholder="Ex: CAISSE-001"
+                className={errors.cash_register_number ? "border-destructive" : ""}
+              />
+              {errors.cash_register_number && (
+                <p className="text-sm text-destructive">
+                  {errors.cash_register_number.message}
+                </p>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                disabled={isLoading}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="min-w-[120px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Icon
+                      icon="heroicons:arrow-path"
+                      className="h-4 w-4 animate-spin mr-2"
+                    />
+                    Enregistrement...
+                  </>
+                ) : (
+                  "Mettre à jour"
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
-}
+};
 
 export default CashRegisterTable;

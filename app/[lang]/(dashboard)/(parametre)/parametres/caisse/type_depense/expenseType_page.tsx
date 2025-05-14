@@ -45,19 +45,32 @@ interface Props {
 
 const ExpenseTypePage = ({ data }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<ExpenseType | null>(null);
+  const [selectedExpense, setSelectedExpense] = useState<ExpenseType | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const { expenseTypes, setExpenseTypes } = useSchoolStore();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<{ name: string }>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<{ name: string }>({
     defaultValues: {
       name: "",
-    }
+    },
   });
 
-  const activeExpenses = data.filter(item => item.active === 1);
+  const activeExpenses = data.filter(
+  (item) =>
+    item.active === 1 &&
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+);
+
   const totalPages = Math.ceil(activeExpenses.length / itemsPerPage);
   const paginatedExpenses = activeExpenses.slice(
     (currentPage - 1) * itemsPerPage,
@@ -73,13 +86,16 @@ const ExpenseTypePage = ({ data }: Props) => {
   const handleUpdate = async (formData: { name: string }) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/expenseType?id=${selectedExpense?.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `/api/expenseType?id=${selectedExpense?.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Échec de la mise à jour");
@@ -90,7 +106,9 @@ const ExpenseTypePage = ({ data }: Props) => {
       setExpenseTypes(updatedExpenses);
       setIsModalOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -120,28 +138,37 @@ const ExpenseTypePage = ({ data }: Props) => {
         {/* Carte du formulaire d'ajout */}
         <Card className="lg:col-span-1 p-6 shadow-sm border-0 bg-gradient-to-br from-primary/5 to-primary/10">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Icon icon="heroicons:plus-circle" className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-lg font-semibold">Ajouter un type de dépense</h2>
+
+            <h2 className="text-lg font-semibold">
+              Ajouter un type de dépense
+            </h2>
           </div>
-          <InputFormValidation onSuccess={() => fetchExpenseType().then(setExpenseTypes)} />
+          <InputFormValidation
+            onSuccess={() => fetchExpenseType().then(setExpenseTypes)}
+          />
         </Card>
 
         {/* Carte de la liste des types de dépenses */}
         <Card className="lg:col-span-2 p-6 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Icon icon="heroicons:list-bullet" className="h-5 w-5 text-primary" />
-              </div>
+
               <h2 className="text-lg font-semibold">Types de dépenses</h2>
             </div>
-            <Badge color="secondary" className="px-3 py-1">
-              Total: {activeExpenses.length}
-            </Badge>
+            <div className="mb-4 flex items-center gap-3">
+              <Input
+                type="text"
+                placeholder="Rechercher un type de dépense..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Revenir à la première page à chaque recherche
+                }}
+                className="max-w-sm"
+              />
+            </div>
           </div>
-          
+
           <div className="rounded-md border">
             <Table>
               <TableHeader className="bg-primary/5">
@@ -165,7 +192,9 @@ const ExpenseTypePage = ({ data }: Props) => {
                         transition={{ duration: 0.2 }}
                         className="hover:bg-primary/5"
                       >
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.name}
+                        </TableCell>
                         <TableCell className="text-right">
                           <Button
                             variant="ghost"
@@ -181,7 +210,10 @@ const ExpenseTypePage = ({ data }: Props) => {
                   </AnimatePresence>
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center text-muted-foreground"
+                    >
                       Aucun type de dépense actif trouvé
                     </TableCell>
                   </TableRow>
@@ -202,7 +234,7 @@ const ExpenseTypePage = ({ data }: Props) => {
                       <PaginationPrevious onClick={handlePreviousPage} />
                     )}
                   </PaginationItem>
-                  
+
                   {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                     const page = i + 1;
                     return (
@@ -226,7 +258,9 @@ const ExpenseTypePage = ({ data }: Props) => {
                   {totalPages > 3 && currentPage < totalPages && (
                     <PaginationItem>
                       <Button
-                        variant={currentPage === totalPages ? "outline" : "ghost"}
+                        variant={
+                          currentPage === totalPages ? "outline" : "ghost"
+                        }
                         onClick={() => setCurrentPage(totalPages)}
                       >
                         {totalPages}
@@ -236,13 +270,9 @@ const ExpenseTypePage = ({ data }: Props) => {
 
                   <PaginationItem>
                     {currentPage === totalPages ? (
-                      <PaginationNext 
-                        className="cursor-not-allowed opacity-50"
-                      />
+                      <PaginationNext className="cursor-not-allowed opacity-50" />
                     ) : (
-                      <PaginationNext 
-                        onClick={handleNextPage} 
-                      />
+                      <PaginationNext onClick={handleNextPage} />
                     )}
                   </PaginationItem>
                 </PaginationContent>
@@ -264,47 +294,57 @@ const ExpenseTypePage = ({ data }: Props) => {
               Mettez à jour les informations de "{selectedExpense?.name}"
             </DialogDescription>
           </DialogHeader>
-          
-          <form onSubmit={handleSubmit(handleUpdate)} className="space-y-4 mt-2">
+
+          <form
+            onSubmit={handleSubmit(handleUpdate)}
+            className="space-y-4 mt-2"
+          >
             <div className="space-y-2">
               <Label htmlFor="name">Nom *</Label>
               <Input
                 id="name"
-                {...register("name", { 
+                {...register("name", {
                   required: "Le nom est requis",
                   minLength: {
                     value: 2,
-                    message: "Le nom doit contenir au moins 2 caractères"
-                  }
+                    message: "Le nom doit contenir au moins 2 caractères",
+                  },
                 })}
                 placeholder="Ex: Fournitures de bureau"
                 className={errors.name ? "border-destructive" : ""}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.name.message}
+                </p>
               )}
             </div>
-            
+
             <div className="flex justify-end gap-3 pt-4">
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
                 disabled={isLoading}
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isLoading}
                 className="min-w-[120px]"
               >
                 {isLoading ? (
                   <>
-                    <Icon icon="heroicons:arrow-path" className="h-4 w-4 animate-spin mr-2" />
+                    <Icon
+                      icon="heroicons:arrow-path"
+                      className="h-4 w-4 animate-spin mr-2"
+                    />
                     Enregistrement...
                   </>
-                ) : "Mettre à jour"}
+                ) : (
+                  "Mettre à jour"
+                )}
               </Button>
             </div>
           </form>

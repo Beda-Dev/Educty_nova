@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PlusCircle, CreditCard, Trash2, Edit, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -37,19 +38,40 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useSchoolStore } from "@/store";
 import { PaymentMethod } from "@/lib/interface";
-//import { fetchPaymentMethods } from "@/store/schoolservice"
+import { fetchPaymentMethods } from "@/store/schoolservice";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
 
 export default function PaymentMethodsPage() {
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [newMethodLabel, setNewMethodLabel] = useState("");
-  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(
-    null
-  );
+  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
   const [editMethodLabel, setEditMethodLabel] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const { methodPayment, setmethodPayment } = useSchoolStore();
+  const router = useRouter();
+
+  const itemsPerPage = 5;
+  const filteredData = methodPayment.filter(item =>
+    item.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Fetch payment methods
   useEffect(() => {
@@ -63,6 +85,14 @@ export default function PaymentMethodsPage() {
     ];
     setmethodPayment(data);
   }, []);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   // Add new payment method
   const addPaymentMethod = async () => {
@@ -88,7 +118,9 @@ export default function PaymentMethodsPage() {
       if (!response.ok) throw new Error("Erreur lors de l'ajout");
 
       const newMethod = await response.json();
-      setPaymentMethods([...paymentMethods, newMethod]);
+      // Refresh the list after adding
+      const updatedMethods = await fetchPaymentMethods();
+      setmethodPayment(updatedMethods);
       setNewMethodLabel("");
 
       toast({
@@ -122,14 +154,13 @@ export default function PaymentMethodsPage() {
 
       if (!response.ok) throw new Error("Erreur lors de la mise à jour");
 
-      const updatedMethod = await response.json();
-      setPaymentMethods(
-        paymentMethods.map((method) =>
-          method.id === updatedMethod.id ? updatedMethod : method
-        )
-      );
+      // Refresh the list after update
+      const updatedMethods = await fetchPaymentMethods();
+      setmethodPayment(updatedMethods);
       setEditingMethod(null);
       setEditMethodLabel("");
+      setIsModalOpen(false);
+      router.refresh();
 
       toast({
         title: "Succès",
@@ -156,14 +187,15 @@ export default function PaymentMethodsPage() {
 
       if (!response.ok) throw new Error("Erreur lors de la suppression");
 
-      setPaymentMethods(
-        paymentMethods.filter((method) => method.id !== Number(id))
-      );
+      // Refresh the list after delete
+      const updatedMethods = await fetchPaymentMethods();
+      setmethodPayment(updatedMethods);
 
       toast({
         title: "Succès",
         description: "Méthode supprimée avec succès",
       });
+      router.refresh();
     } catch (error) {
       toast({
         title: "Erreur",
@@ -179,171 +211,121 @@ export default function PaymentMethodsPage() {
   const openEditDialog = (method: PaymentMethod) => {
     setEditingMethod(method);
     setEditMethodLabel(method.label);
+    setIsModalOpen(true);
   };
 
+  const columns = [
+    { key: "label", label: "Méthode de paiement" },
+    { key: "actions", label: "Actions" },
+  ];
+
   return (
-    <Card className="p-3" >
-      <div className="container mx-auto py-10">
-        <motion.h1
-          className="text-3xl font-bold mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          Méthodes de Paiement
-        </motion.h1>
-
-        {/* Add new method form */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Ajouter une méthode de paiement</CardTitle>
-              <CardDescription>
-                Créez une nouvelle méthode de paiement en saisissant un nom.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid w-full items-center gap-4">
-                <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="name">Nom de la méthode</Label>
-                  <Input
-                    id="name"
-                    placeholder="Ex: Carte Bancaire, Virement, etc."
-                    value={newMethodLabel}
-                    onChange={(e) => setNewMethodLabel(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addPaymentMethod()}
-                  />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button
-                onClick={addPaymentMethod}
-                className="w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <PlusCircle className="mr-2 h-4 w-4" />
-                )}
-                Ajouter
-              </Button>
-            </CardFooter>
-          </Card>
-        </motion.div>
-
-        {/* Payment methods list */}
-        {isLoading ? (
-          <div className="flex justify-center py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
+        {/* Carte du formulaire d'ajout */}
+        <Card className="lg:col-span-1 p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <PlusCircle className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Ajouter une méthode</h2>
           </div>
-        ) : (
-          <AnimatePresence>
-            {methodPayment.length === 0 ? (
-              <motion.div
-                className="text-center py-10 text-muted-foreground"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                Aucune méthode de paiement n'a été ajoutée.
-              </motion.div>
-            ) : (
-              <motion.div
-                className="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-              >
-                <AnimatePresence>
-                  {methodPayment.map((method) => (
-                    <motion.div
-                      key={method.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Card>
-                        <CardHeader className="flex flex-row items-center justify-between gap-4">
-                          <div className="flex items-center gap-4">
-                            <CreditCard className="h-8 w-8 text-primary" />
-                            <div>
-                              <CardTitle>{method.label}</CardTitle>
-                              <CardDescription>
-                                Méthode de paiement
-                              </CardDescription>
-                            </div>
-                          </div>
-                          <div className="flex gap-2">
-                            {/* Edit Dialog */}
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => openEditDialog({ ...method })}
-                                  disabled={isSubmitting}
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Modifier la méthode</DialogTitle>
-                                  <DialogDescription>
-                                    Modifiez le nom de cette méthode de
-                                    paiement.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                  <div className="grid grid-cols-4 items-center gap-4">
-                                    <Label
-                                      htmlFor="edit-method"
-                                      className="text-right"
-                                    >
-                                      Nom
-                                    </Label>
-                                    <Input
-                                      id="edit-method"
-                                      value={editMethodLabel}
-                                      onChange={(e) =>
-                                        setEditMethodLabel(e.target.value)
-                                      }
-                                      className="col-span-3"
-                                    />
-                                  </div>
-                                </div>
-                                <DialogFooter>
-                                  <Button
-                                    onClick={updatePaymentMethod}
-                                    disabled={isSubmitting}
-                                  >
-                                    {isSubmitting ? (
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
-                                      "Enregistrer"
-                                    )}
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nom de la méthode *</Label>
+              <Input
+                id="name"
+                placeholder="Ex: Carte Bancaire, Virement, etc."
+                value={newMethodLabel}
+                onChange={(e) => setNewMethodLabel(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addPaymentMethod()}
+              />
+            </div>
+            <Button
+              onClick={addPaymentMethod}
+              className="w-full"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <PlusCircle className="mr-2 h-4 w-4" />
+              )}
+              Ajouter
+            </Button>
+          </div>
+        </Card>
 
-                            {/* Delete Alert */}
+        {/* Carte de la liste des méthodes */}
+        <Card className="lg:col-span-2 p-6 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">Méthodes de paiement</h2>
+            </div>
+            <div className="mb-4 flex items-center gap-3">
+              <Input
+                type="text"
+                placeholder="Rechercher une méthode..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="max-w-sm"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader className="bg-primary/5">
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableHead key={column.key} className="font-medium">
+                      {column.label}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredData.length > 0 ? (
+                  <AnimatePresence>
+                    {paginatedData.map((method) => (
+                      <motion.tr
+                        key={method.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="hover:bg-primary/5"
+                      >
+                        <TableCell className="font-medium">
+                          {method.label}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openEditDialog(method)}
+                              className="text-primary hover:bg-primary/10"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
                                   variant="ghost"
                                   size="icon"
                                   disabled={isSubmitting}
+                                  className="text-destructive hover:bg-destructive/10"
                                 >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                  <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -375,16 +357,123 @@ export default function PaymentMethodsPage() {
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>
-                        </CardHeader>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-      </div>
-    </Card>
+                        </TableCell>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      {searchTerm ? (
+                        "Aucune méthode ne correspond à votre recherche."
+                      ) : (
+                        "Aucune méthode de paiement enregistrée pour le moment."
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          {filteredData.length > itemsPerPage && (
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    {currentPage === 1 ? (
+                      <PaginationPrevious className="cursor-not-allowed opacity-50" />
+                    ) : (
+                      <PaginationPrevious onClick={handlePreviousPage} />
+                    )}
+                  </PaginationItem>
+
+                  {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                    const page = i + 1;
+                    return (
+                      <PaginationItem key={page}>
+                        <Button
+                          variant={currentPage === page ? "outline" : "ghost"}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </Button>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  {totalPages > 3 && currentPage < totalPages && (
+                    <PaginationItem>
+                      <Button variant="ghost" disabled>
+                        ...
+                      </Button>
+                    </PaginationItem>
+                  )}
+
+                  <PaginationItem>
+                    {currentPage === totalPages ? (
+                      <PaginationNext className="cursor-not-allowed opacity-50" />
+                    ) : (
+                      <PaginationNext onClick={handleNextPage} />
+                    )}
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
+        </Card>
+      </motion.div>
+
+      {/* Modale de modification */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Modifier la méthode
+            </DialogTitle>
+            <DialogDescription>
+              Mettez à jour les informations de la méthode de paiement
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-method">Nom de la méthode *</Label>
+              <Input
+                id="edit-method"
+                value={editMethodLabel}
+                onChange={(e) => setEditMethodLabel(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button
+                onClick={updatePaymentMethod}
+                disabled={isSubmitting}
+                className="min-w-[120px]"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  "Mettre à jour"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
