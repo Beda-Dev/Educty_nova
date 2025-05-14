@@ -412,13 +412,13 @@ const menuItems: MenuCategory = {
           title: "Emploi du temps classes",
           path: "vie_scolaire/emploi_du_temps_classe",
           icon: <User className="w-6 h-6" />,
-        },
-        {
-          id: "professeurs",
-          title: "Emploi du temps professeurs",
-          path: "vie_scolaire/emploi_du_temps_professeur",
-          icon: <Calendar className="w-6 h-6" />,
-        },
+         }
+        // {
+        //   id: "professeurs",
+        //   title: "Emploi du temps professeurs",
+        //   path: "vie_scolaire/emploi_du_temps_professeur",
+        //   icon: <Calendar className="w-6 h-6" />,
+        // },
       ],
     },
     {

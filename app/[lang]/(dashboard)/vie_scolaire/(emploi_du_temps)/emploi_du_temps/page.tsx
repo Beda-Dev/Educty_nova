@@ -37,15 +37,15 @@ export default function EmploiDuTempsPage() {
       icon: <User className="w-6 h-6" />,
       path: "vie_scolaire/emploi_du_temps_classe",
       color: itemColors[0]
-    },
-    {
-      id: "professeurs",
-      title: "Emploi du temps professeurs",
-      description: "Gestion des emplois du temps des enseignants",
-      icon: <Calendar className="w-6 h-6" />,
-      path: "vie_scolaire/emploi_du_temps_professeur",
-      color: itemColors[1]
     }
+    // {
+    //   id: "professeurs",
+    //   title: "Emploi du temps professeurs",
+    //   description: "Gestion des emplois du temps des enseignants",
+    //   icon: <Calendar className="w-6 h-6" />,
+    //   path: "vie_scolaire/emploi_du_temps_professeur",
+    //   color: itemColors[1]
+    // }
   ];
 
   const containerVariants = {
