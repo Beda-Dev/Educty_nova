@@ -421,7 +421,7 @@ export const fetchClasses = async () => {
 
   export const fetchPaymentMethods = async () => {
     try {
-      const response = await fetch(`https://educty.digifaz.com/api/`);
+      const response = await fetch(`https://educty.digifaz.com/api/paymentMethod`);
       return await response.json();
     } catch (error) {
       console.error("Erreur lors de la récupération des methode de paiement :", error);
@@ -440,6 +440,96 @@ export const fetchClasses = async () => {
       }
     }
   };
+
+  export const fetchValidationExpenses = async () => {
+    try {
+      const response = await fetch(`https://educty.digifaz.com/api/validationExpense`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erreur lors de la récupération des validation de depenses :", error);
+      const storedData = localStorage.getItem("school-store");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          console.log("validation de depensest récupérées depuis localStorage : ", parsedData.state.validationExpenses);
+          return parsedData.state.paymentStatus || [];
+        } catch (error) {
+          console.error("Erreur lors du parsing des données : ", error);
+        }
+      }
+      else {
+        return [];
+      }
+    }
+  };
+
+    export const fetchTutors = async () => {
+    try {
+      const response = await fetch(`https://educty.digifaz.com/api/tutor`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erreur lors de la récupération des parents :", error);
+      const storedData = localStorage.getItem("school-store");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          console.log("parents récupérées depuis localStorage : ", parsedData.state.tutors);
+          return parsedData.state.paymentStatus || [];
+        } catch (error) {
+          console.error("Erreur lors du parsing des données : ", error);
+        }
+      }
+      else {
+        return [];
+      }
+    }
+  };
+
+      export const fetchTransactions = async () => {
+    try {
+      const response = await fetch(`https://educty.digifaz.com/api/transaction`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erreur lors de la récupération des transactions :", error);
+      const storedData = localStorage.getItem("school-store");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          console.log("transaction récupérées depuis localStorage : ", parsedData.state.transactions);
+          return parsedData.state.paymentStatus || [];
+        } catch (error) {
+          console.error("Erreur lors du parsing des données : ", error);
+        }
+      }
+      else {
+        return [];
+      }
+    }
+  };
+
+   export const fetchCashRegisterSessions = async () => {
+    try {
+      const response = await fetch(`https://educty.digifaz.com/api/cashRegisterSession`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erreur lors de la récupération des sessions de caisse :", error);
+      const storedData = localStorage.getItem("school-store");
+      if (storedData) {
+        try {
+          const parsedData = JSON.parse(storedData);
+          console.log("sessions de caisse récupérées depuis localStorage : ", parsedData.state.cashRegisterSessions);
+          return parsedData.state.paymentStatus || [];
+        } catch (error) {
+          console.error("Erreur lors du parsing des données : ", error);
+        }
+      }
+      else {
+        return [];
+      }
+    }
+  };
+
+
 
 
 

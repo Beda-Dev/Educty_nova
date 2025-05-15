@@ -412,7 +412,7 @@ const menuItems: MenuCategory = {
           title: "Emploi du temps classes",
           path: "vie_scolaire/emploi_du_temps_classe",
           icon: <User className="w-6 h-6" />,
-         }
+        },
         // {
         //   id: "professeurs",
         //   title: "Emploi du temps professeurs",
@@ -483,10 +483,17 @@ export default function DynamicMenu() {
     "/depense",
   ];
 
+  const parametreRoute = ["/fees_type"];
+
   const elevesSpecialRoutes = ["/new_registration", "/re-registration"];
 
   const isCaisseRoute = caisseRoutes.some((route) => pathname.endsWith(route));
+
   const isElevesSpecialRoute = elevesSpecialRoutes.some((route) =>
+    pathname.endsWith(route)
+  );
+
+  const isParametreRoute = parametreRoute.some((route) =>
     pathname.endsWith(route)
   );
 
@@ -494,6 +501,8 @@ export default function DynamicMenu() {
     activeMenu = "caisse_comptabilite";
   } else if (isElevesSpecialRoute) {
     activeMenu = "eleves";
+  } else if (isParametreRoute) {
+    activeMenu = "parametres";
   } else if (currentPath.length >= 2) {
     const pathSegment = currentPath[1];
     if (Object.keys(menuItems).includes(pathSegment)) {
@@ -514,17 +523,17 @@ export default function DynamicMenu() {
     return false;
   };
 
-useEffect(() => {
-  if (!isHovering) {
-    const timer = setTimeout(() => {
-      // Vérifier à nouveau pour éviter les fermetures intempestives
-      if (!isHovering) {
-        setOpenPopoverId(null);
-      }
-    }, 300); // Réduit à 300ms pour une réponse plus rapide
-    return () => clearTimeout(timer);
-  }
-}, [isHovering, openPopoverId]);
+  useEffect(() => {
+    if (!isHovering) {
+      const timer = setTimeout(() => {
+        // Vérifier à nouveau pour éviter les fermetures intempestives
+        if (!isHovering) {
+          setOpenPopoverId(null);
+        }
+      }, 300); // Réduit à 300ms pour une réponse plus rapide
+      return () => clearTimeout(timer);
+    }
+  }, [isHovering, openPopoverId]);
 
   // Composant récursif pour les items de menu
   const MenuItemComponent = ({

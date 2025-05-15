@@ -18,7 +18,7 @@ import DashboardDropdown from "@/components/dashboard-dropdown";
 import DatePickerWithRange from "@/components/date-picker-with-range";
 import { useSchoolStore } from "@/store";
 import GroupedStackBar from "./components/tauxRecouvrement";
-import { calculerRecouvrementParClasse } from "./fonction";
+import { calculerRecouvrementParClasse , downloadFile , downloadFile1 , downloadFile3} from "./fonction";
 import { AcademicYear, Registration } from "@/lib/interface";
 import { useEffect, useState } from "react";
 import { BarChart2, Info } from "lucide-react";
@@ -81,16 +81,32 @@ const DashbordView = ({ trans }: DashbordViewProps) => {
 
   // useEffect(() => {
   //   // Récupération des données depuis localStorage
-  //   const storedData = localStorage.getItem("school-store");
-  //   if (storedData) {
-  //     try {
-  //       const parsedData = JSON.parse(storedData);
-  //       console.log("Données récupérées depuis localStorage : ", parsedData.state);
-  //       setData(parsedData);
-  //     } catch (error) {
-  //       console.error("Erreur lors du parsing des données : ", error);
-  //     }
+  //   // const storedData = localStorage.getItem("school-store");
+  //   // if (storedData) {
+  //   //   try {
+  //   //     const parsedData = JSON.parse(storedData);
+  //   //     console.log("Données récupérées depuis localStorage : ", parsedData.state);
+  //   //     setData(parsedData);
+  //   //   } catch (error) {
+  //   //     console.error("Erreur lors du parsing des données : ", error);
+  //   //   }
+  //   // }
+
+  //   const fetchAndDownload = async () => {
+  //     await downloadFile3("http://educty.digifaz.com/storage/document/1744904690_Logo-3HD.png")
+  //     // await downloadFile1("http://educty.digifaz.com/storage/document/1744904690_Logo-3HD.png" , "test.svg");
+      
+  //     // await downloadFile("http://educty.digifaz.com/storage/document/1744904690_Logo-3HD.png")
+
+      
+
   //   }
+
+  //   fetchAndDownload();
+
+
+
+    
   // }, []);
 
   return (

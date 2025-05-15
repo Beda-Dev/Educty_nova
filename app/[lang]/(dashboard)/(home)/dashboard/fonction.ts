@@ -6,6 +6,7 @@ import {
   Installment,
   Payment,
 } from "@/lib/interface";
+import { saveAs } from "file-saver";
 
 export interface DonneesClasseRecouvrement {
   classeId: number;
@@ -98,4 +99,60 @@ export function calculerRecouvrementParClasse(
     return [];
   }
 }
+
+// utils/downloadFile.ts
+export async function downloadFile(url: string, filename?: string) {
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        // Ajoute ici les headers nécessaires (ex : Auth)
+        // Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Échec du téléchargement");
+    }
+
+    const blob = await response.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = filename ?? "download";
+    document.body.appendChild(link);
+    link.click();
+
+    // Nettoyage
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("Erreur de téléchargement :", error);
+  }
+}
+
+export async function downloadFile1(url: string, filename: string) {
+
+  const response = await fetch(url);
+  const blob = await response.blob();
+  saveAs(blob, filename);
+}
+
+export const downloadFile3: (fileUrl: string) => Promise<void> = async (fileUrl: string) => {
+  const response = await fetch(`/api/downloadFile?url=${encodeURIComponent(fileUrl)}`);
+  const blob = await response.blob();
+  
+  // Créer un lien de téléchargement
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileUrl.split('/').pop() || 'download';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  window.URL.revokeObjectURL(url);
+};
+
+
 

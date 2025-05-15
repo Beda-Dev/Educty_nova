@@ -21,7 +21,11 @@ import {
   ExpenseType,
   Permission,
   InterfaceOTP,
-  PaymentMethod
+  PaymentMethod,
+  ValidationExpense,
+  Tutor,
+  Transaction,
+  CashRegisterSession
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -193,6 +197,31 @@ interface SchoolStore {
 
   methodPayment: PaymentMethod[] ;
   setmethodPayment: (data: PaymentMethod[]) => void;
+
+  validationExpenses: ValidationExpense[];
+  setValidationExpenses: (data: ValidationExpense[]) => void;
+
+  tutors: Tutor[];
+  setTutors: (data: Tutor[]) => void;
+
+  transactions: Transaction[];
+  setTransactions: (data: Transaction[]) => void;
+
+  cashRegisterSessions: CashRegisterSession[];
+  setCashRegisterSessions: (data: CashRegisterSession[]) => void;
+
+  cashRegisterSessionCurrent: CashRegisterSession | null;
+  setCashRegisterSessionCurrent: (data: CashRegisterSession | null) => void;
+
+  newRegistration: Registration | null;
+  setNewRegistrations: (data: Registration | null) => void;
+
+  cashRegisterCurrent: CashRegister | null;
+  setCashRegisterCurrent: (data: CashRegister | null) => void;
+
+  Newstudent: Student | null;
+  setNewStudent: (data: Student | null) => void;
+
 }
 
 export const useSchoolStore = create<SchoolStore>()(
@@ -269,6 +298,31 @@ export const useSchoolStore = create<SchoolStore>()(
 
       methodPayment: [],
       setmethodPayment: (data: PaymentMethod[]) => set({methodPayment: data}),
+
+      validationExpenses: [],
+      setValidationExpenses: (data: ValidationExpense[]) => set({validationExpenses: data}),
+
+      tutors: [],
+      setTutors: (data: Tutor[]) => set({tutors: data}),
+
+      transactions: [],
+      setTransactions: (data: Transaction[]) => set({transactions: data}),
+
+      cashRegisterSessions: [],
+      setCashRegisterSessions: (data: CashRegisterSession[]) => set({cashRegisterSessions: data}),
+
+      cashRegisterSessionCurrent: null,
+      setCashRegisterSessionCurrent: (data : CashRegisterSession | null ) => set({cashRegisterSessionCurrent: data}),
+
+      newRegistration: null,
+      setNewRegistrations: (data: Registration | null) => set({newRegistration: data}),
+
+      cashRegisterCurrent: null,
+      setCashRegisterCurrent: (data: CashRegister | null) => set({cashRegisterCurrent: data}),
+
+      Newstudent: null,
+      setNewStudent: (data: Student | null) => set({Newstudent: data}),
+
 
     }),
     {

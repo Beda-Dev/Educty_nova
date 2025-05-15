@@ -328,6 +328,45 @@ export interface CashRegisterSession {
   cash_register: CashRegister;
 }
 
+export interface Tutor {
+  id: number;
+  name: string;
+  first_name: string;
+  phone_number: string;
+  sexe: string;
+  type: string;
+  created_at: string;
+  updated_at: string;
+  students?: StudentOnly[];
+}
+
+export interface ValidationExpense {
+  id: number;
+  user_id: number;
+  expense_id: number;
+  validation_date: string;
+  comment: string;
+  validation_order: number;
+  validation_status: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  expense?: Expense;
+}
+
+export interface Transaction {
+  id: number;
+  user_id: number;
+  cash_register_session_id: number;
+  transaction_date: string;
+  total_amount: string;
+  transaction_type: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+  cash_register_session?: CashRegisterSession;
+}
+
 
 
 
