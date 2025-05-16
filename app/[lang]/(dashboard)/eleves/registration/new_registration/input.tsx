@@ -76,7 +76,7 @@ export default function FileManager({
     
     try {
       setLoading(true);
-      const response = await fetch(`/api/document/${id}`, { method: "DELETE" });
+      const response = await fetch(`/api/document?id=${id}`, { method: "DELETE" });
       
       if (!response.ok) {
         const errorData = await response.json();

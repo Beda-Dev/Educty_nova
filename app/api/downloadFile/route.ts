@@ -1,34 +1,39 @@
-// pages/api/download.ts
-import { NextApiRequest, NextApiResponse } from 'next';
-import fetch from 'node-fetch';
+// app/api/downloadFile/route.ts
+import { NextRequest } from 'next/server';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { url } = req.query;
-  
-  if (!url || typeof url !== 'string') {
-    return res.status(400).json({ error: 'URL is required' });
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const url = searchParams.get('url');
+
+  if (!url) {
+    return new Response(JSON.stringify({ error: 'URL is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const response = await fetch(url);
-    
-    // Vérifier que la réponse est OK
+
     if (!response.ok) {
       throw new Error(`Failed to fetch: ${response.statusText}`);
     }
-    
-    // Obtenir le buffer des données
-    const buffer = await response.buffer();
-    
-    // Définir les en-têtes appropriés
-    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/octet-stream');
-    res.setHeader('Content-Length', buffer.length);
-    res.setHeader('Content-Disposition', `attachment; filename="${url.split('/').pop()}"`);
-    
-    // Envoyer les données binaires directement
-    res.send(buffer);
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+        'Content-Length': buffer.length.toString(),
+        'Content-Disposition': `attachment; filename="${url.split('/').pop()}"`,
+      },
+    });
   } catch (error) {
     console.error('Download error:', error);
-    res.status(500).json({ error: 'Failed to download file' });
+    return new Response(JSON.stringify({ error: 'Failed to download file' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
