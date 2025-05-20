@@ -203,7 +203,7 @@ const NotificationMessage = () => {
                       {notification.user?.name} - {notification.expense?.label}
                     </div>
                     <div className="text-xs text-default-600 mb-1">
-                      Montant: {notification.expense?.amount} €
+                      Montant: {notification.expense?.amount} Fcfa
                     </div>
                     <div className="text-xs text-default-900">
                       {notification.comment}
@@ -236,7 +236,7 @@ const NotificationMessage = () => {
         <DropdownMenuSeparator />
         <div className="m-4 mt-5">
           <Button asChild className="w-full">
-            <Link href="/expenses/validation">Voir toutes les validations</Link>
+            <Link href="/decaissement/validation">Voir toutes les validations</Link>
           </Button>
         </div>
       </DropdownMenuContent>
