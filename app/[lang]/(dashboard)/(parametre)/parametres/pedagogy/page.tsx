@@ -40,7 +40,7 @@ export default function Page() {
     {
       id: "academic-year",
       title: "Année Académique",
-      description: "Configurer les années scolaires et périodes",
+      description: "Gestion des années académiques et périodes",
       icon: <Calendar className="w-6 h-6" />,
       path: "/academic_year",
       color: itemColors[0]
@@ -48,7 +48,7 @@ export default function Page() {
     {
       id: "levels",
       title: "Niveaux",
-      description: "Gérer les niveaux d'études",
+      description: "Gestion des niveaux d'études",
       icon: <Layers className="w-6 h-6" />,
       path: "/level",
       color: itemColors[1]
@@ -56,7 +56,7 @@ export default function Page() {
     {
       id: "classes",
       title: "Classes",
-      description: "Gérer les classes et sections",
+      description: "Gestion des classes et sections",
       icon: <School className="w-6 h-6" />,
       path: "/classe",
       color: itemColors[2]
@@ -108,10 +108,10 @@ export default function Page() {
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                Gestion Scolaire
+                Pédagogie
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configuration des paramètres liés à l'organisation scolaire
+                Gestion des paramètres liés à pédagogique dans votre etablissement
               </p>
             </div>
           </div>

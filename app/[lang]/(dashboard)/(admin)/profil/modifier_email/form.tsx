@@ -210,6 +210,8 @@ const EmailUpdateForm = () => {
 
           <Button
             type="submit"
+            variant="outline"
+            color="skyblue"
             className="w-full mt-4"
             disabled={isPending || !isValid || !isDirty || Object.keys(errors).length > 0}
           >

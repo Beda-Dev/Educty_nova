@@ -269,6 +269,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Button 
                   variant="outline" 
+                  color="tyrian"
                   className="gap-2"
                   onClick={() => router.push("/profil/modifier_email")}
                 >
@@ -281,6 +282,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
                 <Button 
                   variant="outline" 
                   className="gap-2"
+                  color="tyrian"
                   onClick={() => setPasswordModalOpen(true)}
                 >
                   <Key className="h-4 w-4" />

@@ -14,6 +14,11 @@ const progressVariants = cva(
         warning: "[&>div]:bg-warning",
         info: "[&>div]:bg-info",
         success: "[&>div]:bg-success",
+        tyrian: "[&>div]:bg-tyrian",
+        bittersweet: "[&>div]:bg-bittersweet",
+        whitesmoke: "[&>div]:bg-whitesmoke",
+        skyblue: "[&>div]:bg-skyblue",
+        indigodye: "[&>div]:bg-indigodye",
       },
       size: {
         xs: "h-1",
@@ -40,6 +45,14 @@ const circleVariants = cva("[&_[path-color]]:text-default-200 ", {
       warning: "[&_[bar-color]]:text-warning [&_[text-color]]:fill-warning",
       info: "[&_[bar-color]]:text-info [&_[text-color]]:fill-info",
       success: "[&_[bar-color]]:text-success [&_[text-color]]:fill-success",
+      tyrian: "[&_[bar-color]]:text-tyrian [&_[text-color]]:fill-tyrian",
+      bittersweet:
+        "[&_[bar-color]]:text-bittersweet [&_[text-color]]:fill-bittersweet",
+      whitesmoke:
+        "[&_[bar-color]]:text-whitesmoke [&_[text-color]]:fill-whitesmoke",
+      skyblue: "[&_[bar-color]]:text-skyblue [&_[text-color]]:fill-skyblue",
+      indigodye:
+        "[&_[bar-color]]:text-indigodye [&_[text-color]]:fill-indigodye",
     },
     size: {
       xs: "h-12 w-12",
@@ -54,20 +67,38 @@ const circleVariants = cva("[&_[path-color]]:text-default-200 ", {
     size: "md",
   },
 });
-interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl',
-  value?: number,
-  showValue?: boolean,
-  color?: 'primary' | 'dark' | 'destructive' | 'warning' | 'info' | 'success',
-  isStripe?: boolean,
-  isAnimate?: boolean
-
+interface ProgressProps
+  extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  value?: number;
+  showValue?: boolean;
+  color?:
+    | "primary"
+    | "dark"
+    | "destructive"
+    | "warning"
+    | "info"
+    | "success"
+    | "tyrian"
+    | "bittersweet"
+    | "whitesmoke"
+    | "skyblue"
+    | "indigodye";
+  isStripe?: boolean;
+  isAnimate?: boolean;
 }
 
-const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root>, ProgressProps>(({ className, value, color, size, showValue, isStripe, isAnimate, ...props }, ref) => {
-  const stripeStyles = isStripe
-    ? {
-      backgroundImage: `linear-gradient(
+const Progress = React.forwardRef<
+  React.ElementRef<typeof ProgressPrimitive.Root>,
+  ProgressProps
+>(
+  (
+    { className, value, color, size, showValue, isStripe, isAnimate, ...props },
+    ref
+  ) => {
+    const stripeStyles = isStripe
+      ? {
+          backgroundImage: `linear-gradient(
           45deg,
           hsla(0, 0%, 100%, 0.15) 25%,
           transparent 0,
@@ -77,58 +108,60 @@ const Progress = React.forwardRef<React.ElementRef<typeof ProgressPrimitive.Root
           transparent 0,
           transparent
         )`,
-      backgroundSize: "0.857rem 0.857rem",
-    }
-    : {};
-  return (
-    <ProgressPrimitive.Root
-      ref={ref}
-      className={cn(
-        progressVariants({ color, size }),
-
-        className
-      )}
-      {...props}
-    >
-      <ProgressPrimitive.Indicator
+          backgroundSize: "0.857rem 0.857rem",
+        }
+      : {};
+    return (
+      <ProgressPrimitive.Root
+        ref={ref}
         className={cn(
-          "flex-1 transition-all h-full w-full flex items-center justify-center   ",
-          className,
-          {
-            "animate-stripes": isAnimate,
-          }
+          progressVariants({ color, size }),
+
+          className
         )}
-        style={{
-          transform: `translateX(-${100 - (value || 0)}%)`,
-          ...stripeStyles,
-        }}
+        {...props}
       >
-        {showValue && (
-          <span className=" text-right pr-1 text-[10px]  text-primary-foreground block w-full">
-            {value}%
-          </span>
-        )}
-      </ProgressPrimitive.Indicator>
-    </ProgressPrimitive.Root>
-  );
-}
+        <ProgressPrimitive.Indicator
+          className={cn(
+            "flex-1 transition-all h-full w-full flex items-center justify-center   ",
+            className,
+            {
+              "animate-stripes": isAnimate,
+            }
+          )}
+          style={{
+            transform: `translateX(-${100 - (value || 0)}%)`,
+            ...stripeStyles,
+          }}
+        >
+          {showValue && (
+            <span className=" text-right pr-1 text-[10px]  text-primary-foreground block w-full">
+              {value}%
+            </span>
+          )}
+        </ProgressPrimitive.Indicator>
+      </ProgressPrimitive.Root>
+    );
+  }
 );
 Progress.displayName = ProgressPrimitive.Root.displayName;
 
 interface CircularProgressProps {
-  className?: string,
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl',
-  value?: number,
-  showValue?: boolean,
-  color?: 'primary' | 'dark' | 'destructive' | 'warning' | 'info' | 'success',
-  isStripe?: boolean,
-  isAnimate?: boolean
-  loading?: boolean
-  customContent?: React.ReactNode
+  className?: string;
+  size?: "xs" | "sm" | "md" | "lg" | "xl";
+  value?: number;
+  showValue?: boolean;
+  color?: "primary" | "dark" | "destructive" | "warning" | "info" | "success";
+  isStripe?: boolean;
+  isAnimate?: boolean;
+  loading?: boolean;
+  customContent?: React.ReactNode;
 }
 
-
-const CircularProgress = React.forwardRef<React.ForwardedRef<HTMLDivElement>, CircularProgressProps>(
+const CircularProgress = React.forwardRef<
+  React.ForwardedRef<HTMLDivElement>,
+  CircularProgressProps
+>(
   (
     {
       className,
@@ -147,11 +180,9 @@ const CircularProgress = React.forwardRef<React.ForwardedRef<HTMLDivElement>, Ci
     const circumference = 2 * Math.PI * radius;
     const progress = circumference - (circumference * (value ?? 0)) / 100;
 
-
     return (
       <div className="relative">
         <svg
-
           className={cn(
             circleVariants({ color, size }),
 

@@ -19,6 +19,14 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-muted-foreground dark:text-default-950 hover:bg-secondary/80",
         dark: "bg-accent-foreground text-accent hover:bg-accent-foreground/80",
+        tyrian: "bg-tyrian text-tyrian-foreground hover:bg-tyrian/80",
+        bittersweet:
+          "bg-bittersweet text-bittersweet-foreground hover:bg-bittersweet/80",
+        whitesmoke:
+          "bg-whitesmoke text-whitesmoke-foreground hover:bg-whitesmoke/80",
+        skyblue: "bg-skyblue text-skyblue-foreground hover:bg-skyblue/80",
+        indigodye:
+          "bg-indigodye text-indigodye-foreground hover:bg-indigodye/80",
       },
       variant: {
         outline:
@@ -145,6 +153,95 @@ const buttonVariants = cva(
         color: "destructive",
         className: " text-destructive  hover:text-destructive-foreground ",
       },
+      // Tyrian
+      {
+        variant: "outline",
+        color: "tyrian",
+        className:
+          "text-tyrian hover:text-tyrian-foreground hover:border-tyrian hover:bg-tyrian/10",
+      },
+      {
+        variant: "soft",
+        color: "tyrian",
+        className: "bg-tyrian/10 text-tyrian hover:bg-tyrian/20",
+      },
+      {
+        variant: "ghost",
+        color: "tyrian",
+        className: "text-tyrian hover:bg-tyrian/10",
+      },
+
+      // Bittersweet
+      {
+        variant: "outline",
+        color: "bittersweet",
+        className:
+          "text-bittersweet hover:text-bittersweet-foreground hover:border-bittersweet hover:bg-bittersweet/10",
+      },
+      {
+        variant: "soft",
+        color: "bittersweet",
+        className: "bg-bittersweet/10 text-bittersweet hover:bg-bittersweet/20",
+      },
+      {
+        variant: "ghost",
+        color: "bittersweet",
+        className: "text-bittersweet hover:bg-bittersweet/10",
+      },
+
+      // White Smoke
+      {
+        variant: "outline",
+        color: "whitesmoke",
+        className:
+          "text-whitesmoke hover:text-whitesmoke-foreground hover:border-whitesmoke hover:bg-whitesmoke/50",
+      },
+      {
+        variant: "soft",
+        color: "whitesmoke",
+        className: "bg-whitesmoke/50 text-whitesmoke hover:bg-whitesmoke/70",
+      },
+      {
+        variant: "ghost",
+        color: "whitesmoke",
+        className: "text-whitesmoke hover:bg-whitesmoke/20",
+      },
+
+      // Vivid Sky Blue
+      {
+        variant: "outline",
+        color: "skyblue",
+        className:
+          "text-skyblue hover:text-skyblue-foreground hover:border-skyblue hover:bg-skyblue/10",
+      },
+      {
+        variant: "soft",
+        color: "skyblue",
+        className: "bg-skyblue/10 text-skyblue hover:bg-skyblue/20",
+      },
+      {
+        variant: "ghost",
+        color: "skyblue",
+        className: "text-skyblue hover:bg-skyblue/10",
+      },
+
+      // Indigo Dye
+      {
+        variant: "outline",
+        color: "indigodye",
+        className:
+          "text-indigodye hover:text-indigodye-foreground hover:border-indigodye hover:bg-indigodye/10",
+      },
+      {
+        variant: "soft",
+        color: "indigodye",
+        className: "bg-indigodye/10 text-indigodye hover:bg-indigodye/20",
+      },
+      {
+        variant: "ghost",
+        color: "indigodye",
+        className: "text-indigodye hover:bg-indigodye/10",
+      },
     ],
 
     defaultVariants: {
@@ -155,10 +252,22 @@ const buttonVariants = cva(
 );
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonVariants> {
-  asChild?: boolean,
-  color?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'destructive' | 'default' | 'dark'
-
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+  color?:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "info"
+    | "warning"
+    | "destructive"
+    | "default"
+    | "dark"
+    | "tyrian"
+    | "bittersweet"
+    | "whitesmoke"
+    | "skyblue"
+    | "indigodye";
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

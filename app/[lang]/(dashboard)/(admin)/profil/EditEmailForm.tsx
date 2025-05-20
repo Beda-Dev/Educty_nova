@@ -52,10 +52,10 @@ export function EditEmailForm({ user, onCloseAction, onSuccess }: EditEmailFormP
       {error && <p className="text-sm text-red-500">{error}</p>}
 
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCloseAction}>
+        <Button type="button" color="bittersweet" variant="outline" onClick={onCloseAction}>
           Annuler
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit"  variant="outline" color="skyblue"  disabled={isLoading}>
           {isLoading ? "En cours..." : "Mettre à jour"}
         </Button>
       </div>

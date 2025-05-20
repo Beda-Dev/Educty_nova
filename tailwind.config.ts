@@ -102,6 +102,26 @@ const config  = {
           DEFAULT: "hsl(var(--card) / <alpha-value>)",
           foreground: "hsl(var(--card-foreground) / <alpha-value>)",
         },
+            tyrian: {
+      DEFAULT: "#4A073B",
+      foreground: "#ffffff", // à ajuster selon ton design
+    },
+    bittersweet: {
+      DEFAULT: "#FF6663",
+      foreground: "#ffffff", // à ajuster
+    },
+    whitesmoke: {
+      DEFAULT: "#F6F4F5",
+      foreground: "#000000", // à ajuster
+    },
+    skyblue: {
+      DEFAULT: "#5AD2F4",
+      foreground: "#000000", // à ajuster
+    },
+    indigodye: {
+      DEFAULT: "#344966",
+      foreground: "#ffffff", // à ajuster
+    },
       },
       boxShadow: {
         sm: "0px 1px 2px 0px rgba(15, 22, 36, 0.06), 0px 1px 3px 0px rgba(15, 22, 36, 0.10)",

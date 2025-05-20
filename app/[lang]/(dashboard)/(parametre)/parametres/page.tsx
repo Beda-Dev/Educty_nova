@@ -58,7 +58,7 @@ export default function Page() {
     {
       id: "scolarite",
       title: "Scolarité",
-      description: "Gestion des inscriptions, classes et frais scolaires",
+      description: "Gestion scolaires",
       icon: <School className="w-6 h-6" />,
       path: "/parametres/scolarite",
       color: itemColors[2]
@@ -66,7 +66,7 @@ export default function Page() {
     {
       id: "administration",
       title: "Administration",
-      description: "Gestion des utilisateurs, rôles et paramètres avancés",
+      description: "Gestion administrative",
       icon: <Users className="w-6 h-6" />,
       path: "/parametres/administration",
       color: itemColors[3]
@@ -74,7 +74,7 @@ export default function Page() {
     {
       id: "caisse",
       title: "Caisse",
-      description: "Gestion des parametre de caisse, encaissements et décaissements",
+      description: "Gestion des paramètres de caisse, encaissements et décaissements",
       icon: <CreditCard className="w-6 h-6" />,
       path: "/parametres/caisse",
       color: itemColors[4]
@@ -129,7 +129,7 @@ export default function Page() {
                 Paramètres
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configuration des paramètres du système selon vos besoins
+                Gestion des paramètres de l'application selon vos besoins
               </p>
             </div>
           </div>

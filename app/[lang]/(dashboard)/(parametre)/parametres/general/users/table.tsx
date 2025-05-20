@@ -43,9 +43,20 @@ import makeAnimated from "react-select/animated";
 import { fetchUsers } from "@/store/schoolservice";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { verificationPermission } from "@/lib/fonction";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
   const { userOnline, setUsers } = useSchoolStore();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
 
   const permissionRequisCreer = ["creer utilisateur"];
   const permissionRequisSupprimer = ["supprimer utilisateur"];
@@ -83,14 +94,58 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
   //     </Card>
   //   );
   // }
+  // fonction pour les filtres
+  const filteredUsers = users.filter((u) => {
+    const matchSearch =
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchRole = selectedRole
+      ? u.roles.some((r) => r.name === selectedRole)
+      : true;
+    return matchSearch && matchRole;
+  });
+
+  const paginatedUsers = filteredUsers.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
 
   return (
     <Card title="Utilisateurs">
-      {hasAdminAccessCreer ? (
-        <div className="flex justify-end mb-4">
-          <AddUserDialog roles={roles} />
-        </div>
-      ) : null}
+<div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+  {/* Filtres à gauche */}
+  <div className="flex items-center gap-4 flex-wrap">
+    <Input
+      placeholder="Rechercher un nom ou email..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-64"
+    />
+    <Select
+      options={[
+        { value: null, label: "Tous les rôles" },
+        ...roles.map((r) => ({ value: r.name, label: r.name })),
+      ]}
+      onChange={(option) => setSelectedRole(option?.value || null)}
+      placeholder="Filtrer par rôle"
+      isClearable
+      className="min-w-[200px]"
+    />
+    <Badge variant="outline">
+      Total utilisateurs : {users.length}
+    </Badge>
+  </div>
+
+  {/* Bouton à droite */}
+  {hasAdminAccessCreer && (
+    <div>
+      <AddUserDialog roles={roles} />
+    </div>
+  )}
+</div>
+
+
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -101,7 +156,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((item) => {
+          {paginatedUsers.map((item) => {
             return (
               <TableRow key={item.email}>
                 <TableCell className="font-medium text-card-foreground/80">
@@ -150,6 +205,38 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
           })}
         </TableBody>
       </Table>
+
+      <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <span className="text-sm px-2">
+              Page {page} sur {Math.ceil(filteredUsers.length / itemsPerPage)}
+            </span>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext
+              onClick={() =>
+                setPage((prev) =>
+                  prev < Math.ceil(filteredUsers.length / itemsPerPage)
+                    ? prev + 1
+                    : prev
+                )
+              }
+              className={
+                page >= Math.ceil(filteredUsers.length / itemsPerPage)
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </Card>
   );
 };
@@ -246,7 +333,11 @@ const EditingDialog = ({ user, roles }: { user: User; roles: Role[] }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="icon" variant="outline" className="h-7 w-7">
+        <Button
+          size="icon"
+          color="tyrian"
+          className="h-7 w-7"
+        >
           <Icon icon="heroicons:pencil" className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -323,10 +414,9 @@ const DeleteUserButton = ({
   const deleteUser = async () => {
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        `/api/user?id=${userId}`,
-        { method: "DELETE" }
-      );
+      const response = await fetch(`/api/user?id=${userId}`, {
+        method: "DELETE",
+      });
       if (!response.ok) throw new Error("Échec de la suppression");
 
       setUsers(users.filter((use: User) => use.id !== userId));
@@ -341,7 +431,11 @@ const DeleteUserButton = ({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button size="icon" variant="outline" className="h-7 w-7">
+        <Button
+          size="icon"
+          color="bittersweet"
+          className="h-7 w-7"
+        >
           <Icon icon="heroicons:trash" className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
@@ -452,7 +546,7 @@ const AddUserDialog = ({ roles }: { roles: Role[] }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Ajouter un utilisateur</Button>
+        <Button  color="indigodye" >Ajouter un utilisateur</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -496,9 +590,18 @@ const AddUserDialog = ({ roles }: { roles: Role[] }) => {
                 closeMenuOnSelect={false}
               />
             </div>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Création..." : "Ajouter"}
-            </Button>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <DialogClose asChild>
+                <Button type="reset" color="bittersweet" disabled={isLoading}>
+                  Annuler
+                </Button>
+              </DialogClose>
+
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Création..." : "Ajouter"}
+              </Button>
+            </div>
           </form>
         </DialogHeader>
       </DialogContent>

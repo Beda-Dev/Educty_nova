@@ -35,7 +35,7 @@ import {
   List,
   Tags,
   CalendarCheck,
-  CheckCircle
+  CheckCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { forwardRef } from "react";
@@ -148,8 +148,7 @@ const menuItems: MenuCategory = {
       children: [
         {
           id: "fees",
-          title: "Frais",
-          description: "Frais et paiements",
+          title: "Frais scolaires",
           icon: <DollarSign className="w-4 h-4" />,
           path: "parametres/scolarite/frais-scolaires",
           children: [
@@ -174,7 +173,7 @@ const menuItems: MenuCategory = {
           title: "Documents",
           description: "Modèles de documents",
           icon: <FileText className="w-4 h-4" />,
-          path: "type_document",
+          path: "parametres/scolarite/type_document",
         },
       ],
     },
@@ -320,20 +319,20 @@ const menuItems: MenuCategory = {
           path: "depense",
           icon: <DollarSign className="w-4 h-4" />,
         },
-            {
-              id: "validation-depense",
-              title: "Validation dépenses",
-              icon: <CheckCircle className="w-6 h-6" />,
-              path: "/decaissement/validation",
-            }
+        {
+          id: "validation-depense",
+          title: "Validation dépenses",
+          icon: <CheckCircle className="w-6 h-6" />,
+          path: "/decaissement/validation",
+        },
       ],
     },
-        {
-          id: "sessions",
-          title: "Sessions de caisse",
-          icon: <Clock className="w-6 h-6" />,
-          path: "/caisse_comptabilite/session_caisse"
-        }
+    {
+      id: "sessions",
+      title: "Sessions de caisse",
+      icon: <Clock className="w-6 h-6" />,
+      path: "/caisse_comptabilite/session_caisse",
+    },
   ],
   pedagogie: [
     {
@@ -510,7 +509,7 @@ export default function DynamicMenu() {
     "/close-session/5",
     "/close-session/6",
     "/close-session/7",
-    "/validation"
+    "/validation",
   ];
 
   const parametreRoute = ["/fees_type"];

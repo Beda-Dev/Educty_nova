@@ -148,6 +148,7 @@ export function EditPasswordForm({ user, onCloseAction, onSuccess }: EditPasswor
         <Button 
           type="button" 
           variant="outline" 
+          color="bittersweet"
           onClick={onCloseAction}
           disabled={isLoading}
         >
@@ -155,6 +156,8 @@ export function EditPasswordForm({ user, onCloseAction, onSuccess }: EditPasswor
         </Button>
         <Button 
           type="submit" 
+          variant="outline"
+          color="skyblue"
           disabled={isLoading}
           className="min-w-32 bg-primary hover:bg-primary/90"
         >

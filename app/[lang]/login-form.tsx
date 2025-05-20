@@ -17,6 +17,8 @@ import { useSchoolStore } from "@/store";
 import {User} from '@/lib/interface'
 import { useRouter } from "next/navigation";
 import {mergeUserPermissions} from "@/lib/fonction";
+import LogoComponent from "./logo";
+
 const schema = z.object({
   email: z.string().email({ message: "Votre adresse e-mail n’est pas valide." }),
   password: z.string().min(4),
@@ -110,8 +112,9 @@ const LogInForm = () => {
   
   return (
     <div className="w-full ">
-      <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:h-14 2xl:w-14 text-primary" />
+      <Link href="/dashboard" className="inline-block flex items-center justify-center mb-6">
+        {/* <SiteLogo className="h-10 w-10 2xl:h-14 2xl:w-14 text-primary" /> */}
+        <LogoComponent  />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
       Bonjour 👋

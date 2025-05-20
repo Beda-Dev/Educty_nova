@@ -64,7 +64,7 @@ export default function Page() {
     {
       id: "fees",
       title: "Frais Scolaires",
-      description: "Configurer les frais et paiements",
+      description: "Gestion des frais et paiements",
       icon: <DollarSign className="w-6 h-6" />,
       path: "parametres/scolarite/frais-scolaires",
       color: itemColors[4]
@@ -72,7 +72,7 @@ export default function Page() {
     {
       id: "documents",
       title: "Documents",
-      description: "Gérer les modèles de documents",
+      description: "Gestion des documents",
       icon: <FileText className="w-6 h-6" />,
       path: "parametres/scolarite/type_document",
       color: itemColors[5]
@@ -124,10 +124,10 @@ export default function Page() {
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-                Paramètre scolaire
+                Scolarité
               </h1>
               <p className="text-sm text-muted-foreground">
-                Configuration des paramètres scolaire selon vos besoins
+                Gestion les paramètres liés a la  scolarité
               </p>
             </div>
           </div>

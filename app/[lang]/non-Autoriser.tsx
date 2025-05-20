@@ -19,7 +19,7 @@ const ErrorPage = () => {
           <div className="mt-3 text-default-600 text-sm md:text-base">
           Il vous manque les droits requis pour pouvoir accéder à<br /> cette page
           </div>
-          <Button asChild className="mt-9  md:min-w-[300px]" size="lg">
+          <Button asChild className="mt-9  md:min-w-[300px]" color="tyrian" size="lg">
             <Link href="/dashboard">Aller à la page d’accueil</Link>
           </Button>
         </div>
