@@ -41,7 +41,7 @@ export async function updateStudentCountByClass(
     );
 
     if (validRegistrations.length === 0) {
-      console.warn(`Aucune inscription valide trouvée pour l'année ${academicYear.name}`);
+      console.warn(`Aucune inscription valide trouvée pour l'année ${academicYear.label}`);
       return;
     }
 
