@@ -10,8 +10,7 @@ const SidebarLogo = ({ hovered }: { hovered?: boolean }) => {
         <div className="flex flex-1 items-center gap-x-3  ">
           <SiteLogo className="text-primary h-8 w-8" />
           {(!collapsed || hovered) && (
-            <div className="flex-1  text-xl text-primary  font-semibold">
-              Educty Nova
+            <div className="flex-1  text-xl text-primary  font-semibold ">Educty Nova
             </div>
           )}
         </div>

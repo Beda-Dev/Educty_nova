@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "type_depense",
+  title: "Echeanciers de paiement",
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {

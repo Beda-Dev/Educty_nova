@@ -10,12 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HandCoins, ListChecks } from "lucide-react";
+import { HandCoins, ListChecks, CheckCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 
 const itemColors = [
   "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300",
-  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300"
+  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300",
+  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300"
 ];
 
 export default function DecaissementPage() {
@@ -35,6 +36,14 @@ export default function DecaissementPage() {
       icon: <HandCoins className="w-6 h-6" />,
       path: "depense",
       color: itemColors[0]
+    },
+    {
+      id: "validation-depense",
+      title: "Validation des dépenses",
+      description: "Valider ou rejeter les demandes de dépenses",
+      icon: <CheckCircle className="w-6 h-6" />,
+      path: "/decaissement/validation",
+      color: itemColors[2]
     }
   ];
 
@@ -125,6 +134,14 @@ export default function DecaissementPage() {
                           {item.description}
                         </p>
                       </div>
+                      <motion.div 
+                        className="absolute bottom-4 right-4 text-sm font-medium"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        →
+                      </motion.div>
                     </motion.div>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="bg-primary text-white">

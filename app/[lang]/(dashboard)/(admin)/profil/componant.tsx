@@ -9,20 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Mail, Key, User as UserIcon, Shield, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User, Permission, Role } from "@/lib/interface";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
@@ -30,9 +23,11 @@ import { EditEmailForm } from "./EditEmailForm";
 import { EditPasswordForm } from "./EditPasswordForm";
 import { EditDialog } from "./EditDialog";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 // Définition des types
-
 export interface RoleWithPermissions extends Role {
   permissions: Permission[];
 }
@@ -78,7 +73,6 @@ function groupPermissionsByCategory(permissions: Permission[]) {
       }
       categories[category].push(permission);
     } else {
-      // Pour les permissions sans catégorie claire
       if (!categories["autres"]) {
         categories["autres"] = [];
       }
@@ -89,22 +83,33 @@ function groupPermissionsByCategory(permissions: Permission[]) {
   return categories;
 }
 
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
 export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const router = useRouter();
 
   const handleEmailUpdateSuccess = () => {
-    // Optionnel: Rafraîchir les données ou afficher un toast
     setEmailModalOpen(false);
   };
 
   const handlePasswordUpdateSuccess = () => {
-    // Optionnel: Rafraîchir les données ou afficher un toast
     setPasswordModalOpen(false);
   };
-
-  // Vérification des permissions de l'utilisateur
 
   const allPermissions = [
     ...(user?.roles?.flatMap((role) => role.permissions) || []),
@@ -118,6 +123,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
         .map((p) => [p.id, p])
     ).values()
   );
+  
   const permissionCategories = groupPermissionsByCategory(
     uniquePermissions.filter((p): p is Permission => p !== undefined)
   );
@@ -187,239 +193,318 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
   return (
     <div className="container mx-auto py-6 space-y-6">
       {/* Carte d'information utilisateur */}
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-4">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-              {getInitials(user?.name)}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <CardTitle className="text-2xl">
-              {user?.name || "Utilisateur inconnu"}
-            </CardTitle>
-            <CardDescription>
-              {user?.email || "Email non disponible"}
-            </CardDescription>
-            <div className="flex mt-2 gap-2 flex-wrap">
-              {user?.roles?.length ? (
-                user.roles.map((role) => (
-                  <Badge key={role.id} className="bg-primary">
-                    {role.name}
-                  </Badge>
-                ))
-              ) : (
-                <Badge variant="outline">Aucun rôle</Badge>
-              )}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">ID</p>
-              <p>{user?.id || "N/A"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Créé le</p>
-              <p>
-                {user?.created_at
-                  ? formatDate(user.created_at)
-                  : "Non disponible"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Dernière mise à jour
-              </p>
-              <p>
-                {user?.updated_at
-                  ? formatDate(user.updated_at)
-                  : "Non disponible"}
-              </p>
-            </div>
-            {/* <div>
-              <p className="text-sm text-muted-foreground">Email vérifié</p>
-              <p>
-                {user?.email_verified_at ? (
-                  <span className="text-green-600">
-                    {formatDate(user.email_verified_at)}
-                  </span>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
+          <CardHeader className="flex flex-row items-start gap-4 pb-3">
+            <Avatar className="h-16 w-16">
+              <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+                {getInitials(user?.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-1.5">
+              <CardTitle className="text-2xl flex items-center gap-2">
+                {user?.name || "Utilisateur inconnu"}
+                <Badge color="secondary" className="h-5">
+                  ID: {user?.id || "N/A"}
+                </Badge>
+              </CardTitle>
+              <CardDescription className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                {user?.email || "Email non disponible"}
+              </CardDescription>
+              <div className="flex mt-2 gap-2 flex-wrap">
+                {user?.roles?.length ? (
+                  user.roles.map((role) => (
+                    <Badge 
+                      key={role.id} 
+                      className="bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:from-primary/80 hover:to-primary/60 transition-colors"
+                    >
+                      {role.name}
+                    </Badge>
+                  ))
                 ) : (
-                  <span className="text-orange-600">Non vérifié</span>
+                  <Badge variant="outline">Aucun rôle</Badge>
                 )}
-              </p>
-            </div> */}
-          </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.div 
+                variants={fadeIn}
+                className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
+              >
+                <UserIcon className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Créé le</p>
+                  <p className="font-medium">
+                    {user?.created_at
+                      ? formatDate(user.created_at)
+                      : "Non disponible"}
+                  </p>
+                </div>
+              </motion.div>
 
-          <div className="flex gap-2 mt-6">
-        <Button 
-          variant="outline" 
-          // onClick={() => setEmailModalOpen(true)}
-          onClick={() => router.push("/profil/modifier_email")}
-        >
-          Modifier l'email
-        </Button>
+              <motion.div 
+                variants={fadeIn}
+                className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
+              >
+                <Shield className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Dernière mise à jour</p>
+                  <p className="font-medium">
+                    {user?.updated_at
+                      ? formatDate(user.updated_at)
+                      : "Non disponible"}
+                  </p>
+                </div>
+              </motion.div>
+            </div>
 
-        <Button 
-          variant="outline" 
-          onClick={() => setPasswordModalOpen(true)}
-        >
-          Modifier le mot de passe
-        </Button>
-      </div>
+            <div className="flex gap-2 mt-6">
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => router.push("/profil/modifier_email")}
+                >
+                  <Mail className="h-4 w-4" />
+                  Modifier l'email
+                </Button>
+              </motion.div>
+
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="outline" 
+                  className="gap-2"
+                  onClick={() => setPasswordModalOpen(true)}
+                >
+                  <Key className="h-4 w-4" />
+                  Modifier le mot de passe
+                </Button>
+              </motion.div>
+            </div>
 
             {/* Modale Email */}
             <EditDialog
-        title="Modifier l'email"
-        open={emailModalOpen}
-        onOpenChangeAction={setEmailModalOpen}
-      >
-        <EditEmailForm
-          user={user}
-          onCloseAction={() => setEmailModalOpen(false)}
-          onSuccess={handleEmailUpdateSuccess}
-        />
-      </EditDialog>
+              title="Modifier l'email"
+              open={emailModalOpen}
+              onOpenChangeAction={setEmailModalOpen}
+            >
+              <EditEmailForm
+                user={user}
+                onCloseAction={() => setEmailModalOpen(false)}
+                onSuccess={handleEmailUpdateSuccess}
+              />
+            </EditDialog>
 
-      {/* Modale Password */}
-      <EditDialog
-        title="Modifier le mot de passe"
-        open={passwordModalOpen}
-        onOpenChangeAction={setPasswordModalOpen}
-      >
-        <EditPasswordForm
-          user={user}
-          onCloseAction={() => setPasswordModalOpen(false)}
-          onSuccess={handlePasswordUpdateSuccess}
-        />
-      </EditDialog>
-
-        </CardContent>
-      </Card>
+            {/* Modale Password */}
+            <EditDialog
+              title="Modifier le mot de passe"
+              open={passwordModalOpen}
+              onOpenChangeAction={setPasswordModalOpen}
+            >
+              <EditPasswordForm
+                user={user}
+                onCloseAction={() => setPasswordModalOpen(false)}
+                onSuccess={handlePasswordUpdateSuccess}
+              />
+            </EditDialog>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Onglets pour les rôles et permissions */}
       <Tabs defaultValue="permissions" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="permissions">Permissions</TabsTrigger>
-          <TabsTrigger value="roles">Rôles</TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-2">
+            <Shield className="h-4 w-4" /> Permissions
+          </TabsTrigger>
+          <TabsTrigger value="roles" className="gap-2">
+            <UserIcon className="h-4 w-4" /> Rôles
+          </TabsTrigger>
         </TabsList>
 
         {/* Contenu de l'onglet Permissions */}
         <TabsContent value="permissions">
-          <Card>
-            <CardHeader>
-              <CardTitle>Permissions</CardTitle>
-              <CardDescription>
-                {uniquePermissions.length > 0
-                  ? `L'utilisateur a ${uniquePermissions.length} permissions`
-                  : "Aucune permission attribuée"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {uniquePermissions.length > 0 ? (
-                <ScrollArea className="h-[500px] pr-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {Object.entries(permissionCategories).map(
-                      ([category, permissions]) => (
-                        <Card key={category} className="border shadow-sm">
-                          <CardHeader className="py-3">
-                            <CardTitle className="text-lg capitalize">
-                              {category.replace(/_/g, " ")}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="py-2">
-                            <div className="space-y-2">
-                              {permissions.map((permission) => (
-                                <div
-                                  key={permission.id}
-                                  className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded"
-                                >
-                                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                                  <span className="text-sm capitalize">
-                                    {permission.name.replace(/_/g, " ")}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )
-                    )}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Aucune permission trouvée
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Permissions
+                </CardTitle>
+                <CardDescription>
+                  {uniquePermissions.length > 0
+                    ? `L'utilisateur a ${uniquePermissions.length} permission(s)`
+                    : "Aucune permission attribuée"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {uniquePermissions.length > 0 ? (
+                  <ScrollArea className="h-[500px] pr-4">
+                    <motion.div 
+                      variants={staggerContainer}
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                    >
+                      {Object.entries(permissionCategories).map(
+                        ([category, permissions]) => (
+                        <motion.div 
+                          key={category} 
+                          variants={fadeIn}
+                          whileHover={{ y: -2 }}
+                        >
+                          <Card className="border shadow-sm hover:shadow-md transition-shadow">
+                            <CardHeader className="py-3">
+                              <CardTitle className="text-lg capitalize flex items-center justify-between">
+                                <span>{category.replace(/_/g, " ")}</span>
+                                <Badge variant="outline" className="ml-2">
+                                  {permissions.length}
+                                </Badge>
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="py-2">
+                              <div className="space-y-2">
+                                {permissions.map((permission) => (
+                                  <TooltipProvider key={permission.id}>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <motion.div 
+                                          whileHover={{ x: 5 }}
+                                          className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded transition-colors cursor-default"
+                                        >
+                                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                                          <span className="text-sm capitalize truncate">
+                                            {permission.name.replace(/_/g, " ")}
+                                          </span>
+                                        </motion.div>
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>{permission.name}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </ScrollArea>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Aucune permission trouvée
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </TabsContent>
 
         {/* Contenu de l'onglet Rôles */}
         <TabsContent value="roles">
-          <Card>
-            <CardHeader>
-              <CardTitle>Rôles</CardTitle>
-              <CardDescription>
-                {user?.roles?.length
-                  ? `L'utilisateur a ${user.roles.length} rôle(s)`
-                  : "Aucun rôle attribué"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {user?.roles?.length ? (
-                <div className="space-y-6">
-                  {user.roles.map((role) => (
-                    <div key={role.id} className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-semibold capitalize">
-                          {role.name}
-                        </h3>
-                        <Badge variant="outline">{role.guard_name}</Badge>
-                      </div>
-                      <div className="flex gap-4 text-sm text-muted-foreground">
-                        <p>Créé le: {formatDate(role.created_at)}</p>
-                        <p>Mis à jour: {formatDate(role.updated_at)}</p>
-                      </div>
-                      <Separator />
-                      <div>
-                        <h4 className="font-medium mb-2">
-                          Permissions du rôle ({(role.permissions ?? []).length}
-                          )
-                        </h4>
-                        {(role.permissions ?? []).length > 0 ? (
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                            {(role.permissions ?? []).map((permission) => (
-                              <Badge
-                                key={permission.id}
-                                color="secondary"
-                                className="justify-start text-left truncate"
-                                title={permission.name}
-                              >
-                                <span className="truncate capitalize">
-                                  {permission.name.replace(/_/g, " ")}
-                                </span>
-                              </Badge>
-                            ))}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+          >
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  Rôles
+                </CardTitle>
+                <CardDescription>
+                  {user?.roles?.length
+                    ? `L'utilisateur a ${user.roles.length} rôle(s)`
+                    : "Aucun rôle attribué"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {user?.roles?.length ? (
+                  <motion.div 
+                    variants={staggerContainer}
+                    className="space-y-6"
+                  >
+                    {user.roles.map((role) => (
+                      <motion.div 
+                        key={role.id} 
+                        variants={fadeIn}
+                        className="space-y-4 p-4 border rounded-lg hover:border-primary/30 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold capitalize">
+                              {role.name}
+                            </h3>
+                            <Badge color="secondary">{role.guard_name}</Badge>
                           </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            Ce rôle n'a aucune permission
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  Aucun rôle attribué à cet utilisateur
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div className="flex gap-4 text-sm text-muted-foreground">
+                          <p>Créé le: {formatDate(role.created_at)}</p>
+                          <p>Mis à jour: {formatDate(role.updated_at)}</p>
+                        </div>
+                        <Separator />
+                        <div>
+                          <h4 className="font-medium mb-2 flex items-center gap-2">
+                            <Shield className="h-4 w-4" />
+                            Permissions du rôle ({(role.permissions ?? []).length})
+                          </h4>
+                          {(role.permissions ?? []).length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                              {(role.permissions ?? []).map((permission) => (
+                                <motion.div
+                                  key={permission.id}
+                                  whileHover={{ scale: 1.02 }}
+                                >
+                                  <Badge
+                                    variant="outline"
+                                    className="justify-start text-left truncate w-full hover:bg-primary/5 transition-colors"
+                                    title={permission.name}
+                                  >
+                                    <CheckCircle2 className="h-3 w-3 mr-2 text-primary" />
+                                    <span className="truncate capitalize">
+                                      {permission.name.replace(/_/g, " ")}
+                                    </span>
+                                  </Badge>
+                                </motion.div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">
+                              Ce rôle n'a aucune permission
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    Aucun rôle attribué à cet utilisateur
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </TabsContent>
       </Tabs>
     </div>

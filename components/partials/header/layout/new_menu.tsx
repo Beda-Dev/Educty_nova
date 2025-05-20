@@ -34,6 +34,8 @@ import {
   CreditCard,
   List,
   Tags,
+  CalendarCheck,
+  CheckCircle
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { forwardRef } from "react";
@@ -223,6 +225,12 @@ const menuItems: MenuCategory = {
           path: "parametres/caisse/methodes_paiement",
           icon: <CreditCard className="w-6 h-6" />,
         },
+        {
+          id: "payment-schedules",
+          title: "Échéanciers de Paiement",
+          icon: <CalendarCheck className="w-6 h-6" />,
+          path: "parametres/caisse/echeanciers_paiement",
+        },
       ],
     },
   ],
@@ -312,8 +320,20 @@ const menuItems: MenuCategory = {
           path: "depense",
           icon: <DollarSign className="w-4 h-4" />,
         },
+            {
+              id: "validation-depense",
+              title: "Validation dépenses",
+              icon: <CheckCircle className="w-6 h-6" />,
+              path: "/decaissement/validation",
+            }
       ],
     },
+        {
+          id: "sessions",
+          title: "Sessions de caisse",
+          icon: <Clock className="w-6 h-6" />,
+          path: "/caisse_comptabilite/session_caisse"
+        }
   ],
   pedagogie: [
     {
@@ -481,6 +501,16 @@ export default function DynamicMenu() {
     "/encaissement",
     "/decaissement",
     "/depense",
+    "/session_caisse",
+    "/open-session",
+    "/close-session/1",
+    "/close-session/2",
+    "/close-session/3",
+    "/close-session/4",
+    "/close-session/5",
+    "/close-session/6",
+    "/close-session/7",
+    "/validation"
   ];
 
   const parametreRoute = ["/fees_type"];

@@ -45,6 +45,7 @@ import {
   verificationPermission,
 } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
+import { RegistrationForm } from "./RegistrationForm";
 
 const stepVariants = {
   hidden: { opacity: 0, x: 50 },
@@ -72,7 +73,8 @@ export default function OldReregistration() {
   } = useSchoolStore();
   const isTablet = useMediaQuery("(max-width: 1024px)");
   const [activeStep, setActiveStep] = useState(0);
-  const [AcademicYearCurrent, setAcademicYearCurrent] = useState<AcademicYear>();
+  const [AcademicYearCurrent, setAcademicYearCurrent] =
+    useState<AcademicYear>();
   const [Tarificationfound, setTarificationfound] = useState(false);
   const [datapost, setDataPost] = useState<Registration>();
   const [tarificationsData, setTarificationsData] = useState<{
@@ -220,7 +222,18 @@ export default function OldReregistration() {
 
     setActiveStep((prev) => prev + 1);
     setIsSubmitting(false);
-  }, [activeStep, Data, New, AcademicYearCurrent, reRegistration, registrations, academicYearCurrent, classes, router, setReRegistrations]);
+  }, [
+    activeStep,
+    Data,
+    New,
+    AcademicYearCurrent,
+    reRegistration,
+    registrations,
+    academicYearCurrent,
+    classes,
+    router,
+    setReRegistrations,
+  ]);
 
   if (hasAdminAccessInscrire === false) {
     return (
@@ -244,7 +257,9 @@ export default function OldReregistration() {
       <Stepper
         current={activeStep}
         direction={isTablet ? "vertical" : "horizontal"}
-        className={`mb-8 ${isTablet ? "stepper-vertical" : "stepper-horizontal"}`}
+        className={`mb-8 ${
+          isTablet ? "stepper-vertical" : "stepper-horizontal"
+        }`}
       >
         {steps.map(({ label, icon }) => (
           <Step key={label}>
@@ -266,166 +281,21 @@ export default function OldReregistration() {
           animate="visible"
           exit="exit"
           transition={{ duration: 0.3 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+          className="w-full gap-6 mt-4"
         >
           {activeStep === 0 && (
-            <>
-              <motion.div variants={inputVariants} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Matricule</Label>
-                  <Input
-                    name="registration_number"
-                    value={Data.registration_number}
-                    onChange={handleChange}
-                    placeholder="Numéro d'inscription"
-                    readOnly
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Nom</Label>
-                  <Input
-                    name="name"
-                    value={Data.name}
-                    onChange={handleChange}
-                    placeholder="Nom"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Prénom</Label>
-                  <Input
-                    name="first_name"
-                    value={Data.first_name}
-                    onChange={handleChange}
-                    placeholder="Prénom"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Date de Naissance</Label>
-                  <Input
-                    name="birth_date"
-                    type="date"
-                    value={Data.birth_date}
-                    onChange={handleChange}
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div variants={inputVariants} className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Nom du tuteur</Label>
-                  <Input
-                    name="tutor_name"
-                    value={Data.tutor_name}
-                    onChange={handleChange}
-                    placeholder="Nom du tuteur"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Prénom du tuteur</Label>
-                  <Input
-                    name="tutor_first_name"
-                    value={Data.tutor_first_name}
-                    onChange={handleChange}
-                    placeholder="Prénom du tuteur"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Numéro du tuteur</Label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <Input
-                      className="pl-10"
-                      name="tutor_number"
-                      value={Data.tutor_number}
-                      onChange={(e) => {
-                        const input = e.target.value;
-                        const numericInput = input.replace(/\D/g, "").slice(0, 10);
-                        handleChange({
-                          ...e,
-                          target: { ...e.target, value: numericInput },
-                        });
-                      }}
-                      placeholder="Numéro du tuteur"
-                      maxLength={10}
-                      pattern="\d{10}"
-                      inputMode="numeric"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Statut de l'élève</Label>
-                  <Select
-                    name="status"
-                    onValueChange={(value) =>
-                      setData({ ...Data, assignment_type_id: Number(value) })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {assignmentTypes.map((item: AssignmentType) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Niveau</Label>
-                  <Select
-                    name="Niveau"
-                    onValueChange={(value) => setLevelChoice(Number(value))}
-                    required
-                    defaultValue={reRegistration?.classe.level_id?.toString()}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Niveau" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {levels.map((item: Level) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Classe</Label>
-                  <Select
-                    name="classe"
-                    onValueChange={(value) =>
-                      setNew({ ...New, class_id: Number(value) })
-                    }
-                    required
-                    defaultValue={reRegistration?.student.assignment_type_id?.toString()}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Classes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {TrieDeClasse(levelChoice, classes).map((item: Classe) => (
-                        <SelectItem key={item.id} value={item.id.toString()}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </motion.div>
-            </>
+            <RegistrationForm
+              Data={Data}
+              levelChoice={levelChoice}
+              reRegistration={reRegistration}
+              assignmentTypes={assignmentTypes}
+              levels={levels}
+              classes={classes}
+              handleChange={handleChange}
+              setLevelChoice={setLevelChoice}
+              setData={setData}
+              setNew={setNew}
+            />
           )}
 
           {activeStep === 1 && (
@@ -442,7 +312,7 @@ export default function OldReregistration() {
                   </Card>
                 )}
 
-                <Card title="frais de scolarité" >
+                <Card title="frais de scolarité">
                   <TarificationTable
                     tarifications={pricing}
                     level_id={levelChoice}
@@ -460,10 +330,7 @@ export default function OldReregistration() {
             datapost &&
             tarificationsData &&
             Tarificationfound === true && (
-              <motion.div
-                variants={inputVariants}
-                className="col-span-2"
-              >
+              <motion.div variants={inputVariants} className="col-span-2">
                 <RegistrationFinal
                   registration={datapost}
                   finance={tarificationsData}

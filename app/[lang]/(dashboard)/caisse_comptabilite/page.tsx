@@ -10,13 +10,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowDownCircle, ArrowUpCircle, Wallet } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, Clock } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
   "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300",
-  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300"
+  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300",
+  "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300"
 ];
 
 export default function CaissePage() {
@@ -45,6 +46,14 @@ export default function CaissePage() {
       icon: <ArrowUpCircle className="w-6 h-6" />,
       path: "decaissement",
       color: itemColors[1]
+    },
+    {
+      id: "sessions",
+      title: "Sessions de caisse",
+      description: "Historique et gestion des sessions",
+      icon: <Clock className="w-6 h-6" />,
+      path: "/caisse_comptabilite/session_caisse",
+      color: itemColors[2]
     }
   ];
 
@@ -103,7 +112,7 @@ export default function CaissePage() {
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"

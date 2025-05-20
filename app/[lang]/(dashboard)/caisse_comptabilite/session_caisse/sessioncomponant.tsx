@@ -302,13 +302,15 @@ export default function CashRegisterSessionsPage() {
   }, [sessions, searchTerm, statusFilter, userFilter, registerFilter, dateRange])
 
   // Format currency
-  const formatCurrency = (amount: string) => {
-    const numericAmount = Number.parseInt(amount) / 100
-    return numericAmount.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "EUR",
-    })
-  }
+const formatCurrency = (amount: string) => {
+  const numericAmount = Number.parseInt(amount) / 100
+
+  return numericAmount.toLocaleString("fr-FR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }) + ' FCFA'
+}
+
 
   // Format date
   const formatDate = (dateString: string | null) => {

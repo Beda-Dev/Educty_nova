@@ -13,14 +13,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CreditCard, Wallet, List, Banknote } from "lucide-react";
+import { CreditCard, Wallet, List, Banknote, CalendarCheck } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
   "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
   "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300",
-  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300"
+  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300",
+  "bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300"
 ];
 
 export default function CashSettingsPage() {
@@ -60,6 +61,14 @@ export default function CashSettingsPage() {
       icon: <CreditCard className="w-6 h-6" />,
       path: "/parametres/caisse/methodes_paiement",
       color: itemColors[2]
+    },
+    {
+      id: "payment-schedules",
+      title: "Échéanciers de Paiement",
+      description: "Gestion des plans de paiement et échéances",
+      icon: <CalendarCheck className="w-6 h-6" />,
+      path: "/parametres/caisse/echeanciers_paiement",
+      color: itemColors[3]
     }
   ];
 
@@ -118,7 +127,7 @@ export default function CashSettingsPage() {
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" // Changé à lg:grid-cols-4 pour 4 éléments
             variants={containerVariants}
             initial="hidden"
             animate="visible"

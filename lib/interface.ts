@@ -34,7 +34,6 @@ export interface Permission {
 }
 
 export interface AcademicYear {
-  [x: string]: any;
   id: number;
   label: string;
   active: number;
@@ -283,6 +282,9 @@ export interface Payment {
   installment: Installment;
   cash_register: CashRegister;
   cashier: UserSingle;
+  transaction_id?:number;
+  payment_method?: PaymentMethod[];
+
 }
 
 export interface ExpenseType {
@@ -305,6 +307,7 @@ export interface Expense {
   updated_at: string;
   expense_type: ExpenseType;
   cash_register: CashRegister;
+  transaction_id?: number;
 }
 
 export interface InterfaceOTP {

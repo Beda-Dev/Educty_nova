@@ -27,6 +27,7 @@ import {
   BadgeAlert,
   Loader2
 } from "lucide-react";
+import {paiementRegistration} from "./fonction"
 
 export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);

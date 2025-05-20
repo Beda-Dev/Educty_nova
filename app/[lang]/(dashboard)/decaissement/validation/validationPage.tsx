@@ -566,8 +566,8 @@ export default function ExpenseValidationsPage() {
                                 <div className="text-sm text-gray-500 mt-1">{validation.comment}</div>
                               )}
                             </TableCell>
-                            <TableCell className="px-6 py-4 font-medium">
-                              {validation.expense?.amount} €
+                            <TableCell className="text-xs px-6 py-4 font-medium">
+                              {validation.expense?.amount} FCFA
                             </TableCell>
                             <TableCell className="px-6 py-4">
                               <div className="font-medium">{validation.user?.name}</div>
