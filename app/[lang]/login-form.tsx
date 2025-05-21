@@ -100,9 +100,9 @@ const LogInForm = () => {
 
   if (!users?.length || !roles?.length || !permissions?.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <span className="ml-2 text-primary">Chargement...</span>
+      <div className="w-full h-full flex items-center justify-center bg-whitesmoke">
+        <Loader2 className="h-6 w-6 animate-spin text-primary bg-whitesmoke" />
+        <span className="ml-2 text-primary bg-whitesmoke">Chargement...</span>
       </div>
     );
   }
@@ -111,19 +111,16 @@ const LogInForm = () => {
 
   
   return (
-    <div className="w-full ">
-      <Link href="/dashboard" className="inline-block flex items-center justify-center mb-6">
-        {/* <SiteLogo className="h-10 w-10 2xl:h-14 2xl:w-14 text-primary" /> */}
-        <LogoComponent  />
-      </Link>
-      <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
+    <div className="w-full bg-whitesmoke ">
+
+      <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900 bg-whitesmoke ">
       Bonjour 👋
       </div>
-      <div className="2xl:text-lg text-base text-default-600 mt-2 leading-6">
+      <div className="2xl:text-lg text-base text-default-600 mt-2 leading-6 bg-whitesmoke">
       Entrez vos identifiants pour accéder à votre compte
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="2xl:mt-7 mt-8">
-        <div className="relative">
+      <form onSubmit={handleSubmit(onSubmit)} className="2xl:mt-7 mt-8 bg-whitesmoke">
+        <div className="relative bg-whitesmoke">
           <Input
             removeWrapper
             type="email"
@@ -139,9 +136,9 @@ const LogInForm = () => {
           <Label
             htmlFor="email"
             className={cn(
-              " absolute text-base text-default-600  rounded-t duration-300 transform -translate-y-5 scale-75 top-2 z-10 origin-[0]   bg-background  px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75  peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1",
+              " absolute text-base text-default-600  rounded-t duration-300 transform -translate-y-5 scale-75 top-2 z-10 origin-[0]   bg-whitesmoke  px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75  peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1",
               {
-                " text-sm ": isDesktop2xl,
+                " text-sm bg-whitesmoke": isDesktop2xl,
               }
             )}
           >
@@ -149,10 +146,10 @@ const LogInForm = () => {
           </Label>
         </div>
         {errors.email && (
-          <div className=" text-destructive mt-2">{errors.email.message}</div>
+          <div className=" text-destructive mt-2 bg-whitesmoke">{errors.email.message}</div>
         )}
 
-        <div className="relative mt-6">
+        <div className="relative mt-6 bg-whitesmoke">
           <Input
             removeWrapper
             type={passwordType === "password" ? "password" : "text"}
@@ -168,20 +165,20 @@ const LogInForm = () => {
           <Label
             htmlFor="password"
             className={cn(
-              " absolute text-base  rounded-t text-default-600  duration-300 transform -translate-y-5 scale-75 top-2 z-10 origin-[0]   bg-background  px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75  peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1",
+              " absolute text-base  rounded-t text-default-600  duration-300 transform -translate-y-5 scale-75 top-2 z-10 origin-[0]   bg-whitesmoke px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75  peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1",
               {
-                " text-sm ": isDesktop2xl,
+                " text-sm bg-whitesmoke": isDesktop2xl,
               }
             )}
           >
             Mot de passe
           </Label>
           <div
-            className="absolute top-1/2 -translate-y-1/2 ltr:right-4 rtl:left-4 cursor-pointer"
+            className="absolute top-1/2 -translate-y-1/2 ltr:right-4 rtl:left-4 cursor-pointer bg-whitesmoke"
             onClick={togglePasswordType}
           >
             {passwordType === "password" ? (
-              <Icon icon="heroicons:eye" className="w-4 h-4 text-default-400" />
+              <Icon icon="heroicons:eye" className="w-4 h-4 text-default-400 " />
             ) : (
               <Icon
                 icon="heroicons:eye-slash"
@@ -191,18 +188,19 @@ const LogInForm = () => {
           </div>
         </div>
         {errors.password && (
-          <div className=" text-destructive mt-2">
+          <div className=" text-destructive mt-2 bg-whitesmoke">
             {errors.password.message}
           </div>
         )}
 
-        <div className="mt-5  mb-6 flex flex-wrap gap-2">
+        <div className="mt-5  mb-6 flex flex-wrap gap-2 bg-whitesmoke">
 
-          <Link href="/forgot" className="flex-none text-sm text-primary">
+          <Link href="/forgot" className="flex-none text-sm text-primary bg-whitesmoke">
           Mot de passe oublié ?
           </Link>
         </div>
         <Button
+        color="tyrian"
           className="w-full"
           disabled={isPending}
           size={!isDesktop2xl ? "lg" : "md"}

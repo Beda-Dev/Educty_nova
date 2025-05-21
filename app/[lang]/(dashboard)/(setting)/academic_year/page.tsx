@@ -10,17 +10,12 @@ import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { Card } from "@/components/ui/card";
 
 const ServerComponent = () => {
-  const [data, setData] = useState<AcademicYear[]>([]);
   const { academicYears, userOnline } = useSchoolStore();
   const permissionRequis = ["voir annee_Academique"];
   const hasAdminAccess = verificationPermission(
     { permissionNames: userOnline?.permissionNames || [] },
     permissionRequis
   );
-
-  useEffect(() => {
-    setData(academicYears);
-  }, [academicYears]);
 
   if (hasAdminAccess === false) {
     return (
@@ -30,7 +25,7 @@ const ServerComponent = () => {
     );
   }
 
-  return <AcademicYearPage data={data} />;
+  return <AcademicYearPage data={academicYears} />;
 };
 
 export default ServerComponent;

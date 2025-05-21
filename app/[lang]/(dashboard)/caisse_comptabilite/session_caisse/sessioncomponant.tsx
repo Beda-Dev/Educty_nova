@@ -1,18 +1,45 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCw, Search, SlidersHorizontal } from "lucide-react"
+import { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import {
+  CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  RefreshCw,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,312 +47,146 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { CashRegisterSession, UserSingle, CashRegister } from "@/lib/interface";
 
-// Types
-interface User {
-  id: number
-  hierarchical_id: number | null
-  name: string
-  email: string
-  email_verified_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-interface CashRegister {
-  id: number
-  cash_register_number: string
-  active: number
-  created_at: string
-  updated_at: string
-}
-
-interface CashRegisterSession {
-  id: number
-  user_id: number
-  cash_register_id: number
-  opening_date: string
-  closing_date: string | null
-  opening_amount: string
-  closing_amount: string | null
-  status: "open" | "closed"
-  created_at: string
-  updated_at: string
-  user?: User
-  cash_register?: CashRegister
-}
-
-// Mock data for demonstration
-const mockSessions: CashRegisterSession[] = [
-  {
-    id: 1,
-    user_id: 1,
-    cash_register_id: 4,
-    opening_date: "2025-05-13 07:30:00",
-    closing_date: "2025-05-13 17:30:00",
-    opening_amount: "0",
-    closing_amount: "200000",
-    status: "closed",
-    created_at: "2025-05-13T13:03:54.000000Z",
-    updated_at: "2025-05-13T13:11:50.000000Z",
-    user: {
-      id: 1,
-      hierarchical_id: null,
-      name: "Tania",
-      email: "k@gmail.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-    },
-    cash_register: {
-      id: 4,
-      cash_register_number: "5",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-    },
-  },
-  {
-    id: 2,
-    user_id: 2,
-    cash_register_id: 1,
-    opening_date: "2025-05-14 08:00:00",
-    closing_date: "2025-05-14 18:00:00",
-    opening_amount: "5000",
-    closing_amount: "150000",
-    status: "closed",
-    created_at: "2025-05-14T08:00:00.000000Z",
-    updated_at: "2025-05-14T18:00:00.000000Z",
-    user: {
-      id: 2,
-      hierarchical_id: null,
-      name: "Marc Dupont",
-      email: "marc@example.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-    },
-    cash_register: {
-      id: 1,
-      cash_register_number: "1",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-    },
-  },
-  {
-    id: 3,
-    user_id: 1,
-    cash_register_id: 2,
-    opening_date: "2025-05-15 07:45:00",
-    closing_date: null,
-    opening_amount: "10000",
-    closing_amount: null,
-    status: "open",
-    created_at: "2025-05-15T07:45:00.000000Z",
-    updated_at: "2025-05-15T07:45:00.000000Z",
-    user: {
-      id: 1,
-      hierarchical_id: null,
-      name: "Tania",
-      email: "k@gmail.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-    },
-    cash_register: {
-      id: 2,
-      cash_register_number: "2",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-    },
-  },
-  {
-    id: 4,
-    user_id: 3,
-    cash_register_id: 3,
-    opening_date: "2025-05-15 08:30:00",
-    closing_date: null,
-    opening_amount: "7500",
-    closing_amount: null,
-    status: "open",
-    created_at: "2025-05-15T08:30:00.000000Z",
-    updated_at: "2025-05-15T08:30:00.000000Z",
-    user: {
-      id: 3,
-      hierarchical_id: null,
-      name: "Sophie Martin",
-      email: "sophie@example.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-    },
-    cash_register: {
-      id: 3,
-      cash_register_number: "3",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-    },
-  },
-  {
-    id: 5,
-    user_id: 4,
-    cash_register_id: 1,
-    opening_date: "2025-05-12 08:15:00",
-    closing_date: "2025-05-12 17:45:00",
-    opening_amount: "2000",
-    closing_amount: "175000",
-    status: "closed",
-    created_at: "2025-05-12T08:15:00.000000Z",
-    updated_at: "2025-05-12T17:45:00.000000Z",
-    user: {
-      id: 4,
-      hierarchical_id: null,
-      name: "Jean Durand",
-      email: "jean@example.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-    },
-    cash_register: {
-      id: 1,
-      cash_register_number: "1",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-    },
-  },
-]
-
-// Get unique users from sessions
+// Optimized filter functions using memoization
 const getUniqueUsers = (sessions: CashRegisterSession[]) => {
-  const usersMap = new Map<number, User>()
-  sessions.forEach((session) => {
-    if (session.user) {
-      usersMap.set(session.user.id, session.user)
+  return sessions.reduce((acc: UserSingle[], session) => {
+    if (session.user && !acc.some(u => u.id === session.user.id)) {
+      acc.push(session.user);
     }
-  })
-  return Array.from(usersMap.values())
-}
+    return acc;
+  }, []);
+};
 
-// Get unique cash registers from sessions
 const getUniqueCashRegisters = (sessions: CashRegisterSession[]) => {
-  const registersMap = new Map<number, CashRegister>()
-  sessions.forEach((session) => {
-    if (session.cash_register) {
-      registersMap.set(session.cash_register.id, session.cash_register)
+  return sessions.reduce((acc: CashRegister[], session) => {
+    if (session.cash_register && !acc.some(cr => cr.id === session.cash_register.id)) {
+      acc.push(session.cash_register);
     }
-  })
-  return Array.from(registersMap.values())
-}
+    return acc;
+  }, []);
+};
 
-export default function CashRegisterSessionsPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
-  // State for filters
-  const [sessions, setSessions] = useState<CashRegisterSession[]>(mockSessions)
-  const [filteredSessions, setFilteredSessions] = useState<CashRegisterSession[]>(mockSessions)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const [userFilter, setUserFilter] = useState<string | null>(null)
-  const [registerFilter, setRegisterFilter] = useState<string | null>(null)
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined
-    to: Date | undefined
-  }>({
-    from: undefined,
-    to: undefined,
-  })
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
-  const totalPages = Math.ceil(filteredSessions.length / itemsPerPage)
-  const paginatedSessions = filteredSessions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-
-  // Get unique users and cash registers for filters
-  const uniqueUsers = getUniqueUsers(sessions)
-  const uniqueCashRegisters = getUniqueCashRegisters(sessions)
-
-  // Apply filters
-  useEffect(() => {
-    let result = [...sessions]
-
-    // Apply search filter
-    if (searchTerm) {
-      result = result.filter(
-        (session) =>
-          session.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          session.cash_register?.cash_register_number.includes(searchTerm),
-      )
-    }
-
-    // Apply status filter
-    if (statusFilter) {
-      result = result.filter((session) => session.status === statusFilter)
-    }
-
-    // Apply user filter
-    if (userFilter) {
-      result = result.filter((session) => session.user_id === Number.parseInt(userFilter))
-    }
-
-    // Apply cash register filter
-    if (registerFilter) {
-      result = result.filter((session) => session.cash_register_id === Number.parseInt(registerFilter))
-    }
-
-    // Apply date range filter
-    if (dateRange.from) {
-      result = result.filter((session) => {
-        const openingDate = new Date(session.opening_date)
-        return openingDate >= dateRange.from!
-      })
-    }
-
-    if (dateRange.to) {
-      result = result.filter((session) => {
-        const openingDate = new Date(session.opening_date)
-        return openingDate <= dateRange.to!
-      })
-    }
-
-    setFilteredSessions(result)
-    setCurrentPage(1) // Reset to first page when filters change
-  }, [sessions, searchTerm, statusFilter, userFilter, registerFilter, dateRange])
-
-  // Format currency
+// Memoized currency formatter
 const formatCurrency = (amount: string) => {
-  const numericAmount = Number.parseInt(amount) / 100
-
-  return numericAmount.toLocaleString("fr-FR", {
+  const numericAmount = Number.parseInt(amount) / 100;
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'XOF',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }) + ' FCFA'
-}
+    maximumFractionDigits: 0
+  }).format(numericAmount).replace('CFA', 'FCFA');
+};
 
+// Memoized date formatter
+const formatSessionDate = (dateString: string | null) => {
+  if (!dateString) return "—";
+  return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: fr });
+};
 
-  // Format date
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "—"
-    return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: fr })
-  }
+export default function CashRegisterSessionsPage({ data }: { data: CashRegisterSession[] }) {
+  const router = useRouter();
+  const [sessions, setSessions] = useState<CashRegisterSession[]>(data);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [userFilter, setUserFilter] = useState<string | null>(null);
+  const [registerFilter, setRegisterFilter] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({ from: undefined, to: undefined });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Memoized derived data
+  const uniqueUsers = useMemo(() => getUniqueUsers(sessions), [sessions]);
+  const uniqueCashRegisters = useMemo(() => getUniqueCashRegisters(sessions), [sessions]);
+
+  const filteredSessions = useMemo(() => {
+    return sessions.filter(session => {
+      // Search term filter
+      if (searchTerm && !(
+        session.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        session.cash_register?.cash_register_number.toLowerCase().includes(searchTerm.toLowerCase())
+      )) {
+        return false;
+      }
+
+      // Status filter
+      if (statusFilter && statusFilter !== "all" && session.status !== statusFilter) {
+        return false;
+      }
+
+      // User filter
+      if (userFilter && userFilter !== "all" && session.user_id !== Number(userFilter)) {
+        return false;
+      }
+
+      // Register filter
+      if (registerFilter && registerFilter !== "all" && 
+          session.cash_register_id !== Number(registerFilter)) {
+        return false;
+      }
+
+      // Date range filter
+      const openingDate = new Date(session.opening_date);
+      if (dateRange.from && openingDate < dateRange.from) {
+        return false;
+      }
+      if (dateRange.to) {
+        const endOfDay = new Date(dateRange.to);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (openingDate > endOfDay) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [sessions, searchTerm, statusFilter, userFilter, registerFilter, dateRange]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredSessions.length / itemsPerPage);
+  const paginatedSessions = useMemo(() => {
+    return filteredSessions.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredSessions, currentPage, itemsPerPage]);
 
   // Reset all filters
-  const resetFilters = () => {
-    setSearchTerm("")
-    setStatusFilter(null)
-    setUserFilter(null)
-    setRegisterFilter(null)
-    setDateRange({ from: undefined, to: undefined })
-  }
+  const resetFilters = useCallback(() => {
+    setSearchTerm("");
+    setStatusFilter(null);
+    setUserFilter(null);
+    setRegisterFilter(null);
+    setDateRange({ from: undefined, to: undefined });
+    setCurrentPage(1);
+  }, []);
+
+  // Handle page navigation
+  const goToPage = useCallback((page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  }, [totalPages]);
+
+  // Handle session close navigation
+  const navigateToCloseSession = useCallback((sessionId: number) => {
+    router.push(`/caisse_comptabilite/close-session/${sessionId}`);
+  }, [router]);
+
+  // Handle session details navigation
+  const navigateToSessionDetails = useCallback((sessionId: number) => {
+    router.push(`/cash-register/sessions/${sessionId}`);
+  }, [router]);
 
   return (
     <div className="container mx-auto py-6">
@@ -333,14 +194,21 @@ const formatCurrency = (amount: string) => {
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <CardTitle>Sessions de caisse</CardTitle>
-            <CardDescription>Gérez et consultez les sessions de caisse</CardDescription>
+            <CardDescription>
+              Gérez et consultez les sessions de caisse
+            </CardDescription>
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" size="sm" onClick={resetFilters} className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetFilters}
+              className="flex gap-1"
+            >
               <RefreshCw className="h-4 w-4" />
               Réinitialiser
             </Button>
-            <Button asChild size="sm" className="flex gap-1">
+            <Button asChild color="indigodye" size="sm" className="flex gap-1">
               <Link href="/caisse_comptabilite/open-session">
                 <Plus className="h-4 w-4" />
                 Nouvelle session
@@ -357,13 +225,22 @@ const formatCurrency = (amount: string) => {
                 placeholder="Rechercher..."
                 className="pl-8"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
             </div>
 
             <div className="flex flex-wrap gap-2">
               {/* Status filter */}
-              <Select value={statusFilter || ""} onValueChange={(value) => setStatusFilter(value || null)}>
+              <Select
+                value={statusFilter || ""}
+                onValueChange={(value) => {
+                  setStatusFilter(value === "all" ? null : value);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Statut" />
                 </SelectTrigger>
@@ -375,7 +252,13 @@ const formatCurrency = (amount: string) => {
               </Select>
 
               {/* User filter */}
-              <Select value={userFilter || ""} onValueChange={(value) => setUserFilter(value || null)}>
+              <Select
+                value={userFilter || ""}
+                onValueChange={(value) => {
+                  setUserFilter(value === "all" ? null : value);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Utilisateur" />
                 </SelectTrigger>
@@ -390,14 +273,23 @@ const formatCurrency = (amount: string) => {
               </Select>
 
               {/* Cash register filter */}
-              <Select value={registerFilter || ""} onValueChange={(value) => setRegisterFilter(value || null)}>
+              <Select
+                value={registerFilter || ""}
+                onValueChange={(value) => {
+                  setRegisterFilter(value === "all" ? null : value);
+                  setCurrentPage(1);
+                }}
+              >
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Caisse" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toutes les caisses</SelectItem>
                   {uniqueCashRegisters.map((register) => (
-                    <SelectItem key={register.id} value={register.id.toString()}>
+                    <SelectItem
+                      key={register.id}
+                      value={register.id.toString()}
+                    >
                       Caisse {register.cash_register_number}
                     </SelectItem>
                   ))}
@@ -411,14 +303,17 @@ const formatCurrency = (amount: string) => {
                     variant="outline"
                     className={cn(
                       "w-[240px] justify-start text-left font-normal",
-                      !dateRange.from && !dateRange.to && "text-muted-foreground",
+                      !dateRange.from &&
+                        !dateRange.to &&
+                        "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {dateRange.from ? (
                       dateRange.to ? (
                         <>
-                          {format(dateRange.from, "dd/MM/yyyy")} - {format(dateRange.to, "dd/MM/yyyy")}
+                          {format(dateRange.from, "dd/MM/yyyy")} -{" "}
+                          {format(dateRange.to, "dd/MM/yyyy")}
                         </>
                       ) : (
                         format(dateRange.from, "dd/MM/yyyy")
@@ -434,25 +329,30 @@ const formatCurrency = (amount: string) => {
                     mode="range"
                     defaultMonth={dateRange.from}
                     selected={dateRange}
-                    onSelect={(range) =>
+                    onSelect={(range) => {
                       setDateRange({
                         from: range?.from,
                         to: range?.to,
-                      })
-                    }
+                      });
+                      setCurrentPage(1);
+                    }}
                     numberOfMonths={2}
                     locale={fr}
                   />
                   <div className="flex items-center justify-between p-3 border-t border-border">
-                    <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: undefined, to: undefined })}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setDateRange({ from: undefined, to: undefined });
+                        setCurrentPage(1);
+                      }}
+                    >
                       Réinitialiser
                     </Button>
                     <Button
                       size="sm"
-                      onClick={() => {
-                        // Close popover
-                        document.body.click()
-                      }}
+                      onClick={() => document.body.click()}
                     >
                       Appliquer
                     </Button>
@@ -467,7 +367,7 @@ const formatCurrency = (amount: string) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
+                  
                   <TableHead>Caisse</TableHead>
                   <TableHead>Utilisateur</TableHead>
                   <TableHead>Ouverture</TableHead>
@@ -481,43 +381,61 @@ const formatCurrency = (amount: string) => {
               <TableBody>
                 {paginatedSessions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-6 text-muted-foreground">
+                    <TableCell
+                      colSpan={9}
+                      className="text-center py-6 text-muted-foreground"
+                    >
                       Aucune session trouvée
                     </TableCell>
                   </TableRow>
                 ) : (
                   paginatedSessions.map((session) => (
                     <TableRow key={session.id}>
-                      <TableCell className="font-medium">{session.id}</TableCell>
-                      <TableCell>Caisse {session.cash_register?.cash_register_number}</TableCell>
-                      <TableCell>{session.user?.name}</TableCell>
-                      <TableCell>{formatDate(session.opening_date)}</TableCell>
-                      <TableCell>{formatDate(session.closing_date)}</TableCell>
-                      <TableCell>{formatCurrency(session.opening_amount)}</TableCell>
-                      <TableCell>{session.closing_amount ? formatCurrency(session.closing_amount) : "—"}</TableCell>
                       <TableCell>
-                        <Badge color={session.status === "open" ? "success" : "secondary"}>
+                        Caisse {session.cash_register?.cash_register_number}
+                      </TableCell>
+                      <TableCell>{session.user?.name}</TableCell>
+                      <TableCell>{formatSessionDate(session.opening_date)}</TableCell>
+                      <TableCell>{formatSessionDate(session.closing_date)}</TableCell>
+                      <TableCell>
+                        {formatCurrency(session.opening_amount)}
+                      </TableCell>
+                      <TableCell>
+                        {session.closing_amount
+                          ? formatCurrency(session.closing_amount)
+                          : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          color={session.status === "open" ? "success" : "secondary"}
+                        >
                           {session.status === "open" ? "Ouvert" : "Fermé"}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
                               <SlidersHorizontal className="h-4 w-4" />
                               <span className="sr-only">Actions</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem onClick={() => router.push(`/cash-register/sessions/${session.id}`)}>
+                            <DropdownMenuItem
+                              onClick={() => navigateToSessionDetails(session.id)}
+                            >
                               Voir les détails
                             </DropdownMenuItem>
                             {session.status === "open" && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  onClick={() => router.push(`/caisse_comptabilite/close-session/${session.id}`)}
+                                  onClick={() => navigateToCloseSession(session.id)}
                                 >
                                   Fermer la session
                                 </DropdownMenuItem>
@@ -538,13 +456,14 @@ const formatCurrency = (amount: string) => {
             <div className="flex items-center justify-between mt-4">
               <div className="text-sm text-muted-foreground">
                 Affichage de {(currentPage - 1) * itemsPerPage + 1} à{" "}
-                {Math.min(currentPage * itemsPerPage, filteredSessions.length)} sur {filteredSessions.length} sessions
+                {Math.min(currentPage * itemsPerPage, filteredSessions.length)}{" "}
+                sur {filteredSessions.length} sessions
               </div>
               <div className="flex items-center space-x-2">
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -552,7 +471,7 @@ const formatCurrency = (amount: string) => {
                 <Button
                   variant="outline"
                   size="icon"
-                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -563,5 +482,5 @@ const formatCurrency = (amount: string) => {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

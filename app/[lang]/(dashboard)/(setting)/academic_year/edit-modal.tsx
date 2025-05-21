@@ -28,6 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "react-hot-toast";
 import { AcademicYear } from "@/lib/interface";
@@ -93,7 +94,9 @@ const EditModal: React.FC<EditModalProps> = ({
       }
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +150,7 @@ const EditModal: React.FC<EditModalProps> = ({
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant="outline"
+                            color="indigodye"
                             className={cn(
                               "w-full justify-start text-left font-normal",
                               !startDate && "text-muted-foreground"
@@ -162,7 +165,10 @@ const EditModal: React.FC<EditModalProps> = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                      <PopoverContent
+                        className="w-auto p-0 z-[9999]"
+                        align="start"
+                      >
                         <Calendar
                           mode="single"
                           selected={startDate}
@@ -188,7 +194,7 @@ const EditModal: React.FC<EditModalProps> = ({
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant="outline"
+                            color="indigodye"
                             className={cn(
                               "w-full justify-start text-left font-normal",
                               !endDate && "text-muted-foreground"
@@ -203,7 +209,10 @@ const EditModal: React.FC<EditModalProps> = ({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+                      <PopoverContent
+                        className="w-auto p-0 z-[9999]"
+                        align="start"
+                      >
                         <Calendar
                           mode="single"
                           selected={endDate}
@@ -220,16 +229,23 @@ const EditModal: React.FC<EditModalProps> = ({
             </div>
 
             <DialogFooter>
-              <Button type="submit" disabled={isLoading} className="mt-4">
-                {isLoading ? (
-                  <>
-                    <span className="animate-spin mr-2">↻</span>
-                    Enregistrement...
-                  </>
-                ) : (
-                  "Enregistrer les modifications"
-                )}
-              </Button>
+              <div className="flex justify-end space-x-3">
+                <DialogClose asChild>
+                  <Button type="button" color="bittersweet" disabled={isLoading}>
+                    Annuler
+                  </Button>
+                </DialogClose>
+                <Button type="submit" disabled={isLoading} className="">
+                  {isLoading ? (
+                    <>
+                      <span className="animate-spin mr-2">↻</span>
+                      Enregistrement...
+                    </>
+                  ) : (
+                    "Enregistrer les modifications"
+                  )}
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { cn, isLocationMatch, translate, getDynamicPath } from "@/lib/utils";
+import { cn, isLocationMatch, translate, getDynamicPath , isLocationMatch2 } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
@@ -11,18 +11,21 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
   trans: any
 }) => {
   const { badge, href, title } = item;
+  console.log("item", item);
 
   const pathname = usePathname();
   const locationName = getDynamicPath(pathname);
+  // console.log("locationName", pathname);
+  // console.log("href", href);
   return (
     <Link href={href}>
       <>
         {!collapsed || hovered ? (
           <div
             className={cn(
-              "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-primary hover:text-primary-foreground",
+              "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-primary-foreground",
               {
-                "bg-primary text-primary-foreground ": isLocationMatch(
+                "bg-skyblue   text-primary-foreground ": isLocationMatch2(
                   href,
                   locationName
                 ),
@@ -41,11 +44,11 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
               className={cn(
                 "h-12 w-12 mx-auto rounded-md  transition-all duration-300 inline-flex flex-col items-center justify-center  relative  ",
                 {
-                  "bg-primary text-primary-foreground ": isLocationMatch(
+                  "bg-skyblue  text-primary-foreground ": isLocationMatch2(
                     href,
                     locationName
                   ),
-                  " text-default-600   ": !isLocationMatch(href, locationName),
+                  " text-default-600   ": !isLocationMatch2(href, locationName),
                 }
               )}
             >

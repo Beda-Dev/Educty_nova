@@ -1,17 +1,9 @@
 "use client";
-
-import { useState, useEffect } from "react";
-import { PlusCircle, CreditCard, Trash2, Edit, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { PlusCircle, CreditCard, Edit, Loader2, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -29,11 +21,8 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSchoolStore } from "@/store";
@@ -48,43 +37,45 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import PaymentMethodForm from "./payment-method-form";
 
 export default function PaymentMethodsPage() {
-  const [newMethodLabel, setNewMethodLabel] = useState("");
-  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
+  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(
+    null
+  );
   const [editMethodLabel, setEditMethodLabel] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
   const { methodPayment, setmethodPayment } = useSchoolStore();
   const router = useRouter();
 
-  const itemsPerPage = 5;
-  const filteredData = methodPayment.filter(item =>
-    item.label.toLowerCase().includes(searchTerm.toLowerCase())
+  const ITEMS_PER_PAGE = 5;
+  const filteredData = methodPayment.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
   );
-
-  // Fetch payment methods
-  useEffect(() => {
-    const data: PaymentMethod[] = [
-      {
-        id: 1,
-        label: "Carte Bancaire",
-        created_at: "2023-10-01",
-        updated_at: "2023-10-01",
-      },
-    ];
-    setmethodPayment(data);
-  }, []);
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -94,67 +85,25 @@ export default function PaymentMethodsPage() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  // Add new payment method
-  const addPaymentMethod = async () => {
-    if (!newMethodLabel.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez entrer un nom pour la méthode de paiement",
-        color: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      const response = await fetch("/api/payment-methods", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ label: newMethodLabel.trim() }),
-      });
-
-      if (!response.ok) throw new Error("Erreur lors de l'ajout");
-
-      const newMethod = await response.json();
-      // Refresh the list after adding
-      const updatedMethods = await fetchPaymentMethods();
-      setmethodPayment(updatedMethods);
-      setNewMethodLabel("");
-
-      toast({
-        title: "Succès",
-        description: `La méthode "${newMethodLabel}" a été ajoutée.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de l'ajout",
-        color: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   // Update payment method
   const updatePaymentMethod = async () => {
     if (!editingMethod || !editMethodLabel.trim()) return;
 
     try {
       setIsSubmitting(true);
-      const response = await fetch(`/api/payment-methods/${editingMethod.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ label: editMethodLabel.trim() }),
-      });
+      const response = await fetch(
+        `/api/payment-methods?id=${editingMethod.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: editMethodLabel.trim() }),
+        }
+      );
 
       if (!response.ok) throw new Error("Erreur lors de la mise à jour");
 
-      // Refresh the list after update
       const updatedMethods = await fetchPaymentMethods();
       setmethodPayment(updatedMethods);
       setEditingMethod(null);
@@ -181,13 +130,12 @@ export default function PaymentMethodsPage() {
   const deletePaymentMethod = async (id: string) => {
     try {
       setIsSubmitting(true);
-      const response = await fetch(`/api/payment-methods/${id}`, {
+      const response = await fetch(`/api/payment-methods?id=${id}`, {
         method: "DELETE",
       });
 
       if (!response.ok) throw new Error("Erreur lors de la suppression");
 
-      // Refresh the list after delete
       const updatedMethods = await fetchPaymentMethods();
       setmethodPayment(updatedMethods);
 
@@ -210,7 +158,7 @@ export default function PaymentMethodsPage() {
   // Open edit dialog
   const openEditDialog = (method: PaymentMethod) => {
     setEditingMethod(method);
-    setEditMethodLabel(method.label);
+    setEditMethodLabel(method.name);
     setIsModalOpen(true);
   };
 
@@ -220,74 +168,64 @@ export default function PaymentMethodsPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="w-full">
+      {/* Modal for adding new payment method */}
+      <Dialog open={isModalOpenAdd} onOpenChange={setIsModalOpenAdd}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter une méthode de paiement</DialogTitle>
+          </DialogHeader>
+          <PaymentMethodForm onSuccess={() => setIsModalOpenAdd(false)} />
+        </DialogContent>
+      </Dialog>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
       >
-        {/* Carte du formulaire d'ajout */}
-        <Card className="lg:col-span-1 p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <PlusCircle className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Ajouter une méthode</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nom de la méthode *</Label>
-              <Input
-                id="name"
-                placeholder="Ex: Carte Bancaire, Virement, etc."
-                value={newMethodLabel}
-                onChange={(e) => setNewMethodLabel(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addPaymentMethod()}
-              />
-            </div>
-            <Button
-              onClick={addPaymentMethod}
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <PlusCircle className="mr-2 h-4 w-4" />
-              )}
-              Ajouter
-            </Button>
-          </div>
-        </Card>
-
-        {/* Carte de la liste des méthodes */}
-        <Card className="lg:col-span-2 p-6 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold">Méthodes de paiement</h2>
+              <CardTitle>Méthodes de paiement</CardTitle>
             </div>
-            <div className="mb-4 flex items-center gap-3">
-              <Input
-                type="text"
-                placeholder="Rechercher une méthode..."
-                value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="max-w-sm"
-              />
-            </div>
-          </div>
+            <Badge variant="outline">
+              {methodPayment.length}{" "}
+              {methodPayment.length > 1 ? "méthodes" : "méthode"}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+              {/* Filters on left */}
+              <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
+                <Input
+                  placeholder="Rechercher..."
+                  className="w-full sm:w-64"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
 
-          <div className="rounded-md border">
+              {/* Button on right */}
+              <Button
+                color="indigodye"
+                onClick={() => setIsModalOpenAdd(true)}
+                className="w-full md:w-auto"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Ajouter une méthode
+              </Button>
+            </div>
+
             <Table>
-              <TableHeader className="bg-primary/5">
+              <TableHeader>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableHead key={column.key} className="font-medium">
-                      {column.label}
-                    </TableHead>
+                    <TableHead key={column.key}>{column.label}</TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
@@ -304,15 +242,14 @@ export default function PaymentMethodsPage() {
                         className="hover:bg-primary/5"
                       >
                         <TableCell className="font-medium">
-                          {method.label}
+                          {method.name}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell>
                           <div className="flex gap-2 justify-end">
                             <Button
-                              variant="ghost"
+                              color="tyrian"
                               size="icon"
                               onClick={() => openEditDialog(method)}
-                              className="text-primary hover:bg-primary/10"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -320,12 +257,12 @@ export default function PaymentMethodsPage() {
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
-                                  variant="ghost"
+                                  color="destructive"
                                   size="icon"
                                   disabled={isSubmitting}
-                                  className="text-destructive hover:bg-destructive/10"
+                                  className=""
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
@@ -335,7 +272,7 @@ export default function PaymentMethodsPage() {
                                   </AlertDialogTitle>
                                   <AlertDialogDescription>
                                     Cette action supprimera définitivement la
-                                    méthode "{method.label}".
+                                    méthode "{method.name}".
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -367,93 +304,98 @@ export default function PaymentMethodsPage() {
                       colSpan={columns.length}
                       className="h-24 text-center text-muted-foreground"
                     >
-                      {searchTerm ? (
-                        "Aucune méthode ne correspond à votre recherche."
-                      ) : (
-                        "Aucune méthode de paiement enregistrée pour le moment."
-                      )}
+                      {searchTerm
+                        ? "Aucune méthode ne correspond à votre recherche."
+                        : "Aucune méthode de paiement enregistrée."}
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
             </Table>
-          </div>
 
-          {/* Pagination */}
-          {filteredData.length > itemsPerPage && (
-            <div className="mt-4 flex justify-center">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    {currentPage === 1 ? (
-                      <PaginationPrevious className="cursor-not-allowed opacity-50" />
-                    ) : (
-                      <PaginationPrevious onClick={handlePreviousPage} />
+            {filteredData.length > ITEMS_PER_PAGE && (
+              <div className="mt-4 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      {currentPage === 1 ? (
+                        <PaginationPrevious className="cursor-not-allowed opacity-50" />
+                      ) : (
+                        <PaginationPrevious onClick={handlePreviousPage} />
+                      )}
+                    </PaginationItem>
+
+                    {/* Affichage de max 3 pages */}
+                    {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                      const page = i + 1;
+                      return (
+                        <PaginationItem key={page}>
+                          <Button
+                            variant={currentPage === page ? "soft" : "ghost"}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        </PaginationItem>
+                      );
+                    })}
+
+                    {/* Ellipsis et dernier bouton si > 3 pages */}
+                    {totalPages > 3 && currentPage < totalPages - 1 && (
+                      <PaginationItem>
+                        <span className="px-2 text-muted-foreground">…</span>
+                      </PaginationItem>
                     )}
-                  </PaginationItem>
 
-                  {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-                    const page = i + 1;
-                    return (
-                      <PaginationItem key={page}>
+                    {totalPages > 3 && currentPage < totalPages && (
+                      <PaginationItem>
                         <Button
-                          variant={currentPage === page ? "outline" : "ghost"}
-                          onClick={() => setCurrentPage(page)}
+                        
+                          variant={
+                            currentPage === totalPages ? "outline" : "ghost"
+                          }
+                          onClick={() => setCurrentPage(totalPages)}
                         >
-                          {page}
+                          {totalPages}
                         </Button>
                       </PaginationItem>
-                    );
-                  })}
-
-                  {totalPages > 3 && currentPage < totalPages && (
-                    <PaginationItem>
-                      <Button variant="ghost" disabled>
-                        ...
-                      </Button>
-                    </PaginationItem>
-                  )}
-
-                  <PaginationItem>
-                    {currentPage === totalPages ? (
-                      <PaginationNext className="cursor-not-allowed opacity-50" />
-                    ) : (
-                      <PaginationNext onClick={handleNextPage} />
                     )}
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+
+                    <PaginationItem>
+                      {currentPage === totalPages ? (
+                        <PaginationNext className="cursor-not-allowed opacity-50" />
+                      ) : (
+                        <PaginationNext onClick={handleNextPage} />
+                      )}
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </CardContent>
         </Card>
       </motion.div>
 
-      {/* Modale de modification */}
+      {/* Edit modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2">
               <Edit className="h-5 w-5" />
               Modifier la méthode
             </DialogTitle>
-            <DialogDescription>
-              Mettez à jour les informations de la méthode de paiement
-            </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4 mt-2">
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-method">Nom de la méthode *</Label>
+              <Label>Nom de la méthode </Label>
               <Input
-                id="edit-method"
                 value={editMethodLabel}
                 onChange={(e) => setEditMethodLabel(e.target.value)}
               />
             </div>
-
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-between gap-3 pt-4">
               <Button
-                variant="outline"
+                color="destructive"
                 onClick={() => setIsModalOpen(false)}
                 disabled={isSubmitting}
               >

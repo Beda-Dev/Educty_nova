@@ -6,7 +6,6 @@ import * as z from "zod";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Card from "@/components/ui/card-snippet";
 import {
   Form,
   FormControl,
@@ -17,11 +16,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
-import {
-  fetchLevels,
-} from "@/store/schoolservice";
+import { fetchLevels } from "@/store/schoolservice";
 import { useSchoolStore } from "@/store";
-import { Level } from "@/lib/interface";
 
 const FormSchema = z.object({
   level: z.string().min(1, {
@@ -31,9 +27,13 @@ const FormSchema = z.object({
 
 type FormSchemaType = z.infer<typeof FormSchema>;
 
-const InputFormValidation = () => {
+interface InputFormValidationProps {
+  onSuccess?: () => void;
+}
+
+const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const {setLevels} = useSchoolStore();
+  const { setLevels } = useSchoolStore();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -53,55 +53,53 @@ const InputFormValidation = () => {
     });
 
     if (response.ok) {
-      const updatelevel:Level[] = await fetchLevels();
-      setLevels(updatelevel);
+      const updatedLevels = await fetchLevels();
+      setLevels(updatedLevels);
       toast({
         title: "Niveau créé avec succès",
         description: "Le niveau a été ajouté avec succès.",
       });
       form.reset();
+      onSuccess?.();
     } else {
       toast({
         title: "Erreur",
-        description: `Erreur lors de l'envoi des données  ${response}`,
+        description: "Erreur lors de l'envoi des données",
       });
-      console.error("");
     }
 
     setIsLoading(false);
   }
 
   return (
-    <Card title="Ajouter un niveau">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="level"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Niveau</FormLabel>
-                <FormControl>
-                  <Input
-                    disabled={isLoading}
-                    placeholder="Ex: 6ème"
-                    {...field}
-                    className={cn("", {
-                      "border-destructive focus:border-destructive":
-                        form.formState.errors.level,
-                    })}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Ajout en cours..." : "Ajouter"}
-          </Button>
-        </form>
-      </Form>
-    </Card>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="level"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="mb-2">Niveau</FormLabel>
+              <FormControl>
+                <Input
+                  disabled={isLoading}
+                  placeholder="Ex: 6ème"
+                  {...field}
+                  className={cn("", {
+                    "border-destructive focus:border-destructive":
+                      form.formState.errors.level,
+                  })}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button color="indigodye" type="submit" disabled={isLoading}>
+          {isLoading ? "Ajout en cours..." : "Ajouter"}
+        </Button>
+      </form>
+    </Form>
   );
 };
 

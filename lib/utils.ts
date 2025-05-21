@@ -18,6 +18,53 @@ export const isLocationMatch = (
   );
 };
 
+export const isLocationMatch2 = (
+  targetLocation: string,
+  currentPath: string
+): boolean => {
+  // Normaliser les chemins en supprimant les slashs initiaux/finaux
+  const normalizePath = (path: string) => path.replace(/^\/|\/$/g, '');
+  const normalizedTarget = normalizePath(targetLocation);
+  const normalizedCurrent = normalizePath(currentPath);
+
+  // Cas 1: Correspondance exacte
+  if (normalizedCurrent === normalizedTarget) {
+    return true;
+  }
+
+  // Cas 2: La cible est un préfixe du chemin actuel (sous-route)
+  if (normalizedCurrent.startsWith(`${normalizedTarget}/`)) {
+    return true;
+  }
+
+  // Cas 3: Gestion des routes dynamiques (ex: /eleves/[id])
+  const targetSegments = normalizedTarget.split('/');
+  const currentSegments = normalizedCurrent.split('/');
+
+  // Si les segments ont des longueurs différentes, pas de correspondance
+  if (targetSegments.length !== currentSegments.length) {
+    return false;
+  }
+
+  // Vérifier chaque segment
+  for (let i = 0; i < targetSegments.length; i++) {
+    const targetSeg = targetSegments[i];
+    const currentSeg = currentSegments[i];
+
+    // Si le segment cible est dynamique (entre crochets)
+    if (targetSeg.startsWith('[') && targetSeg.endsWith(']')) {
+      continue; // On ignore les segments dynamiques
+    }
+
+    if (targetSeg !== currentSeg) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+
 export const RGBToHex = (r: number, g: number, b: number): string => {
   const componentToHex = (c: number): string => {
     const hex = c.toString(16);

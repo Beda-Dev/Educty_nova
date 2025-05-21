@@ -11,8 +11,8 @@ export default function LogoComponent({ className, ...props }: LogoComponentProp
     <Image
       src={LogoImage}
       alt="Logo"
-      width={150}
-      height={100}
+      width={500}
+      height={500}
       priority
       className={className}
       {...props}

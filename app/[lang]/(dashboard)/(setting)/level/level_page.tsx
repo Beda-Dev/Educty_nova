@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -9,37 +9,63 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
-import InputFormValidation from "./input_form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Level } from "@/lib/interface";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@iconify/react";
+import { Edit } from "lucide-react";
+import { useSchoolStore } from "@/store";
+import { verificationPermission } from "@/lib/fonction";
+import ErrorPage from "@/app/[lang]/non-Autoriser";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import InputFormValidation from "./input_form";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
-import { useSchoolStore } from "@/store";
 import { fetchLevels } from "@/store/schoolservice";
-import { Badge } from "@/components/ui/badge";
-import { verificationPermission } from "@/lib/fonction";
-import ErrorPage from "@/app/[lang]/non-Autoriser";
 
 interface Props {
   data: Level[];
 }
 
 const LevelPage = ({ data }: Props) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { setLevels, userOnline } = useSchoolStore();
+  const [filtered, setFiltered] = useState(() =>
+  data.filter((item) => item.active === 1)
+);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<{ label: string }>({
+    defaultValues: {
+      label: "",
+    },
+  });
 
   const permissionRequisVoir = ["voir niveau"];
   const permissionRequisModifier = ["modifier niveau"];
@@ -61,17 +87,7 @@ const LevelPage = ({ data }: Props) => {
     permissionRequisCreer
   );
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<{ label: string }>({
-    defaultValues: {
-      label: "",
-    },
-  });
+
 
   const handleEdit = (level: Level) => {
     setSelectedLevel(level);
@@ -109,16 +125,30 @@ const LevelPage = ({ data }: Props) => {
     }
   };
 
-  const activeLevels = data.filter((item) => item.active === 1);
+  const filteredData = filtered;
+
+  const ITEMS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const columns = [
     { key: "label", label: "Niveau" },
     { key: "class_count", label: "Nombre de classes" },
   ];
 
-  if (hasAdminAccessModifier === true) {
+  if (hasAdminAccessModifier) {
     columns.push({ key: "actions", label: "Actions" });
   }
+
+  useEffect(() => {
+  setFiltered(data.filter((item) => item.active === 1));
+}, [data]);
+
 
   if (hasAdminAccessVoir === false) {
     return (
@@ -129,99 +159,24 @@ const LevelPage = ({ data }: Props) => {
   }
 
   return (
-    <div
-      className={`grid grid-cols-1 ${
-        hasAdminAccessCreer ? `md:grid-cols-2` : `md:grid-cols-1`
-      }  gap-6`}
-    >
-            {/* Carte du formulaire d'ajout */}
-            {hasAdminAccessCreer ? (
-        <div className="bg-transparent p-2 h-[300px] rounded-sm w-[90%] mx-auto text-center items-center justify-center text-sm order-1 md:order-2">
-          <InputFormValidation />
-        </div>
-      ) : null} 
-
-      {/* Carte de la liste des niveaux */}
-      <Card className="p-6 shadow-sm order-2 md:order-1">
-        <div className="flex justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-            Liste des Niveaux
-          </h2>
-          <Badge variant="outline" className="px-3 py-1">
-            Total: {activeLevels.length}
-          </Badge>
-        </div>
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader className="bg-gray-50 dark:bg-gray-800">
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead key={column.key} className="font-medium">
-                    {column.label}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {activeLevels.length > 0 ? (
-                activeLevels.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  >
-                    <TableCell className="font-medium">{item.label}</TableCell>
-                    <TableCell className="text-center">
-                      {item.class_count}
-                    </TableCell>
-
-                    {hasAdminAccessModifier ? (
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(item)}
-                          className="text-primary hover:bg-primary/10"
-                        >
-                          <Icon icon="heroicons:pencil" className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    ) : null}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-gray-500"
-                  >
-                    Aucun niveau actif trouvé
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
-
-
+    <div className="w-full">
+      {/* Modale d'ajout */}
+      <Dialog open={isModalOpenAdd} onOpenChange={setIsModalOpenAdd}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Créer un nouveau niveau</DialogTitle>
+          </DialogHeader>
+          <InputFormValidation onSuccess={() => setIsModalOpenAdd(false)} />
+        </DialogContent>
+      </Dialog>
 
       {/* Modale de modification */}
-      <Dialog
-        open={isModalOpen}
-        onOpenChange={(open) => {
-          if (!open) setIsModalOpen(false);
-        }}
-      >
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">
-              <Icon icon="heroicons:pencil" className="inline mr-2 h-5 w-5" />
               Modifier le niveau
             </DialogTitle>
-            <DialogDescription className="text-gray-600 dark:text-gray-400">
-              Mettez à jour les informations de {selectedLevel?.label}
-            </DialogDescription>
           </DialogHeader>
 
           <form
@@ -229,7 +184,9 @@ const LevelPage = ({ data }: Props) => {
             className="space-y-4 mt-2"
           >
             <div className="space-y-2">
-              <Label htmlFor="label">Nom du niveau *</Label>
+              <label htmlFor="label" className="block text-sm font-medium">
+                Nom du niveau 
+              </label>
               <Input
                 id="label"
                 {...register("label", {
@@ -247,10 +204,10 @@ const LevelPage = ({ data }: Props) => {
               )}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-between gap-3 pt-4">
               <Button
                 type="button"
-                variant="outline"
+                color="destructive"
                 onClick={() => setIsModalOpen(false)}
                 disabled={isLoading}
               >
@@ -258,25 +215,125 @@ const LevelPage = ({ data }: Props) => {
               </Button>
               <Button
                 type="submit"
+                color="indigodye"
                 disabled={isLoading}
                 className="min-w-[120px]"
               >
-                {isLoading ? (
-                  <>
-                    <Icon
-                      icon="heroicons:arrow-path"
-                      className="h-4 w-4 animate-spin mr-2"
-                    />
-                    En cours...
-                  </>
-                ) : (
-                  "Mettre à jour"
-                )}
+                {isLoading ? "En cours..." : "Mettre à jour"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Liste des niveaux</CardTitle>
+          <Badge variant="outline">
+            {filteredData.length}{" "}
+            {filteredData.length > 1 ? "niveaux" : "niveau"}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+            {/* Filtre de recherche */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
+              <Input
+                placeholder="Rechercher..."
+                className="w-full sm:w-64"
+                onChange={(e) => {
+                  const value = e.target.value.toLowerCase();
+                  setCurrentPage(1);
+                  setFiltered(
+                    data.filter((item) =>
+                      item.label.toLowerCase().includes(value)
+                    )
+                  );
+                }}
+              />
+            </div>
+
+            {/* Bouton d'ajout */}
+            {hasAdminAccessCreer && (
+              <Button color="indigodye" onClick={() => setIsModalOpenAdd(true)}>
+                Ajouter un niveau
+              </Button>
+            )}
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableHead key={column.key}>{column.label}</TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paginatedData.length > 0 ? (
+                paginatedData.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.label}</TableCell>
+                    <TableCell>{item.class_count}</TableCell>
+                    {hasAdminAccessModifier && (
+                      <TableCell>
+                        <Button
+                          color="tyrian"
+                          size="icon"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    Aucun niveau trouvé
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+
+          {totalPages > 1 && (
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <span className="text-sm px-2">
+                    Page {currentPage} sur {totalPages}
+                  </span>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -19,7 +19,7 @@ export interface CalendarCategory {
 
 export interface PaymentMethod {
   id: number;
-  label: string;
+  name: string;
   created_at: string;
   updated_at: string;
   payments?: Payment[];
@@ -97,6 +97,9 @@ export interface User {
   created_at: string;
   updated_at: string;
   roles: Role[];
+  superior?: null;
+  subordinates?: UserSingle[];
+  avatar?: string | null;
   permissions?: Permission[];
   permissionNames?: string[];
 }
@@ -109,6 +112,9 @@ export interface UserSingle {
   email_verified_at: null;
   created_at: string;
   updated_at: string;
+  superior?: null;
+  subordinates?: UserSingle[];
+  avatar?: string | null;
 }
 
 export interface Student {
@@ -282,9 +288,8 @@ export interface Payment {
   installment: Installment;
   cash_register: CashRegister;
   cashier: UserSingle;
-  transaction_id?:number;
+  transaction_id?: number;
   payment_method?: PaymentMethod[];
-
 }
 
 export interface ExpenseType {
@@ -369,8 +374,3 @@ export interface Transaction {
   user?: User;
   cash_register_session?: CashRegisterSession;
 }
-
-
-
-
-

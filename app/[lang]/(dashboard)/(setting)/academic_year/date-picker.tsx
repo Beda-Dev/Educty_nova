@@ -24,6 +24,15 @@ import {
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import { useSchoolStore } from "@/store";
+import { fetchAcademicYears } from "@/store/schoolservice";
+
+
+interface DatePickerFormProps {
+  onSuccess?: () => void;
+}
+
+
 
 // Schéma de validation avec Zod
 const FormSchema = z.object({
@@ -34,7 +43,8 @@ const FormSchema = z.object({
 
 type FormSchemaType = z.infer<typeof FormSchema>;
 
-const DatePickerForm = () => {
+const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
+  const { setAcademicYears } = useSchoolStore();
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
   });
@@ -55,6 +65,12 @@ const DatePickerForm = () => {
 
     if (response.ok) {
       toast.success("Dates ajoutées avec succès");
+      const updatedAcademicYears = await fetchAcademicYears();
+      setAcademicYears(updatedAcademicYears);
+
+      if (onSuccess) {
+        onSuccess();
+      }
     } else {
       console.error("Erreur lors de l'envoi des dates" , response);
       toast.error("Une erreur est survenue");
@@ -92,7 +108,7 @@ const DatePickerForm = () => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+              <PopoverContent className="w-auto p-0 z-[9999]" side="left" align="start" sideOffset={4} avoidCollisions={false}>
                 <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
               </PopoverContent>
             </Popover>

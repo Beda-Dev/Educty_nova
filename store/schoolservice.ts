@@ -430,7 +430,7 @@ export const fetchClasses = async () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log("methode de paiement récupérées depuis localStorage : ", parsedData.state.methodPayment);
-          return parsedData.state.permissions || [];
+          return parsedData.state.methodPayment || [];
         } catch (error) {
           console.error("Erreur lors du parsing des données : ", error);
         }
@@ -452,7 +452,7 @@ export const fetchClasses = async () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log("validation de depensest récupérées depuis localStorage : ", parsedData.state.validationExpenses);
-          return parsedData.state.paymentStatus || [];
+          return parsedData.state.validationExpenses || [];
         } catch (error) {
           console.error("Erreur lors du parsing des données : ", error);
         }
@@ -474,7 +474,7 @@ export const fetchClasses = async () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log("parents récupérées depuis localStorage : ", parsedData.state.tutors);
-          return parsedData.state.paymentStatus || [];
+          return parsedData.state.tutors || [];
         } catch (error) {
           console.error("Erreur lors du parsing des données : ", error);
         }
@@ -496,7 +496,7 @@ export const fetchClasses = async () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log("transaction récupérées depuis localStorage : ", parsedData.state.transactions);
-          return parsedData.state.paymentStatus || [];
+          return parsedData.state.transactions || [];
         } catch (error) {
           console.error("Erreur lors du parsing des données : ", error);
         }
@@ -518,7 +518,7 @@ export const fetchClasses = async () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log("sessions de caisse récupérées depuis localStorage : ", parsedData.state.cashRegisterSessions);
-          return parsedData.state.paymentStatus || [];
+          return parsedData.state.cashRegisterSession || [];
         } catch (error) {
           console.error("Erreur lors du parsing des données : ", error);
         }
