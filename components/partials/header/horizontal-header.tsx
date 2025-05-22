@@ -1,6 +1,6 @@
 import React from "react";
 import { Search } from "lucide-react";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import Link from "next/link";
 const horizontalHeader: React.FC<{ handleOpenSearch: () => void }> = ({ handleOpenSearch }) => {
   return (
@@ -10,7 +10,7 @@ const horizontalHeader: React.FC<{ handleOpenSearch: () => void }> = ({ handleOp
           href="/dashboard"
           className=" text-primary flex items-center gap-2"
         >
-          <SiteLogo className="h-7 w-7" />
+          <LogoComponent1 width={28} height={28} />
           <span className=" text-xl font-semibold lg:inline-block hidden">
             {" "}
             Educty Nova

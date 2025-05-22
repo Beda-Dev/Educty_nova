@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -143,7 +143,7 @@ const ReceiptBlock = ({
     {/* En-tête */}
     <div className="flex justify-between items-center border-b pb-4 mb-6">
       <div className="flex items-center gap-3">
-        <SiteLogo className="w-10 h-10 text-primary" />
+        <LogoComponent1 width={40} height={40} />
         <div>
           <h1 className="text-xl font-bold">ÉCOLE ÉDUCTY</h1>
           <p className="text-sm text-gray-600">

@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSchoolStore } from "@/store";
 import { Card } from "@/components/ui/card";
@@ -152,7 +152,7 @@ const EmailUpdateForm = () => {
       <Card className="p-6 shadow-lg">
         <div className="flex flex-col items-center mb-6">
           <Link href="/dashboard" className="mb-4">
-            <SiteLogo className="h-12 w-12 text-primary" />
+            <LogoComponent1  width={48} height={48}/>
           </Link>
           <h1 className="text-2xl font-bold text-center text-gray-900">
             Modifier votre email

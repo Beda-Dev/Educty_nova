@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
-import { ArrowLeft, Loader2, AlertTriangle, CheckCircle2, Euro } from "lucide-react"
+import { ArrowLeft, Loader2, AlertTriangle, CheckCircle2, Euro, Clock, User as UserIcon, Calculator, FileText } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
@@ -19,113 +19,9 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-
-// Types
-interface User {
-  id: number
-  hierarchical_id: number | null
-  name: string
-  email: string
-  email_verified_at: string | null
-  created_at: string
-  updated_at: string
-  photo?: string
-}
-
-interface CashRegister {
-  id: number
-  cash_register_number: string
-  active: number
-  created_at: string
-  updated_at: string
-  location?: string
-}
-
-interface CashRegisterSession {
-  id: number
-  user_id: number
-  cash_register_id: number
-  opening_date: string
-  closing_date: string | null
-  opening_amount: string
-  closing_amount: string | null
-  status: "open" | "closed"
-  created_at: string
-  updated_at: string
-  user?: User
-  cash_register?: CashRegister
-  comment?: string
-  transactions_count?: number
-  transactions_total?: string
-}
-
-// Mock data for demonstration
-const mockSessions: CashRegisterSession[] = [
-  {
-    id: 3,
-    user_id: 1,
-    cash_register_id: 2,
-    opening_date: "2025-05-15 07:45:00",
-    closing_date: null,
-    opening_amount: "500000", // 5000 FCFA
-    closing_amount: null,
-    status: "open",
-    created_at: "2025-05-15T07:45:00.000000Z",
-    updated_at: "2025-05-15T07:45:00.000000Z",
-    transactions_count: 24,
-    transactions_total: "1250000", // 12500 FCFA
-    user: {
-      id: 1,
-      hierarchical_id: null,
-      name: "Tania Kaboré",
-      email: "tania.kabore@example.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-      photo: "/avatars/tania.jpg"
-    },
-    cash_register: {
-      id: 2,
-      cash_register_number: "CAISSE-002",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-      location: "Salle des professeurs"
-    },
-  },
-  {
-    id: 4,
-    user_id: 3,
-    cash_register_id: 3,
-    opening_date: "2025-05-15 08:30:00",
-    closing_date: null,
-    opening_amount: "750000", // 7500 FCFA
-    closing_amount: null,
-    status: "open",
-    created_at: "2025-05-15T08:30:00.000000Z",
-    updated_at: "2025-05-15T08:30:00.000000Z",
-    transactions_count: 18,
-    transactions_total: "980000", // 9800 FCFA
-    user: {
-      id: 3,
-      hierarchical_id: null,
-      name: "Sophie Martin",
-      email: "sophie.martin@example.com",
-      email_verified_at: null,
-      created_at: "2025-02-20T05:42:54.000000Z",
-      updated_at: "2025-02-20T09:21:47.000000Z",
-      photo: "/avatars/sophie.jpg"
-    },
-    cash_register: {
-      id: 3,
-      cash_register_number: "CAISSE-003",
-      active: 1,
-      created_at: "2025-02-20T03:37:19.000000Z",
-      updated_at: "2025-02-20T03:39:11.000000Z",
-      location: "Accueil principal"
-    },
-  }
-]
+import { useSchoolStore } from "@/store"
+import { fetchCashRegisterSessions , fetchTransactions } from "@/store/schoolservice"
+import { CashRegisterSession, Transaction } from "@/lib/interface"
 
 // Validation schema
 const formSchema = z.object({
@@ -142,11 +38,13 @@ interface Props {
 export default function CloseSessionPage({ params }: Props) {
   const router = useRouter()
   const { id } = params;
+  const { userOnline, users, cashRegisterSessions, setCashRegisterSessions, transactions , setTransactions } = useSchoolStore();
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [session, setSession] = useState<CashRegisterSession | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [sessionTransactions, setSessionTransactions] = useState<Transaction[]>([])
 
   // Initialize form with react-hook-form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -157,41 +55,56 @@ export default function CloseSessionPage({ params }: Props) {
     },
   })
 
-  // Fetch session data
-  useEffect(() => {
-    const fetchSession = async () => {
-      setIsLoading(true)
-      try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 800))
+    const fetchSessionData = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const updatedSessions: CashRegisterSession[] = await fetchCashRegisterSessions()
+      const updatedTransactions: Transaction[] = await fetchTransactions()
 
-        const sessionId = Number(id)
-        const foundSession = mockSessions.find((s) => s.id === sessionId)
+      setCashRegisterSessions(updatedSessions)
+      setTransactions(updatedTransactions)
 
-        if (!foundSession) {
-          setError("Session introuvable")
-          return
-        }
+      const sessionId = Number(id)
+      const foundSession = updatedSessions.find((s: CashRegisterSession) => s.id === sessionId)
 
-        if (foundSession.status === "closed") {
-          setError("Cette session est déjà fermée")
-          return
-        }
-
-        setSession(foundSession)
-        // Pre-fill closing amount with expected value (opening + transactions)
-        const expectedAmount = (parseInt(foundSession.opening_amount) + parseInt(foundSession.transactions_total || "0")).toString()
-        form.setValue("closing_amount", expectedAmount)
-      } catch (error) {
-        console.error("Error fetching session:", error)
-        setError("Une erreur est survenue lors de la récupération des données")
-      } finally {
-        setIsLoading(false)
+      if (!foundSession) {
+        setError("Session introuvable")
+        return
       }
-    }
 
-    fetchSession()
-  }, [params.id, form])
+      if (foundSession.status === "closed") {
+        setError("Cette session est déjà fermée")
+        return
+      }
+
+      // Filter transactions for this session
+      const sessionTransactions = updatedTransactions.filter(
+        (t) => t.cash_register_session_id === sessionId
+      )
+
+      setSessionTransactions(sessionTransactions)
+      setSession(foundSession)
+      
+      // Calculate total from transactions if not provided
+      const transactionsTotal = sessionTransactions.reduce(
+        (sum, t) => sum + parseInt(t.total_amount),
+        0
+      )
+
+      // Pre-fill closing amount with expected value (opening + transactions)
+      const expectedAmount = parseInt(foundSession.opening_amount) + transactionsTotal
+      form.setValue("closing_amount", expectedAmount.toString())
+    } catch (error) {
+      console.error("Error fetching session:", error)
+      setError("Une erreur est survenue lors de la récupération des données")
+    } finally {
+      setIsLoading(false)
+    }
+  }, [id, form, setCashRegisterSessions, setTransactions])
+
+  useEffect(() => {
+    fetchSessionData()
+  }, [fetchSessionData]) //
 
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -200,8 +113,30 @@ export default function CloseSessionPage({ params }: Props) {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch(`/api/cashRegisterSession?id=${session.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          closing_amount: values.closing_amount,
+          comment: values.comment,
+          status: 'closed',
+          closing_date: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la fermeture de la session')
+      }
+
+      const updatedSession = await response.json()
+
+      // Update store with the closed session
+      const updatedSessions = cashRegisterSessions.map(s => 
+        s.id === session.id ? updatedSession : s
+      )
+      setCashRegisterSessions(updatedSessions)
 
       // Show success animation
       setShowSuccess(true)
@@ -211,15 +146,15 @@ export default function CloseSessionPage({ params }: Props) {
       router.push("/caisse_comptabilite/session_caisse")
     } catch (error) {
       console.error("Error closing session:", error)
-      setError("Une erreur est survenue lors de la fermeture")
+      setError(error instanceof Error ? error.message : "Une erreur est survenue lors de la fermeture")
     } finally {
       setIsSubmitting(false)
     }
   }
 
   // Format FCFA currency
-  const formatFCFA = (value: string) => {
-    const numericValue = parseInt(value || "0")
+  const formatFCFA = (value: string | number) => {
+    const numericValue = typeof value === 'string' ? parseInt(value || "0") : value
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
       currency: 'XOF',
@@ -247,6 +182,11 @@ export default function CloseSessionPage({ params }: Props) {
     const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
 
     return `${diffHrs}h${diffMins.toString().padStart(2, '0')}`
+  }
+
+  // Find user by id
+  const getUserById = (userId: number) => {
+    return users.find(user => user.id === userId)
   }
 
   if (isLoading) {
@@ -286,7 +226,10 @@ export default function CloseSessionPage({ params }: Props) {
         >
           <Card className="max-w-3xl mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl">Erreur</CardTitle>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <AlertTriangle className="h-6 w-6 text-destructive" />
+                Erreur
+              </CardTitle>
               <CardDescription>Impossible de fermer la session</CardDescription>
             </CardHeader>
             <CardContent>
@@ -297,7 +240,7 @@ export default function CloseSessionPage({ params }: Props) {
               </Alert>
             </CardContent>
             <CardFooter className="flex justify-start border-t pt-6">
-              <Button variant="outline" onClick={() => router.push("/cash-register/sessions")}>
+              <Button variant="outline" onClick={() => router.push("/caisse_comptabilite/session_caisse")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Retour à la liste
               </Button>
@@ -330,7 +273,7 @@ export default function CloseSessionPage({ params }: Props) {
               </Alert>
             </CardContent>
             <CardFooter className="flex justify-start border-t pt-6">
-              <Button variant="outline" onClick={() => router.push("/cash-register/sessions")}>
+              <Button variant="outline" onClick={() => router.push("/caisse_comptabilite/session_caisse")}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Retour à la liste
               </Button>
@@ -340,6 +283,12 @@ export default function CloseSessionPage({ params }: Props) {
       </div>
     )
   }
+
+  const sessionUser = getUserById(session.user_id)
+  const transactionsTotal = sessionTransactions.reduce(
+    (sum, t) => sum + parseInt(t.total_amount),
+    0
+  )
 
   return (
     <div className="container mx-auto py-8">
@@ -355,14 +304,14 @@ export default function CloseSessionPage({ params }: Props) {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white dark:bg-gray-900 p-8 rounded-lg max-w-md text-center"
+              className="bg-white dark:bg-gray-900 p-8 rounded-lg max-w-md text-center shadow-xl"
             >
-              <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+              <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4 animate-pulse" />
               <h3 className="text-2xl font-bold mb-2">Session fermée</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 La session #{session.id} a été fermée avec succès.
               </p>
-              <div className="text-lg font-semibold">
+              <div className="text-lg font-semibold bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
                 Montant final: {formatFCFA(form.getValues("closing_amount"))}
               </div>
             </motion.div>
@@ -379,10 +328,13 @@ export default function CloseSessionPage({ params }: Props) {
           <CardHeader className="border-b">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl">Fermer la session de caisse</CardTitle>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <FileText className="h-6 w-6 text-primary" />
+                  Fermer la session de caisse
+                </CardTitle>
                 <CardDescription>Remplissez les informations pour fermer la session</CardDescription>
               </div>
-              <Badge variant="outline" className="px-3 py-1 text-sm">
+              <Badge color="secondary" className="px-3 py-1 text-sm font-medium">
                 #{session.id}
               </Badge>
             </div>
@@ -392,35 +344,60 @@ export default function CloseSessionPage({ params }: Props) {
               {/* Session information */}
               <div className="p-5 rounded-lg bg-gray-50 dark:bg-gray-800 border">
                 <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <Calculator className="h-5 w-5" />
                   <span>Résumé de la session</span>
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Caisse:</span>
-                      <span className="font-medium">N° {session.cash_register?.cash_register_number}</span>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                        <Euro className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Caisse</p>
+                        <p className="font-medium">N° {session.cash_register?.cash_register_number}</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Lieu:</span>
-                      <span className="font-medium">{session.cash_register?.location || "Non spécifié"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Ouverte par:</span>
-                      <span className="font-medium">{session.user?.name}</span>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
+                        <UserIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Ouverte par</p>
+                        <p className="font-medium">{sessionUser?.name || "Utilisateur inconnu"}</p>
+                        {sessionUser?.email && (
+                          <p className="text-sm text-muted-foreground">{sessionUser.email}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Date d'ouverture:</span>
-                      <span className="font-medium">{formatDate(session.opening_date)}</span>
+
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/30">
+                        <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Date d'ouverture</p>
+                        <p className="font-medium">{formatDate(session.opening_date)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Durée: {calculateDuration(session.opening_date)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Durée:</span>
-                      <span className="font-medium">{calculateDuration(session.opening_date)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Transactions:</span>
-                      <span className="font-medium">{session.transactions_count || 0}</span>
+
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
+                        <FileText className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Transactions</p>
+                        <p className="font-medium">{sessionTransactions.length} opérations</p>
+                        <p className="text-sm text-muted-foreground">
+                          Total: {formatFCFA(transactionsTotal)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -428,18 +405,27 @@ export default function CloseSessionPage({ params }: Props) {
                 <Separator className="my-4" />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900">
-                    <div className="text-sm text-blue-600 dark:text-blue-400">Ouverture</div>
-                    <div className="font-bold text-lg">{formatFCFA(session.opening_amount)}</div>
+                  <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900 flex flex-col">
+                    <div className="text-sm text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                      <Euro className="h-3 w-3" />
+                      Ouverture
+                    </div>
+                    <div className="font-bold text-lg mt-1">{formatFCFA(session.opening_amount)}</div>
                   </div>
-                  <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-900">
-                    <div className="text-sm text-green-600 dark:text-green-400">Transactions</div>
-                    <div className="font-bold text-lg">+{formatFCFA(session.transactions_total || "0")}</div>
+                  <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-900 flex flex-col">
+                    <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+                      <FileText className="h-3 w-3" />
+                      Transactions
+                    </div>
+                    <div className="font-bold text-lg mt-1">+{formatFCFA(transactionsTotal)}</div>
                   </div>
-                  <div className="p-3 rounded-md bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-900">
-                    <div className="text-sm text-purple-600 dark:text-purple-400">Attendu</div>
-                    <div className="font-bold text-lg">
-                      {formatFCFA((parseInt(session.opening_amount) + parseInt(session.transactions_total || "0")).toString())}
+                  <div className="p-3 rounded-md bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-900 flex flex-col">
+                    <div className="text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2">
+                      <Calculator className="h-3 w-3" />
+                      Attendu
+                    </div>
+                    <div className="font-bold text-lg mt-1">
+                      {formatFCFA(parseInt(session.opening_amount) + transactionsTotal)}
                     </div>
                   </div>
                 </div>
@@ -456,6 +442,7 @@ export default function CloseSessionPage({ params }: Props) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="flex items-center gap-2">
+                          <Euro className="h-4 w-4" />
                           <span>Montant de fermeture</span>
                         </FormLabel>
                         <FormControl>
@@ -466,7 +453,9 @@ export default function CloseSessionPage({ params }: Props) {
                               onChange={(e) => handleCurrencyChange(e, field.onChange)}
                               className="pl-10 text-lg font-medium"
                             />
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">FCFA</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                              <Euro className="h-4 w-4" />
+                            </span>
                           </div>
                         </FormControl>
                         <FormDescription>
@@ -483,7 +472,10 @@ export default function CloseSessionPage({ params }: Props) {
                     name="comment"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Commentaire (optionnel)</FormLabel>
+                        <FormLabel className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Commentaire (optionnel)
+                        </FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder="Ajoutez des observations sur cette session..."
@@ -500,7 +492,7 @@ export default function CloseSessionPage({ params }: Props) {
                   />
 
                   <div className="pt-4">
-                    <Alert color="warning">
+                    <Alert color="destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Confirmation requise</AlertTitle>
                       <AlertDescription>

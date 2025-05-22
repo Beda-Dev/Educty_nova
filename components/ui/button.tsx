@@ -158,7 +158,7 @@ const buttonVariants = cva(
         variant: "outline",
         color: "tyrian",
         className:
-          "text-tyrian hover:text-tyrian-foreground hover:border-tyrian hover:bg-tyrian/10",
+          "text-tyrian hover:text-tyrian-foreground hover:border-tyrian hover:bg-tyrian",
       },
       {
         variant: "soft",
@@ -168,7 +168,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         color: "tyrian",
-        className: "text-tyrian hover:bg-tyrian/10",
+        className: "text-tyrian hover:bg-tyrian/10 hover:text-muted-foreground",
       },
 
       // Bittersweet
@@ -176,7 +176,7 @@ const buttonVariants = cva(
         variant: "outline",
         color: "bittersweet",
         className:
-          "text-bittersweet hover:text-bittersweet-foreground hover:border-bittersweet hover:bg-bittersweet/10",
+          "text-bittersweet hover:text-bittersweet-foreground hover:border-bittersweet hover:bg-bittersweet",
       },
       {
         variant: "soft",
@@ -186,7 +186,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         color: "bittersweet",
-        className: "text-bittersweet hover:bg-bittersweet/10",
+        className: "text-bittersweet hover:bg-bittersweet/10 hover:text-muted-foreground",
       },
 
       // White Smoke
@@ -194,7 +194,7 @@ const buttonVariants = cva(
         variant: "outline",
         color: "whitesmoke",
         className:
-          "text-whitesmoke hover:text-whitesmoke-foreground hover:border-whitesmoke hover:bg-whitesmoke/50",
+          "text-whitesmoke hover:text-whitesmoke-foreground hover:border-whitesmoke hover:bg-whitesmoke",
       },
       {
         variant: "soft",
@@ -204,7 +204,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         color: "whitesmoke",
-        className: "text-whitesmoke hover:bg-whitesmoke/20",
+        className: "text-whitesmoke hover:bg-whitesmoke/20 hover:text-muted-foreground",
       },
 
       // Vivid Sky Blue
@@ -212,7 +212,7 @@ const buttonVariants = cva(
         variant: "outline",
         color: "skyblue",
         className:
-          "text-skyblue hover:text-skyblue-foreground hover:border-skyblue hover:bg-skyblue/10",
+          "text-skyblue hover:text-skyblue-foreground hover:border-skyblue hover:bg-skyblue",
       },
       {
         variant: "soft",
@@ -222,7 +222,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         color: "skyblue",
-        className: "text-skyblue hover:bg-skyblue/10",
+        className: "text-skyblue hover:bg-skyblue/10 hover:text-muted-foreground",
       },
 
       // Indigo Dye
@@ -230,22 +230,22 @@ const buttonVariants = cva(
         variant: "outline",
         color: "indigodye",
         className:
-          "text-indigodye hover:text-indigodye-foreground hover:border-indigodye hover:bg-indigodye/10",
+          "text-indigodye hover:text-indigodye-foreground hover:border-indigodye hover:bg-indigodye",
       },
       {
         variant: "soft",
         color: "indigodye",
-        className: "bg-indigodye/10 text-indigodye hover:bg-indigodye/20",
+        className: "bg-indigodye/10 text-indigodye hover:bg-indigodye/20 ",
       },
       {
         variant: "ghost",
         color: "indigodye",
-        className: "text-indigodye hover:bg-indigodye/10",
+        className: "text-indigodye hover:bg-indigodye/10  hover:text-muted-foreground",
       },
     ],
 
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
       size: "default",
     },
   }

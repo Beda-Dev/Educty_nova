@@ -9,7 +9,7 @@ import NestedMenus from "./nested-menus";
 import Image from "next/image";
 import Link from "next/link";
 import FooterMenu from "./footer-menu";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import LogoutFooter from "./logout-footer";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -159,7 +159,7 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
         >
           <div className=" pt-4 ">
             <Link href="/dashboard">
-              <SiteLogo className=" mx-auto text-primary h-8 w-8" />
+              <LogoComponent1 width={32} height={32} />
             </Link>
           </div>
           {/* end logo */}

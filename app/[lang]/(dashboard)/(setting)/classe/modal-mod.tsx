@@ -137,13 +137,13 @@ const EditClassModal = ({ classData, onClose, onUpdate, onOpen }: EditClassModal
             </div>
           </ScrollArea>
 
-          <div className="flex justify-center gap-3 mt-4">
+          <div className="flex justify-evenly gap-3 mt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={loading} onClick={onClose}>
+              <Button color="destructive" type="button"  disabled={loading} onClick={onClose}>
                 Annuler
               </Button>
             </DialogClose>
-            <Button type="button" onClick={handleUpdate} disabled={loading}>
+            <Button color="tyrian" type="button" onClick={handleUpdate} disabled={loading}>
               {loading ? "Mise à jour..." : "Mettre à jour"}
             </Button>
           </div>

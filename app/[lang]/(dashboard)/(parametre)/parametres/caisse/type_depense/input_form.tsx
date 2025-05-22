@@ -16,11 +16,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
-import { Card } from "@/components/ui/card";
 import { useSchoolStore } from "@/store";
 import { fetchExpenseType } from "@/store/schoolservice";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
+import { Pencil } from "lucide-react";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const formSchema = z.object({
   name: z.string()
@@ -33,9 +34,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface InputFormValidationProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
-const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
+const ExpenseTypeForm = ({ onSuccess, onClose }: InputFormValidationProps) => {
   const { setExpenseTypes } = useSchoolStore();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -91,8 +93,14 @@ const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
   };
 
   return (
-    <Card className="p-6 shadow-sm">
-
+    <>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Pencil className="h-5 w-5" />
+          Ajouter un type de dépense
+        </DialogTitle>
+      </DialogHeader>
+      
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -105,7 +113,7 @@ const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
                   <Input
                     {...field}
                     disabled={isLoading}
-                    placeholder=""
+                    placeholder="Ex: Fournitures de bureau"
                     className={cn({
                       "border-destructive": form.formState.errors.name,
                     })}
@@ -116,12 +124,20 @@ const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
             )}
           />
 
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-around gap-3 pt-4">
             <Button
+              type="button"
+              color="destructive"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Annuler
+            </Button>
+            <Button
+            color="indigodye"
               type="submit"
               disabled={isLoading}
               className="min-w-[120px]"
-              variant="outline"
             >
               {isLoading ? (
                 <>
@@ -132,16 +148,13 @@ const ExpenseTypeForm = ({ onSuccess }: InputFormValidationProps) => {
                   Enregistrement...
                 </>
               ) : (
-                <>
-                  <Icon icon="heroicons:check" className="h-4 w-4 mr-2" />
-                  Créer
-                </>
+                "Créer"
               )}
             </Button>
           </div>
         </form>
       </Form>
-    </Card>
+    </>
   );
 };
 

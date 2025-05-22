@@ -17,7 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchClasses } from "@/store/schoolservice";
-import {Classe} from '@/lib/interface'
+import { Classe } from "@/lib/interface";
 interface ClassData {
   level_id: number;
   label: string;
@@ -32,10 +32,8 @@ const DialogForm = () => {
   const [maxStudent, setMaxStudent] = useState<number | null>(null);
   const [studentNumber] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const {levels , classes , setClasses} = useSchoolStore()
+  const { levels, classes, setClasses } = useSchoolStore();
 
-
-  
   const validateForm = (): boolean => {
     if (!label.trim()) {
       toast.error("Le libellé est requis.");
@@ -81,8 +79,8 @@ const DialogForm = () => {
 
       toast.dismiss();
       toast.success("Classe créée avec succès !");
-      const update:Classe[] = await fetchClasses()
-      if(update){
+      const update: Classe[] = await fetchClasses();
+      if (update) {
         setClasses(update);
       }
       setLabel("");
@@ -98,9 +96,9 @@ const DialogForm = () => {
   };
 
   return (
-    <Dialog  open={open} onOpenChange={setOpen} >
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button  onClick={()=> setOpen(true) }>Ajouter une classe</Button>
+        <Button  color="indigodye" onClick={() => setOpen(true)}>Ajouter une classe</Button>
       </DialogTrigger>
       <DialogContent size="xl">
         <DialogHeader>
@@ -131,7 +129,11 @@ const DialogForm = () => {
               </div>
               <div className="flex flex-col gap-2">
                 <Label>Niveau</Label>
-                <ControlledSelectData datas={levels} onSelect={setSelectedLevelId} placeholder="Choisir un niveau" />
+                <ControlledSelectData
+                  datas={levels}
+                  onSelect={setSelectedLevelId}
+                  placeholder="Choisir un niveau"
+                />
               </div>
               <div className="flex flex-col gap-2">
                 <Label>Nombre d'élèves actuels</Label>
@@ -142,11 +144,16 @@ const DialogForm = () => {
 
           <div className="flex justify-center gap-3 mt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={loading}>
+              <Button color="destructive" type="button"  disabled={loading}>
                 Annuler
               </Button>
             </DialogClose>
-            <Button type="button" onClick={handleSubmit} disabled={loading}>
+            <Button
+              type="button"
+              color="indigodye"
+              onClick={handleSubmit}
+              disabled={loading}
+            >
               {loading ? "Création..." : "Créer"}
             </Button>
           </div>

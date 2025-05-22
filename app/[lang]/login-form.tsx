@@ -11,7 +11,6 @@ import toast from "react-hot-toast";
 import { cn , isLocationMatch, translate, getDynamicPath } from "@/lib/utils";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-import { SiteLogo } from "@/components/svg";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSchoolStore } from "@/store";
 import {User} from '@/lib/interface'

@@ -512,7 +512,7 @@ export default function DynamicMenu() {
     "/validation",
   ];
 
-  const parametreRoute = ["/fees_type"];
+  const parametreRoute = ["/fees_type" , "fees_type" , "/frais-scolaires/fees_type" ];
 
   const elevesSpecialRoutes = ["/new_registration", "/re-registration"];
 

@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 
 import Link from "next/link";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { ScrollArea } from "@/components/ui/scroll-area";
 export default function SubmitFormInDrawer() {
   return (
@@ -46,7 +46,8 @@ export default function SubmitFormInDrawer() {
             <div className=" text-center py-2">
               <div className="flex justify-center">
                 <Link href="#">
-                  <SiteLogo className="w-12 h-12 mb-2 text-primary" />
+                  
+                  <LogoComponent1 width={48} height={48} className="mb-2" />
                 </Link>
               </div>
               <h3 className="text-2xl font-bold text-default-700 ">

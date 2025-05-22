@@ -36,7 +36,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import Card from "@/components/ui/card-snippet";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useSchoolStore } from "@/store";
 import Select, { GroupBase, components } from "react-select";
 import makeAnimated from "react-select/animated";
@@ -112,131 +118,132 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
 
   return (
     <Card title="Utilisateurs">
-<div className="flex justify-between items-center mb-4 flex-wrap gap-4">
-  {/* Filtres à gauche */}
-  <div className="flex items-center gap-4 flex-wrap">
-    <Input
-      placeholder="Rechercher un nom ou email..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="w-64"
-    />
-    <Select
-      options={[
-        { value: null, label: "Tous les rôles" },
-        ...roles.map((r) => ({ value: r.name, label: r.name })),
-      ]}
-      onChange={(option) => setSelectedRole(option?.value || null)}
-      placeholder="Filtrer par rôle"
-      isClearable
-      className="min-w-[200px]"
-    />
-    <Badge variant="outline">
-      Total utilisateurs : {users.length}
-    </Badge>
-  </div>
-
-  {/* Bouton à droite */}
-  {hasAdminAccessCreer && (
-    <div>
-      <AddUserDialog roles={roles} />
-    </div>
-  )}
-</div>
-
-
-
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="font-semibold">Utilisateur</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Rôle(s)</TableHead>
-            <TableHead>Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {paginatedUsers.map((item) => {
-            return (
-              <TableRow key={item.email}>
-                <TableCell className="font-medium text-card-foreground/80">
-                  <div className="flex gap-3 items-center">
-                    <Avatar className="rounded-full">
-                      <AvatarFallback>
-                        {item.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-card-foreground flex">
-                      {item.name}{" "}
-                      {item.name === userOnline?.name ? (
-                        <p className="text-sm text-slate-400"> (vous)</p>
-                      ) : (
-                        ""
-                      )}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>{item.email}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {item.roles.map((roleItem) => (
-                      <Badge
-                        key={roleItem.id}
-                        variant="soft"
-                        className="capitalize"
-                      >
-                        {roleItem.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell className="flex justify-end">
-                  <div className="flex gap-3">
-                    {hasAdminAccessModifier ? (
-                      <EditingDialog user={item} roles={roles} />
-                    ) : null}
-                    {hasAdminAccessSupprimer ? (
-                      <DeleteUserButton userId={item.id} users={users} />
-                    ) : null}
-                  </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
-
-      <Pagination className="mt-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              className={page === 1 ? "pointer-events-none opacity-50" : ""}
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-xl">Utilisateurs</CardTitle>
+        <Badge variant="outline">Total utilisateurs : {users.length}</Badge>
+      </CardHeader>
+      <CardContent>
+        <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
+          {/* Filtres à gauche */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <Input
+              placeholder="Rechercher un nom ou email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-64"
             />
-          </PaginationItem>
-          <PaginationItem>
-            <span className="text-sm px-2">
-              Page {page} sur {Math.ceil(filteredUsers.length / itemsPerPage)}
-            </span>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext
-              onClick={() =>
-                setPage((prev) =>
-                  prev < Math.ceil(filteredUsers.length / itemsPerPage)
-                    ? prev + 1
-                    : prev
-                )
-              }
-              className={
-                page >= Math.ceil(filteredUsers.length / itemsPerPage)
-                  ? "pointer-events-none opacity-50"
-                  : ""
-              }
+            <Select
+              options={[
+                { value: null, label: "Tous les rôles" },
+                ...roles.map((r) => ({ value: r.name, label: r.name })),
+              ]}
+              onChange={(option) => setSelectedRole(option?.value || null)}
+              placeholder="Filtrer par rôle"
+              isClearable
+              className="min-w-[200px]"
             />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+          </div>
+
+          {/* Bouton à droite */}
+          {hasAdminAccessCreer && (
+            <div>
+              <AddUserDialog roles={roles} />
+            </div>
+          )}
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="font-semibold">Utilisateur</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Rôle(s)</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {paginatedUsers.map((item) => {
+              return (
+                <TableRow key={item.email}>
+                  <TableCell className="font-medium text-card-foreground/80">
+                    <div className="flex gap-3 items-center">
+                      <Avatar className="rounded-full">
+                        <AvatarFallback>
+                          {item.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-card-foreground flex">
+                        {item.name}{" "}
+                        {item.name === userOnline?.name ? (
+                          <p className="text-sm text-slate-400"> (vous)</p>
+                        ) : (
+                          ""
+                        )}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{item.email}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {item.roles.map((roleItem) => (
+                        <Badge
+                          key={roleItem.id}
+                          variant="soft"
+                          className="capitalize"
+                        >
+                          {roleItem.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="flex justify-end">
+                    <div className="flex gap-3">
+                      {hasAdminAccessModifier ? (
+                        <EditingDialog user={item} roles={roles} />
+                      ) : null}
+                      {hasAdminAccessSupprimer ? (
+                        <DeleteUserButton userId={item.id} users={users} />
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                className={page === 1 ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <span className="text-sm px-2">
+                Page {page} sur {Math.ceil(filteredUsers.length / itemsPerPage)}
+              </span>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  setPage((prev) =>
+                    prev < Math.ceil(filteredUsers.length / itemsPerPage)
+                      ? prev + 1
+                      : prev
+                  )
+                }
+                className={
+                  page >= Math.ceil(filteredUsers.length / itemsPerPage)
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </CardContent>
     </Card>
   );
 };
@@ -333,11 +340,7 @@ const EditingDialog = ({ user, roles }: { user: User; roles: Role[] }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          size="icon"
-          color="tyrian"
-          className="h-7 w-7"
-        >
+        <Button size="icon" color="tyrian" className="h-7 w-7">
           <Icon icon="heroicons:pencil" className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -386,11 +389,11 @@ const EditingDialog = ({ user, roles }: { user: User; roles: Role[] }) => {
             </div>
             <div className="flex justify-end space-x-3">
               <DialogClose asChild>
-                <Button type="button" variant="outline" disabled={isLoading}>
+                <Button type="button" color="destructive" disabled={isLoading}>
                   Annuler
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" color="tyrian" disabled={isLoading}>
                 {isLoading ? "Enregistrement..." : "Sauvegarder"}
               </Button>
             </div>
@@ -431,11 +434,7 @@ const DeleteUserButton = ({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button
-          size="icon"
-          color="bittersweet"
-          className="h-7 w-7"
-        >
+        <Button size="icon" color="bittersweet" className="h-7 w-7">
           <Icon icon="heroicons:trash" className="h-4 w-4" />
         </Button>
       </AlertDialogTrigger>
@@ -445,7 +444,7 @@ const DeleteUserButton = ({
           <p>Cette action est irréversible.</p>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel variant={"outline"} >Annuler</AlertDialogCancel>
           <AlertDialogAction
             onClick={deleteUser}
             className="bg-red-600 hover:bg-red-700"
@@ -546,7 +545,7 @@ const AddUserDialog = ({ roles }: { roles: Role[] }) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button  color="indigodye" >Ajouter un utilisateur</Button>
+        <Button color="indigodye">Ajouter un utilisateur</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -598,7 +597,7 @@ const AddUserDialog = ({ roles }: { roles: Role[] }) => {
                 </Button>
               </DialogClose>
 
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" color="indigodye" disabled={isLoading}>
                 {isLoading ? "Création..." : "Ajouter"}
               </Button>
             </div>

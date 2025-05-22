@@ -518,7 +518,7 @@ export const fetchClasses = async () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log("sessions de caisse récupérées depuis localStorage : ", parsedData.state.cashRegisterSessions);
-          return parsedData.state.cashRegisterSession || [];
+          return parsedData.state.cashRegisterSessions || [];
         } catch (error) {
           console.error("Erreur lors du parsing des données : ", error);
         }

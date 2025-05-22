@@ -56,6 +56,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CashRegisterSession, UserSingle, CashRegister } from "@/lib/interface";
+import { useSchoolStore } from "@/store";
 
 // Optimized filter functions using memoization
 const getUniqueUsers = (sessions: CashRegisterSession[]) => {
@@ -94,6 +95,7 @@ const formatSessionDate = (dateString: string | null) => {
 };
 
 export default function CashRegisterSessionsPage({ data }: { data: CashRegisterSession[] }) {
+  const { userOnline , users , cashRegisters } = useSchoolStore();
   const router = useRouter();
   const [sessions, setSessions] = useState<CashRegisterSession[]>(data);
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,9 +109,6 @@ export default function CashRegisterSessionsPage({ data }: { data: CashRegisterS
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Memoized derived data
-  const uniqueUsers = useMemo(() => getUniqueUsers(sessions), [sessions]);
-  const uniqueCashRegisters = useMemo(() => getUniqueCashRegisters(sessions), [sessions]);
 
   const filteredSessions = useMemo(() => {
     return sessions.filter(session => {
@@ -264,7 +263,7 @@ export default function CashRegisterSessionsPage({ data }: { data: CashRegisterS
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les utilisateurs</SelectItem>
-                  {uniqueUsers.map((user) => (
+                  {users.map((user) => (
                     <SelectItem key={user.id} value={user.id.toString()}>
                       {user.name}
                     </SelectItem>
@@ -285,7 +284,7 @@ export default function CashRegisterSessionsPage({ data }: { data: CashRegisterS
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Toutes les caisses</SelectItem>
-                  {uniqueCashRegisters.map((register) => (
+                  {cashRegisters.map((register) => (
                     <SelectItem
                       key={register.id}
                       value={register.id.toString()}
@@ -363,7 +362,7 @@ export default function CashRegisterSessionsPage({ data }: { data: CashRegisterS
           </div>
 
           {/* Sessions table */}
-          <div className="rounded-md border">
+          <div className="rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -416,7 +415,7 @@ export default function CashRegisterSessionsPage({ data }: { data: CashRegisterS
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
-                              variant="ghost"
+                              color="tyrian"
                               size="icon"
                               className="h-8 w-8"
                             >

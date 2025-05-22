@@ -12,7 +12,7 @@ export const columns: ColumnProps[] = [
 
  {
     key: "start",
-    label: "date debut",
+    label: "date début",
   },
   {
     key: "end",

@@ -11,7 +11,7 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
   trans: any
 }) => {
   const { badge, href, title } = item;
-  console.log("item", item);
+  // console.log("item", item);
 
   const pathname = usePathname();
   const locationName = getDynamicPath(pathname);

@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSchoolStore } from "@/store";
 import {User} from '@/lib/interface'
@@ -112,7 +112,7 @@ const ForgotForm = () => {
   return (
     <div className="w-full">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" />
+        <LogoComponent1 width={40} height={40} className="2xl:w-14 2xl:h-14 text-primary"/>
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
       Vous avez oublié votre mot de passe ?

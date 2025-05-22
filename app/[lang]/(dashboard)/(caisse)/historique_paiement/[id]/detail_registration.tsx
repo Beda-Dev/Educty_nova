@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -119,7 +119,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
               <div className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-gray-100">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-4">
-                    <SiteLogo className="w-10 h-10 text-primary" />
+                    <LogoComponent1 width={40} height={40} />
                     <h1 className="text-2xl font-bold text-gray-800">Educty</h1>
                   </div>
 
@@ -235,7 +235,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
               <div className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-gray-100">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-4">
-                    <SiteLogo className="w-10 h-10 text-primary" />
+                    <LogoComponent1 width={40} height={40} />
                     <h1 className="text-2xl font-bold text-gray-800">Educty</h1>
                   </div>
 

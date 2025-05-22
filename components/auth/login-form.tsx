@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { Icon } from "@iconify/react";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -57,7 +57,7 @@ const LogInForm = () => {
   return (
     <div className="w-full py-10">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:w-14 2xl:h-14 text-primary" />
+        <LogoComponent1 width={40} height={40} className="2xl:w-14 2xl:h-14 text-primary"/>
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Hey, Hello 👋

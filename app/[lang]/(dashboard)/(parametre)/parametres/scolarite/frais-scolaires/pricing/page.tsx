@@ -40,16 +40,10 @@ export default function PricingPage() {
 
   // Vérification des permissions
   const permissionRequisVoir = ["voir frais_Scolaires"];
-  const permissionRequisCreer = ["creer frais_Scolaires"];
 
   const hasAdminAccessVoir = verificationPermission(
     { permissionNames: userOnline?.permissionNames || [] },
     permissionRequisVoir
-  );
-
-  const hasAdminAccessCreer = verificationPermission(
-    { permissionNames: userOnline?.permissionNames || [] },
-    permissionRequisCreer
   );
 
   // Affichage des erreurs si l'utilisateur n'a pas accès
@@ -61,17 +55,5 @@ export default function PricingPage() {
     );
   }
 
-  return (
-    <Card title="Frais scolaire">
-      {/* Affichage du bouton pour créer une nouvelle tarification si l'utilisateur a les permissions nécessaires */}
-      {hasAdminAccessCreer && (
-        <div className="flex flex-wrap items-right justify-end gap-4 mb-3">
-          <DialogForm onSuccess={handleSuccess} />
-        </div>
-      )}
-
-      {/* Table des frais scolaires */}
-      <FeeTable data={pricing} />
-    </Card>
-  );
+  return <FeeTable data={pricing} />;
 }

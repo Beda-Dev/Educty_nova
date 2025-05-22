@@ -10,11 +10,10 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { Fragment, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { SiteLogo } from "@/components/svg";
 import LogoComponent from "./logo";
+import { motion } from "framer-motion";
 
 const LoginPage = () => {
-  const [openVideo, setOpenVideo] = useState<boolean>(false);
   return (
     <Fragment>
       <div className="min-h-screen bg-whitesmoke  flex items-center  overflow-hidden w-full">
@@ -28,40 +27,30 @@ const LoginPage = () => {
               alt="image"
               className="absolute top-0 left-0 w-full h-full "
             /> */}
-            <div className="">
-
-                <LogoComponent />
-
-            </div>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className=" relative hidden xl:flex justify-center items-center"
+            >
+              <LogoComponent />
+            </motion.div>
           </div>
 
           <div className=" bg-whitesmoke min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center">
-            <div className="lg:w-[480px] bg-whitesmoke ">
-              <LogInForm />
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+              className="bg-whitesmoke min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center"
+            >
+              <div className="lg:w-[480px] bg-whitesmoke ">
+                <LogInForm />
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
-      <Dialog open={openVideo}>
-        <DialogContent size="lg" className="p-0" hiddenCloseIcon>
-          <Button
-            size="icon"
-            onClick={() => setOpenVideo(false)}
-            className="absolute -top-4 -right-4 bg-default-900"
-          >
-            <X className="w-6 h-6" />
-          </Button>
-          <iframe
-            width="100%"
-            height="315"
-            src="https://www.youtube.com/embed/8D6b3McyhhU?si=zGOlY311c21dR70j"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          ></iframe>
-        </DialogContent>
-      </Dialog>
     </Fragment>
   );
 };

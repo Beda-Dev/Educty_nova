@@ -14,15 +14,15 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 
 const schema = z.object({
   password: z
     .string()
-    .min(4, { message: "Votre mot de passe doit contenir au moins 4 caractères." }),
+    .min(8, { message: "Votre mot de passe doit contenir au moins 8 caractères." }),
   confirmPassword: z
     .string()
-    .min(4, { message: "Votre mot de passe doit contenir au moins 4 caractères." }),
+    .min(8, { message: "Votre mot de passe doit contenir au moins 8 caractères." }),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],
@@ -76,7 +76,7 @@ const FormulaireNouveauMotDePasse = () => {
   return (
     <div className="w-full">
       <Link href="/dashboard" className="inline-block">
-        <SiteLogo className="h-10 w-10 2xl:h-14 2xl:w-14 text-primary" />
+        <LogoComponent1 width={40} height={40} className="2xl:h-14 2xl:w-14"/>
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl lg:text-2xl text-xl font-bold text-default-900">
         Créer un nouveau mot de passe

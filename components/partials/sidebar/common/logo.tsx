@@ -1,4 +1,4 @@
-import { SiteLogo } from "@/components/svg";
+import LogoComponent1 from "@/app/[lang]/logo1";
 import { useSidebar } from "@/store";
 import React from "react";
 
@@ -8,7 +8,7 @@ const SidebarLogo = ({ hovered }: { hovered?: boolean }) => {
     <div className="px-4 py-4 ">
       <div className=" flex items-center">
         <div className="flex flex-1 items-center gap-x-3  ">
-          <SiteLogo className="h-8 w-8 " />
+          <LogoComponent1 width={32} height={32} />
           {(!collapsed || hovered) && (
             <div className="flex-1  text-xl text-primary  font-semibold ">Educty Nova
             </div>
