@@ -198,7 +198,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                   </TableCell>
                   <TableCell className="flex justify-end">
                     <div className="flex gap-3">
-                      {hasAdminAccessModifier ? (
+                      {true ? (
                         <EditingDialog user={item} roles={roles} />
                       ) : null}
                       {hasAdminAccessSupprimer ? (

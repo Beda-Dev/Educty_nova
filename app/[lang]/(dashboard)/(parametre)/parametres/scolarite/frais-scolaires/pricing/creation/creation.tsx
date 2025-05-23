@@ -701,6 +701,7 @@ export default function TarificationPage() {
                         />
                       </div>
                       <Button
+                      color="indigodye"
                         onClick={ajouterPaiement}
                         disabled={
                           !nouvelleDatePaiement ||

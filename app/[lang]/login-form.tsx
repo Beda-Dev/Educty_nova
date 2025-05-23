@@ -8,24 +8,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { cn , isLocationMatch, translate, getDynamicPath } from "@/lib/utils";
+import { cn, isLocationMatch, translate, getDynamicPath } from "@/lib/utils";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useSchoolStore } from "@/store";
-import {User} from '@/lib/interface'
+import { User } from "@/lib/interface";
 import { useRouter } from "next/navigation";
-import {mergeUserPermissions} from "@/lib/fonction";
+import { mergeUserPermissions } from "@/lib/fonction";
 import LogoComponent from "./logo";
 
 const schema = z.object({
-  email: z.string().email({ message: "Votre adresse e-mail n’est pas valide." }),
+  email: z
+    .string()
+    .email({ message: "Votre adresse e-mail n’est pas valide." }),
   password: z.string().min(4),
 });
 
 function findUserByEmail(email: string, users: User[]): User | null {
-  return users.find(user => user.email === email) || null;
-} 
+  return users.find((user) => user.email === email) || null;
+}
 
 type LoginFormData = {
   email: string;
@@ -33,10 +35,13 @@ type LoginFormData = {
 };
 
 const LogInForm = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [passwordType, setPasswordType] = React.useState("password");
-  const {users , setUserOnline , roles , permissions} = useSchoolStore()
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [apiError, setApiError] = React.useState<string | null>(null);
+
+  const { users, setUserOnline, roles, permissions } = useSchoolStore();
   const togglePasswordType = () => {
     if (passwordType === "text") {
       setPasswordType("password");
@@ -48,7 +53,7 @@ const LogInForm = () => {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm({
     resolver: zodResolver(schema),
     mode: "all",
@@ -62,9 +67,8 @@ const LogInForm = () => {
   const toggleVisibility = () => setIsVisible(!isVisible);
   const isDesktop2xl = useMediaQuery("(max-width: 1530px)");
 
-
-  
   const onSubmit = async (formData: LoginFormData) => {
+    setIsLoading(true);
     startTransition(async () => {
       try {
         const response = await fetch("/api/login", {
@@ -72,53 +76,60 @@ const LogInForm = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         });
-  
+
         const result = await response.json();
-  
+
         if (!response.ok) {
-          toast.error(result?.message || "Identifiants invalides ou erreur serveur.");
+          setApiError(result?.message || "Identifiants invalides.");
+          toast.error(
+            result?.message || "Identifiants invalides ou erreur serveur."
+          );
           console.warn("Échec de connexion :", result);
           return;
         }
-  
+
         const userData = result.data;
-        const userWithPermissions = mergeUserPermissions(userData, roles, permissions);
-  
+        const userWithPermissions = mergeUserPermissions(
+          userData,
+          roles,
+          permissions
+        );
+
         setUserOnline(userWithPermissions || userData);
-  
+
         toast.success("Connexion réussie");
         router.push("/dashboard");
         reset();
       } catch (error) {
         console.error("Erreur lors de la tentative de connexion :", error);
         toast.error("Erreur réseau. Veuillez réessayer.");
+      } finally {
+        setIsLoading(false);
       }
     });
   };
-  
 
   if (!users?.length || !roles?.length || !permissions?.length) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-whitesmoke">
-        <Loader2 className="h-6 w-6 animate-spin text-primary bg-whitesmoke" />
-        <span className="ml-2 text-primary bg-whitesmoke">Chargement...</span>
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="text-primary">Chargement des données...</span>
       </div>
     );
   }
-    
 
-
-  
   return (
     <div className="w-full bg-whitesmoke ">
-
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900 bg-whitesmoke ">
-      Bonjour 👋
+        Bonjour 👋
       </div>
       <div className="2xl:text-lg text-base text-default-600 mt-2 leading-6 bg-whitesmoke">
-      Entrez vos identifiants pour accéder à votre compte
+        Entrez vos identifiants pour accéder à votre compte
       </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="2xl:mt-7 mt-8 bg-whitesmoke">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="2xl:mt-7 mt-8 bg-whitesmoke"
+      >
         <div className="relative bg-whitesmoke">
           <Input
             removeWrapper
@@ -131,6 +142,8 @@ const LogInForm = () => {
             className={cn("peer", {
               "border-destructive": errors.email,
             })}
+              aria-invalid={!!errors.email}
+  aria-describedby="email-error"
           />
           <Label
             htmlFor="email"
@@ -144,9 +157,11 @@ const LogInForm = () => {
             Email
           </Label>
         </div>
-        {errors.email && (
-          <div className=" text-destructive mt-2 bg-whitesmoke">{errors.email.message}</div>
-        )}
+{errors.email && (
+  <p id="email-error" className="mt-2 text-sm text-destructive">
+    {errors.email.message}
+  </p>
+)}
 
         <div className="relative mt-6 bg-whitesmoke">
           <Input
@@ -160,6 +175,7 @@ const LogInForm = () => {
             className={cn("peer", {
               "border-destructive": errors.password,
             })}
+            
           />
           <Label
             htmlFor="password"
@@ -177,7 +193,10 @@ const LogInForm = () => {
             onClick={togglePasswordType}
           >
             {passwordType === "password" ? (
-              <Icon icon="heroicons:eye" className="w-4 h-4 text-default-400 " />
+              <Icon
+                icon="heroicons:eye"
+                className="w-4 h-4 text-default-400 "
+              />
             ) : (
               <Icon
                 icon="heroicons:eye-slash"
@@ -193,19 +212,27 @@ const LogInForm = () => {
         )}
 
         <div className="mt-5  mb-6 flex flex-wrap gap-2 bg-whitesmoke">
-
-          <Link href="/forgot" className="flex-none text-sm text-primary bg-whitesmoke">
-          Mot de passe oublié ?
+          <Link
+            href="/forgot"
+            className="flex-none text-sm text-primary bg-whitesmoke"
+          >
+            Mot de passe oublié ?
           </Link>
         </div>
         <Button
-        color="tyrian"
-          className="w-full"
-          disabled={isPending}
-          size={!isDesktop2xl ? "lg" : "md"}
+          color="tyrian"
+          type="submit"
+          className="w-full transition-opacity duration-300"
+          disabled={isLoading || !isValid}
         >
-          {isPending && <Loader2 className="ltr:mr-2 rtl:ml-2 h-4 w-4 animate-spin" />}
-          {isPending ? "Chargement..." : "Se connecter"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connexion en cours...
+            </>
+          ) : (
+            "Se connecter"
+          )}
         </Button>
       </form>
     </div>

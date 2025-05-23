@@ -194,7 +194,7 @@ export default function RolesManagement() {
                       value={newResponsibility}
                       onChange={(e) => setNewResponsibility(e.target.value)}
                     />
-                    <Button type="button" onClick={handleAddResponsibility}>
+                    <Button color="indigodye" type="button" onClick={handleAddResponsibility}>
                       Ajouter
                     </Button>
                   </div>

@@ -69,13 +69,13 @@ export default function PermissionsTable({
   
 
   
-  if (!hasAdminAccessVoir) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (!hasAdminAccessVoir) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return (
     <Card className="p-4" title="permissions">

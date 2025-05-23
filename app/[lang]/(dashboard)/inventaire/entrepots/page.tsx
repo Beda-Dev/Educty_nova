@@ -174,7 +174,8 @@ export default function EntrepotsPage() {
             </div>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
               <DialogTrigger asChild>
-                <Button>
+                <Button  color="indigodye">
+
                   <Plus className="mr-2 h-4 w-4" />
                   Ajouter un entrepôt
                 </Button>

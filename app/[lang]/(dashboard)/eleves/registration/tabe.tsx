@@ -166,7 +166,7 @@ const RegistrationForm = ({ classes, academicYears, students, documentTypes }: {
             </div>
           ))}
           <Button
-            variant="outline"
+            color="indigodye"
             onClick={() => setDocuments([...documents, { document_type_id: 0, student_id: registration.student_id, label: "" }])}
           >
             Ajouter un document

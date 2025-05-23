@@ -504,6 +504,7 @@ export default function TarificationPage() {
                       />
                     </div>
                     <Button
+                      color="indigodye"
                       onClick={ajouterPaiement}
                       disabled={
                         !nouvelleDatePaiement || !nouveauMontantPaiement || Number.parseInt(nouveauMontantPaiement) <= 0

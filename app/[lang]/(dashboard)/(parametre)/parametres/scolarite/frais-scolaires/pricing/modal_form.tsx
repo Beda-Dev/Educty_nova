@@ -171,7 +171,7 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}>Ajouter une tarification</Button>
+        <Button color="indigodye" onClick={() => setOpen(true)}>Ajouter une tarification</Button>
       </DialogTrigger>
       <DialogContent size="xl">
         <DialogHeader>

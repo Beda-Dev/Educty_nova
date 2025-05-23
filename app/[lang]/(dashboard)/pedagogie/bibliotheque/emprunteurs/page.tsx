@@ -16,7 +16,7 @@ export default function UtilisateursPage() {
       <main className="flex-1 p-4 md:p-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Gestion des Utilisateurs</h1>
-          <Button>
+          <Button color="indigodye" >
             <UserPlus className="mr-2 h-4 w-4" />
             Ajouter un utilisateur
           </Button>

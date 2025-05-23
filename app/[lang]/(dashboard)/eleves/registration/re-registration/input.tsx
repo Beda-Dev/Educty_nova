@@ -420,7 +420,7 @@ export default function FileManager({
             <p className="mt-1 text-sm text-muted-foreground">
               Commencez par ajouter des documents pour {student.name} {student.first_name}
             </p>
-            <Button variant="outline" size="sm" className="mt-4" onClick={() => setOpen(true)}>
+            <Button color="indigodye"  size="sm" className="mt-4" onClick={() => setOpen(true)}>
               <PlusCircle className="w-4 h-4 mr-2" />
               Ajouter un document
             </Button>

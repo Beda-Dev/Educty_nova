@@ -150,7 +150,7 @@ const EditModal: React.FC<EditModalProps> = ({
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            color="indigodye"
+                            variant="outline"
                             className={cn(
                               "w-full justify-start text-left font-normal",
                               !startDate && "text-muted-foreground"
@@ -167,7 +167,7 @@ const EditModal: React.FC<EditModalProps> = ({
                       </PopoverTrigger>
                       <PopoverContent
                         className="w-auto p-0 z-[9999]"
-                        align="start"
+                        side="left" align="start" sideOffset={4} avoidCollisions={false}
                       >
                         <Calendar
                           mode="single"
@@ -194,7 +194,7 @@ const EditModal: React.FC<EditModalProps> = ({
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            color="indigodye"
+                            variant="outline"
                             className={cn(
                               "w-full justify-start text-left font-normal",
                               !endDate && "text-muted-foreground"
@@ -211,7 +211,7 @@ const EditModal: React.FC<EditModalProps> = ({
                       </PopoverTrigger>
                       <PopoverContent
                         className="w-auto p-0 z-[9999]"
-                        align="start"
+                        side="right" align="start" sideOffset={4} avoidCollisions={false}
                       >
                         <Calendar
                           mode="single"
@@ -235,7 +235,7 @@ const EditModal: React.FC<EditModalProps> = ({
                     Annuler
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={isLoading} className="">
+                <Button color="indigodye" type="submit" disabled={isLoading} className="">
                   {isLoading ? (
                     <>
                       <span className="animate-spin mr-2">↻</span>

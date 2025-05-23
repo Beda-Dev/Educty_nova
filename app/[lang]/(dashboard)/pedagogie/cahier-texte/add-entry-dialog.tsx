@@ -314,10 +314,10 @@ export function AddEntryDialog({
             />
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button color="destructive" type="button" onClick={() => onOpenChange(false)}>
                 Annuler
               </Button>
-              <Button type="submit">Ajouter</Button>
+              <Button color="indigodye" type="submit">Ajouter</Button>
             </DialogFooter>
           </form>
         </Form>

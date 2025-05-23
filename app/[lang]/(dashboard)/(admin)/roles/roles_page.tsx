@@ -99,13 +99,13 @@ const RolePage = ({ data, isLoading = false }: Props) => {
     }
   };
 
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return (
     <div

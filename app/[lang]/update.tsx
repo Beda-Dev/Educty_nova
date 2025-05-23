@@ -44,7 +44,6 @@ const DataFetcher = () => {
   const setInstallments = useSchoolStore((state) => state.setInstallments);
   const setCashRegisters = useSchoolStore((state) => state.setCashRegisters);
   const setExpenseTypes = useSchoolStore((state) => state.setExpenseTypes);
-  const setExpenses = useSchoolStore((state) => state.setExpenses);
   const setSettings = useSchoolStore((state) => state.setSettings);
   const setAcademicYearCurrent = useSchoolStore((state) => state.setAcademicYearCurrent);
   const setPermission = useSchoolStore((state) => state.setPermission);
@@ -126,7 +125,6 @@ const DataFetcher = () => {
         setInstallments(installments);
         setCashRegisters(cashRegisters);
         setExpenseTypes(expenseTypes);
-        setExpenses(expenses);
         setSettings(settings);
         setPermission(permissions)
       } catch (error) {
@@ -165,7 +163,6 @@ const DataFetcher = () => {
     setInstallments,
     setCashRegisters,
     setExpenseTypes,
-    setExpenses,
     setSettings,
     setPermission
   ]);

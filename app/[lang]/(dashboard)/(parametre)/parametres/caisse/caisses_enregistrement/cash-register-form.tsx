@@ -73,7 +73,7 @@ export default function CashRegisterForm({ onSuccess }: CashRegisterFormProps) {
           </p>
         )}
       </div>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button color="indigodye" type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (

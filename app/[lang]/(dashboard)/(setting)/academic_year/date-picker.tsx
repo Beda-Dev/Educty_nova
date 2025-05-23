@@ -129,7 +129,7 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 z-[9999]" align="start">
+              <PopoverContent className="w-auto p-0 z-[9999]" side="right" align="start" sideOffset={4} avoidCollisions={false}>
                 <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus />
               </PopoverContent>
             </Popover>
@@ -141,7 +141,7 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
         <input type="hidden" {...form.register("start_date")} />
         <input type="hidden" {...form.register("end_date")} />
 
-        <Button type="submit" disabled={!startDate || !endDate || isLoading} className="w-full">
+        <Button color="indigodye" type="submit" disabled={!startDate || !endDate || isLoading} className="w-full">
           {isLoading ? "Envoi..." : "Ajouter"}
         </Button>
       </form>
