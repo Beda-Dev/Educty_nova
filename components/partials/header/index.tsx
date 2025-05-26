@@ -17,12 +17,15 @@ import ClassicHeader from "./layout/classic-header";
 import FullScreen from "./full-screen";
 import {AcademicYear , User} from "@/lib/interface"
 import { useSchoolStore } from "@/store";
+import {LastOpenSessionPopover} from "./sessionCurrent";
 
 const NavTools = ({ isDesktop, isMobile, sidebarType }: { isDesktop: boolean; isMobile: boolean; sidebarType: string ; academicYearsData : AcademicYear[]  }) => {
-  const { academicYears , users , userOnline } = useSchoolStore();
+  const { academicYears , users , userOnline , cashRegisterSessions } = useSchoolStore();
   return (
     <div className="nav-tools flex items-center  gap-2">
+      
       {userOnline && <AcademicYearsDisplay data={academicYears} user={userOnline} Mobile={isMobile} />}
+      <LastOpenSessionPopover sessions={cashRegisterSessions} />
       {isDesktop && <Language />}
       {isDesktop && <FullScreen />}
 

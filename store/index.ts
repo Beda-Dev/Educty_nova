@@ -25,7 +25,8 @@ import {
   ValidationExpense,
   Tutor,
   Transaction,
-  CashRegisterSession
+  CashRegisterSession,
+  Setting
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -120,9 +121,7 @@ export const useSidebar = create<SidebarState>()(
 
 // Store pour les données scolaires
 
-interface Setting {
-  registration_number_format: string;
-}
+
 
 
 interface SchoolStore {

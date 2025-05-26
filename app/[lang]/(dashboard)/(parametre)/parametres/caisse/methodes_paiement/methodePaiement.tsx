@@ -53,7 +53,11 @@ import {
 } from "@/components/ui/select";
 import PaymentMethodForm from "./payment-method-form";
 
-export default function PaymentMethodsPage() {
+interface PaymentPaymentProps {
+  data: PaymentMethod[];
+}
+
+export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(
     null
   );
@@ -64,11 +68,11 @@ export default function PaymentMethodsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
-  const { methodPayment, setmethodPayment } = useSchoolStore();
+  const {  setmethodPayment } = useSchoolStore();
   const router = useRouter();
 
   const ITEMS_PER_PAGE = 5;
-  const filteredData = methodPayment.filter((item) =>
+  const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -134,7 +138,7 @@ export default function PaymentMethodsPage() {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Erreur lors de la suppression");
+      
 
       const updatedMethods = await fetchPaymentMethods();
       setmethodPayment(updatedMethods);
@@ -142,9 +146,11 @@ export default function PaymentMethodsPage() {
       toast({
         title: "Succès",
         description: "Méthode supprimée avec succès",
+        color: "success",
       });
       router.refresh();
     } catch (error) {
+      console.error("Erreur lors de la suppression:", error);
       toast({
         title: "Erreur",
         description: "Échec de la suppression",
@@ -191,8 +197,8 @@ export default function PaymentMethodsPage() {
               <CardTitle>Méthodes de paiement</CardTitle>
             </div>
             <Badge variant="outline">
-              {methodPayment.length}{" "}
-              {methodPayment.length > 1 ? "méthodes" : "méthode"}
+              {filteredData.length}{" "}
+              {filteredData.length > 1 ? "méthodes" : "méthode"}
             </Badge>
           </CardHeader>
           <CardContent>
@@ -276,12 +282,13 @@ export default function PaymentMethodsPage() {
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                  <AlertDialogCancel variant="outline">Annuler</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() =>
                                       deletePaymentMethod(method.id.toString())
                                     }
-                                    className="bg-destructive hover:bg-destructive/90"
+                                    
+                                    color="destructive"
                                     disabled={isSubmitting}
                                   >
                                     {isSubmitting ? (

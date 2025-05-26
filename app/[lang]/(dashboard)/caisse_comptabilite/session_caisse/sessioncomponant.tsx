@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarIcon,
   ChevronLeft,
@@ -13,16 +13,12 @@ import {
   RefreshCw,
   Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 
+// Import des composants UI
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -55,8 +51,6 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { CashRegisterSession, UserSingle, CashRegister } from "@/lib/interface";
-import { useSchoolStore } from "@/store";
 import { Label } from "@/components/ui/label";
 import {
   Pagination,
@@ -65,27 +59,29 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ModalWithAnimation } from "./modal";
-import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CashRegisterSession } from "@/lib/interface";
+import { useSchoolStore } from "@/store";
 
-// Memoized currency formatter
 const formatCurrency = (amount: string) => {
   const numericAmount = Number.parseInt(amount) / 100;
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
     currency: "XOF",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-    .format(numericAmount)
-    .replace("CFA", "FCFA");
+  }).format(numericAmount);
 };
 
-// Memoized date formatter
 const formatSessionDate = (dateString: string | null) => {
   if (!dateString) return "—";
-  return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: fr });
+  return format(new Date(dateString), "dd MMM yyyy, HH:mm", { locale: fr });
 };
 
 export default function CashRegisterSessionsPage({
@@ -96,8 +92,6 @@ export default function CashRegisterSessionsPage({
   const { userOnline, users, cashRegisters } = useSchoolStore();
   const router = useRouter();
   const [sessions, setSessions] = useState<CashRegisterSession[]>(data);
-  const [selectedSession, setSelectedSession] =
-    useState<CashRegisterSession | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [userFilter, setUserFilter] = useState<string | null>(null);
@@ -105,67 +99,55 @@ export default function CashRegisterSessionsPage({
   const [dateRange, setDateRange] = useState<{
     from: Date | undefined;
     to: Date | undefined;
-  }>({ from: undefined, to: undefined });
+  }>({
+    from: undefined,
+    to: undefined,
+  });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Filtrage des sessions
   const filteredSessions = useMemo(() => {
     return sessions.filter((session) => {
-      // Search term filter
-      if (
-        searchTerm &&
-        !(
-          session.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      const matchesSearch = searchTerm
+        ? session.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           session.cash_register?.cash_register_number
             .toLowerCase()
             .includes(searchTerm.toLowerCase())
-        )
-      ) {
-        return false;
-      }
+        : true;
 
-      // Status filter
-      if (
-        statusFilter &&
-        statusFilter !== "all" &&
-        session.status !== statusFilter
-      ) {
-        return false;
-      }
+      const matchesStatus =
+        statusFilter && statusFilter !== "all"
+          ? session.status === statusFilter
+          : true;
 
-      // User filter
-      if (
-        userFilter &&
-        userFilter !== "all" &&
-        session.user_id !== Number(userFilter)
-      ) {
-        return false;
-      }
+      const matchesUser =
+        userFilter && userFilter !== "all"
+          ? session.user_id === Number(userFilter)
+          : true;
 
-      // Register filter
-      if (
-        registerFilter &&
-        registerFilter !== "all" &&
-        session.cash_register_id !== Number(registerFilter)
-      ) {
-        return false;
-      }
+      const matchesRegister =
+        registerFilter && registerFilter !== "all"
+          ? session.cash_register_id === Number(registerFilter)
+          : true;
 
-      // Date range filter
       const openingDate = new Date(session.opening_date);
-      if (dateRange.from && openingDate < dateRange.from) {
-        return false;
-      }
-      if (dateRange.to) {
-        const endOfDay = new Date(dateRange.to);
-        endOfDay.setHours(23, 59, 59, 999);
-        if (openingDate > endOfDay) {
-          return false;
-        }
-      }
+      const matchesDateFrom = dateRange.from
+        ? openingDate >= dateRange.from
+        : true;
+      const matchesDateTo = dateRange.to
+        ? openingDate <= new Date(dateRange.to.setHours(23, 59, 59, 999))
+        : true;
 
-      return true;
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesUser &&
+        matchesRegister &&
+        matchesDateFrom &&
+        matchesDateTo
+      );
     });
   }, [
     sessions,
@@ -176,24 +158,14 @@ export default function CashRegisterSessionsPage({
     dateRange,
   ]);
 
-  // Pagination calculations
+  // Pagination
   const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(filteredSessions.length / ITEMS_PER_PAGE);
   const paginatedSessions = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    return filteredSessions.slice(start, end);
+    return filteredSessions.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredSessions, currentPage]);
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  };
-
-  // Reset all filters
   const resetFilters = useCallback(() => {
     setSearchTerm("");
     setStatusFilter(null);
@@ -203,353 +175,330 @@ export default function CashRegisterSessionsPage({
     setCurrentPage(1);
   }, []);
 
-  // Handle page navigation
-  const goToPage = useCallback(
-    (page: number) => {
-      setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-    },
-    [totalPages]
-  );
-
-  // Handle session close navigation
-  const navigateToCloseSession = useCallback(
-    (sessionId: number) => {
-      router.push(`/caisse_comptabilite/close-session/${sessionId}`);
-    },
-    [router]
-  );
-
-  // Handle session details navigation
-  const navigateToSessionDetails = useCallback(
-    (sessionId: number) => {
-      router.push(`/cash-register/sessions/${sessionId}`);
-    },
-    [router]
-  );
-
-  // verification de la session ouverte
   const handleAddSession = () => {
     const hasOpenSession = sessions.some(
       (session) =>
         session.user_id === userOnline?.id && session.status === "open"
     );
+    hasOpenSession
+      ? setShowModal(true)
+      : router.push("/caisse_comptabilite/open-session");
+  };
 
-    if (hasOpenSession) {
-      setShowModal(true);
-    } else {
-      router.push("/caisse_comptabilite/open-session");
-    }
+  const navigateToSessionDetails = (sessionId: number) => {
+    router.push(`/cash-register/sessions/${sessionId}`);
+  };
+
+  const navigateToCloseSession = (sessionId: number) => {
+    router.push(`/caisse_comptabilite/close-session/${sessionId}`);
+  };
+
+  const handlePreviousPage = () =>
+    currentPage > 1 && setCurrentPage(currentPage - 1);
+  const handleNextPage = () =>
+    currentPage < totalPages && setCurrentPage(currentPage + 1);
+
+  // Animation variants
+  const fadeIn = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
   };
 
   return (
     <div className="container mx-auto py-6">
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <CardTitle>
-              Sessions de caisse
-              <Badge className="ml-2" color="secondary">
-                {sessions.length}
-              </Badge>
-            </CardTitle>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Card className="border-none shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="h-6 w-6 text-primary" />
+              <CardTitle className="text-2xl font-semibold">
+                Sessions de caisse
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Gestion et consultation des sessions de caisse
+              </p>
+            </div>
 
-            <CardDescription>
-              Gérez et consultez les sessions de caisse
-            </CardDescription>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={resetFilters}
-              className="flex gap-1"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Réinitialiser
-            </Button>
-            <Button
-              onClick={handleAddSession}
-              color="indigodye"
-              size="sm"
-              className="flex gap-1"
-            >
-              <Plus className="h-4 w-4" />
-              Nouvelle session
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div>
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6">
-              <div className="relative flex-1 mt-6">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher..."
-                  className="pl-8"
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-              </div>
+            <Badge variant="outline" className="text-sm">
+              {filteredSessions.length} session
+              {filteredSessions.length !== 1 ? "s" : ""}
+            </Badge>
+          </CardHeader>
 
-              <div className="flex flex-wrap gap-2">
-                {/* Status filter */}
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="statusFilter"
-                    className="mb-1 text-sm font-medium"
-                  >
-                    Statut
-                  </Label>
-
-                  <Select
-                    value={statusFilter || ""}
-                    onValueChange={(value) => {
-                      setStatusFilter(value === "all" ? null : value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue placeholder="Statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les statuts</SelectItem>
-                      <SelectItem value="open">Ouvert</SelectItem>
-                      <SelectItem value="closed">Fermé</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* User filter */}
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="userFilter"
-                    className="mb-1 text-sm font-medium"
-                  >
-                    Utilisateur
-                  </Label>
-                  <Select
-                    value={userFilter || ""}
-                    onValueChange={(value) => {
-                      setUserFilter(value === "all" ? null : value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="Utilisateur" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous les utilisateurs</SelectItem>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id.toString()}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Cash register filter */}
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="registerFilter"
-                    className="mb-1 text-sm font-medium"
-                  >
-                    Caisse
-                  </Label>
-                  <Select
-                    value={registerFilter || ""}
-                    onValueChange={(value) => {
-                      setRegisterFilter(value === "all" ? null : value);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-[140px]">
-                      <SelectValue placeholder="Caisse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes les caisses</SelectItem>
-                      {cashRegisters.map((register) => (
-                        <SelectItem
-                          key={register.id}
-                          value={register.id.toString()}
-                        >
-                          Caisse {register.cash_register_number}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Date range filter */}
-                <div className="flex flex-col">
-                  <Label
-                    htmlFor="dateRange"
-                    className="mb-1 text-sm font-medium"
-                  >
-                    Période
-                  </Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
+          <CardContent className="px-6 pb-6">
+            {/* Barre d'actions et badge */}
+            <div className="flex justify-end items-center mb-4">
+              <div className="flex gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
                       <Button
                         variant="outline"
-                        className={cn(
-                          "w-[240px] justify-start text-left font-normal",
-                          !dateRange.from &&
-                            !dateRange.to &&
-                            "text-muted-foreground"
-                        )}
+                        size="sm"
+                        onClick={resetFilters}
+                        className="h-9 px-3"
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateRange.from ? (
-                          dateRange.to ? (
-                            <>
-                              {format(dateRange.from, "dd/MM/yyyy")} -{" "}
-                              {format(dateRange.to, "dd/MM/yyyy")}
-                            </>
-                          ) : (
-                            format(dateRange.from, "dd/MM/yyyy")
-                          )
-                        ) : (
-                          "Sélectionner une période"
-                        )}
+                        <RefreshCw className="h-4 w-4" />
+                        <span className="ml-2">Réinitialiser</span>
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="range"
-                        defaultMonth={dateRange.from}
-                        selected={dateRange}
-                        onSelect={(range) => {
-                          setDateRange({
-                            from: range?.from,
-                            to: range?.to,
-                          });
-                          setCurrentPage(1);
-                        }}
-                        numberOfMonths={2}
-                        locale={fr}
-                      />
-                      <div className="flex items-center justify-between p-3 border-t border-border">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setDateRange({ from: undefined, to: undefined });
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Réinitialiser
-                        </Button>
-                        <Button size="sm" onClick={() => document.body.click()}>
-                          Appliquer
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Réinitialiser tous les filtres
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Button
+                    onClick={handleAddSession}
+                    size="sm"
+                    className="h-9 px-3"
+                    color="indigodye"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="ml-2">Nouvelle session</span>
+                  </Button>
+                </TooltipProvider>
               </div>
             </div>
 
-            {/* Sessions table */}
-            <div className="rounded-md">
+            {/* Filtres avec labels */}
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
+              {/* Recherche */}
+              <div className="md:col-span-2">
+                <Label
+                  htmlFor="search"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Recherche
+                </Label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="search"
+                    placeholder="Caisse ou utilisateur..."
+                    className="pl-9"
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                  {searchTerm && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filtre Statut */}
+              <div>
+                <Label
+                  htmlFor="status-filter"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Statut
+                </Label>
+                <Select
+                  value={statusFilter || ""}
+                  onValueChange={(value) => {
+                    setStatusFilter(value === "all" ? null : value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous statuts</SelectItem>
+                    <SelectItem value="open">Ouvert</SelectItem>
+                    <SelectItem value="closed">Fermé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtre Utilisateur */}
+              <div>
+                <Label
+                  htmlFor="user-filter"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Utilisateur
+                </Label>
+                <Select
+                  value={userFilter || ""}
+                  onValueChange={(value) => {
+                    setUserFilter(value === "all" ? null : value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous utilisateurs</SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id.toString()}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Filtre Caisse */}
+              <div>
+                <Label
+                  htmlFor="register-filter"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Caisse
+                </Label>
+                <Select
+                  value={registerFilter || ""}
+                  onValueChange={(value) => {
+                    setRegisterFilter(value === "all" ? null : value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes caisses</SelectItem>
+                    {cashRegisters.map((register) => (
+                      <SelectItem
+                        key={register.id}
+                        value={register.id.toString()}
+                      >
+                        Caisse {register.cash_register_number}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Tableau */}
+            <div className="r">
               <Table>
-                <TableHeader>
+                <TableHeader className="">
                   <TableRow>
-                    <TableHead>Caisse</TableHead>
+                    <TableHead className="w-[120px]">Caisse</TableHead>
                     <TableHead>Utilisateur</TableHead>
                     <TableHead>Ouverture</TableHead>
                     <TableHead>Fermeture</TableHead>
-                    <TableHead>Montant initial</TableHead>
-                    <TableHead>Montant final</TableHead>
+                    <TableHead className="text-right">
+                      Montant initial
+                    </TableHead>
+                    <TableHead className="text-right">Montant final</TableHead>
                     <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="w-[50px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedSessions.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={9}
-                        className="text-center py-6 text-muted-foreground"
-                      >
+                      <TableCell colSpan={8} className="h-24 text-center">
                         Aucune session trouvée
                       </TableCell>
                     </TableRow>
                   ) : (
-                    paginatedSessions.map((session) => (
-                      <TableRow key={session.id}>
-                        <TableCell>
-                          Caisse {session.cash_register?.cash_register_number}
-                        </TableCell>
-                        <TableCell>{session.user?.name}</TableCell>
-                        <TableCell>
-                          {formatSessionDate(session.opening_date)}
-                        </TableCell>
-                        <TableCell>
-                          {formatSessionDate(session.closing_date)}
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(session.opening_amount)}
-                        </TableCell>
-                        <TableCell>
-                          {session.closing_amount
-                            ? formatCurrency(session.closing_amount)
-                            : "—"}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            color={
-                              session.status === "open"
-                                ? "success"
-                                : "secondary"
-                            }
-                          >
-                            {session.status === "open" ? "Ouvert" : "Fermé"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                color="tyrian"
-                                size="icon"
-                                className="h-8 w-8"
-                              >
-                                <SlidersHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Actions</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  navigateToSessionDetails(session.id)
-                                }
-                              >
-                                Voir les détails
-                              </DropdownMenuItem>
-                              {session.status === "open" && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() =>
-                                      navigateToCloseSession(session.id)
-                                    }
-                                  >
-                                    Fermer la session
-                                  </DropdownMenuItem>
-                                </>
+                    <AnimatePresence>
+                      {paginatedSessions.map((session) => (
+                        <motion.tr
+                          key={session.id}
+                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="border-t-muted-foreground/20"
+                        >
+                          <TableCell className="font-medium">
+                            Caisse {session.cash_register?.cash_register_number}
+                          </TableCell>
+                          <TableCell>{session.user?.name}</TableCell>
+                          <TableCell>
+                            {formatSessionDate(session.opening_date)}
+                          </TableCell>
+                          <TableCell>
+                            {session.status === "open"
+                              ? "—"
+                              : formatSessionDate(session.closing_date)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(session.opening_amount)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {session.status === "open"
+                              ? "—"
+                              : formatCurrency(session.closing_amount)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              color={
+                                session.status === "open"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                              className={cn(
+                                "capitalize",
+                                session.status === "open" &&
+                                  "bg-green-500/20 text-green-600"
                               )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                            >
+                              {session.status === "open" ? "Ouvert" : "Fermé"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  color="tyrian"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                >
+                                  <SlidersHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Actions</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    navigateToSessionDetails(session.id)
+                                  }
+                                >
+                                  Voir les détails
+                                </DropdownMenuItem>
+                                {session.status === "open" && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      className="text-red-600 focus:text-red-600"
+                                      onClick={() =>
+                                        navigateToCloseSession(session.id)
+                                      }
+                                    >
+                                      Fermer la session
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
                   )}
                 </TableBody>
               </Table>
@@ -557,115 +506,121 @@ export default function CashRegisterSessionsPage({
 
             {/* Pagination */}
             {filteredSessions.length > ITEMS_PER_PAGE && (
-              <div className="mt-4 flex justify-center">
+              <div className="mt-4 flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Page {currentPage} sur {totalPages} •{" "}
+                  {filteredSessions.length} résultats
+                </div>
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious
-                        onClick={
-                          currentPage === 1 ? undefined : handlePreviousPage
-                        }
-                        aria-disabled={currentPage === 1}
-                        tabIndex={currentPage === 1 ? -1 : 0}
-                        className={
-                          currentPage === 1
-                            ? "pointer-events-none opacity-50"
-                            : ""
-                        }
-                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handlePreviousPage}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
                     </PaginationItem>
 
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <PaginationItem key={i + 1}>
-                        <Button
-                          variant={currentPage === i + 1 ? "outline" : "ghost"}
-                          onClick={() => setCurrentPage(i + 1)}
-                        >
-                          {i + 1}
-                        </Button>
-                      </PaginationItem>
-                    ))}
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <PaginationItem key={pageNum}>
+                          <Button
+                            variant={
+                              currentPage === pageNum ? "outline" : "ghost"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </Button>
+                        </PaginationItem>
+                      );
+                    })}
 
                     <PaginationItem>
-                      <PaginationNext
-                        onClick={
-                          currentPage === totalPages
-                            ? undefined
-                            : handleNextPage
-                        }
-                        aria-disabled={currentPage === totalPages}
-                        tabIndex={currentPage === totalPages ? -1 : 0}
-                        className={
-                          currentPage === totalPages
-                            ? "pointer-events-none opacity-50 text-muted-foreground"
-                            : ""
-                        }
-                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleNextPage}
+                        disabled={currentPage === totalPages}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
               </div>
             )}
+          </CardContent>
+        </Card>
+      </motion.div>
 
-            <AnimatePresence>
-              {showModal && (
-                <Dialog
-                  open={showModal}
-                  onOpenChange={() => setShowModal(false)}
-                >
-                  <DialogContent>
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
+      {/* Modal */}
+      <AnimatePresence>
+        {showModal && (
+          <Dialog open={showModal} onOpenChange={setShowModal}>
+            <DialogContent className="sm:max-w-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <div className="space-y-4">
+                  <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold">
+                      Session déjà ouverte
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Vous avez déjà une session active. Veuillez la clôturer
+                      avant d'en ouvrir une nouvelle.
+                    </p>
+                  </div>
+                  <div className="flex justify-center gap-3 pt-2">
+                    <Button
+                    color="destructive"
+                      variant="outline"
+                      onClick={() => setShowModal(false)}
                     >
-                      <div className="text-center">
-                        <h2 className="text-lg font-semibold">
-                          Session déjà ouverte
-                        </h2>
-                        <p className="text-sm text-gray-500 mt-2">
-                          Vous avez déjà une session ouverte. Veuillez la
-                          clôturer avant d'en créer une nouvelle.
-                        </p>
-                        <div className="mt-4 flex justify-center gap-2">
-                          <Button
-                            color="destructive"
-                            variant="outline"
-                            onClick={() => setShowModal(false)}
-                          >
-                            Fermer
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              // Trouver la session ouverte de l'utilisateur
-                              const openSession = sessions.find(
-                                (session) =>
-                                  session.user_id === userOnline?.id &&
-                                  session.status === "open"
-                              );
-
-                              if (openSession) {
-                                // Rediriger vers la page de la session
-                                router.push(
-                                  `/caisse_comptabilite/session_caisse/${openSession.id}`
-                                );
-                              }
-                              setShowModal(false);
-                            }}
-                          >
-                            Voir la session
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </DialogContent>
-                </Dialog>
-              )}
-            </AnimatePresence>
-          </div>
-        </CardContent>
-      </Card>
+                      Fermer
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const openSession = sessions.find(
+                          (session) =>
+                            session.user_id === userOnline?.id &&
+                            session.status === "open"
+                        );
+                        if (openSession) {
+                          router.push(
+                            `/caisse_comptabilite/session_caisse/${openSession.id}`
+                          );
+                        }
+                        setShowModal(false);
+                      }}
+                    >
+                      Voir la session
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,12 +14,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "react-hot-toast";
-import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 import { useSchoolStore } from "@/store";
 import { fetchFeeType } from "@/store/schoolservice";
 import { useRouter } from "next/navigation";
-import { Icon } from "@iconify/react";
+import { Loader2, PlusCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   label: z.string()
@@ -33,9 +38,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface InputFormValidationProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
-const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
+const InputFormValidation = ({ onSuccess, onClose }: InputFormValidationProps) => {
   const { setFeeTypes } = useSchoolStore();
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -93,16 +99,16 @@ const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
   };
 
   return (
-    <Card className="p-6 shadow-sm">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Icon icon="heroicons:plus-circle" className="h-5 w-5" />
+    <>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <PlusCircle className="h-5 w-5" />
           Nouveau Type de Frais
-        </h3>
-        <p className="text-sm text-muted-foreground mt-1">
-          Ajoutez un nouveau type de frais à votre etablissement
-        </p>
-      </div>
+        </DialogTitle>
+        <DialogDescription>
+          Ajoutez un nouveau type de frais à votre établissement
+        </DialogDescription>
+      </DialogHeader>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -117,9 +123,6 @@ const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
                     {...field}
                     disabled={isLoading}
                     placeholder="Ex: Frais de scolarité"
-                    className={cn({
-                      "border-destructive": form.formState.errors.label,
-                    })}
                   />
                 </FormControl>
                 <FormMessage />
@@ -127,28 +130,34 @@ const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
             )}
           />
           
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-around gap-3 pt-4">
+            <Button
+              color="destructive"
+              type="button"
+              onClick={onClose}
+              disabled={isLoading}
+            >
+              Annuler
+            </Button>
             <Button 
               type="submit" 
               disabled={isLoading}
               className="min-w-[120px]"
+              color="indigodye"
             >
               {isLoading ? (
                 <>
-                  <Icon icon="heroicons:arrow-path" className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Enregistrement...
                 </>
               ) : (
-                <>
-                  <Icon icon="heroicons:check" className="h-4 w-4 mr-2" />
-                  Créer
-                </>
+                "Créer"
               )}
             </Button>
           </div>
         </form>
       </Form>
-    </Card>
+    </>
   );
 };
 

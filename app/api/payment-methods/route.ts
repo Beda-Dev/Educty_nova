@@ -52,7 +52,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { id } = await request.json();
+    const id = new URL(request.url).searchParams.get('id');
     
     const response = await fetch(`https://educty.digifaz.com/api/paymentMethod/${id}`, {
       method: 'DELETE',

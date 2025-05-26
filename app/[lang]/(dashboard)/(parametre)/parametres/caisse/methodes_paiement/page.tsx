@@ -1,30 +1,28 @@
-"use client"
+"use client";
 
-import React , {useEffect , useState} from 'react'
-import { useSchoolStore } from '@/store'
-import PaymentMethodsPage from './methodePaiement';
+import React, { useEffect } from "react";
+import { useSchoolStore } from "@/store";
+import PaymentMethodsPage from "./methodePaiement";
 import { fetchPaymentMethods } from "@/store/schoolservice";
 
+function MethodePaiement() {
+  const { methodPayment, setmethodPayment } = useSchoolStore();
 
-function methodePaiement() {
-    const { methodPayment, setmethodPayment } = useSchoolStore();
-
-useEffect(() => {
-
-    const fetchMethodPayment = async () => {
-      if (methodPayment.length > 0) {
-        return;
-      }
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      try {
         const updatedMethods = await fetchPaymentMethods();
         setmethodPayment(updatedMethods);
+      } catch (error) {
+        console.error("Failed to fetch payment methods:", error);
+        // Option: handle error in UI or store
+      }
     };
 
-    fetchMethodPayment();
-}, [setmethodPayment]);
+    loadPaymentMethods();
+  }, [setmethodPayment]);
 
-return (
-    <PaymentMethodsPage />
-    );
+  return <PaymentMethodsPage data={methodPayment} />;
 }
 
-export default methodePaiement
+export default MethodePaiement;

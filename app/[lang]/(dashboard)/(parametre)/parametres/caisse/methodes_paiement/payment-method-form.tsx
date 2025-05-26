@@ -12,7 +12,9 @@ interface PaymentMethodFormProps {
   onSuccess: () => void;
 }
 
-export default function PaymentMethodForm({ onSuccess }: PaymentMethodFormProps) {
+export default function PaymentMethodForm({
+  onSuccess,
+}: PaymentMethodFormProps) {
   const [newMethodLabel, setNewMethodLabel] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setmethodPayment } = useSchoolStore();
@@ -50,7 +52,7 @@ export default function PaymentMethodForm({ onSuccess }: PaymentMethodFormProps)
         description: `La méthode "${newMethodLabel}" a été ajoutée.`,
       });
     } catch (error) {
-        onSuccess();
+      onSuccess();
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'ajout",
@@ -73,32 +75,29 @@ export default function PaymentMethodForm({ onSuccess }: PaymentMethodFormProps)
           onKeyDown={(e) => e.key === "Enter" && addPaymentMethod()}
         />
       </div>
-      <div className="flex items-center justify-between">
-                      <Button
-      color="destructive"
-        onClick={onSuccess}
-        className=""
-        disabled={isSubmitting}
-      >
-
-        annuler
-      </Button>
-              <Button
-      color="indigodye"
-        onClick={addPaymentMethod}
-        className=""
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <PlusCircle className="mr-2 h-4 w-4" />
-        )}
-        Ajouter
-      </Button>
-
+      <div className="flex items-center justify-around">
+        <Button
+          color="destructive"
+          onClick={onSuccess}
+          className=""
+          disabled={isSubmitting}
+        >
+          annuler
+        </Button>
+        <Button
+          color="indigodye"
+          onClick={addPaymentMethod}
+          className=""
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <PlusCircle className="mr-2 h-4 w-4" />
+          )}
+          Ajouter
+        </Button>
       </div>
-
     </div>
   );
 }

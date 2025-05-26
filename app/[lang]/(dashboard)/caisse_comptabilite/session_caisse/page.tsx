@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import CashRegisterSessionsPage from "./sessioncomponant";
 import { useSchoolStore } from "@/store";
-import { fetchCashRegisterSessions } from "@/store/schoolservice";
+import { fetchCashRegisterSessions , fetchTransactions } from "@/store/schoolservice";
 import {
   User,
   CashRegister,
@@ -12,19 +12,23 @@ import {
 } from "@/lib/interface";
 
 function SessionCaissePage() {
-  const { cashRegisterSessions, setCashRegisterSessions } = useSchoolStore();
+  const { cashRegisterSessions, setCashRegisterSessions , setTransactions } = useSchoolStore();
 
   useEffect(() => {
     const fetchsession = async () => {
-      if (cashRegisterSessions.length > 0) {
-        return;
-      }
       const updatedSession = await fetchCashRegisterSessions();
       setCashRegisterSessions(updatedSession);
     };
+    // Fetch transactions if needed
+    const fetchTransactionsData = async () => {
+      const transactions = await fetchTransactions();
+      setTransactions(transactions);
+    };
+
 
     fetchsession();
-  }, [setCashRegisterSessions]);
+    fetchTransactionsData();
+  }, [setCashRegisterSessions , setTransactions]);
 
   return <CashRegisterSessionsPage data={cashRegisterSessions} />;
 }

@@ -9,25 +9,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
-import InputFormValidation from "./input_form";
-import { FeeType } from "@/lib/interface";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@iconify/react";
+import { Pencil, PlusCircle, Trash, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { useSchoolStore } from "@/store";
 import { fetchFeeType } from "@/store/schoolservice";
 import { Badge } from "@/components/ui/badge";
+import { FeeType } from "@/lib/interface";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
+import InputFormValidation from "./input_form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 
@@ -36,10 +53,36 @@ interface Props {
 }
 
 const FeesTypePage = ({ data }: Props) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
+  const [isModalOpenEdit, setIsModalOpenEdit] = useState(false);
   const [selectedFeeType, setSelectedFeeType] = useState<FeeType | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const { setFeeTypes, userOnline } = useSchoolStore();
+
+  const ITEMS_PER_PAGE = 5;
+  const activeFeeTypes = data.filter(
+    (item) =>
+      item.active === 1 &&
+      item.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const totalPages = Math.ceil(activeFeeTypes.length / ITEMS_PER_PAGE);
+  const paginatedFeeTypes = activeFeeTypes.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<{ label: string }>({
+    defaultValues: {
+      label: "",
+    },
+  });
 
   const permissionRequisVoir = ["voir frais_Scolaires"];
   const permissionRequisModifier = ["modifier frais_Scolaires"];
@@ -60,31 +103,20 @@ const FeesTypePage = ({ data }: Props) => {
     { permissionNames: userOnline?.permissionNames || [] },
     permissionRequisCreer
   );
+
   const hasAdminAccessSupprimer = verificationPermission(
     { permissionNames: userOnline?.permissionNames || [] },
     permissionRequisSupprimer
   );
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors },
-  } = useForm<{ label: string }>({
-    defaultValues: {
-      label: "",
-    },
-  });
-
   const handleEdit = (feeType: FeeType) => {
     setSelectedFeeType(feeType);
     reset({ label: feeType.label });
-    setIsModalOpen(true);
+    setIsModalOpenEdit(true);
   };
 
   const handleUpdate = async (formData: { label: string }) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       const response = await fetch(`/api/feeType?id=${selectedFeeType?.id}`, {
         method: "PUT",
@@ -101,21 +133,49 @@ const FeesTypePage = ({ data }: Props) => {
       toast.success("Type de frais mis à jour avec succès");
       const updatedFeeTypes = await fetchFeeType();
       setFeeTypes(updatedFeeTypes);
-      setIsModalOpen(false);
+      setIsModalOpenEdit(false);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Une erreur est survenue"
       );
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const activeFeeTypes = data.filter((item) => item.active === 1);
+  const handleDelete = async (id: string) => {
+    try {
+      setIsSubmitting(true);
+      const response = await fetch(`/api/feeType?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Échec de la suppression");
+
+      const updatedFeeTypes = await fetchFeeType();
+      setFeeTypes(updatedFeeTypes);
+
+      toast.success("Type de frais supprimé avec succès");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
 
   const columns = [
     { key: "label", label: "Type de frais" },
-    { key: "actions", label: "Actions" },
+    ...(hasAdminAccessModifier ? [{ key: "actions", label: "Actions" }] : []),
   ];
 
   if (hasAdminAccessVoir === false) {
@@ -126,102 +186,35 @@ const FeesTypePage = ({ data }: Props) => {
     );
   }
 
-  if (hasAdminAccessModifier === false) {
-    columns.pop(); // Remove the actions column if the user doesn't have permission
-  }
-
   return (
-    <div
-      className={`grid grid-cols-1  ${
-        hasAdminAccessCreer ? ` md:grid-cols-[2fr_1fr]` : ` md:grid-cols-1`
-      }  gap-6`}
-    >
-      {hasAdminAccessCreer ? (
-        <div className="bg-transparent p-2 h-[300px] rounded-sm w-[90%] mx-auto text-center items-center justify-center text-sm order-1 md:order-2">
+    <div className="w-full">
+      {/* Modal for adding new fee type */}
+      <Dialog open={isModalOpenAdd} onOpenChange={setIsModalOpenAdd}>
+        <DialogContent>
           <InputFormValidation
-            onSuccess={() => fetchFeeType().then(setFeeTypes)}
+            onSuccess={() => {
+              setIsModalOpenAdd(false);
+              fetchFeeType().then(setFeeTypes);
+            }}
+            onClose={() => setIsModalOpenAdd(false)}
           />
-        </div>
-      ) : null}
-      {/* Carte de la liste des types de frais */}
-      <Card className="p-6 shadow-sm order-2 md:order-1">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Types de Frais</h2>
-          <Badge variant="outline" className="px-3 py-1">
-            Total: {activeFeeTypes.length}
-          </Badge>
-        </div>
+        </DialogContent>
+      </Dialog>
 
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader className="bg-gray-50 dark:bg-gray-800 text-center">
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead
-                    key={column.key}
-                    className="text-center font-medium"
-                  >
-                    {column.label}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {activeFeeTypes.length > 0 ? (
-                activeFeeTypes.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  >
-                    <TableCell className="text-center">{item.label}</TableCell>
-                    {hasAdminAccessModifier ? (
-                      <TableCell className="text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(item)}
-                          className="text-primary hover:bg-primary/10 mx-auto"
-                        >
-                          <Icon icon="heroicons:pencil" className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    ) : null}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-gray-500"
-                  >
-                    Aucun type de frais actif trouvé
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
-
-      {/* Modale de modification */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      {/* Modal for editing fee type */}
+      <Dialog open={isModalOpenEdit} onOpenChange={setIsModalOpenEdit}>
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">
-              <Icon icon="heroicons:pencil" className="inline mr-2 h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
               Modifier le type de frais
             </DialogTitle>
-            <DialogDescription>
-              Mettez à jour les informations de "{selectedFeeType?.label}"
-            </DialogDescription>
           </DialogHeader>
-
-          <form
-            onSubmit={handleSubmit(handleUpdate)}
-            className="space-y-4 mt-2"
-          >
+          <form onSubmit={handleSubmit(handleUpdate)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="label">Nom du type de frais *</Label>
+              <label htmlFor="label" className="text-sm font-medium leading-none">
+                Nom 
+              </label>
               <Input
                 id="label"
                 {...register("label", {
@@ -232,34 +225,34 @@ const FeesTypePage = ({ data }: Props) => {
                   },
                 })}
                 placeholder="Ex: Frais de scolarité"
-                className={errors.label ? "border-red-500" : ""}
+                className={errors.label ? "border-destructive" : ""}
               />
               {errors.label && (
-                <p className="text-sm text-red-500">{errors.label.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.label.message}
+                </p>
               )}
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-around gap-3 pt-4">
               <Button
+                color="destructive"
                 type="button"
-                variant="outline"
-                onClick={() => setIsModalOpen(false)}
-                disabled={isLoading}
+                onClick={() => setIsModalOpenEdit(false)}
+                disabled={isSubmitting}
               >
                 Annuler
               </Button>
               <Button
+                color="tyrian"
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="min-w-[120px]"
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <>
-                    <Icon
-                      icon="heroicons:arrow-path"
-                      className="h-4 w-4 animate-spin mr-2"
-                    />
-                    En cours...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enregistrement...
                   </>
                 ) : (
                   "Mettre à jour"
@@ -269,6 +262,201 @@ const FeesTypePage = ({ data }: Props) => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Pencil className="h-5 w-5 text-primary" />
+              <CardTitle>Types de Frais</CardTitle>
+            </div>
+            <Badge variant="outline">
+              {activeFeeTypes.length} {activeFeeTypes.length > 1 ? "types de frais" : "type de frais"}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row items-center justify-between mb-4 gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-center w-full md:w-auto">
+                <Input
+                  placeholder="Rechercher un type de frais..."
+                  className="w-full sm:w-64"
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+              </div>
+
+              {hasAdminAccessCreer && (
+                <Button
+                  color="indigodye"
+                  onClick={() => setIsModalOpenAdd(true)}
+                  className="w-full md:w-auto"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Ajouter un type
+                </Button>
+              )}
+            </div>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableHead key={column.key}>{column.label}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {activeFeeTypes.length > 0 ? (
+                  <AnimatePresence>
+                    {paginatedFeeTypes.map((item) => (
+                      <motion.tr
+                        key={item.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="hover:bg-primary/5 border-t border-muted-foreground/20"
+                      >
+                        <TableCell className="font-medium">
+                          {item.label}
+                        </TableCell>
+                        {hasAdminAccessModifier && (
+                          <TableCell>
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                color="tyrian"
+                                size="icon"
+                                onClick={() => handleEdit(item)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+
+                              {hasAdminAccessSupprimer && (
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      color="destructive"
+                                      size="icon"
+                                      disabled={isSubmitting}
+                                    >
+                                      <Trash className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>
+                                        Êtes-vous sûr ?
+                                      </AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Cette action supprimera définitivement le type "{item.label}".
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel variant="outline">
+                                        Annuler
+                                      </AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDelete(item.id.toString())}
+                                        className="bg-destructive hover:bg-destructive/90"
+                                        disabled={isSubmitting}
+                                      >
+                                        {isSubmitting ? (
+                                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        ) : (
+                                          "Supprimer"
+                                        )}
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              )}
+                            </div>
+                          </TableCell>
+                        )}
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center text-muted-foreground"
+                    >
+                      {searchTerm
+                        ? "Aucun type de frais ne correspond à votre recherche."
+                        : "Aucun type de frais enregistré."}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+
+            {activeFeeTypes.length > ITEMS_PER_PAGE && (
+              <div className="mt-4 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      {currentPage === 1 ? (
+                        <PaginationPrevious className="cursor-not-allowed opacity-50" />
+                      ) : (
+                        <PaginationPrevious onClick={handlePreviousPage} />
+                      )}
+                    </PaginationItem>
+
+                    {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                      const page = i + 1;
+                      return (
+                        <PaginationItem key={page}>
+                          <Button
+                            variant={currentPage === page ? "outline" : "ghost"}
+                            onClick={() => setCurrentPage(page)}
+                          >
+                            {page}
+                          </Button>
+                        </PaginationItem>
+                      );
+                    })}
+
+                    {totalPages > 3 && currentPage < totalPages - 1 && (
+                      <PaginationItem>
+                        <span className="px-2 text-muted-foreground">…</span>
+                      </PaginationItem>
+                    )}
+
+                    {totalPages > 3 && currentPage < totalPages && (
+                      <PaginationItem>
+                        <Button
+                          variant={
+                            currentPage === totalPages ? "outline" : "ghost"
+                          }
+                          onClick={() => setCurrentPage(totalPages)}
+                        >
+                          {totalPages}
+                        </Button>
+                      </PaginationItem>
+                    )}
+
+                    <PaginationItem>
+                      {currentPage === totalPages ? (
+                        <PaginationNext className="cursor-not-allowed opacity-50" />
+                      ) : (
+                        <PaginationNext onClick={handleNextPage} />
+                      )}
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };
