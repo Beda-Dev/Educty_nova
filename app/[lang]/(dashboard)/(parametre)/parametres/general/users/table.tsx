@@ -56,6 +56,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { AddUserModal } from "./modals/AddUserModal";
+import { EditUserModal } from "./modals/EditUserModal";
+import { DeleteUserModal } from "./modals/DeleteUserModal";
 
 const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
   const { userOnline, setUsers } = useSchoolStore();
@@ -116,11 +119,20 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
     page * itemsPerPage
   );
 
+  const handleSuccess = async () => {
+    const updatedUsers = await fetchUsers();
+    if (updatedUsers) {
+      setUsers(updatedUsers);
+    }
+  };
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
   return (
     <Card title="Utilisateurs">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-xl">Utilisateurs</CardTitle>
-        <Badge variant="outline">Total utilisateurs : {users.length}</Badge>
+        <Badge variant="outline">utilisateurs : {filteredUsers.length}</Badge>
       </CardHeader>
       <CardContent>
         <div className="flex justify-between items-center mb-4 flex-wrap gap-4">
@@ -147,7 +159,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
           {/* Bouton à droite */}
           {hasAdminAccessCreer && (
             <div>
-              <AddUserDialog roles={roles} />
+              <AddUserModal roles={roles} onSuccess={handleSuccess} />
             </div>
           )}
         </div>
@@ -198,12 +210,19 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                   </TableCell>
                   <TableCell className="flex justify-end">
                     <div className="flex gap-3">
-                      {true ? (
-                        <EditingDialog user={item} roles={roles} />
-                      ) : null}
-                      {hasAdminAccessSupprimer ? (
-                        <DeleteUserButton userId={item.id} users={users} />
-                      ) : null}
+                      {hasAdminAccessModifier && (
+                        <EditUserModal
+                          user={item}
+                          roles={roles}
+                          onSuccess={handleSuccess}
+                        />
+                      )}
+                      {hasAdminAccessSupprimer && (
+                        <DeleteUserModal
+                          userId={item.id}
+                          onSuccess={handleSuccess}
+                        />
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -212,398 +231,71 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
           </TableBody>
         </Table>
 
-        <Pagination className="mt-4">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                className={page === 1 ? "pointer-events-none opacity-50" : ""}
-              />
+{filteredUsers.length > itemsPerPage && (
+  <div className="mt-4 flex justify-center">
+    <Pagination>
+      <PaginationContent>
+        {/* Previous */}
+        <PaginationItem>
+          {page === 1 ? (
+            <PaginationPrevious className="cursor-not-allowed opacity-50" />
+          ) : (
+            <PaginationPrevious onClick={() => setPage((p) => Math.max(p - 1, 1))} />
+          )}
+        </PaginationItem>
+
+        {/* Pages */}
+        {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+          const pageNum = i + 1;
+          return (
+            <PaginationItem key={pageNum}>
+              <Button
+                variant={page === pageNum ? "soft" : "ghost"}
+                onClick={() => setPage(pageNum)}
+              >
+                {pageNum}
+              </Button>
             </PaginationItem>
-            <PaginationItem>
-              <span className="text-sm px-2">
-                Page {page} sur {Math.ceil(filteredUsers.length / itemsPerPage)}
-              </span>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  setPage((prev) =>
-                    prev < Math.ceil(filteredUsers.length / itemsPerPage)
-                      ? prev + 1
-                      : prev
-                  )
-                }
-                className={
-                  page >= Math.ceil(filteredUsers.length / itemsPerPage)
-                    ? "pointer-events-none opacity-50"
-                    : ""
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+          );
+        })}
+
+        {/* Ellipsis */}
+        {totalPages > 3 && page < totalPages - 1 && (
+          <PaginationItem>
+            <span className="px-2 text-muted-foreground">…</span>
+          </PaginationItem>
+        )}
+
+        {/* Dernière page */}
+        {totalPages > 3 && page < totalPages && (
+          <PaginationItem>
+            <Button
+              variant={page === totalPages ? "outline" : "ghost"}
+              onClick={() => setPage(totalPages)}
+            >
+              {totalPages}
+            </Button>
+          </PaginationItem>
+        )}
+
+        {/* Next */}
+        <PaginationItem>
+          {page === totalPages ? (
+            <PaginationNext className="cursor-not-allowed opacity-50" />
+          ) : (
+            <PaginationNext
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+            />
+          )}
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  </div>
+)}
+
       </CardContent>
     </Card>
   );
 };
 
 export default TableUser;
-
-const EditingDialog = ({ user, roles }: { user: User; roles: Role[] }) => {
-  const { setUsers } = useSchoolStore();
-  const [selectedRoles, setSelectedRoles] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const animatedComponents = makeAnimated();
-
-  // Convert roles to options format
-  const roleOptions = roles.map((role) => ({
-    value: role.name,
-    label: role.name,
-  }));
-
-  // Initialize selected roles
-  useEffect(() => {
-    if (user.roles) {
-      setSelectedRoles(
-        user.roles.map((role) => ({
-          value: role.name,
-          label: role.name,
-        }))
-      );
-    }
-  }, [user]);
-
-  const updateUserRoles = async (userId: number, roles: string[]) => {
-    setIsLoading(true);
-    try {
-      // First remove all existing roles
-      await Promise.all(
-        user.roles.map(async (role) => {
-          const response = await fetch(
-            `https://educty.digifaz.com/api/users/${userId}/remove-role`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ role: role.name }),
-            }
-          );
-          if (!response.ok) throw new Error("Failed to remove role");
-        })
-      );
-
-      // Then add new roles
-      await Promise.all(
-        roles.map(async (roleName) => {
-          const response = await fetch(
-            `https://educty.digifaz.com/api/users/${userId}/assign-role`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ role: roleName }),
-            }
-          );
-          if (!response.ok) throw new Error("Failed to assign role");
-        })
-      );
-
-      // Refresh user data
-      const updatedUser: User[] = await fetchUsers();
-      setUsers(updatedUser);
-
-      toast.success("Rôles mis à jour avec succès !");
-    } catch (error) {
-      console.error("Error updating roles:", error);
-      toast.error("Erreur lors de la mise à jour des rôles");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const CustomOption = (props: any) => {
-    return (
-      <components.Option {...props}>
-        <div className="flex items-center gap-2">
-          <Icon icon="heroicons:user-circle" className="h-4 w-4" />
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size="icon" color="tyrian" className="h-7 w-7">
-          <Icon icon="heroicons:pencil" className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Modifier l'utilisateur</DialogTitle>
-          <form
-            className="space-y-5 pt-4"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const rolesToAssign = selectedRoles.map((role) => role.value);
-              await updateUserRoles(user.id, rolesToAssign);
-            }}
-          >
-            <div>
-              <Label>Nom</Label>
-              <Input name="name" defaultValue={user.name} required disabled />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input
-                name="email"
-                type="email"
-                defaultValue={user.email}
-                required
-                disabled
-              />
-            </div>
-            <div>
-              <Label>Rôles</Label>
-              <Select
-                isMulti
-                options={roleOptions}
-                value={selectedRoles}
-                onChange={(selected: any) => setSelectedRoles(selected)}
-                components={{
-                  ...animatedComponents,
-                  Option: CustomOption,
-                }}
-                className="react-select"
-                classNamePrefix="select"
-                placeholder="Sélectionner des rôles..."
-                noOptionsMessage={() => "Aucun rôle disponible"}
-                closeMenuOnSelect={false}
-              />
-            </div>
-            <div className="flex justify-end space-x-3">
-              <DialogClose asChild>
-                <Button type="button" color="destructive" disabled={isLoading}>
-                  Annuler
-                </Button>
-              </DialogClose>
-              <Button type="submit" color="tyrian" disabled={isLoading}>
-                {isLoading ? "Enregistrement..." : "Sauvegarder"}
-              </Button>
-            </div>
-          </form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const DeleteUserButton = ({
-  userId,
-  users,
-}: {
-  userId: number;
-  users: User[];
-}) => {
-  const { setUsers } = useSchoolStore();
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const deleteUser = async () => {
-    setIsDeleting(true);
-    try {
-      const response = await fetch(`/api/user?id=${userId}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) throw new Error("Échec de la suppression");
-
-      setUsers(users.filter((use: User) => use.id !== userId));
-      toast.success("Utilisateur supprimé !");
-    } catch (error) {
-      toast.error("Erreur lors de la suppression");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button size="icon" color="bittersweet" className="h-7 w-7">
-          <Icon icon="heroicons:trash" className="h-4 w-4" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-          <p>Cette action est irréversible.</p>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel variant={"outline"} >Annuler</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={deleteUser}
-            className="bg-red-600 hover:bg-red-700"
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Suppression..." : "Supprimer"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-};
-
-const AddUserDialog = ({ roles }: { roles: Role[] }) => {
-  const { setUsers } = useSchoolStore();
-  const [selectedRoles, setSelectedRoles] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const animatedComponents = makeAnimated();
-
-  const roleOptions = roles.map((role) => ({
-    value: role.name,
-    label: role.name,
-  }));
-
-  const addUser = async (newUser: {
-    name: string;
-    email: string;
-    password: string;
-    roles: string[];
-  }) => {
-    setIsLoading(true);
-    try {
-      // console.log("nouvelle utilisateur a creer : ", newUser);
-      // First create the user
-      const response = await fetch("/api/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: newUser.name,
-          email: newUser.email,
-          password: newUser.password,
-        }),
-      });
-
-      if (!response.ok)
-        throw new Error("Échec de la création de l'utilisateur");
-
-      const createdUser = await response.json();
-
-      // console.log("utilisateur creer : ", createdUser);
-
-      // Then assign roles
-      await Promise.all(
-        newUser.roles.map(async (roleName) => {
-          const roleResponse = await fetch(
-            `https://educty.digifaz.com/api/users/${createdUser.id}/assign-role`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ role: roleName }),
-            }
-          );
-          if (!roleResponse.ok)
-            throw new Error("Échec de l'attribution du rôle");
-        })
-      );
-
-      // Refresh user list
-      const usersData: User[] = await fetchUsers();
-      setUsers(usersData);
-
-      toast.success("Utilisateur ajouté avec succès !");
-    } catch (error) {
-      console.error("Error adding user:", error);
-      toast.error("Erreur lors de l'ajout de l'utilisateur");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const CustomOption = (props: any) => {
-    return (
-      <components.Option {...props}>
-        <div className="flex items-center gap-2">
-          <Icon icon="heroicons:user-circle" className="h-4 w-4" />
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button color="indigodye">Ajouter un utilisateur</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Ajouter un utilisateur</DialogTitle>
-          <form
-            className="space-y-5 pt-4"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target as HTMLFormElement);
-              await addUser({
-                name: formData.get("name") as string,
-                email: formData.get("email") as string,
-                password: formData.get("password") as string,
-                roles: selectedRoles.map((role) => role.value),
-              });
-            }}
-          >
-            <Input name="name" placeholder="Nom" required />
-            <Input name="email" placeholder="Email" type="email" required />
-            <Input
-              name="password"
-              placeholder="Mot de passe"
-              type="password"
-              required
-            />
-            <div>
-              <Label>Rôles</Label>
-              <Select
-                isMulti
-                options={roleOptions}
-                value={selectedRoles}
-                onChange={(selected: any) => setSelectedRoles(selected)}
-                components={{
-                  ...animatedComponents,
-                  Option: CustomOption,
-                }}
-                className="react-select"
-                classNamePrefix="select"
-                placeholder="Sélectionner des rôles..."
-                noOptionsMessage={() => "Aucun rôle disponible"}
-                closeMenuOnSelect={false}
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <DialogClose asChild>
-                <Button type="reset" color="bittersweet" disabled={isLoading}>
-                  Annuler
-                </Button>
-              </DialogClose>
-
-              <Button type="submit" color="indigodye" disabled={isLoading}>
-                {isLoading ? "Création..." : "Ajouter"}
-              </Button>
-            </div>
-          </form>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
-  );
-};

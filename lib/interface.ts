@@ -376,23 +376,37 @@ export interface Transaction {
 }
 
 export interface Setting {
-      id: number;
-    registration_number_format: string;
-    created_at: string; // ou Date si vous convertissez les dates
-    updated_at: string; // ou Date si vous convertissez les dates
-    establishment_phone_1: string;
-    establishment_phone_2: string | null;
-    establishment_logo: string | null; // URL ou chemin du fichier
-    establishment_name: string;
-    approval_number: string | null;
-    status: string;
-    address: string;
-    email: string | null;
-    longitude: string | number | null; // plus précis que string pour les coordonnées
-    latitude: string | number | null;  // plus précis que string pour les coordonnées
-    expense_approval_level: number;
-    primary_validator: string | null;
-    currency: string | null;
+  id: number;
+  registration_number_format: string;
+  created_at: string; // ou Date si vous convertissez les dates
+  updated_at: string; // ou Date si vous convertissez les dates
+  establishment_phone_1: string;
+  establishment_phone_2: string | null;
+  establishment_logo: string | null; // URL ou chemin du fichier
+  establishment_name: string;
+  approval_number: string | null;
+  status: string;
+  address: string;
+  email: string | null;
+  longitude: string | number | null; // plus précis que string pour les coordonnées
+  latitude: string | number | null; // plus précis que string pour les coordonnées
+  expense_approval_level: number;
+  primary_validator: string | null;
+  currency: string | null;
 }
 
+export interface Matter {
+  id: number;
+  name: string;
+  coefficient: string;
+  active: number;
+  created_at: string;
+  updated_at: string;
+}
 
+export interface TypeEvaluation {
+  id: number;
+  label: string;
+  created_at: string;
+  updated_at: string;
+}

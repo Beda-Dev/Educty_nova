@@ -36,6 +36,7 @@ import {
   Tags,
   CalendarCheck,
   CheckCircle,
+  Clipboard,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { forwardRef } from "react";
@@ -126,9 +127,23 @@ const menuItems: MenuCategory = {
         {
           id: "classes",
           title: "Classes",
-          description: "Gérer les classes",
+          description: "Gestion des classes",
           icon: <School className="w-4 h-4" />,
           path: "/classe",
+        },
+        {
+          id: "matiere",
+          title: "Matières",
+          description: "Gestion des différentes matières enseignées",
+          icon: <Book className="w-6 h-6" />,
+          path: "/parametres/pedagogy/matieres",
+        },
+        {
+          id: "type_evaluation",
+          title: "Types d'évaluation",
+          description: "Gestion des types d'évaluation",
+          icon: <Clipboard className="w-6 h-6" />,
+          path: "/parametres/pedagogy/type_evaluation",
         },
       ],
     },

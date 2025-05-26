@@ -26,7 +26,9 @@ import {
   Tutor,
   Transaction,
   CashRegisterSession,
-  Setting
+  Setting,
+  Matter,
+  TypeEvaluation
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -221,6 +223,12 @@ interface SchoolStore {
   Newstudent: Student | null;
   setNewStudent: (data: Student | null) => void;
 
+  matters: Matter[];
+  setMatters: (data: Matter[])=> void;
+
+  typeEvaluations: TypeEvaluation[];
+  setTypeEvaluations: (data: TypeEvaluation[])=> void;
+
 }
 
 export const useSchoolStore = create<SchoolStore>()(
@@ -321,6 +329,12 @@ export const useSchoolStore = create<SchoolStore>()(
 
       Newstudent: null,
       setNewStudent: (data: Student | null) => set({Newstudent: data}),
+
+      matters:[],
+      setMatters: (data: Matter[]) => set({ matters: data }),
+
+      typeEvaluations:[],
+      setTypeEvaluations:(data:TypeEvaluation[]) => set({ typeEvaluations: data}),
 
 
     }),

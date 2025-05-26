@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -61,7 +63,24 @@ const formSchema = z.object({
 export default function OpenCashRegisterSession() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { userOnline, cashRegisters } = useSchoolStore();
+  const {
+    userOnline,
+    cashRegisters,
+    setCashRegisterSessionCurrent,
+    cashRegisterCurrent,
+    cashRegisterSessions,
+  } = useSchoolStore();
+
+  const caissesDisponibles = useMemo(() => {
+    const idsCaissesOccupees = new Set(
+      cashRegisterSessions
+        .filter((s) => s.status === "open")
+        .map((s) => s.cash_register_id)
+    );
+    return cashRegisters.filter(
+      (cr) => cr.active === 1 && !idsCaissesOccupees.has(cr.id)
+    );
+  }, [cashRegisters, cashRegisterSessions]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,12 +96,10 @@ export default function OpenCashRegisterSession() {
     setIsSubmitting(true);
 
     try {
-  
+      const now = new Date();
+      // Formatage pour l'API (Y-m-d H:i:s)
+      const formattedDate = format(now, "yyyy-MM-dd HH:mm:ss");
 
-         const now = new Date();
-    // Formatage pour l'API (Y-m-d H:i:s)
-    const formattedDate = format(now, "yyyy-MM-dd HH:mm:ss");
-    
       const newSession = {
         user_id: userOnline.id,
         cash_register_id: Number(values.cash_register_id),
@@ -101,7 +118,10 @@ export default function OpenCashRegisterSession() {
         body: JSON.stringify(newSession),
       });
 
-      console.log("Response:", response.body);
+      const data = await response.json();
+      setCashRegisterSessionCurrent(data.session as CashRegisterSession);
+
+      console.log("Response:", data.message);
 
       if (!response.ok) {
         throw new Error("Erreur lors de l'ouverture de la session");
@@ -155,6 +175,12 @@ export default function OpenCashRegisterSession() {
     const value = e.target.value.replace(/[^0-9]/g, "");
     onChange(value);
   };
+
+  useEffect(() => {
+    if (cashRegisterCurrent) {
+      // router.push("/caisse_comptabilite/session_caisse");
+    }
+  }, [cashRegisterCurrent, router]);
 
   if (!userOnline) {
     return (
@@ -245,7 +271,7 @@ export default function OpenCashRegisterSession() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-gray-700">
-                            Caisse
+                            Caisses disponibles
                           </FormLabel>
                           <Select
                             onValueChange={field.onChange}
@@ -257,17 +283,15 @@ export default function OpenCashRegisterSession() {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {cashRegisters
-                                .filter((register) => register.active === 1)
-                                .map((register) => (
-                                  <SelectItem
-                                    key={register.id}
-                                    value={register.id.toString()}
-                                    className="hover:bg-primary/5"
-                                  >
-                                    Caisse {register.cash_register_number}
-                                  </SelectItem>
-                                ))}
+                              {caissesDisponibles.map((register) => (
+                                <SelectItem
+                                  key={register.id}
+                                  value={register.id.toString()}
+                                  className="hover:bg-primary/5"
+                                >
+                                  Caisse {register.cash_register_number}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                           <FormDescription className="text-gray-500">
@@ -284,7 +308,9 @@ export default function OpenCashRegisterSession() {
                       Date d'ouverture
                     </FormLabel>
                     <Input
-                      value={format(new Date(), "dd MMMM yyyy HH:mm", { locale: fr })}
+                      value={format(new Date(), "dd MMMM yyyy HH:mm", {
+                        locale: fr,
+                      })}
                       disabled
                       className="h-11 bg-gray-100 text-gray-700 cursor-not-allowed"
                     />
@@ -378,7 +404,7 @@ export default function OpenCashRegisterSession() {
 
           <CardFooter className="p-6 border-t border-gray-200 flex justify-end">
             <Button
-            color="destructive"
+              color="destructive"
               variant="outline"
               onClick={() => router.back()}
               className=""

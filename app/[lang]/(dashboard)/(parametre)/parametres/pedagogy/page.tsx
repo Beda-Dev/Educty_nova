@@ -13,14 +13,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Calendar, Layers, School } from "lucide-react";
+import { Calendar, Layers, School, Book, Clipboard } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
   "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300",
   "bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300",
-  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300"
+  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300",
+  "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-300",
 ];
 
 export default function Page() {
@@ -32,7 +33,7 @@ export default function Page() {
   const lang = params.lang as string;
 
   const getLocalizedPath = (path: string) => {
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const cleanPath = path.startsWith("/") ? path.slice(1) : path;
     return `/${lang}/${cleanPath}`;
   };
 
@@ -43,7 +44,7 @@ export default function Page() {
       description: "Gestion des années académiques et périodes",
       icon: <Calendar className="w-6 h-6" />,
       path: "/academic_year",
-      color: itemColors[0]
+      color: itemColors[0],
     },
     {
       id: "levels",
@@ -51,16 +52,32 @@ export default function Page() {
       description: "Gestion des niveaux d'études",
       icon: <Layers className="w-6 h-6" />,
       path: "/level",
-      color: itemColors[1]
+      color: itemColors[1],
     },
     {
       id: "classes",
       title: "Classes",
-      description: "Gestion des classes et sections",
+      description: "Gestion des classes de l'établissement",
       icon: <School className="w-6 h-6" />,
       path: "/classe",
-      color: itemColors[2]
-    }
+      color: itemColors[2],
+    },
+    {
+      id: "matiere",
+      title: "Matières",
+      description: "Gestion des différentes matières enseignées",
+      icon: <Book className="w-6 h-6" />,
+      path: "/parametres/pedagogy/matieres",
+      color: itemColors[3],
+    },
+    {
+      id: "type_evaluation",
+      title: "Types d'évaluation",
+      description: "Gestion des types d'évaluation",
+      icon: <Clipboard className="w-6 h-6" />,
+      path: "/parametres/pedagogy/type_evaluation",
+      color: itemColors[3],
+    },
   ];
 
   const containerVariants = {
@@ -88,14 +105,14 @@ export default function Page() {
     hover: {
       scale: 1.05,
       boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-      transition: { 
+      transition: {
         duration: 0.3,
-        ease: "easeOut"
+        ease: "easeOut",
       },
     },
     tap: {
       scale: 0.98,
-    }
+    },
   };
 
   return (
@@ -111,7 +128,7 @@ export default function Page() {
                 Pédagogie
               </h1>
               <p className="text-sm text-muted-foreground">
-                Gestion des paramètres liés à pédagogique dans votre etablissement
+                Gestion des paramètres pédagogiques dans votre établissement
               </p>
             </div>
           </div>
@@ -140,10 +157,13 @@ export default function Page() {
                       )}
                       onClick={() => router.push(getLocalizedPath(item.path))}
                     >
-                      <div className={cn(
-                        "p-3 rounded-full flex items-center justify-center",
-                        item.color.replace('text-', 'bg-').split(' ')[0] + '/20'
-                      )}>
+                      <div
+                        className={cn(
+                          "p-3 rounded-full flex items-center justify-center",
+                          item.color.replace("text-", "bg-").split(" ")[0] +
+                            "/20"
+                        )}
+                      >
                         {item.icon}
                       </div>
                       <div className="space-y-1">
@@ -154,7 +174,7 @@ export default function Page() {
                           {item.description}
                         </p>
                       </div>
-                      <motion.div 
+                      <motion.div
                         className="absolute bottom-4 right-4 text-sm font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

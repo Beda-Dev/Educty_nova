@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
 import { useSchoolStore } from "@/store";
-import { CashRegister, ExpenseType, Expense } from "@/lib/interface";
+import { CashRegister, ExpenseType, Expense  , Transaction } from "@/lib/interface";
 import {
   Select,
   SelectContent,
@@ -37,7 +37,7 @@ const ExpenseFormModal = ({
   expense,
   isLoading,
 }: ExpenseFormModalProps) => {
-  const { expenseTypes, cashRegisters } = useSchoolStore();
+  const { expenseTypes, cashRegisters , transactions , cashRegisterCurrent } = useSchoolStore();
 
   const { register, handleSubmit, reset, setValue, watch } = useForm({
     defaultValues: {
