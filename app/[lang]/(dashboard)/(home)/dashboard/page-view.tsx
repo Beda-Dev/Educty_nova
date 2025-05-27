@@ -23,6 +23,7 @@ import { AcademicYear, Registration } from "@/lib/interface";
 import { useEffect, useState } from "react";
 import { BarChart2, Info } from "lucide-react";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { getLastOpenSessionForUser} from "@/lib/fonction";
 interface DashbordViewProps {
   trans: {
     [key: string]: string;
@@ -38,6 +39,10 @@ const DashbordView = ({ trans }: DashbordViewProps) => {
     students,
     installements,
     payments,
+    cashRegisterSessionCurrent,
+    userOnline,
+    cashRegisterSessions,
+    setCashRegisterSessionCurrent,
   } = useSchoolStore();
   const data = calculerRecouvrementParClasse(
     academicYearCurrent,
@@ -79,35 +84,17 @@ const DashbordView = ({ trans }: DashbordViewProps) => {
     }));
   }
 
-  // useEffect(() => {
-  //   // Récupération des données depuis localStorage
-  //   // const storedData = localStorage.getItem("school-store");
-  //   // if (storedData) {
-  //   //   try {
-  //   //     const parsedData = JSON.parse(storedData);
-  //   //     console.log("Données récupérées depuis localStorage : ", parsedData.state);
-  //   //     setData(parsedData);
-  //   //   } catch (error) {
-  //   //     console.error("Erreur lors du parsing des données : ", error);
-  //   //   }
-  //   // }
-
-  //   const fetchAndDownload = async () => {
-  //     await downloadFile3("http://educty.digifaz.com/storage/document/1744904690_Logo-3HD.png")
-  //     // await downloadFile1("http://educty.digifaz.com/storage/document/1744904690_Logo-3HD.png" , "test.svg");
-      
-  //     // await downloadFile("http://educty.digifaz.com/storage/document/1744904690_Logo-3HD.png")
-
-      
-
-  //   }
-
-  //   fetchAndDownload();
-
-
-
-    
-  // }, []);
+  useEffect(() => { 
+    if(cashRegisterSessions && userOnline){
+      const lastSession = getLastOpenSessionForUser(cashRegisterSessions, userOnline.id);
+      if(lastSession){
+        setCashRegisterSessionCurrent(lastSession);
+        console.log("Last session found:", lastSession);
+      }else{
+        setCashRegisterSessionCurrent(null);
+      }
+    }
+  }, []);
 
   return (
     <div className="space-y-6">

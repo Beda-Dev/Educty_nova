@@ -108,8 +108,9 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
   };
 
   const handleCreate = () => {
-    setSelectedExpense(null);
-    setIsModalOpen(true);
+    router.push("/depense/addDepense");
+    // setSelectedExpense(null);
+    // setIsModalOpen(true);
   };
 
   const handleSubmit = async (formData: any) => {
@@ -187,7 +188,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
         : true
     );
   // Pagination
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE);
   const paginatedExpenses = filteredExpenses.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -248,7 +249,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 <SelectValue placeholder="Caisse" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Toutes les caisse</SelectItem>
+                <SelectItem value="">caisses</SelectItem>
                 {Array.from(
                   new Set(
                     expenses.map((e) => e.cash_register.cash_register_number)
@@ -269,7 +270,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 <SelectValue placeholder="Validateur" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les validateurs</SelectItem>
+                <SelectItem value="">validateurs</SelectItem>
                 {Array.from(
                   new Set(
                     validations

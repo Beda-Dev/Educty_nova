@@ -30,7 +30,7 @@ function ExpensePage() {
         setExpenses(fetchedExpenses);
 
         const fetchedValidationExpenses = await fetchValidationExpenses();
-        console.log("Fetched validation expenses:", fetchedValidationExpenses);
+        // console.log("Fetched validation expenses:", fetchedValidationExpenses);
         setValidationExpenses(fetchedValidationExpenses);
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);

@@ -20,7 +20,7 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { userOnline } = useSchoolStore();
+  const { userOnline , cashRegisterSessionCurrent } = useSchoolStore();
 
   // Trouver la dernière session ouverte
   const lastOpenSession = sessions
@@ -43,10 +43,10 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
 
   const handleNavigate = () => {
     setIsLoading(true);
-    router.push(`/cash-registers/${lastOpenSession.cash_register.id}`);
+    router.push(`/cash-registers/${cashRegisterSessionCurrent?.cash_register.id}`);
   };
 
-  if (!lastOpenSession) {
+  if (!cashRegisterSessionCurrent) {
     return (
       <Badge variant="outline" className="flex items-center gap-2 py-1 text-xs">
         <AlertCircle className="h-3 w-3" />
@@ -90,7 +90,7 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold">Session en cours</h4>
                   <Badge variant="outline" className="text-xs">
-                    {lastOpenSession.cash_register.cash_register_number}
+                    {cashRegisterSessionCurrent.cash_register.cash_register_number}
                   </Badge>
                 </div>
 
@@ -98,21 +98,21 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Ouverture:</span>
                     <span className="font-medium">
-                      {formatDate(lastOpenSession.opening_date)}
+                      {formatDate(cashRegisterSessionCurrent.opening_date)}
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Montant initial:</span>
                     <span className="font-medium">
-                      {formatAmount(lastOpenSession.opening_amount)}
+                      {formatAmount(cashRegisterSessionCurrent.opening_amount)}
                     </span>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Caissier:</span>
                     <span className="font-medium">
-                      {lastOpenSession.user.name.split(' ')[0]} {/* Prénom seulement */}
+                      {cashRegisterSessionCurrent.user.name.split(' ')[0]} {/* Prénom seulement */}
                     </span>
                   </div>
                 </div>

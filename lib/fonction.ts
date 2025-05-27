@@ -1,4 +1,4 @@
-import { Registration , AcademicYear  , Classe  , User , Role, Permission} from "./interface";
+import { Registration , AcademicYear  , Classe  , User , Role, Permission , CashRegisterSession} from "./interface";
 
 
 // Description: Fonctions utilitaires pour les mises à jour des classes
@@ -327,6 +327,26 @@ export const RetrouverNumero = (receiptNumber: string): ParsedReceipt => {
     type: typeMap[prefix],
   };
 };
+
+
+/**
+ * Retourne la dernière session ouverte pour un utilisateur donné
+ * @param sessions Liste des sessions
+ * @param userId Identifiant de l'utilisateur
+ * @returns La dernière session ouverte ou null
+ */
+export function getLastOpenSessionForUser(
+  sessions: CashRegisterSession[],
+  userId: number
+): CashRegisterSession | null {
+  const openSessions = sessions
+    .filter((session) => session.status === "open" && session.user_id === userId)
+    .sort((a, b) =>
+      new Date(b.opening_date).getTime() - new Date(a.opening_date).getTime()
+    );
+
+  return openSessions.length > 0 ? openSessions[0] : null;
+}
 
 
 
