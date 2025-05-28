@@ -47,6 +47,8 @@ export default function NewReregistration() {
     academicYears,
     documentTypes,
     userOnline,
+    Newstudent,
+    setNewStudent,
     setReRegistrations
   } = useSchoolStore();
   const isTablet = useMediaQuery("(max-width: 1024px)");
@@ -65,6 +67,13 @@ export default function NewReregistration() {
     { permissionNames: userOnline?.permissionNames || [] },
     permissionRequisInscrire
   );
+
+useEffect(() => {
+  return () => {
+    setNewStudent(null);
+  };
+}, []);
+
 
 
   const handleDocumentStatusChange = (isNotEmpty: boolean) => {

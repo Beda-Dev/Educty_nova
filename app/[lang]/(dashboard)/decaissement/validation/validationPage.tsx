@@ -43,17 +43,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 import { ValidationExpense } from "@/lib/interface";
-import { Label } from "@/components/ui/label";
-import { fetchValidationExpenses } from "@/store/schoolservice";
 import { generationNumero } from "@/lib/fonction";
 
 export default function ExpenseValidationsPage() {
@@ -66,10 +61,6 @@ export default function ExpenseValidationsPage() {
   const [selectedValidator, setSelectedValidator] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedValidation, setSelectedValidation] =
-    useState<ValidationExpense | null>(null);
-  const [comment, setComment] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "ascending" | "descending";
@@ -146,26 +137,6 @@ export default function ExpenseValidationsPage() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  // Mettre à jour le statut d'une validation
-  const updateValidationStatus = async (id: number, newStatus: string) => {
-    const update = await fetchValidationExpenses();
-    setValidationExpenses(update);
-
-    toast({
-      title: "Statut mis à jour",
-      description: `La validation #${id} a été marquée comme ${newStatus}.`,
-      color:
-        newStatus === "validée"
-          ? "success"
-          : newStatus === "refusée"
-          ? "destructive"
-          : "default",
-    });
-
-    setIsDialogOpen(false);
-    setComment("");
-  };
-
   // Formater la date pour l'affichage
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -199,11 +170,6 @@ export default function ExpenseValidationsPage() {
           variant: "warning" as const,
         };
     }
-  };
-
-  // Vérifier si une validation peut être modifiée
-  const canEditValidation = (validation: ValidationExpense) => {
-    return validation.validation_status === "en attente";
   };
 
   // Réinitialiser les filtres
@@ -250,10 +216,10 @@ export default function ExpenseValidationsPage() {
               onValueChange={setSelectedValidator}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Validateur" />
+                <SelectValue placeholder="demandeurs" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">validateurs</SelectItem>
+                <SelectItem value="">demandeurs</SelectItem>
                 {Array.from(
                   new Set(
                     validationExpenses
@@ -348,7 +314,11 @@ export default function ExpenseValidationsPage() {
                           className="border-t border-muted-foreground/20"
                         >
                           <TableCell className="text-xs">
-                            {generationNumero(validation.id, validation?.expense?.created_at ?? "", "encaissement")}
+                            {generationNumero(
+                              validation.id,
+                              validation?.expense?.created_at ?? "",
+                              "encaissement"
+                            )}
                           </TableCell>
                           <TableCell>
                             <div className="font-medium">
@@ -388,142 +358,31 @@ export default function ExpenseValidationsPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Dialog
-                              open={
-                                isDialogOpen &&
-                                selectedValidation?.id === validation.id
-                              }
-                              onOpenChange={(open) => {
-                                setIsDialogOpen(open);
-                                if (!open) setSelectedValidation(null);
-                              }}
-                            >
-                              <DialogTrigger asChild>
-                                <Button
-                                color="tyrian"
-                                  variant={
-                                    canEditValidation(validation)
-                                      ? "outline"
-                                      : "ghost"
-                                  }
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedValidation(validation);
-                                    setComment(validation.comment || "");
-                                  }}
-                                >
-                                  <Eye className="h-4 w-4 mr-1" />
-                                  {canEditValidation(validation)
-                                    ? "Modifier"
-                                    : "Voir"}
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-[500px]">
-                                <DialogHeader>
-                                  <DialogTitle>
-                                    {canEditValidation(validation)
-                                      ? "Modifier la validation"
-                                      : "Détails de la validation"}
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    Dépense: {validation.expense?.label}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                  <div className="grid gap-2">
-                                    <Label>Statut</Label>
-                                    {canEditValidation(validation) ? (
-                                      <Select
-                                        defaultValue={
-                                          validation.validation_status
-                                        }
-                                        onValueChange={(value) => {
-                                          if (selectedValidation) {
-                                            setSelectedValidation({
-                                              ...selectedValidation,
-                                              validation_status: value,
-                                            });
-                                          }
-                                        }}
-                                      >
-                                        <SelectTrigger className="w-full">
-                                          <SelectValue placeholder="Sélectionner un statut" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="en attente">
-                                            <div className="flex items-center gap-2">
-                                              <Clock className="h-4 w-4 text-blue-500" />
-                                              En attente
-                                            </div>
-                                          </SelectItem>
-                                          <SelectItem value="validée">
-                                            <div className="flex items-center gap-2">
-                                              <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                              Validée
-                                            </div>
-                                          </SelectItem>
-                                          <SelectItem value="refusée">
-                                            <div className="flex items-center gap-2">
-                                              <XCircle className="h-4 w-4 text-red-500" />
-                                              Refusée
-                                            </div>
-                                          </SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    ) : (
-                                      <Badge
-                                        color={statusInfo.variant}
-                                        className="w-fit"
-                                      >
-                                        {statusInfo.icon}
-                                        <span className="ml-1.5 capitalize">
-                                          {validation.validation_status}
-                                        </span>
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <div className="grid gap-2">
-                                    <Label>Commentaire</Label>
-                                    {canEditValidation(validation) ? (
-                                      <Input
-                                        value={comment}
-                                        onChange={(e) =>
-                                          setComment(e.target.value)
-                                        }
-                                        placeholder="Ajouter un commentaire..."
-                                      />
-                                    ) : (
-                                      <div className="p-2 text-sm text-muted-foreground">
-                                        {validation.comment ||
-                                          "Aucun commentaire"}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                <DialogFooter>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
                                   <Button
-                                    variant="outline"
-                                    onClick={() => setIsDialogOpen(false)}
+                                    color="tyrian"
+                                    size="sm"
+                                    onClick={() =>
+                                      router.push(
+                                        `/decaissement/validation/${validation.id}`
+                                      )
+                                    }
                                   >
-                                    Fermer
+                                    <Eye className="h-4 w-4" />
                                   </Button>
-                                  {canEditValidation(validation) && (
-                                    <Button
-                                      onClick={() => {
-                                        if (selectedValidation) {
-                                          updateValidationStatus(
-                                            selectedValidation.id,
-                                            selectedValidation.validation_status
-                                          );
-                                        }
-                                      }}
-                                    >
-                                      Enregistrer
-                                    </Button>
-                                  )}
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {validation.validation_status ===
+                                    "en attente"
+                                      ? "Valider cette dépense"
+                                      : "Voir les détails"}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </TableCell>
                         </motion.tr>
                       </Fragment>

@@ -6,9 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useSchoolStore } from "@/store";
-import { Student } from "@/lib/interface";
+import { Student, Tutor } from "@/lib/interface";
 
 // Components
 import { Input } from "@/components/ui/input";
@@ -24,32 +24,47 @@ import { Button } from "@/components/ui/button";
 import ImageUploader from "./select_photo";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 
 interface FormProps {
   isValid: boolean;
   onSubmitResult: (result: { success: boolean; data?: Student }) => void;
 }
 
-const schema = z.object({
+const studentSchema = z.object({
   assignment_type_id: z.number({ required_error: "Statut requis" }),
   registration_number: z.string().min(1, "Matricule requis"),
   name: z.string().min(1, "Nom requis"),
   first_name: z.string().min(1, "Prénom requis"),
   birth_date: z.string().min(1, "Date de naissance requise"),
-  tutor_name: z.string().min(1, "Nom du tuteur requis"),
-  tutor_first_name: z.string().min(1, "Prénom du tuteur requis"),
-  tutor_number: z.string()
+  sexe: z.enum(["Masculin", "Feminin"], { required_error: "Sexe requis" }),
+});
+
+const tutorSchema = z.object({
+  name: z.string().min(1, "Nom requis"),
+  first_name: z.string().min(1, "Prénom requis"),
+  phone_number: z
+    .string()
     .min(10, "Le numéro doit contenir 10 chiffres")
     .max(10, "Le numéro doit contenir 10 chiffres")
     .regex(/^\d+$/, "Doit contenir uniquement des chiffres"),
-  sexe: z.enum(["Masculin", "Feminin"], { required_error: "Sexe requis" }),
-
+  sexe: z.enum(["Homme", "Femme"], { required_error: "Sexe requis" }),
+  type_tutor: z.string().min(1, "Lien de parenté requis"),
 });
 
 const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
-  const { assignmentTypes, students, Newstudent, setNewStudent } = useSchoolStore();
+  const { assignmentTypes, students, Newstudent, setNewStudent } =
+    useSchoolStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [showTutorForm, setShowTutorForm] = useState(false);
+  const [tutors, setTutors] = useState<
+    {
+      data: z.infer<typeof tutorSchema>;
+      isLegalTutor: boolean;
+      id?: number; // Pour les tuteurs existants en mode édition
+    }[]
+  >([]);
 
   const {
     register,
@@ -57,33 +72,66 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     setValue,
     reset,
     formState: { errors, isDirty },
-  } = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-    defaultValues: Newstudent ? {
-      assignment_type_id: Newstudent.assignment_type_id,
-      registration_number: Newstudent.registration_number,
-      name: Newstudent.name,
-      first_name: Newstudent.first_name,
-      birth_date: Newstudent.birth_date,
-      tutor_name: Newstudent.tutor_name,
-      tutor_first_name: Newstudent.tutor_first_name || "",
-      tutor_number: Newstudent.tutor_number || "",
-      sexe: Newstudent.sexe as "Masculin" | "Feminin",
-    } : undefined,
+  } = useForm<z.infer<typeof studentSchema>>({
+    resolver: zodResolver(studentSchema),
+    defaultValues: Newstudent
+      ? {
+          assignment_type_id: Newstudent.assignment_type_id,
+          registration_number: Newstudent.registration_number,
+          name: Newstudent.name,
+          first_name: Newstudent.first_name,
+          birth_date: Newstudent.birth_date,
+          sexe: Newstudent.sexe as "Masculin" | "Feminin",
+        }
+      : undefined,
   });
+
+  // Charger les tuteurs existants si on est en mode édition
+  useEffect(() => {
+    if (Newstudent?.id) {
+      const fetchTutors = async () => {
+        try {
+          const response = await fetch(
+            `https://educty.digifaz.com/api/student/${Newstudent.id}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setTutors(
+              data.tutors.map((tutor: Tutor) => ({
+                data: {
+                  name: tutor.name,
+                  first_name: tutor.first_name,
+                  phone_number: tutor.phone_number,
+                  sexe: tutor.sexe as "Homme" | "Femme",
+                  type_tutor: tutor.type_tutor,
+                },
+                isLegalTutor:
+                  tutor.students?.[0]?.pivot?.is_tutor_legal ?? false,
+                id: tutor.id,
+              }))
+            );
+          }
+        } catch (error) {
+          console.error("Erreur lors du chargement des tuteurs:", error);
+        }
+      };
+      fetchTutors();
+    }
+  }, [Newstudent]);
 
   // Vérifie l'unicité du matricule (sauf pour l'étudiant en cours d'édition)
   const isMatriculeUnique = (matricule: string): boolean => {
     return !students.some(
-      (student) => student.registration_number === matricule && 
-                 (!Newstudent || student.id !== Newstudent.id)
+      (student) =>
+        student.registration_number === matricule &&
+        (!Newstudent || student.id !== Newstudent.id)
     );
   };
 
   // Convertit en majuscules et met à jour le champ
   const handleUpperCaseChange = (
-    e: React.ChangeEvent<HTMLInputElement>, 
-    fieldName: keyof z.infer<typeof schema>
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldName: keyof z.infer<typeof studentSchema>
   ) => {
     const upperValue = e.target.value.toUpperCase();
     e.target.value = upperValue;
@@ -95,80 +143,209 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     setImageFile(file);
   };
 
-  // Soumission du formulaire
-const onSubmit = async (data: z.infer<typeof schema>) => {
-  if (!isMatriculeUnique(data.registration_number)) {
-    toast.error("Ce matricule est déjà utilisé par un autre élève");
-    return;
-  }
+  // Ajouter un nouveau tuteur
+  const addTutor = () => {
+    setTutors([
+      ...tutors,
+      {
+        data: {
+          name: "",
+          first_name: "",
+          phone_number: "",
+          sexe: "Homme",
+          type_tutor: "",
+        },
+        isLegalTutor: tutors.length === 0, // Le premier tuteur est le tuteur légal par défaut
+      },
+    ]);
+    setShowTutorForm(true);
+  };
 
-  setIsSubmitting(true);
-  const isEditing = !!Newstudent;
-  const url = isEditing
-    ? `https://educty.digifaz.com/api/student/${Newstudent.id}`
-    : "https://educty.digifaz.com/api/student";
-  const method = isEditing ? "PUT" : "POST";
+  // Supprimer un tuteur
+  const removeTutor = (index: number) => {
+    const newTutors = [...tutors];
+    newTutors.splice(index, 1);
+    setTutors(newTutors);
 
-  try {
-    let body: BodyInit;
-    let headers: HeadersInit | undefined;
+    // Si on supprime le tuteur légal et qu'il reste des tuteurs, on définit le premier comme tuteur légal
+    if (newTutors.length > 0 && !newTutors.some((t) => t.isLegalTutor)) {
+      newTutors[0].isLegalTutor = true;
+    }
+  };
 
-    if (isEditing) {
-      // PUT = JSON sans la photo
-      const jsonData = {
-        ...data,
-        status: "actif",
-      };
-      body = JSON.stringify(jsonData);
-      headers = {
-        "Content-Type": "application/json",
-      };
-    } else {
-      // POST = FormData avec photo
-      const formData = new FormData();
-      Object.entries(data).forEach(([key, value]) => {
-              if (key !== "sexe") {
-        formData.append(key, value as string);
-      }
+  // Mettre à jour un tuteur
+  const updateTutor = (
+    index: number,
+    field: keyof z.infer<typeof tutorSchema>,
+    value: any
+  ) => {
+    const newTutors = [...tutors];
+    newTutors[index].data[field] = value;
+    setTutors(newTutors);
+  };
+
+  // Changer le tuteur légal
+  const setLegalTutor = (index: number) => {
+    const newTutors = tutors.map((tutor, i) => ({
+      ...tutor,
+      isLegalTutor: i === index,
+    }));
+    setTutors(newTutors);
+  };
+
+  // Valider les données des tuteurs
+  const validateTutors = (): boolean => {
+    if (tutors.length === 0) {
+      toast.error("Au moins un tuteur doit être renseigné");
+      return false;
+    }
+
+    try {
+      tutors.forEach((tutor) => {
+        tutorSchema.parse(tutor.data);
       });
-      formData.append("status", "actif");
+      return true;
+    } catch (error) {
+      toast.error("Veuillez vérifier les informations des tuteurs");
+      return false;
+    }
+  };
 
-      if (imageFile) {
-        formData.append("photo", imageFile);
+  // Soumission du formulaire
+  const onSubmit = async (studentData: z.infer<typeof studentSchema>) => {
+    if (!isMatriculeUnique(studentData.registration_number)) {
+      toast.error("Ce matricule est déjà utilisé par un autre élève");
+      return;
+    }
+
+    if (!validateTutors()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    const isEditing = !!Newstudent;
+
+    try {
+      // 1. Créer/mettre à jour l'élève
+      const studentUrl = isEditing
+        ? `https://educty.digifaz.com/api/student/${Newstudent.id}`
+        : "https://educty.digifaz.com/api/student";
+      const studentMethod = isEditing ? "PUT" : "POST";
+
+      let studentBody: BodyInit;
+      if (isEditing) {
+        // PUT = JSON sans la photo
+        studentBody = JSON.stringify({
+          ...studentData,
+          status: "actif",
+        });
+      } else {
+        // POST = FormData avec photo
+        const formData = new FormData();
+        Object.entries(studentData).forEach(([key, value]) => {
+          if (key !== "sexe") {
+            formData.append(key, value as string);
+          }
+        });
+        formData.append("status", "actif");
+        if (imageFile) {
+          formData.append("photo", imageFile);
+        }
+        formData.append("sexe", studentData.sexe);
+        studentBody = formData;
       }
-       if (data.sexe) formData.append("sexe", data.sexe);
 
-      body = formData;
-      // Pas de Content-Type ici, il est géré automatiquement par le navigateur
+      console.log("Envoi des données de l'élève:", {
+        method: studentMethod,
+        url: studentUrl,
+        body: studentBody,
+      });
+
+      const studentResponse = await fetch(studentUrl, {
+        method: studentMethod,
+        body: studentBody,
+        headers: isEditing
+          ? {
+              "Content-Type": "application/json",
+            }
+          : undefined,
+      });
+
+      if (!studentResponse.ok) {
+        throw new Error(await studentResponse.text());
+      }
+
+      const studentResult = await studentResponse.json();
+      console.log("Réponse de l'API élève:", studentResult);
+      setNewStudent(studentResult);
+
+      // 2. Créer/mettre à jour les tuteurs et les associer à l'élève
+      const tutorPromises = tutors.map(async (tutor) => {
+        const tutorUrl = tutor.id
+          ? `https://educty.digifaz.com/api/tutor/${tutor.id}`
+          : "https://educty.digifaz.com/api/tutor";
+        const tutorMethod = tutor.id ? "PUT" : "POST";
+
+        const tutorResponse = await fetch(tutorUrl, {
+          method: tutorMethod,
+          body: JSON.stringify(tutor.data),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!tutorResponse.ok) {
+          throw new Error(await tutorResponse.text());
+        }
+
+        return tutorResponse.json();
+      });
+
+      const tutorsResults = await Promise.all(tutorPromises);
+      console.log("Réponses de l'API tuteurs:", tutorsResults);
+
+      // 3. Associer les tuteurs à l'élève avec le statut de tuteur légal
+      const assignTutorResponse = await fetch(
+        "https://educty.digifaz.com/api/student/assign-tutor",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            student_id: studentResult.id,
+            tutors: tutorsResults.map((tutorResult, index) => ({
+              id: tutorResult.id,
+              is_tutor_legal: tutors[index].isLegalTutor,
+            })),
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!assignTutorResponse.ok) {
+        throw new Error(await assignTutorResponse.text());
+      }
+
+      const assignTutorResult = await assignTutorResponse.json();
+      console.log("Réponse de l'API assign-tutor:", assignTutorResult);
+
+      toast.success(
+        isEditing
+          ? "Élève et tuteurs mis à jour"
+          : "Élève et tuteurs enregistrés"
+      );
+      onSubmitResult({ success: true, data: studentResult });
+    } catch (error) {
+      console.error("Erreur:", error);
+      toast.error("Une erreur est survenue lors de l'enregistrement");
+      onSubmitResult({ success: false });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const response = await fetch(url, {
-      method,
-      body,
-      headers,
-    });
-
-    if (!response.ok) {
-      setNewStudent(null);
-      throw new Error(await response.text());
-    }
-
-    const result = await response.json();
-    setNewStudent(result);
-    toast.success(isEditing ? "Élève mis à jour" : "Élève enregistré");
-    onSubmitResult({ success: true, data: result });
-  } catch (error) {
-    console.error("Erreur:", error);
-    toast.error("Une erreur est survenue lors de l'enregistrement");
-    onSubmitResult({ success: false });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   return (
-    <motion.form 
+    <motion.form
       onSubmit={handleSubmit(onSubmit)}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -181,9 +358,19 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
           <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <span className="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
               </span>
               Informations sur l'élève
@@ -191,9 +378,9 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
           </CardHeader>
           <CardContent className="p-6 space-y-4">
             <div className="flex flex-col items-center gap-4">
-              <ImageUploader 
-                initialImage={Newstudent?.photo || ""} 
-                onImageChange={handleImageChange} 
+              <ImageUploader
+                initialImage={Newstudent?.photo || ""}
+                onImageChange={handleImageChange}
               />
             </div>
 
@@ -202,7 +389,9 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
               <Input
                 id="registration_number"
                 {...register("registration_number")}
-                onChange={(e) => handleUpperCaseChange(e, "registration_number")}
+                onChange={(e) =>
+                  handleUpperCaseChange(e, "registration_number")
+                }
                 className="focus-visible:ring-2 focus-visible:ring-blue-500"
                 disabled={false}
               />
@@ -252,7 +441,7 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
                 type="date"
                 {...register("birth_date")}
                 className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                max={new Date().toISOString().split('T')[0]}
+                max={new Date().toISOString().split("T")[0]}
               />
               {errors.birth_date && (
                 <p className="text-sm font-medium text-red-500 mt-1">
@@ -266,7 +455,9 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
                 <Label htmlFor="sexe">Sexe </Label>
                 <Select
                   onValueChange={(value) =>
-                    setValue("sexe", value as "Masculin" | "Feminin", { shouldValidate: true })
+                    setValue("sexe", value as "Masculin" | "Feminin", {
+                      shouldValidate: true,
+                    })
                   }
                   defaultValue={Newstudent?.sexe}
                 >
@@ -289,7 +480,9 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
                 <Label htmlFor="assignment_type_id">Statut de l'élève </Label>
                 <Select
                   onValueChange={(value) =>
-                    setValue("assignment_type_id", Number(value), { shouldValidate: true })
+                    setValue("assignment_type_id", Number(value), {
+                      shouldValidate: true,
+                    })
                   }
                   defaultValue={Newstudent?.assignment_type_id?.toString()}
                 >
@@ -314,69 +507,165 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
           </CardContent>
         </Card>
 
-        {/* Carte Informations sur le tuteur */}
+        {/* Carte Informations sur les tuteurs */}
         <Card className="border rounded-lg shadow-sm overflow-hidden">
           <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/20">
             <CardTitle className="text-lg font-semibold flex items-center gap-2">
               <span className="bg-blue-100 dark:bg-blue-800 p-2 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </span>
-              Informations sur le tuteur
+              Informations sur les tuteurs
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="tutor_name">Nom du tuteur *</Label>
-                <Input
-                  id="tutor_name"
-                  {...register("tutor_name")}
-                  onChange={(e) => handleUpperCaseChange(e, "tutor_name")}
-                  className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                />
-                {errors.tutor_name && (
-                  <p className="text-sm font-medium text-red-500 mt-1">
-                    {errors.tutor_name.message}
-                  </p>
-                )}
-              </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addTutor}
+              className="flex items-center gap-2"
+            >
+              <Plus size={16} />
+              Ajouter un tuteur
+            </Button>
 
-              <div className="space-y-2">
-                <Label htmlFor="tutor_first_name">Prénom du tuteur </Label>
-                <Input
-                  id="tutor_first_name"
-                  {...register("tutor_first_name")}
-                  onChange={(e) => handleUpperCaseChange(e, "tutor_first_name")}
-                  className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                />
-                {errors.tutor_first_name && (
-                  <p className="text-sm font-medium text-red-500 mt-1">
-                    {errors.tutor_first_name.message}
-                  </p>
-                )}
-              </div>
-            </div>
+            {tutors.length > 0 && (
+              <div className="space-y-6">
+                {tutors.map((tutor, index) => (
+                  <div
+                    key={index}
+                    className="border rounded-lg p-4 space-y-4 relative"
+                  >
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium">Tuteur {index + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeTutor(index)}
+                        className="text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="tutor_number">Numéro du tuteur </Label>
-              <Input
-                id="tutor_number"
-                {...register("tutor_number")}
-                placeholder="Ex: 701234567"
-                className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                maxLength={10}
-              />
-              {errors.tutor_number && (
-                <p className="text-sm font-medium text-red-500 mt-1">
-                  {errors.tutor_number.message}
-                </p>
-              )}
-            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`tutor-name-${index}`}>Nom *</Label>
+                        <Input
+                          id={`tutor-name-${index}`}
+                          value={tutor.data.name}
+                          onChange={(e) => {
+                            const upperValue = e.target.value.toUpperCase();
+                            e.target.value = upperValue;
+                            updateTutor(index, "name", upperValue);
+                          }}
+                          className="focus-visible:ring-2 focus-visible:ring-blue-500"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`tutor-first-name-${index}`}>
+                          Prénom *
+                        </Label>
+                        <Input
+                          id={`tutor-first-name-${index}`}
+                          value={tutor.data.first_name}
+                          onChange={(e) => {
+                            const upperValue = e.target.value.toUpperCase();
+                            e.target.value = upperValue;
+                            updateTutor(index, "first_name", upperValue);
+                          }}
+                          className="focus-visible:ring-2 focus-visible:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`tutor-phone-${index}`}>
+                          Numéro de téléphone *
+                        </Label>
+                        <Input
+                          id={`tutor-phone-${index}`}
+                          value={tutor.data.phone_number}
+                          onChange={(e) =>
+                            updateTutor(index, "phone_number", e.target.value)
+                          }
+                          placeholder="Ex: 701234567"
+                          className="focus-visible:ring-2 focus-visible:ring-blue-500"
+                          maxLength={10}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`tutor-type-${index}`}>
+                          Lien de parenté *
+                        </Label>
+                        <Input
+                          id={`tutor-type-${index}`}
+                          value={tutor.data.type_tutor}
+                          onChange={(e) =>
+                            updateTutor(index, "type_tutor", e.target.value)
+                          }
+                          placeholder="Ex: Père, Mère, Oncle..."
+                          className="focus-visible:ring-2 focus-visible:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`tutor-sexe-${index}`}>Sexe *</Label>
+                        <Select
+                          value={tutor.data.sexe}
+                          onValueChange={(value) =>
+                            updateTutor(
+                              index,
+                              "sexe",
+                              value as "Homme" | "Femme"
+                            )
+                          }
+                        >
+                          <SelectTrigger className="focus:ring-2 focus:ring-blue-500">
+                            <SelectValue placeholder="Sélectionner" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Homme">Masculin</SelectItem>
+                            <SelectItem value="Femme">Feminin</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex items-center justify-end space-x-2 pt-2">
+                        <Switch
+                          id={`tutor-legal-${index}`}
+                          checked={tutor.isLegalTutor}
+                          onCheckedChange={() => setLegalTutor(index)}
+                        />
+                        <Label htmlFor={`tutor-legal-${index}`}>
+                          Tuteur légal
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -384,26 +673,16 @@ const onSubmit = async (data: z.infer<typeof schema>) => {
       <Separator className="my-6" />
 
       <div className="flex justify-end gap-4">
-        {/* <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => reset()}
-          disabled={!isDirty || isSubmitting}
-        >
-          Annuler
-        </Button> */}
-        <Button 
-          type="submit" 
-          className="min-w-[120px]"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="min-w-[120px]" disabled={isSubmitting}>
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {Newstudent ? "Mise à jour..." : "Enregistrement..."}
             </>
+          ) : Newstudent ? (
+            "suivant"
           ) : (
-            Newstudent ? "suivant" : "suivant"
+            "suivant"
           )}
         </Button>
       </div>

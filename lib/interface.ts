@@ -133,17 +133,27 @@ export interface Student {
   updated_at: string;
   photo: string;
   sexe: string;
-  assignment_type: {
-    id: number;
-    label: string;
-    slug: string;
-    active: number;
-    created_at: string;
-    updated_at: string;
-  };
+  assignment_type: AssignmentType;
   documents: Document[];
   payments: Payment[];
   registrations: Registration[];
+  tutors?: {
+    id: number;
+    name: string;
+    first_name: string;
+    phone_number: string;
+    sexe: string;
+    type: string;
+    created_at: string;
+    updated_at: string;
+    pivot: {
+      tutor_id: number;
+      student_id: number;
+      is_tutor_legal: 0 | 1;
+      created_at: string;
+      updated_at: string;
+    };
+  }[];
 }
 
 export interface StudentOnly {
@@ -342,10 +352,30 @@ export interface Tutor {
   first_name: string;
   phone_number: string;
   sexe: string;
-  type: string;
+  type_tutor: string;
   created_at: string;
   updated_at: string;
-  students?: StudentOnly[];
+  students?: {
+    id: number;
+    assignment_type_id: number;
+    registration_number: string;
+    name: string;
+    first_name: string;
+    birth_date: string;
+    tutor_name: string;
+    tutor_first_name: string;
+    tutor_number: string;
+    status: string;
+    photo: string;
+    sexe: string;
+    pivot: {
+      tutor_id: number;
+      student_id: number;
+      is_tutor_legal: 0 | 1;
+      created_at: string;
+      updated_at: string;
+    };
+  }[];
 }
 
 export interface ValidationExpense {
