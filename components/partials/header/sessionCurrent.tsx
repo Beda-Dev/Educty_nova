@@ -43,7 +43,8 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
 
   const handleNavigate = () => {
     setIsLoading(true);
-    router.push(`/cash-registers/${cashRegisterSessionCurrent?.cash_register.id}`);
+    // router.push(`/cash-registers/${cashRegisterSessionCurrent?.cash_register.id}`);
+    router.push("/caisse_comptabilite/session_caisse")
   };
 
   if (!cashRegisterSessionCurrent) {

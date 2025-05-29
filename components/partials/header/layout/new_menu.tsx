@@ -38,7 +38,7 @@ import {
   CheckCircle,
   Clipboard,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { forwardRef } from "react";
 
 const MenuTrigger = forwardRef<
@@ -67,7 +67,8 @@ type MenuItem = {
   icon: React.ReactNode;
   path: string;
   description?: string;
-  children?: MenuItem[]; // peut être récursif
+  children?: MenuItem[];
+  hidden?: boolean;
 };
 
 type MenuCategory = {
@@ -224,7 +225,6 @@ const menuItems: MenuCategory = {
           path: "/parametres/caisse/type_depense",
           icon: <ClipboardList className="w-4 h-4" />,
         },
-
         {
           id: "payment-methods",
           title: "Méthodes de Paiement",
@@ -339,6 +339,15 @@ const menuItems: MenuCategory = {
       title: "Sessions de caisse",
       icon: <Clock className="w-6 h-6" />,
       path: "/caisse_comptabilite/session_caisse",
+      children: [
+        {
+          id: "close_session",
+          title: "fermeture caisse",
+          icon: <Calendar className="w-6 h-6" />,
+          path: "/caisse_comptabilite/close-session",
+          hidden: true
+        }
+      ]
     },
   ],
   pedagogie: [
@@ -439,12 +448,6 @@ const menuItems: MenuCategory = {
           path: "/vie_scolaire/emploi_du_temps_classe",
           icon: <User className="w-6 h-6" />,
         },
-        // {
-        //   id: "professeurs",
-        //   title: "Emploi du temps professeurs",
-        //   path: "vie_scolaire/emploi_du_temps_professeur",
-        //   icon: <Calendar className="w-6 h-6" />,
-        // },
       ],
     },
     {
@@ -471,9 +474,10 @@ export default function DynamicMenu() {
   const lang = params.lang as string;
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  const [isHovering, setIsHovering] = useState(false);
+  
+  // Utilisation de useRef pour gérer les timers de fermeture
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Mémoïsation de la fonction de navigation
   const navigate = React.useCallback(
     (path: string) => {
       router.push(`/${lang}/${path}`);
@@ -481,26 +485,27 @@ export default function DynamicMenu() {
     [router, lang]
   );
 
-  // Fonction récursive améliorée pour vérifier les chemins actifs
   const isPathActive = React.useCallback(
     (path: string, children?: MenuItem[]): boolean => {
-      // Normalisation des chemins
       const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-      const normalizedCurrent = pathname.endsWith("/")
-        ? pathname.slice(0, -1)
+      const fullPath = `/${lang}${normalizedPath}`;
+      const normalizedCurrent = pathname.endsWith("/") 
+        ? pathname.slice(0, -1) 
         : pathname;
 
-      // Vérification du chemin principal
-      if (
-        normalizedCurrent === `/${lang}${normalizedPath}` ||
-        normalizedCurrent.endsWith(normalizedPath)
-      ) {
+      const currentSegments = normalizedCurrent.split('/').filter(Boolean);
+      const menuSegments = fullPath.split('/').filter(Boolean);
+
+      const isPrefix = menuSegments.every((segment, index) => 
+        currentSegments[index] === segment
+      );
+
+      if (isPrefix) {
         return true;
       }
 
-      // Vérification récursive des enfants
       if (children) {
-        return children.some((child) =>
+        return children.some((child) => 
           isPathActive(child.path, child.children)
         );
       }
@@ -510,30 +515,28 @@ export default function DynamicMenu() {
     [pathname, lang]
   );
 
-  // Fonction optimisée pour déterminer si le menu doit être affiché
   const shouldShowMenu = React.useCallback(() => {
-    // Chemins où le menu ne doit pas apparaître
-    const excludedPaths = [
-      "/login",
-      "/register",
-      "/forgot-password",
-      "/reset-password",
-      "/error",
-    ];
-
-    if (excludedPaths.some((path) => pathname.includes(path))) {
-      return false;
-    }
-
-    // Toujours afficher sur la page d'accueil
     if (pathname === `/${lang}` || pathname === `/${lang}/`) {
       return true;
     }
 
-    // Vérifier si le chemin correspond à un élément de menu
     const checkPathInMenu = (items: MenuItem[]): boolean => {
       return items.some((item) => {
-        if (isPathActive(item.path, item.children)) return true;
+        const normalizedPath = item.path.startsWith("/") ? item.path : `/${item.path}`;
+        const fullPath = `/${lang}${normalizedPath}`;
+        const normalizedCurrent = pathname.endsWith("/") 
+          ? pathname.slice(0, -1) 
+          : pathname;
+
+        const currentSegments = normalizedCurrent.split('/').filter(Boolean);
+        const menuSegments = fullPath.split('/').filter(Boolean);
+
+        const isPrefix = menuSegments.every((segment, index) => 
+          currentSegments[index] === segment
+        );
+
+        if (isPrefix) return true;
+        
         return item.children ? checkPathInMenu(item.children) : false;
       });
     };
@@ -541,13 +544,11 @@ export default function DynamicMenu() {
     return Object.values(menuItems).some((category) =>
       checkPathInMenu(category)
     );
-  }, [pathname, lang, isPathActive]);
+  }, [pathname, lang]);
 
-  // Détection optimisée du menu actif
   const getActiveMenu = React.useCallback((): MenuKey => {
     const pathSegments = pathname.split("/").filter(Boolean);
 
-    // 1. Vérification des routes spéciales prioritaires
     const specialRoutes: Record<string, MenuKey> = {
       paiement: "caisse_comptabilite",
       encaissement: "caisse_comptabilite",
@@ -568,101 +569,119 @@ export default function DynamicMenu() {
       caisse: "parametres",
     };
 
-    // 2. Vérification des segments clés de menu
     const menuKeys = Object.keys(menuItems) as MenuKey[];
 
-    // Parcours des segments du chemin
     for (const segment of pathSegments) {
-      // Priorité aux routes spéciales
       if (specialRoutes[segment]) {
         return specialRoutes[segment];
       }
 
-      // Ensuite vérification des clés de menu principales
       if (menuKeys.includes(segment as MenuKey)) {
         return segment as MenuKey;
       }
     }
 
-    // 3. Vérification des préfixes de chemin pour les cas complexes
-    if (pathname.includes("/parametres/")) {
+    if (pathSegments.some(seg => seg === "parametres")) {
       return "parametres";
     }
-    if (pathname.includes("/eleves/")) {
+    if (pathSegments.some(seg => seg === "eleves")) {
       return "eleves";
     }
     if (
-      pathname.includes("/caisse_comptabilite/") ||
-      pathname.includes("/encaissement") ||
-      pathname.includes("/decaissement")
+      pathSegments.some(seg => seg === "caisse_comptabilite") ||
+      pathSegments.some(seg => seg === "encaissement") ||
+      pathSegments.some(seg => seg === "decaissement")
     ) {
       return "caisse_comptabilite";
     }
-    if (pathname.includes("/pedagogie/")) {
+    if (pathSegments.some(seg => seg === "pedagogie")) {
       return "pedagogie";
     }
-    if (pathname.includes("/inventaire/")) {
+    if (pathSegments.some(seg => seg === "inventaire")) {
       return "inventaire";
     }
-    if (pathname.includes("/vie_scolaire/")) {
+    if (pathSegments.some(seg => seg === "vie_scolaire")) {
       return "vie_scolaire";
     }
 
-    // 4. Fallback par défaut
     return "parametres";
   }, [pathname]);
 
   const activeMenu = getActiveMenu();
-  // console.log('Active menu:', getActiveMenu());
   const currentMenuItems = menuItems[activeMenu] || [];
 
-  // Gestion améliorée des popovers
-  useEffect(() => {
-    if (!isHovering && openPopoverId) {
-      const timer = setTimeout(() => {
-        setOpenPopoverId(null);
-      }, 500); // Augmentez ce délai à 500ms (au lieu de 200ms)
-      return () => clearTimeout(timer);
+  // Fonction pour gérer l'ouverture du popover avec délai
+  const handleOpenPopover = React.useCallback((itemId: string) => {
+    // Annuler tout timer de fermeture en cours
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
     }
-  }, [isHovering, openPopoverId]);
+    setOpenPopoverId(itemId);
+  }, []);
 
-  // Composant mémoïsé pour les items de menu
+  // Fonction pour gérer la fermeture du popover avec délai
+  const handleClosePopover = React.useCallback(() => {
+    closeTimerRef.current = setTimeout(() => {
+      setOpenPopoverId(null);
+    }, 300); // Délai de 300ms avant fermeture
+  }, []);
+
+  // Nettoyage des timers au démontage du composant
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
   const MenuItemComponent = React.useCallback(
     ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
-      const hasChildren = item.children && item.children.length > 0;
+      const visibleChildren = item.children?.filter(child => !child.hidden) || [];
+      const hasVisibleChildren = visibleChildren.length > 0;
+      const hasAnyChildren = item.children && item.children.length > 0;
       const isActive = isPathActive(item.path, item.children);
 
       const handleMouseEnter = () => {
         setHoveredItem(item.id);
-        setIsHovering(true);
-        // Toujours ouvrir le popover si on a des enfants, quel que soit le niveau
-        if (hasChildren) {
-          setOpenPopoverId(item.id);
+        if (hasVisibleChildren) {
+          handleOpenPopover(item.id);
         }
       };
 
       const handleMouseLeave = () => {
-        setIsHovering(false);
-        // Ne pas fermer immédiatement, la fermeture est gérée par le timeout dans useEffect
+        // Ne pas fermer immédiatement, laisser le temps de naviguer vers le popover
+        handleClosePopover();
       };
 
       const handleClick = () => {
-        if (!hasChildren) {
+        if (!hasAnyChildren) {
           navigate(item.path);
+          setOpenPopoverId(null); // Fermer le popover lors de la navigation
         }
+      };
+
+      // Fonction pour maintenir le popover ouvert quand on survole le contenu
+      const handlePopoverMouseEnter = () => {
+        if (closeTimerRef.current) {
+          clearTimeout(closeTimerRef.current);
+          closeTimerRef.current = null;
+        }
+      };
+
+      const handlePopoverMouseLeave = () => {
+        handleClosePopover();
       };
 
       return (
         <Popover
-          open={openPopoverId === item.id}
+          open={openPopoverId === item.id && hasVisibleChildren}
           onOpenChange={(open) => {
             if (!open) {
-              // Ajoutez un délai avant de fermer
-              setTimeout(() => {
-                setOpenPopoverId(null);
-              }, 300);
-            } else {
-              setOpenPopoverId(item.id);
+              handleClosePopover();
+            } else if (hasVisibleChildren) {
+              handleOpenPopover(item.id);
             }
           }}
         >
@@ -679,7 +698,8 @@ export default function DynamicMenu() {
                   isActive
                     ? "bg-primary/15 text-primary font-medium"
                     : "text-foreground/90",
-                  level > 0 && "px-3 py-1.5"
+                  level > 0 && "px-3 py-1.5",
+                  item.hidden && "hidden"
                 )}
                 onClick={handleClick}
               >
@@ -687,7 +707,7 @@ export default function DynamicMenu() {
                   {item.icon}
                 </div>
                 <span className="text-sm">{item.title}</span>
-                {hasChildren && (
+                {hasVisibleChildren && (
                   <motion.div
                     animate={{ rotate: hoveredItem === item.id ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
@@ -700,50 +720,46 @@ export default function DynamicMenu() {
             </div>
           </PopoverTrigger>
 
-          {hasChildren && (
+          {hasVisibleChildren && (
             <AnimatePresence>
-              <PopoverContent
-                className={cn(
-                  "p-2 z-50 shadow-lg bg-background/95 backdrop-blur border border-border/50",
-                  level === 0 ? "w-56" : "w-48",
-                  level > 0 && "ml-1"
-                )}
-                align={level === 0 ? "start" : "end"}
-                sideOffset={5}
-                side={level === 0 ? "bottom" : "right"}
-                onMouseEnter={() => {
-                  setIsHovering(true);
-                  setOpenPopoverId(item.id);
-                }}
-                onMouseLeave={() => {
-                  setIsHovering(false);
-                  // Délai avant fermeture géré par le useEffect
-                }}
-                forceMount
-              >
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.15 }}
+              {openPopoverId === item.id && (
+                <PopoverContent
+                  className={cn(
+                    "p-2 z-50 shadow-lg bg-background/95 backdrop-blur border border-border/50",
+                    level === 0 ? "w-56" : "w-48",
+                    level > 0 && "ml-1"
+                  )}
+                  align={level === 0 ? "start" : "end"}
+                  sideOffset={5}
+                  side={level === 0 ? "bottom" : "right"}
+                  onMouseEnter={handlePopoverMouseEnter}
+                  onMouseLeave={handlePopoverMouseLeave}
+                  forceMount
                 >
-                  <div className="flex flex-col gap-1">
-                    {item.children?.map((child) => (
-                      <MenuItemComponent
-                        key={child.id}
-                        item={child}
-                        level={level + 1}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              </PopoverContent>
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <div className="flex flex-col gap-1">
+                      {visibleChildren.map((child) => (
+                        <MenuItemComponent
+                          key={child.id}
+                          item={child}
+                          level={level + 1}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                </PopoverContent>
+              )}
             </AnimatePresence>
           )}
         </Popover>
       );
     },
-    [hoveredItem, isHovering, openPopoverId, isPathActive, navigate]
+    [hoveredItem, openPopoverId, isPathActive, navigate, handleOpenPopover, handleClosePopover]
   );
 
   if (!shouldShowMenu()) {
