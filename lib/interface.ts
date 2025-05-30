@@ -163,9 +163,6 @@ export interface StudentOnly {
   name: string;
   first_name: string;
   birth_date: string;
-  tutor_name: string;
-  tutor_first_name: string;
-  tutor_number: string;
   status: string;
   photo: string;
   sexe: string;

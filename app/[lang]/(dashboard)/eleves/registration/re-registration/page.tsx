@@ -46,6 +46,7 @@ import {
 } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { RegistrationForm } from "./RegistrationForm";
+import PaymentForm from "./payment_step";
 
 const stepVariants = {
   hidden: { opacity: 0, x: 50 },
@@ -77,6 +78,7 @@ export default function OldReregistration() {
     useState<AcademicYear>();
   const [Tarificationfound, setTarificationfound] = useState(false);
   const [datapost, setDataPost] = useState<Registration>();
+  const [subPay , setSubPay] = useState<boolean>(false);
   const [tarificationsData, setTarificationsData] = useState<{
     fees: { label: string; amount: number }[];
     total: number;
@@ -105,6 +107,7 @@ export default function OldReregistration() {
     () => [
       { label: "Informations", icon: <User className="w-4 h-4" /> },
       { label: "Documents", icon: <FileText className="w-4 h-4" /> },
+      { label: "Paiement", icon: <Calendar className="w-4 h-4" /> },
       { label: "Validation", icon: <CheckCircle className="w-4 h-4" /> },
     ],
     []
@@ -116,11 +119,21 @@ export default function OldReregistration() {
     name: reRegistration?.student.name,
     first_name: reRegistration?.student.first_name,
     birth_date: reRegistration?.student.birth_date,
-    tutor_name: reRegistration?.student.tutor_name,
-    tutor_first_name: reRegistration?.student.tutor_first_name,
-    tutor_number: reRegistration?.student.tutor_number,
     status: reRegistration?.student.status,
   }));
+
+  useEffect(() => {
+  if (reRegistration?.student) {
+    setData({
+      assignment_type_id: reRegistration.student.assignment_type_id,
+      registration_number: reRegistration.student.registration_number,
+      name: reRegistration.student.name,
+      first_name: reRegistration.student.first_name,
+      birth_date: reRegistration.student.birth_date,
+      status: reRegistration.student.status,
+    });
+  }
+}, [reRegistration]);
 
   const [levelChoice, setLevelChoice] = useState(
     Number(reRegistration?.classe.level_id)
@@ -137,44 +150,25 @@ export default function OldReregistration() {
     setData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-const handleUpdateSuccess = useCallback(() => {
-  setActiveStep((prev) => prev + 1);
-}, []);
+  const handleUpdateSuccess = useCallback(() => {
+    setActiveStep((prev) => prev + 1);
+  }, []);
 
-const handleNext = useCallback(async () => {
-  setIsSubmitting(true);
-  const currentStep = activeStep;
+    const toggleOpen = () => {
+    setSubPay(false);
+  };
 
-  if (currentStep === 0) {
-    try {
-      const requestBody = { ...Data, sexe: reRegistration?.student.sexe };
-      const res = await fetch(
-        `/api/students?id=${reRegistration?.student_id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestBody),
-        }
-      );
+  const handleNext = useCallback(async () => {
+    setIsSubmitting(true);
+    const currentStep = activeStep;
 
-      if (!res.ok)
-        throw new Error(`Erreur ${res.status}: ${await res.text()}`);
-      toast.success("Données mises à jour avec succès !");
-    } catch (error) {
-      console.error(error);
-      toast.error("Erreur de mise à jour");
-      setIsSubmitting(false);
-      return;
-    }
-  }
-
-  if (currentStep === 1) {
-    const payload = {
-      class_id: New.class_id,
-      academic_year_id: AcademicYearCurrent?.id ?? 1,
-      student_id: reRegistration?.student?.id,
-      registration_date: new Date().toISOString().split("T")[0],
-    };
+    if (currentStep === 1) {
+      const payload = {
+        class_id: New.class_id,
+        academic_year_id: AcademicYearCurrent?.id ?? 1,
+        student_id: reRegistration?.student?.id,
+        registration_date: new Date().toISOString().split("T")[0],
+      };
 
       const existingRegistration = registrations.find(
         (registration) =>
@@ -183,13 +177,13 @@ const handleNext = useCallback(async () => {
           registration.academic_year_id === AcademicYearCurrent?.id
       );
 
-      if (existingRegistration) {
-        toast.error(
-          `L'élève ${reRegistration?.student?.name} ${reRegistration?.student?.first_name} est déjà inscrit dans cette classe.`
-        );
-        setIsSubmitting(false);
-        return;
-      }
+      // if (existingRegistration) {
+      //   toast.error(
+      //     `L'élève ${reRegistration?.student?.name} ${reRegistration?.student?.first_name} est déjà inscrit dans cette classe.`
+      //   );
+      //   setIsSubmitting(false);
+      //   return;
+      // }
 
       try {
         const res = await fetch(`/api/registration`, {
@@ -218,6 +212,17 @@ const handleNext = useCallback(async () => {
     }
 
     if (currentStep === 2) {
+      
+      return;
+    }
+
+    if (currentStep === 3) {
+      setSubPay(true);
+      if (!datapost || !tarificationsData) {
+        toast.error("Veuillez compléter les étapes précédentes.");
+        setIsSubmitting(false);
+        return;
+      }
       setReRegistrations(null);
       router.push("/eleves/registration");
       setIsSubmitting(false);
@@ -287,24 +292,24 @@ const handleNext = useCallback(async () => {
           transition={{ duration: 0.3 }}
           className="w-full gap-6 mt-4"
         >
-  {activeStep === 0 && (
-    <RegistrationForm
-      Data={Data}
-      levelChoice={levelChoice}
-      reRegistration={reRegistration}
-      assignmentTypes={assignmentTypes}
-      levels={levels}
-      classes={classes}
-      handleChange={handleChange}
-      setLevelChoice={setLevelChoice}
-      setData={setData}
-      setNew={setNew}
-      studentId={reRegistration?.student_id}
-      onUpdateSuccess={handleUpdateSuccess}
-      isSubmitting={isSubmitting}
-      setIsSubmitting={setIsSubmitting}
-    />
-  )}
+          {activeStep === 0 && (
+            <RegistrationForm
+              Data={Data}
+              levelChoice={levelChoice}
+              reRegistration={reRegistration}
+              assignmentTypes={assignmentTypes}
+              levels={levels}
+              classes={classes}
+              handleChange={handleChange}
+              setLevelChoice={setLevelChoice}
+              setData={setData}
+              setNew={setNew}
+              studentId={reRegistration?.student_id}
+              onUpdateSuccess={handleUpdateSuccess}
+              isSubmitting={isSubmitting}
+              setIsSubmitting={setIsSubmitting}
+            />
+          )}
 
           {activeStep === 1 && (
             <>
@@ -313,28 +318,30 @@ const handleNext = useCallback(async () => {
                 className="col-span-2 space-y-6"
               >
                 {reRegistration?.student && (
-                  <Card
-                    title={`Documents de ${reRegistration.student.name} ${reRegistration.student.first_name}`}
-                  >
-                    <FileManager student={reRegistration.student} />
-                  </Card>
+                  <FileManager student={reRegistration.student} />
                 )}
 
-                <Card title="frais de scolarité">
-                  <TarificationTable
-                    tarifications={pricing}
-                    level_id={levelChoice}
-                    assignmenttype_id={Data.assignment_type_id ?? 1}
-                    academicyear_id={AcademicYearCurrent?.id ?? 1}
-                    TarificationsFound={handleNoTarifications}
-                    onTarificationsData={setTarificationsData}
-                  />
-                </Card>
+                <TarificationTable
+                  tarifications={pricing}
+                  level_id={levelChoice}
+                  assignmenttype_id={Data.assignment_type_id ?? 1}
+                  academicyear_id={AcademicYearCurrent?.id ?? 1}
+                  TarificationsFound={handleNoTarifications}
+                  onTarificationsData={setTarificationsData}
+                />
               </motion.div>
             </>
           )}
+          {activeStep === 2 && datapost && (
+            <motion.div
+              variants={inputVariants}
+              className="col-span-2 space-y-6"
+            >
+              <PaymentForm registration={datapost} submit={subPay} Sub={toggleOpen} onSuccess={handleUpdateSuccess} />
+            </motion.div>
+          )}
 
-          {activeStep === 2 &&
+          {activeStep === 3 &&
             datapost &&
             tarificationsData &&
             Tarificationfound === true && (

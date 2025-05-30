@@ -1,12 +1,11 @@
 import React, { useMemo, useEffect } from "react";
 import { Pricing } from "@/lib/interface";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Info, CircleAlert, Settings } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   tarifications: Pricing[];
@@ -27,7 +26,6 @@ const TarificationTable: React.FC<Props> = ({
   onTarificationsData,
   isLoading = false,
 }) => {
-  // Filtrage des tarifications
   const filteredTarifications = useMemo(
     () =>
       tarifications.filter(
@@ -39,7 +37,6 @@ const TarificationTable: React.FC<Props> = ({
     [tarifications, level_id, assignmenttype_id, academicyear_id]
   );
 
-  // Préparer les données des frais trouvés
   const feesData = useMemo(
     () =>
       filteredTarifications.map((tarif) => ({
@@ -49,17 +46,14 @@ const TarificationTable: React.FC<Props> = ({
     [filteredTarifications]
   );
 
-  // Calcul de la somme totale des montants
   const totalAmount = useMemo(
     () => feesData.reduce((acc, fee) => acc + fee.amount, 0),
     [feesData]
   );
 
-  // Notifier le parent si aucune tarification n'est trouvée
   useEffect(() => {
     const hasTarifications = filteredTarifications.length > 0;
     TarificationsFound(hasTarifications);
-
     onTarificationsData({
       fees: feesData,
       total: totalAmount,
@@ -68,83 +62,83 @@ const TarificationTable: React.FC<Props> = ({
 
   if (isLoading) {
     return (
-      <Card className="animate-pulse">
-        <CardHeader>
-          <Skeleton className="h-6 w-1/3" />
-          <Separator className="my-2" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-1/3" />
+        <Separator />
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </div>
     );
   }
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span>Détails des tarifications</span>
-          {filteredTarifications.length > 0 && (
-            <Badge variant="outline" className="px-2 py-1 text-sm">
-              {filteredTarifications.length} type{filteredTarifications.length > 1 ? "s" : ""} de frais
-            </Badge>
-          )}
-        </CardTitle>
-        <Separator className="my-2" />
-      </CardHeader>
-      <CardContent>
-        {filteredTarifications.length === 0 ? (
-          <Alert variant="outline" color="destructive">
-            <Info className="h-4 w-4" />
-            <AlertDescription>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">Frais scolaires à payer</h3>
+        {filteredTarifications.length > 0 && (
+          <Badge color="secondary" className="px-3 py-1">
+            {filteredTarifications.length} type{filteredTarifications.length > 1 ? "s" : ""} de frais
+          </Badge>
+        )}
+      </div>
+
+      <Separator />
+
+      {filteredTarifications.length === 0 ? (
+        <Alert color="destructive" className="border-none">
+          <CircleAlert className="h-4 w-4" />
+          <AlertTitle>Aucun frais scolaire configuré</AlertTitle>
+          <AlertDescription className="space-y-2">
+            <p>
               Aucune tarification trouvée pour cette combinaison (niveau, type d'affectation, année académique).
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader className="bg-gray-50 dark:bg-gray-800">
-                  <TableRow>
-                    <TableHead className="w-[60%]">Type de frais</TableHead>
-                    <TableHead className="text-right w-[40%]">Montant (FCFA)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {feesData.map((fee, index) => (
-                    <TableRow key={index} className={index % 2 === 0 ? "bg-gray-50/50 dark:bg-gray-900/50" : ""}>
-                      <TableCell>
-                        <Badge variant="outline" color="secondary" className="font-normal">
-                          {fee.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-medium tabular-nums">
-                        <span className="text-green-600 dark:text-green-400">
-                          {fee.amount.toLocaleString("fr-FR")} FCFA
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            
-            <div className="flex justify-between items-center mt-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg border">
-              <span className="font-medium text-gray-600 dark:text-gray-300">Total à payer :</span>
-              <span className="text-xl font-bold text-green-700 dark:text-green-400">
-                {totalAmount.toLocaleString("fr-FR")} FCFA
+            </p>
+            <div className="flex items-start gap-2 mt-2 text-sm">
+              <Settings className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span>
+                Veuillez vérifier les paramètres dans <strong>Scolarité → Frais scolaires → Tarification</strong>
               </span>
             </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader className="bg-muted/50">
+                <TableRow>
+                  <TableHead className="w-[60%]">Type de frais</TableHead>
+                  <TableHead className="text-right w-[40%]">Montant</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {feesData.map((fee, index) => (
+                  <TableRow key={index} className="hover:bg-muted/50">
+                    <TableCell>
+                      <div className="font-medium">{fee.label}</div>
+                    </TableCell>
+                    <TableCell className="text-right font-medium tabular-nums">
+                      <span className="text-primary">
+                        {fee.amount.toLocaleString("fr-FR")} FCFA
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          
+          <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+            <span className="font-medium">Total à payer :</span>
+            <span className="text-xl font-bold text-primary">
+              {totalAmount.toLocaleString("fr-FR")} FCFA
+            </span>
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 

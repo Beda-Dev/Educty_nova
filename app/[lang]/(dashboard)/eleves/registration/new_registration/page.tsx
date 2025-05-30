@@ -34,6 +34,8 @@ import RegistrationFinal from "./final_register";
 import { getTarificationData } from "./fonction";
 import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
+import StepperWrapper from "../StepperWrapper";
+import { steps } from "./step";
 
 export default function NewReregistration() {
   const router = useRouter();
@@ -107,15 +109,6 @@ useEffect(() => {
     }
   };
 
-  const steps = useMemo(
-    () => [
-      { label: "Étape 1", desc: "Informations de l'élève" },
-      { label: "Étape 2", desc: "Dossier scolaire" },
-      { label: "Étape 3", desc: "classe et Niveau" },
-      { label: "Étape 4", desc: "inscription" },
-    ],
-    []
-  );
 
   const [levelChoice, setLevelChoice] = useState(
     Number(reRegistration?.classe?.level_id ?? 0)
@@ -150,19 +143,7 @@ useEffect(() => {
 
   return (
     <Card>
-      <h2 className="text-lg font-semibold text-center mb-8">
-        {steps[activeStep]?.desc}
-      </h2>
-      <Stepper
-        current={activeStep}
-        direction={isTablet ? "vertical" : "horizontal"}
-      >
-        {steps.map(({ label }) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+      <StepperWrapper steps={steps} currentStep={activeStep} />
       {activeStep === 0 && (
         <FormulaireEnregistrement
           isValid={isValidAdd}
