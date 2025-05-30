@@ -188,21 +188,6 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
 
                 <Separator className="my-3" />
 
-                <div className="space-y-3">
-                  <h3 className="font-medium">Informations du tuteur</h3>
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Nom:</span>
-                    <span>
-                      {data.tutor_first_name} {data.tutor_name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Téléphone:</span>
-                    <span>+225 {data.tutor_number}</span>
-                  </div>
-                </div>
               </div>
             </div>
           </CardContent>

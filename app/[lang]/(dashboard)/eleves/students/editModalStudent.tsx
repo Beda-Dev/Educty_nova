@@ -38,9 +38,6 @@ type FormData = {
   first_name: string;
   birth_date: string;
   sexe: string;
-  tutor_name: string;
-  tutor_first_name: string;
-  tutor_number: string;
   status: string;
 };
 
@@ -59,9 +56,6 @@ export const EditStudentModal = ({
     first_name: "",
     birth_date: "",
     sexe: "",
-    tutor_name: "",
-    tutor_first_name: "",
-    tutor_number: "",
     status: "",
   });
 
@@ -74,9 +68,6 @@ export const EditStudentModal = ({
         first_name: selectedStudent?.student?.first_name || "",
         birth_date: selectedStudent?.student?.birth_date || "",
         sexe: selectedStudent?.student?.sexe || "",
-        tutor_name: selectedStudent?.student?.tutor_name || "",
-        tutor_first_name: selectedStudent?.student?.tutor_first_name || "",
-        tutor_number: selectedStudent?.student?.tutor_number || "",
         status: selectedStudent?.student?.status || "",
       });
     } else {
@@ -87,9 +78,6 @@ export const EditStudentModal = ({
         first_name: "",
         birth_date: "",
         sexe: "",
-        tutor_name: "",
-        tutor_first_name: "",
-        tutor_number: "",
         status: "",
       });
     }
@@ -233,40 +221,8 @@ export const EditStudentModal = ({
               </Select>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="tutor_name">Nom du tuteur</Label>
-              <Input
-                id="tutor_name"
-                name="tutor_name"
-                placeholder="Nom du tuteur"
-                value={formdata.tutor_name}
-                onChange={handleChange}
-                required
-              />
-            </div>
+          
             
-            <div className="space-y-2">
-              <Label htmlFor="tutor_first_name">Prénom du tuteur</Label>
-              <Input
-                id="tutor_first_name"
-                name="tutor_first_name"
-                placeholder="Prénom du tuteur"
-                value={formdata.tutor_first_name}
-                onChange={handleChange}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="tutor_number">Numéro du tuteur</Label>
-              <Input
-                id="tutor_number"
-                name="tutor_number"
-                placeholder="Numéro du tuteur"
-                value={formdata.tutor_number}
-                onChange={handleChange}
-                required
-              />
-            </div>
           </div>
           
           <DialogFooter>
