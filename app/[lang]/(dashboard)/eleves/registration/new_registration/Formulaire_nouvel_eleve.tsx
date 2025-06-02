@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import ImageUploader from "./select_photo";
+import {ImageUploader} from "./select_photo";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -29,6 +29,9 @@ import { Switch } from "@/components/ui/switch";
 interface FormProps {
   isValid: boolean;
   onSubmitResult: (result: { success: boolean; data?: Student }) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  isLastStep: boolean;
 }
 
 const studentSchema = z.object({
@@ -52,17 +55,22 @@ const tutorSchema = z.object({
   type_tutor: z.string().min(1, "Lien de parenté requis"),
 });
 
-const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
+const FormulaireEnregistrement: React.FC<FormProps> = ({
+  onSubmitResult,
+  onPrevious,
+  onNext,
+  isLastStep,
+  isValid,
+}) => {
   const { assignmentTypes, students, Newstudent, setNewStudent } =
     useSchoolStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [showTutorForm, setShowTutorForm] = useState(false);
   const [tutors, setTutors] = useState<
     {
       data: z.infer<typeof tutorSchema>;
       isLegalTutor: boolean;
-      id?: number; // Pour les tuteurs existants en mode édition
+      id?: number;
     }[]
   >([]);
 
@@ -70,7 +78,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     register,
     handleSubmit,
     setValue,
-    reset,
     formState: { errors, isDirty },
   } = useForm<z.infer<typeof studentSchema>>({
     resolver: zodResolver(studentSchema),
@@ -86,7 +93,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
       : undefined,
   });
 
-  // Charger les tuteurs existants si on est en mode édition
   useEffect(() => {
     if (Newstudent?.id) {
       const fetchTutors = async () => {
@@ -119,7 +125,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     }
   }, [Newstudent]);
 
-  // Vérifie l'unicité du matricule (sauf pour l'étudiant en cours d'édition)
   const isMatriculeUnique = (matricule: string): boolean => {
     return !students.some(
       (student) =>
@@ -128,7 +133,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     );
   };
 
-  // Convertit en majuscules et met à jour le champ
   const handleUpperCaseChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: keyof z.infer<typeof studentSchema>
@@ -138,12 +142,10 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     setValue(fieldName, upperValue, { shouldValidate: true });
   };
 
-  // Gestion du téléchargement d'image
   const handleImageChange = (file: File) => {
     setImageFile(file);
   };
 
-  // Ajouter un nouveau tuteur
   const addTutor = () => {
     setTutors([
       ...tutors,
@@ -155,25 +157,21 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
           sexe: "Homme",
           type_tutor: "",
         },
-        isLegalTutor: tutors.length === 0, // Le premier tuteur est le tuteur légal par défaut
+        isLegalTutor: tutors.length === 0,
       },
     ]);
-    setShowTutorForm(true);
   };
 
-  // Supprimer un tuteur
   const removeTutor = (index: number) => {
     const newTutors = [...tutors];
     newTutors.splice(index, 1);
     setTutors(newTutors);
 
-    // Si on supprime le tuteur légal et qu'il reste des tuteurs, on définit le premier comme tuteur légal
     if (newTutors.length > 0 && !newTutors.some((t) => t.isLegalTutor)) {
       newTutors[0].isLegalTutor = true;
     }
   };
 
-  // Mettre à jour un tuteur
   const updateTutor = (
     index: number,
     field: keyof z.infer<typeof tutorSchema>,
@@ -184,7 +182,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     setTutors(newTutors);
   };
 
-  // Changer le tuteur légal
   const setLegalTutor = (index: number) => {
     const newTutors = tutors.map((tutor, i) => ({
       ...tutor,
@@ -193,7 +190,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     setTutors(newTutors);
   };
 
-  // Valider les données des tuteurs
   const validateTutors = (): boolean => {
     if (tutors.length === 0) {
       toast.error("Au moins un tuteur doit être renseigné");
@@ -211,7 +207,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
     }
   };
 
-  // Soumission du formulaire
   const onSubmit = async (studentData: z.infer<typeof studentSchema>) => {
     if (!isMatriculeUnique(studentData.registration_number)) {
       toast.error("Ce matricule est déjà utilisé par un autre élève");
@@ -234,13 +229,11 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
 
       let studentBody: BodyInit;
       if (isEditing) {
-        // PUT = JSON sans la photo
         studentBody = JSON.stringify({
           ...studentData,
           status: "actif",
         });
       } else {
-        // POST = FormData avec photo
         const formData = new FormData();
         Object.entries(studentData).forEach(([key, value]) => {
           if (key !== "sexe") {
@@ -254,12 +247,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
         formData.append("sexe", studentData.sexe);
         studentBody = formData;
       }
-
-      console.log("Envoi des données de l'élève:", {
-        method: studentMethod,
-        url: studentUrl,
-        body: studentBody,
-      });
 
       const studentResponse = await fetch(studentUrl, {
         method: studentMethod,
@@ -276,10 +263,9 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
       }
 
       const studentResult = await studentResponse.json();
-      console.log("Réponse de l'API élève:", studentResult);
       setNewStudent(studentResult);
 
-      // 2. Créer/mettre à jour les tuteurs et les associer à l'élève
+      // 2. Créer/mettre à jour les tuteurs
       const tutorPromises = tutors.map(async (tutor) => {
         const tutorUrl = tutor.id
           ? `https://educty.digifaz.com/api/tutor/${tutor.id}`
@@ -302,9 +288,8 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
       });
 
       const tutorsResults = await Promise.all(tutorPromises);
-      console.log("Réponses de l'API tuteurs:", tutorsResults);
 
-      // 3. Associer les tuteurs à l'élève avec le statut de tuteur légal
+      // 3. Associer les tuteurs à l'élève
       const assignTutorResponse = await fetch(
         "https://educty.digifaz.com/api/student/assign-tutor",
         {
@@ -325,9 +310,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
       if (!assignTutorResponse.ok) {
         throw new Error(await assignTutorResponse.text());
       }
-
-      const assignTutorResult = await assignTutorResponse.json();
-      console.log("Réponse de l'API assign-tutor:", assignTutorResult);
 
       toast.success(
         isEditing
@@ -672,17 +654,27 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({ onSubmitResult }) => {
 
       <Separator className="my-6" />
 
-      <div className="flex justify-end gap-4">
-        <Button type="submit" className="min-w-[120px]" disabled={isSubmitting}>
+      <div className="flex justify-between">
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          disabled={isSubmitting}
+        >
+          Retour
+        </Button>
+        <Button
+          type="submit"
+          disabled={isSubmitting }
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {Newstudent ? "Mise à jour..." : "Enregistrement..."}
+              Enregistrement...
             </>
-          ) : Newstudent ? (
-            "suivant"
+          ) : isLastStep ? (
+            "Terminer"
           ) : (
-            "suivant"
+            "Suivant"
           )}
         </Button>
       </div>

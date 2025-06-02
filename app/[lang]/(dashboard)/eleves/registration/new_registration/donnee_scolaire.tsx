@@ -30,31 +30,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CheckIcon, Loader2Icon, WalletIcon } from "lucide-react";
+import { CheckIcon, Loader2Icon, WalletIcon, ChevronLeft, ChevronRight } from "lucide-react";
+
 
 interface DonneeScolaireProps {
   student: Student;
   onSubmitResult: (result: { success: boolean; data?: Registration }) => void;
+  onPrevious?: () => void;
   onNext?: () => void;
+  isLastStep?: boolean;
 }
 
-export default function DonneeScolaire({ 
-  student, 
-  onSubmitResult, 
-  onNext 
+export default function DonneeScolaire({
+  student,
+  onSubmitResult,
+  onPrevious,
+  onNext,
+  isLastStep
 }: DonneeScolaireProps) {
-  const { 
-    assignmentTypes, 
-    levels, 
-    classes, 
-    academicYears, 
-    pricing, 
-    academicYearCurrent,  
+  const {
+    assignmentTypes,
+    levels,
+    classes,
+    academicYears,
+    pricing,
+    academicYearCurrent,
     registrations,
     userOnline,
     cashRegisters
   } = useSchoolStore();
-  
+
   const currentAcademicYear = academicYearCurrent as AcademicYear;
   const [academicChoice, setAcademicChoice] = useState<number>(currentAcademicYear?.id ?? 0);
   const [levelChoice, setLevelChoice] = useState<number | null>(null);
@@ -73,8 +78,8 @@ export default function DonneeScolaire({
     }
   }, [academicYears, academicChoice, currentAcademicYear]);
 
-  const filteredClasses = useMemo(() => 
-    levelChoice ? TrieDeClasse(levelChoice, classes) : [], 
+  const filteredClasses = useMemo(() =>
+    levelChoice ? TrieDeClasse(levelChoice, classes) : [],
     [levelChoice, classes]
   );
 
@@ -92,11 +97,11 @@ export default function DonneeScolaire({
 
   const validateForm = () => {
     const errors: Record<string, string> = {};
-    
+
     if (!classChoice || !levelChoice) {
       errors.class = "Veuillez sélectionner un niveau et une classe";
     }
-    
+
     if (paymentAmount > 0) {
       if (!selectedCashRegister) {
         errors.cashRegister = "Veuillez sélectionner une caisse";
@@ -104,25 +109,25 @@ export default function DonneeScolaire({
       if (!selectedInstallment) {
         errors.installment = "Veuillez sélectionner une échéance";
       }
-      
+
       // Vérifier que le montant ne dépasse pas le total des tarifs
       const totalAmount = foundTarifications.reduce((acc, tarif) => acc + Number(tarif.amount), 0);
       if (paymentAmount > totalAmount) {
         errors.amount = `Le montant ne peut pas dépasser ${totalAmount.toLocaleString()} FCFA`;
       }
-      
+
       // Vérifier que le montant ne dépasse pas l'échéance sélectionnée
       if (selectedInstallment) {
         const installment = foundTarifications
           .flatMap(t => t.installments)
           .find(i => i?.id === selectedInstallment);
-        
+
         if (installment && paymentAmount > Number(installment.amount_due)) {
           errors.amount = `Le montant ne peut pas dépasser ${Number(installment.amount_due).toLocaleString()} FCFA pour cette échéance`;
         }
       }
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -195,7 +200,7 @@ export default function DonneeScolaire({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Niveau</Label>
-          <Select 
+          <Select
             onValueChange={(value) => setLevelChoice(Number(value))}
             value={levelChoice?.toString() || ""}
           >
@@ -214,7 +219,7 @@ export default function DonneeScolaire({
 
         <div className="space-y-2">
           <Label>Classe</Label>
-          <Select 
+          <Select
             onValueChange={(value) => setClassChoice(Number(value))}
             value={classChoice?.toString() || ""}
             disabled={!levelChoice}
@@ -302,8 +307,8 @@ export default function DonneeScolaire({
                     <TableRow>
                       <TableCell>Inscription en classe</TableCell>
                       <TableCell className="text-right font-mono">
-                        {classChoice ? 
-                          classes.find(c => c.id === classChoice)?.label : 
+                        {classChoice ?
+                          classes.find(c => c.id === classChoice)?.label :
                           "Non sélectionné"}
                       </TableCell>
                     </TableRow>
@@ -327,23 +332,32 @@ export default function DonneeScolaire({
                 </Table>
               </div>
 
-              <Button
-                onClick={handleSubmit}
-                className="w-full gap-2"
-                disabled={loading}
-              >
-                {loading ? (
-                  <>
-                    <Loader2Icon className="h-4 w-4 animate-spin" />
-                    Enregistrement...
-                  </>
-                ) : (
-                  <>
-                    <CheckIcon className="h-4 w-4" />
-                    Confirmer l'inscription
-                  </>
-                )}
-              </Button>
+              <div className="flex justify-between mt-6">
+                (
+                  <Button
+                    variant="outline"
+                    onClick={onPrevious}
+                    className="w-32"
+                  >
+                    <ChevronLeft className="w-4 h-4 mr-2" />
+                    Retour
+                  </Button>
+                )
+                <Button
+                  onClick={handleSubmit}
+                  disabled={loading || !hasValidFees || !validateForm()}
+                  className="w-32"
+                >
+                  {loading ? (
+                    <Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 mr-2" />
+                  )}
+                  {isLastStep ? "Terminer" : "Suivant"}
+                </Button>
+              </div>
+
+
             </div>
           </DialogContent>
         </Dialog>

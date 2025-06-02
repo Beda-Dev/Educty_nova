@@ -20,12 +20,25 @@ import jsPDF from "jspdf";
 import { toast } from "sonner";
 import {generationNumero} from "@/lib/fonction"
 
-interface DataProps {
+interface RegistrationFinalProps {
   registration: Registration;
-  finance: { fees: { label: string; amount: number }[]; total: number };
+  finance: any;
+  onPrevious: () => void;
+  onNext: () => void;
+  isLastStep: boolean;
+  isSubmitting: boolean;
+  Tarificationfound: boolean;
 }
 
-const RegistrationFinal = ({ registration, finance }: DataProps) => {
+const RegistrationFinal = ({
+  registration,
+  finance,
+  onPrevious,
+  onNext,
+  isLastStep,
+  isSubmitting,
+  Tarificationfound,
+}: RegistrationFinalProps) => {
   const { students } = useSchoolStore();
   const [student, setStudent] = useState<Student | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);

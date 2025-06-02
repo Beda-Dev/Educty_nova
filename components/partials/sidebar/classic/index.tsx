@@ -86,6 +86,11 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
   const pathname = usePathname();
   const locationName = getDynamicPath(pathname);
 
+  // Function to check if a menu item is active
+  const isActiveMenu = (href: string) => {
+    return isLocationMatch(href, locationName);
+  };
+
   React.useEffect(() => {
     let subMenuIndex = null;
     let multiMenuIndex = null;
@@ -154,6 +159,7 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
                   collapsed={collapsed}
                   hovered={hovered}
                   trans={trans}
+                  isActive={isActiveMenu(item.href)}
                 />
               )}
 
@@ -172,7 +178,7 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
                     item={item}
                     toggleSubmenu={toggleSubmenu}
                     index={i}
-                    activeSubmenu={activeSubmenu}
+                    isActive={activeSubmenu === i}
                     collapsed={collapsed}
                     hovered={hovered}
                     trans={trans}
@@ -186,6 +192,7 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
                       item={item}
                       index={i}
                       trans={trans}
+                      title={item.title}
                     />
                   )}
                 </>

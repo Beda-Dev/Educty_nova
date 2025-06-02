@@ -1,22 +1,25 @@
 import React from "react";
-
 import { Badge } from "@/components/ui/badge";
-import { cn, isLocationMatch, translate, getDynamicPath , isLocationMatch2 } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { cn, translate } from "@/lib/utils";
 import Link from "next/link";
-const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
+
+interface SingleMenuItemProps {
   item: any;
   collapsed: boolean;
   hovered: boolean;
-  trans: any
+  trans: any;
+  isActive: boolean;
+}
+
+const SingleMenuItem: React.FC<SingleMenuItemProps> = ({ 
+  item, 
+  collapsed, 
+  hovered, 
+  trans, 
+  isActive 
 }) => {
   const { badge, href, title } = item;
-  // console.log("item", item);
 
-  const pathname = usePathname();
-  const locationName = getDynamicPath(pathname);
-  // console.log("locationName", pathname);
-  // console.log("href", href);
   return (
     <Link href={href}>
       <>
@@ -25,10 +28,7 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
             className={cn(
               "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-primary-foreground",
               {
-                "bg-skyblue   text-primary-foreground ": isLocationMatch2(
-                  href,
-                  locationName
-                ),
+                "bg-skyblue   text-primary-foreground ": isActive,
               }
             )}
           >
@@ -44,11 +44,8 @@ const SingleMenuItem = ({ item, collapsed, hovered, trans }: {
               className={cn(
                 "h-12 w-12 mx-auto rounded-md  transition-all duration-300 inline-flex flex-col items-center justify-center  relative  ",
                 {
-                  "bg-skyblue  text-primary-foreground ": isLocationMatch2(
-                    href,
-                    locationName
-                  ),
-                  " text-default-600   ": !isLocationMatch2(href, locationName),
+                  "bg-skyblue  text-primary-foreground ": isActive,
+                  " text-default-600   ": !isActive,
                 }
               )}
             >

@@ -6,7 +6,7 @@ const SubMenuHandler = ({
   item,
   toggleSubmenu,
   index,
-  activeSubmenu,
+  isActive,
   collapsed,
   hovered,
   trans,
@@ -14,7 +14,7 @@ const SubMenuHandler = ({
   item: any;
   toggleSubmenu: any;
   index: number;
-  activeSubmenu: number | null;
+  isActive: boolean;
   collapsed: boolean;
   hovered: boolean;
   trans: any
@@ -29,7 +29,7 @@ const SubMenuHandler = ({
           className={cn(
             "flex  text-default-700 group font-medium text-sm capitalize px-[10px] py-3 rounded cursor-pointer transition-all duration-100 hover:bg-primary hover:text-primary-foreground group",
             {
-              "bg-primary  text-primary-foreground": activeSubmenu === index,
+              "bg-primary  text-primary-foreground": isActive,
             }
           )}
         >
@@ -44,8 +44,8 @@ const SubMenuHandler = ({
               className={cn(
                 " text-base rounded-full flex justify-center items-center transition-all duration-300 group-hover:text-primary-foreground",
                 {
-                  "rotate-90  ": activeSubmenu === index,
-                  " text-default-500  ": activeSubmenu !== index,
+                  "rotate-90  ": isActive,
+                  " text-default-500  ": !isActive,
                 }
               )}
             >

@@ -1,11 +1,12 @@
 import React, { useMemo, useEffect } from "react";
-import { Pricing } from "@/lib/interface";
+import { AssignmentType, Level, Classe, AcademicYear, Registration, Student, Pricing , StudentOnly } from "@/lib/interface";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, CircleAlert, Settings } from "lucide-react";
+import { Info, CircleAlert, Settings, ArrowLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   tarifications: Pricing[];
@@ -15,6 +16,13 @@ interface Props {
   TarificationsFound: (hasTarifications: boolean) => void;
   onTarificationsData: (data: { fees: { label: string; amount: number }[]; total: number }) => void;
   isLoading?: boolean;
+  student: StudentOnly;
+  onSubmitResult: (result: { success: boolean; data?: any }) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  isLastStep: boolean;
+  isSubmitting: boolean;
+  Tarificationfound: boolean;
 }
 
 const TarificationTable: React.FC<Props> = ({
@@ -25,6 +33,10 @@ const TarificationTable: React.FC<Props> = ({
   TarificationsFound,
   onTarificationsData,
   isLoading = false,
+  onPrevious,
+  onNext,
+  isLastStep,
+  isSubmitting,
 }) => {
   const filteredTarifications = useMemo(
     () =>
@@ -63,13 +75,32 @@ const TarificationTable: React.FC<Props> = ({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-1/3" />
-        <Separator />
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
+        {/* Boutons de navigation */}
+        <div className="flex justify-between mt-8">
+          <Button
+            variant="outline"
+            onClick={onPrevious}
+            disabled={isSubmitting}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Retour
+          </Button>
+          
+          <Button
+            onClick={onNext}
+            disabled={isSubmitting}
+            className="ml-auto"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <ChevronRight className="w-4 h-4 mr-2" />
+            )}
+            {isLastStep ? "Terminer" : "Suivant"}
+          </Button>
         </div>
+
+        <Skeleton className="w-full h-[200px]" />
       </div>
     );
   }

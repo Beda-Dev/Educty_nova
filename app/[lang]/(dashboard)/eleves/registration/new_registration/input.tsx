@@ -33,6 +33,9 @@ interface FileManagerProps {
   updateMode?: boolean;
   onDocumentStatus?: (hasDocuments: boolean) => void;
   className?: string;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  isLastStep?: boolean;
 }
 
 const fadeIn = {
@@ -54,6 +57,9 @@ export default function FileManager({
   updateMode = false,
   onDocumentStatus = () => {},
   className = "",
+  onPrevious,
+  onNext,
+  isLastStep
 }: FileManagerProps) {
   const { documentTypes, students, setDocuments, setStudents } = useSchoolStore();
   const [file, setFile] = useState<File | null>(null);
@@ -450,6 +456,21 @@ export default function FileManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <div className="flex justify-between mt-6">
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          disabled={loading}
+        >
+          Retour
+        </Button>
+        <Button
+          onClick={onNext}
+          disabled={loading}
+        >
+          {isLastStep ? "Terminer" : "Suivant"}
+        </Button>
+      </div>
     </div>
   );
 }

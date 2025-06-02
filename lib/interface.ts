@@ -124,9 +124,6 @@ export interface Student {
   name: string;
   first_name: string;
   birth_date: string;
-  tutor_name: string;
-  tutor_first_name: string;
-  tutor_number: string;
   status: string;
   active: number;
   created_at: string;
@@ -165,6 +162,9 @@ export interface StudentOnly {
   birth_date: string;
   status: string;
   photo: string;
+  active: number;
+  created_at: string;
+  updated_at: string;
   sexe: string;
 }
 

@@ -14,8 +14,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Phone, User, Shield, BookOpen, Contact, Plus, Trash2 } from "lucide-react";
-import { AssignmentType, Level, Classe, Registration, Student, Tutor } from "@/lib/interface";
+import {
+  Phone,
+  User,
+  Shield,
+  BookOpen,
+  Contact,
+  Plus,
+  Trash2,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
+import {
+  AssignmentType,
+  Level,
+  Classe,
+  Registration,
+  Student,
+  Tutor,
+} from "@/lib/interface";
 import { TrieDeClasse } from "./fonction";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -48,6 +65,12 @@ interface RegistrationFormProps {
   onUpdateSuccess: () => void;
   isSubmitting: boolean;
   setIsSubmitting: (isSubmitting: boolean) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  isLastStep: boolean;
+  Tarificationfound:
+    | { fees: { label: string; amount: number }[]; total: number }
+    | undefined;
 }
 
 // Schémas de validation
@@ -110,8 +133,12 @@ export function RegistrationForm({
   onUpdateSuccess,
   isSubmitting,
   setIsSubmitting,
+  onPrevious,
+  onNext,
+  isLastStep,
+  Tarificationfound,
 }: RegistrationFormProps) {
-  const { pricing , students } = useSchoolStore();
+  const { pricing, students } = useSchoolStore();
   const [tutors, setTutors] = useState<
     {
       data: z.infer<typeof tutorSchema>;
@@ -143,16 +170,14 @@ export function RegistrationForm({
   useEffect(() => {
     const student = students.find((s) => s.id === studentId);
     if (student) {
-
     }
 
     if (studentId) {
       const fetchTutors = async () => {
         try {
-
           const response = await fetch(`/api/students?id=${studentId}`);
           if (response.ok) {
-            const data:Student = await response.json();
+            const data: Student = await response.json();
             setTutors(
               (data.tutors ?? []).map((tutor: any) => ({
                 data: {
@@ -183,7 +208,7 @@ export function RegistrationForm({
     const upperValue = e.target.value.toUpperCase();
     e.target.value = upperValue;
     setValue(fieldName, upperValue, { shouldValidate: true });
-    
+
     // Mettre à jour aussi les données du parent
     handleChange({
       ...e,
@@ -277,7 +302,9 @@ export function RegistrationForm({
 
       if (!studentResponse.ok) {
         const errorData = await studentResponse.json();
-        throw new Error(errorData.message || "Échec de la mise à jour de l'élève");
+        throw new Error(
+          errorData.message || "Échec de la mise à jour de l'élève"
+        );
       }
 
       // 2. Gérer les tuteurs (création/mise à jour)
@@ -315,24 +342,30 @@ export function RegistrationForm({
       console.log("Tuteurs traités:", tutorsResults);
 
       // 3. Associer les tuteurs à l'élève
-      const assignTutorResponse = await fetch("https://educty.digifaz.com/api/student/assign-tutor", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId,
-          tutors: tutorsResults.map((tutorResult, index) => ({
-            id: tutorResult.id,
-            is_tutor_legal: tutors[index].isLegalTutor,
-          })),
-        }),
-      });
+      const assignTutorResponse = await fetch(
+        "https://educty.digifaz.com/api/student/assign-tutor",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            student_id: studentId,
+            tutors: tutorsResults.map((tutorResult, index) => ({
+              id: tutorResult.id,
+              is_tutor_legal: tutors[index].isLegalTutor,
+            })),
+          }),
+        }
+      );
 
       if (!assignTutorResponse.ok) {
         throw new Error("Échec de l'association des tuteurs");
       }
 
-      toast.success("Informations de l'élève et des tuteurs mises à jour avec succès");
-      onUpdateSuccess();
+      // Toutes les requêtes ont réussi, on peut passer à l'étape suivante
+      toast.success(
+        "Informations de l'élève et des tuteurs mises à jour avec succès"
+      );
+      onNext();
     } catch (error) {
       console.error("Erreur mise à jour:", error);
       toast.error(
@@ -340,9 +373,33 @@ export function RegistrationForm({
           ? error.message
           : "Une erreur est survenue lors de la mise à jour"
       );
-    } finally {
       setIsSubmitting(false);
+    } finally {
+      // Si une erreur s'est produite, setIsSubmitting est déjà appelé dans le catch
+      if (!isSubmitting) {
+        setIsSubmitting(false);
+      }
     }
+  };
+
+  const handleNext = async (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    // Valider d'abord les champs requis
+    if (
+      !Data.name ||
+      !Data.status ||
+      !Data.assignment_type_id ||
+      !Data.registration_number ||
+      !Data.first_name ||
+      !Data.birth_date
+    ) {
+      toast.error("Tous les champs requis doivent être remplis");
+      return;
+    }
+
+    // Soumettre le formulaire (la navigation se fait dans onSubmit)
+    await handleSubmit(onSubmit)();
   };
 
   return (
@@ -354,6 +411,8 @@ export function RegistrationForm({
         className="w-full space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Boutons de navigation */}
+
           {/* Carte Informations Élève */}
           <motion.div variants={itemVariants}>
             <Card className="border rounded-lg shadow-sm overflow-hidden">
@@ -373,7 +432,9 @@ export function RegistrationForm({
                   </Label>
                   <Input
                     {...register("registration_number")}
-                    onChange={(e) => handleUpperCaseChange(e, "registration_number")}
+                    onChange={(e) =>
+                      handleUpperCaseChange(e, "registration_number")
+                    }
                     placeholder="Numéro d'inscription"
                     readOnly
                     className="bg-muted/50 focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -436,7 +497,9 @@ export function RegistrationForm({
                   <Label>Statut *</Label>
                   <Select
                     onValueChange={(value) => {
-                      setValue("assignment_type_id", Number(value), { shouldValidate: true });
+                      setValue("assignment_type_id", Number(value), {
+                        shouldValidate: true,
+                      });
                       setData((prev: any) => ({
                         ...prev,
                         assignment_type_id: Number(value),
@@ -503,9 +566,9 @@ export function RegistrationForm({
                           <Button
                             type="button"
                             variant="outline"
-                            color="destructive"                            size="sm"
+                            color="destructive"
+                            size="sm"
                             onClick={() => removeTutor(index)}
-                            
                           >
                             <Trash2 size={16} />
                           </Button>
@@ -551,7 +614,11 @@ export function RegistrationForm({
                                   const numericInput = e.target.value
                                     .replace(/\D/g, "")
                                     .slice(0, 10);
-                                  updateTutor(index, "phone_number", numericInput);
+                                  updateTutor(
+                                    index,
+                                    "phone_number",
+                                    numericInput
+                                  );
                                 }}
                                 placeholder="Ex: 771234567"
                                 maxLength={10}
@@ -579,7 +646,11 @@ export function RegistrationForm({
                             <Select
                               value={tutor.data.sexe}
                               onValueChange={(value) =>
-                                updateTutor(index, "sexe", value as "Homme" | "Femme")
+                                updateTutor(
+                                  index,
+                                  "sexe",
+                                  value as "Homme" | "Femme"
+                                )
                               }
                             >
                               <SelectTrigger className="focus:ring-2 focus:ring-blue-500">
@@ -673,22 +744,26 @@ export function RegistrationForm({
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="flex items-end">
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Mise à jour...
-                    </>
-                  ) : (
-                    "Mettre à jour"
-                  )}
-                </Button>
-              </div>
             </CardContent>
           </Card>
         </motion.div>
+        <div className="col-span-2">
+          <div className="flex justify-end mt-8">
+            <Button
+              type="submit"
+              onClick={handleNext}
+              disabled={isSubmitting}
+              className="ml-auto"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <ChevronRight className="w-4 h-4 mr-2" />
+              )}
+              {isLastStep ? "Terminer" : "Suivant"}
+            </Button>
+          </div>
+        </div>
       </motion.div>
     </form>
   );

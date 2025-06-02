@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Stepper, Step, StepLabel } from "@/components/ui/steps";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,13 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import Card from "@/components/ui/card-snippet";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { useSchoolStore } from "@/store";
 import {
@@ -47,6 +52,8 @@ import {
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { RegistrationForm } from "./RegistrationForm";
 import PaymentForm from "./payment_step";
+import StepperWrapper from "../StepperWrapper";
+import { steps } from "./step";
 
 const stepVariants = {
   hidden: { opacity: 0, x: 50 },
@@ -73,12 +80,12 @@ export default function OldReregistration() {
     userOnline,
   } = useSchoolStore();
   const isTablet = useMediaQuery("(max-width: 1024px)");
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState<number>(0);
   const [AcademicYearCurrent, setAcademicYearCurrent] =
     useState<AcademicYear>();
   const [Tarificationfound, setTarificationfound] = useState(false);
   const [datapost, setDataPost] = useState<Registration>();
-  const [subPay , setSubPay] = useState<boolean>(false);
+  const [subPay, setSubPay] = useState<boolean>(false);
   const [tarificationsData, setTarificationsData] = useState<{
     fees: { label: string; amount: number }[];
     total: number;
@@ -103,16 +110,6 @@ export default function OldReregistration() {
     setAcademicYearCurrent(academicYearCurrent);
   }, [router, academicYearCurrent, reRegistration]);
 
-  const steps = useMemo(
-    () => [
-      { label: "Informations", icon: <User className="w-4 h-4" /> },
-      { label: "Documents", icon: <FileText className="w-4 h-4" /> },
-      { label: "Paiement", icon: <Calendar className="w-4 h-4" /> },
-      { label: "Validation", icon: <CheckCircle className="w-4 h-4" /> },
-    ],
-    []
-  );
-
   const [Data, setData] = useState(() => ({
     assignment_type_id: reRegistration?.student.assignment_type_id,
     registration_number: reRegistration?.student.registration_number,
@@ -123,17 +120,17 @@ export default function OldReregistration() {
   }));
 
   useEffect(() => {
-  if (reRegistration?.student) {
-    setData({
-      assignment_type_id: reRegistration.student.assignment_type_id,
-      registration_number: reRegistration.student.registration_number,
-      name: reRegistration.student.name,
-      first_name: reRegistration.student.first_name,
-      birth_date: reRegistration.student.birth_date,
-      status: reRegistration.student.status,
-    });
-  }
-}, [reRegistration]);
+    if (reRegistration?.student) {
+      setData({
+        assignment_type_id: reRegistration.student.assignment_type_id,
+        registration_number: reRegistration.student.registration_number,
+        name: reRegistration.student.name,
+        first_name: reRegistration.student.first_name,
+        birth_date: reRegistration.student.birth_date,
+        status: reRegistration.student.status,
+      });
+    }
+  }, [reRegistration]);
 
   const [levelChoice, setLevelChoice] = useState(
     Number(reRegistration?.classe.level_id)
@@ -154,9 +151,21 @@ export default function OldReregistration() {
     setActiveStep((prev) => prev + 1);
   }, []);
 
-    const toggleOpen = () => {
+  const toggleOpen = () => {
     setSubPay(false);
   };
+
+  // Dans OldReregistration
+  const handlePaymentSubmit = useCallback(() => {
+    setIsSubmitting(true);
+    setSubPay(true);
+  }, []);
+
+  const handlePaymentSuccess = useCallback(() => {
+    setIsSubmitting(false);
+    setSubPay(false);
+    handleUpdateSuccess();
+  }, [handleUpdateSuccess]);
 
   const handleNext = useCallback(async () => {
     setIsSubmitting(true);
@@ -177,13 +186,13 @@ export default function OldReregistration() {
           registration.academic_year_id === AcademicYearCurrent?.id
       );
 
-      // if (existingRegistration) {
-      //   toast.error(
-      //     `L'élève ${reRegistration?.student?.name} ${reRegistration?.student?.first_name} est déjà inscrit dans cette classe.`
-      //   );
-      //   setIsSubmitting(false);
-      //   return;
-      // }
+      if (existingRegistration) {
+        toast.error(
+          `L'élève ${reRegistration?.student?.name} ${reRegistration?.student?.first_name} est déjà inscrit dans cette classe.`
+        );
+        setIsSubmitting(false);
+        return;
+      }
 
       try {
         const res = await fetch(`/api/registration`, {
@@ -198,21 +207,26 @@ export default function OldReregistration() {
         const data = await res.json();
         setDataPost(data);
         toast.success("Élève inscrit avec succès !");
+        
         await updateStudentCountByClass(
           registrations,
           academicYearCurrent,
           classes
         );
+        
+        // Attendre 1.5 secondes pour voir le message de succès
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        setActiveStep((prev) => prev + 1);
       } catch (error) {
         console.error(error);
         toast.error("Erreur d'inscription");
         setIsSubmitting(false);
-        return;
       }
+      return;
     }
 
     if (currentStep === 2) {
-      
       return;
     }
 
@@ -233,7 +247,6 @@ export default function OldReregistration() {
     setIsSubmitting(false);
   }, [
     activeStep,
-    Data,
     New,
     AcademicYearCurrent,
     reRegistration,
@@ -241,7 +254,7 @@ export default function OldReregistration() {
     academicYearCurrent,
     classes,
     router,
-    setReRegistrations,
+    setReRegistrations
   ]);
 
   if (hasAdminAccessInscrire === false) {
@@ -254,134 +267,133 @@ export default function OldReregistration() {
 
   return (
     <Card>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-center mb-2">
-          Réinscription d'élève
-        </h2>
-        <p className="text-muted-foreground text-center">
-          {steps[activeStep]?.label}
-        </p>
-      </div>
+      <CardHeader>
+        <StepperWrapper steps={steps} currentStep={activeStep} />
+      </CardHeader>
+      <CardContent>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeStep}
+            variants={stepVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            transition={{ duration: 0.3 }}
+            className="w-full gap-6 mt-4"
+          >
+            {activeStep === 0 && (
+              <RegistrationForm
+                Data={Data}
+                levelChoice={levelChoice}
+                reRegistration={reRegistration}
+                assignmentTypes={assignmentTypes}
+                levels={levels}
+                classes={classes}
+                handleChange={handleChange}
+                setLevelChoice={setLevelChoice}
+                setData={setData}
+                setNew={setNew}
+                studentId={reRegistration?.student_id}
+                onUpdateSuccess={handleUpdateSuccess}
+                isSubmitting={isSubmitting}
+                setIsSubmitting={setIsSubmitting}
+                onPrevious={() =>
+                  setActiveStep((prev) => Math.max(0, prev - 1))
+                }
+                onNext={() =>
+                  setActiveStep((prev) => Math.min(steps.length - 1, prev + 1))
+                }
+                isLastStep={activeStep === steps.length - 1}
+                Tarificationfound={tarificationsData}
+              />
+            )}
 
-      <Stepper
-        current={activeStep}
-        direction={isTablet ? "vertical" : "horizontal"}
-        className={`mb-8 ${
-          isTablet ? "stepper-vertical" : "stepper-horizontal"
-        }`}
-      >
-        {steps.map(({ label, icon }) => (
-          <Step key={label}>
-            <StepLabel>
-              <div className="flex items-center">
-                {icon}
-                <span className="ml-2">{label}</span>
-              </div>
-            </StepLabel>
-          </Step>
-        ))}
-      </Stepper>
+            {activeStep === 1 && (
+              <>
+                <motion.div
+                  variants={inputVariants}
+                  className="col-span-2 space-y-6"
+                >
+                  {reRegistration?.student && (
+                    <FileManager
+                      student={reRegistration.student}
+                      onPrevious={() => setActiveStep(activeStep - 1)}
+                      onNext={() => setActiveStep(activeStep + 1)}
+                      isLastStep={activeStep === 1}
+                      isSubmitting={isSubmitting}
+                      Tarificationfound={
+                        !!tarificationsData && tarificationsData.fees.length > 0
+                      }
+                    />
+                  )}
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeStep}
-          variants={stepVariants}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          transition={{ duration: 0.3 }}
-          className="w-full gap-6 mt-4"
-        >
-          {activeStep === 0 && (
-            <RegistrationForm
-              Data={Data}
-              levelChoice={levelChoice}
-              reRegistration={reRegistration}
-              assignmentTypes={assignmentTypes}
-              levels={levels}
-              classes={classes}
-              handleChange={handleChange}
-              setLevelChoice={setLevelChoice}
-              setData={setData}
-              setNew={setNew}
-              studentId={reRegistration?.student_id}
-              onUpdateSuccess={handleUpdateSuccess}
-              isSubmitting={isSubmitting}
-              setIsSubmitting={setIsSubmitting}
-            />
-          )}
-
-          {activeStep === 1 && (
-            <>
+                  {reRegistration?.student && (
+                    <TarificationTable
+                      tarifications={pricing}
+                      level_id={levelChoice}
+                      assignmenttype_id={Data.assignment_type_id ?? 1}
+                      academicyear_id={AcademicYearCurrent?.id ?? 1}
+                      TarificationsFound={handleNoTarifications}
+                      onTarificationsData={setTarificationsData}
+                      student={reRegistration.student}
+                      onSubmitResult={(result) => {
+                        if (result.success) {
+                          toast.success("Tarification saved successfully");
+                        } else {
+                          toast.error("Failed to save tarification");
+                        }
+                      }}
+                      onPrevious={() => setActiveStep((prev) => prev - 1)}
+                      onNext={() => setActiveStep((prev) => prev + 1)}
+                      isLastStep={false}
+                      isSubmitting={false}
+                      Tarificationfound={false}
+                    />
+                  )}
+                </motion.div>
+              </>
+            )}
+            {activeStep === 2 && datapost && (
               <motion.div
                 variants={inputVariants}
                 className="col-span-2 space-y-6"
               >
-                {reRegistration?.student && (
-                  <FileManager student={reRegistration.student} />
-                )}
-
-                <TarificationTable
-                  tarifications={pricing}
-                  level_id={levelChoice}
-                  assignmenttype_id={Data.assignment_type_id ?? 1}
-                  academicyear_id={AcademicYearCurrent?.id ?? 1}
-                  TarificationsFound={handleNoTarifications}
-                  onTarificationsData={setTarificationsData}
-                />
-              </motion.div>
-            </>
-          )}
-          {activeStep === 2 && datapost && (
-            <motion.div
-              variants={inputVariants}
-              className="col-span-2 space-y-6"
-            >
-              <PaymentForm registration={datapost} submit={subPay} Sub={toggleOpen} onSuccess={handleUpdateSuccess} />
-            </motion.div>
-          )}
-
-          {activeStep === 3 &&
-            datapost &&
-            tarificationsData &&
-            Tarificationfound === true && (
-              <motion.div variants={inputVariants} className="col-span-2">
-                <RegistrationFinal
+                <PaymentForm
                   registration={datapost}
-                  finance={tarificationsData}
+                  submit={subPay}
+                  Sub={() => {
+                    setSubPay(false);
+                    setIsSubmitting(false);
+                  }}
+                  onSuccess={handlePaymentSuccess}
+                  onPrevious={() => setActiveStep((prev) => prev - 1)}
+                  onNext={() => setActiveStep((prev) => prev + 1)}
+                  isLastStep={false}
+                  isSubmitting={isSubmitting}
+                  Tarificationfound={Tarificationfound}
                 />
               </motion.div>
             )}
-        </motion.div>
-      </AnimatePresence>
 
-      <div className="flex justify-between mt-8">
-        {activeStep > 0 && (
-          <Button
-            variant="outline"
-            onClick={() => setActiveStep((prev) => prev - 1)}
-            disabled={isSubmitting}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Retour
-          </Button>
-        )}
-
-        <Button
-          onClick={handleNext}
-          disabled={
-            (activeStep === 1 && Tarificationfound === false) || isSubmitting
-          }
-          className="ml-auto"
-        >
-          {isSubmitting ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <ChevronRight className="w-4 h-4 mr-2" />
-          )}
-          {activeStep === steps.length - 1 ? "Terminer" : "Suivant"}
-        </Button>
-      </div>
+            {activeStep === 3 &&
+              datapost &&
+              tarificationsData &&
+              Tarificationfound === true && (
+                <motion.div variants={inputVariants} className="col-span-2">
+                  <RegistrationFinal
+                    registration={datapost}
+                    finance={tarificationsData}
+                    onPrevious={() => setActiveStep(activeStep - 1)}
+                    onNext={() => setActiveStep(activeStep + 1)}
+                    isLastStep={true}
+                    isSubmitting={false}
+                    Tarificationfound={Tarificationfound}
+                  />
+                </motion.div>
+              )}
+          </motion.div>
+        </AnimatePresence>
+      </CardContent>
     </Card>
   );
 }

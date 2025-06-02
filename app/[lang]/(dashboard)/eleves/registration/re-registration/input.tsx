@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileText, Download, Trash, PlusCircle, Upload, Loader2, FileUp } from "lucide-react";
-import { Student, DocumentType, Document, Registration } from "@/lib/interface";
+import { Student, DocumentType, Document, Registration , StudentOnly } from "@/lib/interface";
 import { Button } from "@/components/ui/button";
 import { 
   Dialog, 
@@ -31,9 +31,14 @@ import { Badge } from "@/components/ui/badge";
 import { formatFileSize } from "./fonction";
 
 interface FileManagerProps {
-  student: Registration["student"];
+  student: StudentOnly;
   updateMode?: boolean;
   onDocumentStatus?: (hasDocuments: boolean) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  isLastStep: boolean;
+  isSubmitting: boolean;
+  Tarificationfound: boolean;
   className?: string;
 }
 
@@ -47,6 +52,10 @@ export default function FileManager({
   student,
   updateMode = false,
   onDocumentStatus = () => {},
+  onPrevious,
+  onNext,
+  isLastStep,
+  isSubmitting,
   className = "",
 }: FileManagerProps) {
   const { documentTypes, students, setDocuments, setStudents } = useSchoolStore();
@@ -455,6 +464,21 @@ export default function FileManager({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <div className="flex justify-between mt-4">
+        <Button
+          onClick={onPrevious}
+          variant="outline"
+          disabled={isSubmitting}
+        >
+          Précédent
+        </Button>
+        <Button
+          onClick={onNext}
+          disabled={isSubmitting || isLastStep}
+        >
+          {isLastStep ? 'Terminer' : 'Suivant'}
+        </Button>
+      </div>
     </div>
   );
 }

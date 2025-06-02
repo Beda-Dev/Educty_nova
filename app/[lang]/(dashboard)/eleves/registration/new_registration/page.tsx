@@ -14,8 +14,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import Card from "@/components/ui/card-snippet";
-import { useRouter } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useRouter, usePathname } from "next/navigation";
 import { useSchoolStore } from "@/store";
 import {
   AssignmentType,
@@ -25,7 +31,7 @@ import {
   Registration,
   Pricing
 } from "@/lib/interface";
-import ImageUploader from "./select_photo";
+import { ImageUploader } from "./select_photo";
 import FileManager from "./input";
 import TarificationTable from "./tarificationTab";
 import FormulaireEnregistrement from "./Formulaire_nouvel_eleve";
@@ -70,11 +76,19 @@ export default function NewReregistration() {
     permissionRequisInscrire
   );
 
+  const pathname = usePathname();
+
 useEffect(() => {
+    if (!pathname.endsWith('/new_registration')) {
+    setNewStudent(null);
+  }
   return () => {
     setNewStudent(null);
   };
-}, []);
+}, [pathname]);
+
+
+
 
 
 
@@ -143,17 +157,26 @@ useEffect(() => {
 
   return (
     <Card>
-      <StepperWrapper steps={steps} currentStep={activeStep} />
+      <CardHeader>
+        <StepperWrapper steps={steps} currentStep={activeStep} />
+      </CardHeader>
+      <CardContent>
       {activeStep === 0 && (
         <FormulaireEnregistrement
           isValid={isValidAdd}
           onSubmitResult={handleResultAddStudent}
+          onPrevious={() => setActiveStep((prev) => prev - 1)}
+          onNext={handleNext}
+          isLastStep={activeStep === steps.length - 1}
         />
       )}
       {activeStep === 1 && student && (
         <FileManager
           student={student}
           onDocumentStatus={handleDocumentStatusChange}
+          onPrevious={() => setActiveStep((prev) => prev - 1)}
+          onNext={handleNext}
+          isLastStep={activeStep === steps.length - 1}
         />
       )}
 
@@ -161,6 +184,9 @@ useEffect(() => {
         <DonneeScolaire
           student={student}
           onSubmitResult={handleSubmissionResult}
+          onPrevious={() => setActiveStep((prev) => prev - 1)}
+          onNext={handleNext}
+          isLastStep={activeStep === steps.length - 1}
         />
       )}
 
@@ -173,28 +199,12 @@ useEffect(() => {
             registration.data.student?.assignment_type_id ?? 0,
             registration.data.academic_year_id
           )}
+          onPrevious={() => setActiveStep((prev) => prev - 1)}
+          onNext={handleNext}
+          isLastStep={activeStep === steps.length - 1}
         />
       )}
-      <div className="flex justify-between mt-4">
-        {activeStep > 0 && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setActiveStep((prev) => prev - 1)}
-          >
-            Retour
-          </Button>
-        )}
-        {activeStep !== 0 && activeStep !== 2 && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleNext()}
-          >
-            {activeStep === steps.length - 1 ? "Terminer" : "Suivant"}
-          </Button>
-        )}
-      </div>
+      </CardContent>
     </Card>
   );
 }

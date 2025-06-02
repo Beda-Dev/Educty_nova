@@ -25,6 +25,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Zap,
+  ChevronRight,
 } from "lucide-react";
 import { useSchoolStore } from "@/store";
 import { toast } from "sonner";
@@ -43,10 +44,15 @@ interface PaymentFormProps {
   registration: Registration;
   levelId?: number;
   assignment_type_id?: number;
-  academic_years_id?: number;
-  submit?: boolean;
-  onSuccess:()=> void;
-  Sub:() => void;
+  academic_years_id?: number,
+  submit?: boolean,
+  onSuccess: () => void,
+  Sub: () => void,
+  onPrevious: () => void,
+  onNext: () => void,
+  isLastStep: boolean,
+  isSubmitting: boolean,
+  Tarificationfound: boolean,
 }
 
 interface PaymentAllocation {
@@ -60,15 +66,21 @@ interface PaymentAllocation {
 
 export default function PaymentForm({
   registration,
-  submit,
+  levelId,
+  assignment_type_id,
+  academic_years_id,
+  submit = false,
   onSuccess,
-  Sub
+  Sub,
+  onPrevious,
+  onNext,
+  isLastStep,
+  isSubmitting,
 }: PaymentFormProps) {
   const { userOnline, cashRegisterSessionCurrent, pricing } = useSchoolStore();
   const router = useRouter();
   const [amountPaid, setAmountPaid] = useState<number>(0);
   const [allocations, setAllocations] = useState<PaymentAllocation[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [totalRemaining, setTotalRemaining] = useState(0);
   const [totalAllocated, setTotalAllocated] = useState(0);
   const [totalAmountDue, setTotalAmountDue] = useState(0);
@@ -112,29 +124,32 @@ export default function PaymentForm({
     setTotalRemaining(totalRemaining);
   }, [allocations]);
 
-  useEffect(() => {
-    const submitPayment = async () => {
-      if (submit === true) {
-        if (
-          isSubmitting ||
-          amountPaid <= 0 ||
-          Math.abs(totalAllocated - amountPaid) > 1
-        ) {
-            Sub();
-          toast.error("Veuillez vérifier les montants avant de soumettre.");
-          return;
-        }
-        try {
-          await handleSubmit();
-        } catch (error) {
-          console.error("Erreur lors de la soumission:", error);
-          toast.error("Erreur lors de la soumission du paiement");
-        }
-      }
-    };
+// Supprimer complètement l'état local isSubmitting si présent
+// Et modifier le useEffect de soumission :
 
-    submitPayment();
-  }, [submit, isSubmitting, amountPaid, totalAllocated]);
+useEffect(() => {
+  const submitPayment = async () => {
+    if (submit && !isSubmitting) {
+      if (amountPaid <= 0 || Math.abs(totalAllocated - amountPaid) > 1) {
+        Sub();
+        toast.error("Veuillez vérifier les montants avant de soumettre.");
+        return;
+      }
+      
+      try {
+        await handleSubmit();
+      } catch (error) {
+        console.error("Erreur lors de la soumission:", error);
+        toast.error("Erreur lors de la soumission du paiement");
+        Sub();
+      } finally {
+        // Ne pas modifier isSubmitting ici - laissé au parent
+      }
+    }
+  };
+
+  submitPayment();
+}, [submit, amountPaid, totalAllocated, isSubmitting, Sub]);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value) || 0;
@@ -174,8 +189,8 @@ export default function PaymentForm({
     let remainingAmount = amountPaid;
     const newAllocations = allocations.map((alloc) => ({
       ...alloc,
-      amount_paid: 0, // ✅ Réinitialiser
-      remaining: alloc.amount_due, // ✅ Réinitialiser
+      amount_paid: 0, // Réinitialiser
+      remaining: alloc.amount_due, // Réinitialiser
     }));
 
     // Distribuer par ordre chronologique
@@ -196,72 +211,72 @@ export default function PaymentForm({
     setAllocations(newAllocations);
   };
 
-const handleSubmit = async () => {
-  if (!userOnline || !cashRegisterSessionCurrent) {
-    toast.error("Session invalide. Veuillez vous reconnecter.");
-    return;
-  }
-
-  if (amountPaid <= 0) {
-    toast.error("Veuillez entrer un montant valide");
-    return;
-  }
-
-  const TOLERANCE = 1;
-  if (Math.abs(totalAllocated - amountPaid) > TOLERANCE) {
-    toast.error("Le montant alloué doit correspondre au montant payé");
-    return;
-  }
-
-  setIsSubmitting(true);
-  const toastId = toast.loading("Enregistrement des paiements...");
-
-  try {
-    const paymentsToProcess = allocations.filter((a) => a.amount_paid > 0);
-
-    if (paymentsToProcess.length === 0) {
-      throw new Error("Aucun paiement à traiter");
+  const handleSubmit = async () => {
+    if (!userOnline || !cashRegisterSessionCurrent) {
+      toast.error("Session invalide. Veuillez vous reconnecter.");
+      return;
     }
 
-    const results = [];
-    for (const payment of paymentsToProcess) {
-      const payload = {
-        student_id: registration.student.id,
-        installment_id: payment.installment_id,
-        cash_register_id: cashRegisterSessionCurrent.cash_register_id,
-        cashier_id: userOnline.id,
-        amount: payment.amount_paid.toString(),
-      };
+    if (amountPaid <= 0) {
+      toast.error("Veuillez entrer un montant valide");
+      return;
+    }
 
-      const response = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    const TOLERANCE = 1;
+    if (Math.abs(totalAllocated - amountPaid) > TOLERANCE) {
+      toast.error("Le montant alloué doit correspondre au montant payé");
+      return;
+    }
 
-      if (!response.ok) {
-        const errorDetail = await response.text();
-        throw new Error(
-          `Échec du paiement pour l'échéance ${payment.installment_id}: ${errorDetail}`
-        );
+    
+    const toastId = toast.loading("Enregistrement des paiements...");
+
+    try {
+      const paymentsToProcess = allocations.filter((a) => a.amount_paid > 0);
+
+      if (paymentsToProcess.length === 0) {
+        throw new Error("Aucun paiement à traiter");
       }
 
-      const result = await response.json();
-      results.push(result);
-    }
+      const results = [];
+      for (const payment of paymentsToProcess) {
+        const payload = {
+          student_id: registration.student.id,
+          installment_id: payment.installment_id,
+          cash_register_id: cashRegisterSessionCurrent.cash_register_id,
+          cashier_id: userOnline.id,
+          amount: payment.amount_paid.toString(),
+        };
 
-    toast.success("Paiements enregistrés avec succès", { id: toastId });
-    onSuccess()
-  } catch (error) {
-    console.error("Erreur complète:", error);
-    const errorMessage = error instanceof Error 
-      ? error.message 
-      : "Une erreur inconnue est survenue";
-    toast.error(errorMessage, { id: toastId });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+        const response = await fetch("/api/payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorDetail = await response.text();
+          throw new Error(
+            `Échec du paiement pour l'échéance ${payment.installment_id}: ${errorDetail}`
+          );
+        }
+
+        const result = await response.json();
+        results.push(result);
+      }
+
+      toast.success("Paiements enregistrés avec succès", { id: toastId });
+      onSuccess()
+    } catch (error) {
+      console.error("Erreur complète:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Une erreur inconnue est survenue";
+      toast.error(errorMessage, { id: toastId });
+    } finally {
+      
+    }
+  };
 
   const paymentProgress =
     totalAmountDue > 0
@@ -270,6 +285,31 @@ const handleSubmit = async () => {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">
+      {/* Boutons de navigation */}
+      <div className="flex justify-between mt-8">
+        <Button
+          variant="outline"
+          onClick={onPrevious}
+          disabled={isSubmitting}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Retour
+        </Button>
+        
+        <Button
+          onClick={onNext}
+          disabled={isSubmitting}
+          className="ml-auto"
+        >
+          {isSubmitting ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <ChevronRight className="w-4 h-4 mr-2" />
+          )}
+          {isLastStep ? "Terminer" : "Suivant"}
+        </Button>
+      </div>
+
       <Button variant="ghost" onClick={() => router.back()} className="gap-2">
         <ArrowLeft className="h-4 w-4" />
         Retour

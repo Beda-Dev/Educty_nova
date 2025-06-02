@@ -29,9 +29,18 @@ import { generationNumero } from "@/lib/fonction";
 interface DataProps {
   registration: Registration;
   finance: { fees: { label: string; amount: number }[]; total: number };
+  onPrevious?: () => void;
+  onNext?: () => void;
+  isLastStep?: boolean;
 }
 
-const RegistrationFinal = ({ registration, finance }: DataProps) => {
+const RegistrationFinal = ({ 
+  registration, 
+  finance,
+  onPrevious,
+  onNext,
+  isLastStep
+}: DataProps) => {
   const { students } = useSchoolStore();
   const [student, setStudent] = useState<Student | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -87,18 +96,20 @@ const RegistrationFinal = ({ registration, finance }: DataProps) => {
   };
 
   return (
-    <div className="mx-auto w-full flex flex-col items-center p-4">
-      <div
-        ref={printRef}
-        className="bg-white p-8 border"
-        style={{ width: "794px", minHeight: "1123px" }}
-      >
-        <ReceiptBlock
-          title="ORIGINAL"
-          registration={registration}
-          student={student}
-          finance={finance}
-        />
+    <div className="space-y-6">
+      <div className="mx-auto w-full flex flex-col items-center p-4">
+        <div
+          ref={printRef}
+          className="bg-white p-8 border"
+          style={{ width: "794px", minHeight: "1123px" }}
+        >
+          <ReceiptBlock
+            title="ORIGINAL"
+            registration={registration}
+            student={student}
+            finance={finance}
+          />
+        </div>
         <div className="border-t-2 border-dashed my-8" />
         <ReceiptBlock
           title="DUPLICATA"
