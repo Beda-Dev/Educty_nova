@@ -14,10 +14,18 @@ import { HandCoins, ListChecks, CheckCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 
 const itemColors = [
-  "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300",
-  "bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300",
-  "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300"
+  "bg-tyrian-100 dark:bg-tyrian-900/50 text-tyrian-700 dark:text-tyrian-200",
+  "bg-bittersweet-100 dark:bg-bittersweet-900/50 text-bittersweet-700 dark:text-bittersweet-200",
+  "bg-whitesmoke-100 dark:bg-whitesmoke-900/50 text-whitesmoke-700 dark:text-whitesmoke-200",
+  "bg-skyblue-100 dark:bg-skyblue-900/50 text-skyblue-700 dark:text-skyblue-200",
+  "bg-indigodye-100 dark:bg-indigodye-900/50 text-indigodye-700 dark:text-indigodye-200",
+  "bg-tyrian-200 dark:bg-tyrian-800/50 text-tyrian-800 dark:text-tyrian-100",
+  "bg-bittersweet-200 dark:bg-bittersweet-800/50 text-bittersweet-800 dark:text-bittersweet-100",
+  "bg-skyblue-200 dark:bg-skyblue-800/50 text-skyblue-800 dark:text-skyblue-100",
+  "bg-indigodye-200 dark:bg-indigodye-800/50 text-indigodye-800 dark:text-indigodye-100",
+  "bg-whitesmoke-200 dark:bg-whitesmoke-800/50 text-whitesmoke-800 dark:text-whitesmoke-100"
 ];
+
 
 export default function DecaissementPage() {
   const router = useRouter();

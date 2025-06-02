@@ -31,7 +31,7 @@ import {
   Registration,
   Pricing
 } from "@/lib/interface";
-import { ImageUploader } from "./select_photo";
+import  ImageUploader  from "./select_photo";
 import FileManager from "./input";
 import TarificationTable from "./tarificationTab";
 import FormulaireEnregistrement from "./Formulaire_nouvel_eleve";

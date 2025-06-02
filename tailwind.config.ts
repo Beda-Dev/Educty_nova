@@ -1,5 +1,5 @@
 import type { Config } from "tailwindcss"
-const config  = {
+const config = {
 
   darkMode: ["class"],
   content: [
@@ -102,26 +102,82 @@ const config  = {
           DEFAULT: "hsl(var(--card) / <alpha-value>)",
           foreground: "hsl(var(--card-foreground) / <alpha-value>)",
         },
-            tyrian: {
-      DEFAULT: "#4A073B",
-      foreground: "#ffffff", // à ajuster selon ton design
-    },
-    bittersweet: {
-      DEFAULT: "#FF6663",
-      foreground: "#ffffff", // à ajuster
-    },
-    whitesmoke: {
-      DEFAULT: "#F6F4F5",
-      foreground: "#000000", // à ajuster
-    },
-    skyblue: {
-      DEFAULT: "#5AD2F4",
-      foreground: "#000000", // à ajuster
-    },
-    indigodye: {
-      DEFAULT: "#344966",
-      foreground: "#ffffff", // à ajuster
-    },
+
+        bittersweet: {
+          50: "#ffeceb",
+          100: "#ffd4d2",
+          200: "#ffb1ae",
+          300: "#ff8882",
+          400: "#ff6663", // base
+          500: "#e65554",
+          600: "#cc4a4a",
+          700: "#a93e3d",
+          800: "#883332",
+          900: "#6f2a29",
+          950: "#3c1311",
+          DEFAULT: "#FF6663",
+          foreground: "#ffffff",
+        },
+        whitesmoke: {
+          50: "#ffffff",
+          100: "#fdfcfd",
+          200: "#f9f7f8",
+          300: "#f5f2f3",
+          400: "#f2eeef",
+          500: "#f0ebed",
+          600: "#e4dfe1",
+          700: "#c4c0c2",
+          800: "#a5a1a3",
+          900: "#8c888a",
+          950: "#4a4647",
+          DEFAULT: "#F6F4F5",
+          foreground: "#000000",
+        },
+        skyblue: {
+          50: "#e3faff",
+          100: "#baf4ff",
+          200: "#7aeaff",
+          300: "#3adfff",
+          400: "#12d8fe",
+          500: "#0ec0e2",
+          600: "#0aa0bd",
+          700: "#0a819b",
+          800: "#0a647a",
+          900: "#084d5f",
+          950: "#042f3b",
+          DEFAULT: "#5AD2F4",
+          foreground: "#000000",
+        },
+        indigodye: {
+          50: "#e7eaf0",
+          100: "#d1d6e0",
+          200: "#aeb8ca",
+          300: "#8c9ab3",
+          400: "#6a7e9c",
+          500: "#50638c",
+          600: "#3e4e70",
+          700: "#344966", // base
+          800: "#2a3c56",
+          900: "#223146",
+          950: "#131c29",
+          DEFAULT: "#344966",
+          foreground: "#ffffff",
+        },
+        tyrian: {
+          50: "#fae9f7",
+          100: "#f1c8e9",
+          200: "#e99fd7",
+          300: "#df6ec2",
+          400: "#c93ca4",
+          500: "#a62586",
+          600: "#871d6d",
+          700: "#6b1757",
+          800: "#521240",
+          900: "#3f0e30",
+          950: "#230418",
+          DEFAULT: "#4A073B",
+          foreground: "#ffffff",
+        },
       },
       boxShadow: {
         sm: "0px 1px 2px 0px rgba(15, 22, 36, 0.06), 0px 1px 3px 0px rgba(15, 22, 36, 0.10)",

@@ -1,176 +1,136 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { useDropzone, type DropzoneOptions } from "react-dropzone";
+import { Upload } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import { toast } from "@/components/ui/use-toast";
+import Image, { type StaticImageData } from "next/image";
+import { toast } from "sonner"; // ou un autre système de notification
 
-interface ImageUploaderProps {
-  initialImage?: string;
-  onImageChange: (file: File) => void;
-  maxSizeMB?: number;
+interface FileWithPreview extends File {
+  preview: string;
 }
 
-const MAX_FILE_SIZE_MB = 2; // 2MB par défaut
+interface ImageUploaderProps {
+  initialImage?: string | StaticImageData;
+  onImageChange?: (file: File | null) => void;
+  maxFileSize?: number; // Taille max en octets (5MB par défaut)
+}
 
-export  function ImageUploader({ 
+const ImageUploader: React.FC<ImageUploaderProps> = ({ 
   initialImage, 
-  onImageChange, 
-  maxSizeMB = MAX_FILE_SIZE_MB 
-}: ImageUploaderProps) {
-  const [image, setImage] = useState<string | null>(initialImage || null);
+  onImageChange,
+  maxFileSize = 2 * 1024 * 1024 // 5MB par défaut
+}) => {
+  const [image, setImage] = useState<string | StaticImageData | null>(initialImage || null);
   const [file, setFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isDragActive, setIsDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const dropzoneOptions: DropzoneOptions = {
     multiple: false,
     accept: { "image/*": [] },
-    maxSize: maxSizeMB * 1024 * 1024, // Convertir en bytes
-    onDrop: (acceptedFiles, fileRejections) => {
-      setIsDragActive(false);
+    maxSize: maxFileSize,
+    onDrop: (acceptedFiles: File[], fileRejections) => {
+      setError(null); // Réinitialise l'erreur à chaque nouvel upload
       
+      // Gestion des fichiers rejetés
       if (fileRejections.length > 0) {
         const rejection = fileRejections[0];
-        if (rejection.errors[0].code === "file-too-large") {
-          toast({
-            title: "Fichier trop volumineux",
-            description: `La taille maximale autorisée est ${maxSizeMB}MB`,
-            color: "destructive",
-          });
+        if (rejection.errors.some(e => e.code === 'file-too-large')) {
+          const errorMsg = `Fichier trop lourd (max ${maxFileSize / (1024 * 1024)}MB)`;
+          setError(errorMsg);
+          toast.error(errorMsg); // Affiche une notification d'erreur
+          return;
         }
-        return;
       }
 
+      // Gestion du fichier accepté
       const newFile = acceptedFiles[0];
       if (newFile) {
-        // Simuler une progression d'upload
-        const interval = setInterval(() => {
-          setUploadProgress((prev) => {
-            if (prev >= 100) {
-              clearInterval(interval);
-              return 100;
-            }
-            return prev + 10;
-          });
-        }, 100);
-
         const previewURL = URL.createObjectURL(newFile);
         setImage(previewURL);
         setFile(newFile);
-        onImageChange(newFile);
-
-        setTimeout(() => setUploadProgress(0), 1500);
+        onImageChange?.(newFile);
       }
     },
-    onDragEnter: () => setIsDragActive(true),
-    onDragLeave: () => setIsDragActive(false),
-  });
+  };
+
+  const { getRootProps, getInputProps } = useDropzone(dropzoneOptions);
 
   useEffect(() => {
-    if (initialImage) {
-      setImage(initialImage);
-    }
+    return () => {
+      if (image && typeof image === 'string' && image.startsWith('blob:')) {
+        URL.revokeObjectURL(image);
+      }
+    };
+  }, [image]);
+
+  useEffect(() => {
+    setImage(initialImage || null);
   }, [initialImage]);
 
-  const removeImage = () => {
-    if (image) {
+  const removeImage = (): void => {
+    if (image && typeof image === 'string' && image.startsWith('blob:')) {
       URL.revokeObjectURL(image);
     }
     setImage(null);
     setFile(null);
+    setError(null);
+    onImageChange?.(null);
+  };
+
+  const getImagePriority = (): boolean | undefined => {
+    if (!image) return undefined;
+    return typeof image === 'string' 
+      ? (image.startsWith('http:') || image.startsWith('https:'))
+      : undefined;
   };
 
   return (
-    <div className="space-y-4 w-full">
-      <div
-        {...getRootProps()}
-        className={cn(
-          "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-          isDragActive ? "border-primary bg-primary/10" : "border-muted-foreground/30",
-          image ? "h-auto" : "h-64 flex items-center justify-center"
-        )}
-      >
-        <input {...getInputProps()} />
-        
-        {image ? (
-          <div className="relative w-full h-full">
-            <div className="relative aspect-square mx-auto max-w-md">
-              <Image
-                alt="Photo de l'élève"
-                src={image}
-                width={400}
-                height={400}
-                className="rounded-md object-cover w-full h-full"
-                priority
-              />
-              <Button
-                type="button"
-                color="destructive"
-                size="sm"
-                className="absolute -top-3 -right-3 rounded-full p-2 h-8 w-8"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeImage();
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-3">
-            <div className="p-3 rounded-full bg-muted">
-              <Upload className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <div className="space-y-1">
-              <h4 className="font-medium text-sm">
-                Glissez-déposez votre image ici, ou cliquez pour sélectionner
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                Formats supportés: JPG, PNG (max. {maxSizeMB}MB)
-              </p>
-            </div>
-            <Button variant="outline" size="sm" type="button">
-              Sélectionner une image
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Téléversement en cours...</span>
-            <span>{uploadProgress}%</span>
-          </div>
-          <Progress value={uploadProgress} className="h-2" />
-        </div>
-      )}
-
-      {file && (
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md text-sm">
-          <div className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium truncate max-w-xs">{file.name}</span>
-            <span className="text-muted-foreground text-xs">
-              {(file.size / 1024 / 1024).toFixed(2)}MB
-            </span>
-          </div>
+    <div className={image ? "h-[200px] w-full col-span-2" : "col-span-2"}>
+      {image ? (
+        <div className="w-full h-full relative">
           <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive h-8 p-2"
+            type="button"
+            className="absolute top-2 right-2 h-8 w-8 rounded-full bg-default-900 hover:bg-background hover:text-default-900 z-20"
             onClick={removeImage}
           >
-            <X className="h-4 w-4" />
+            <span className="text-sm">
+              <Icon icon="fa6-solid:xmark" />
+            </span>
           </Button>
+          <Image
+            alt="Uploaded image"
+            width={200}
+            height={200}
+            className="w-full h-full object-cover rounded-md"
+            src={image}
+            priority={getImagePriority()}
+            unoptimized={typeof image === 'string' ? !image.startsWith('http') && !image.startsWith('https') : undefined}
+          />
+        </div>
+      ) : (
+        <div {...getRootProps({ className: "dropzone" })}>
+          <input {...getInputProps()} />
+          <div className="w-full text-center border-dashed border rounded-md py-[32px] flex items-center flex-col">
+            <div className="h-10 w-10 inline-flex rounded-md bg-muted items-center justify-center mb-2">
+              <Upload className="text-default-500" size={20} />
+            </div>
+            <h4 className="text-lg font-medium mb-1 text-card-foreground/80">
+              Déposez l'image ici ou cliquez pour sélectionner
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Formats acceptés: .png, .jpg, .jpeg, .gif (max {maxFileSize / (1024 * 1024)}MB)
+            </p>
+            {error && (
+              <p className="text-sm text-red-500 mt-2">{error}</p>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default ImageUploader;
