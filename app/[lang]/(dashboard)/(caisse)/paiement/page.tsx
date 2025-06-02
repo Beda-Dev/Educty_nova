@@ -298,27 +298,27 @@ const InvoicePage = () => {
       setDonneesEtudiant(updatedData);
 
       // Envoi du SMS de confirmation
-      if (donneesEtudiant.informationsEtudiant.tutor_number) {
-        const messageToSend = `Bonjour ${
-          donneesEtudiant.informationsEtudiant.tutor_name
-        } ${
-          donneesEtudiant.informationsEtudiant.tutor_first_name
-        } , un paiement de ${calculerTotalPaiement().toLocaleString()} CFA a été enregistré pour l'élève ${
-          donneesEtudiant.informationsEtudiant.name
-        }. Le montant restant dû est de ${
-          updatedData?.resumePaiements?.soldeRestant?.toLocaleString() ||
-          "inconnu"
-        } CFA. Merci pour votre confiance.`;
-        const smsResult = await envoiSms({
-          phoneNumber: donneesEtudiant.informationsEtudiant.tutor_number,
-          message: messageToSend,
-          sender: "Educty Nova",
-        });
+      // if (donneesEtudiant.informationsEtudiant.tutors.) {
+      //   const messageToSend = `Bonjour ${
+      //     donneesEtudiant.informationsEtudiant.tutor_name
+      //   } ${
+      //     donneesEtudiant.informationsEtudiant.tutor_first_name
+      //   } , un paiement de ${calculerTotalPaiement().toLocaleString()} CFA a été enregistré pour l'élève ${
+      //     donneesEtudiant.informationsEtudiant.name
+      //   }. Le montant restant dû est de ${
+      //     updatedData?.resumePaiements?.soldeRestant?.toLocaleString() ||
+      //     "inconnu"
+      //   } CFA. Merci pour votre confiance.`;
+      //   const smsResult = await envoiSms({
+      //     phoneNumber: donneesEtudiant.informationsEtudiant.tutor_number,
+      //     message: messageToSend,
+      //     sender: "Educty Nova",
+      //   });
 
-        if (!smsResult.success) {
-          console.error("Échec envoi SMS:", smsResult.error);
-        }
-      }
+      //   if (!smsResult.success) {
+      //     console.error("Échec envoi SMS:", smsResult.error);
+      //   }
+      // }
 
       // Reset form
       setMontantsPaiement((prev) =>
@@ -735,7 +735,7 @@ const StudentInfoCard = ({
             </div>
           </div>
 
-          <div className="space-y-2 pt-2">
+          {/* <div className="space-y-2 pt-2">
             <Label className="text-sm text-muted-foreground">Tuteur</Label>
             <div className="p-3 bg-muted/50 rounded-md">
               <p className="font-medium">
@@ -748,7 +748,7 @@ const StudentInfoCard = ({
                   "Non renseigné"}
               </p>
             </div>
-          </div>
+          </div> */}
 
           {donneesEtudiant.anneeAcademiqueCourante && (
             <div className="space-y-1">
