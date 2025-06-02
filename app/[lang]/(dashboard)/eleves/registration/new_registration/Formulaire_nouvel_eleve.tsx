@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {ImageUploader} from "./select_photo";
+import ImageUploader from "./select_photo";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
