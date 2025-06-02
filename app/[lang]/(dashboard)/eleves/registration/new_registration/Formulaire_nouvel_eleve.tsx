@@ -142,7 +142,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
     setValue(fieldName, upperValue, { shouldValidate: true });
   };
 
-  const handleImageChange = (file: File) => {
+  const handleImageChange = (file: File | null) => {
     setImageFile(file);
   };
 
