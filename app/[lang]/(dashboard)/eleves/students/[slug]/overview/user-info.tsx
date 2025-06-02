@@ -67,16 +67,6 @@ const UserInfo: React.FC<UserInfoProps> = ({ student, anneeAcademic }) => {
       value: `${student.name || "Non renseigné"} ${student.first_name || ""}`.trim()
     },
     {
-      icon: Phone,
-      label: "Téléphone tuteur",
-      value: student.tutor_number || "Non renseigné"
-    },
-    {
-      icon: User,
-      label: "Tuteur",
-      value: `${student.tutor_name || "Non renseigné"} ${student.tutor_first_name || ""}`.trim()
-    },
-    {
       icon: CalenderCheck,
       label: "Date de naissance",
       value: formatDate(student.birth_date)
@@ -102,7 +92,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ student, anneeAcademic }) => {
     <Card>
       <CardHeader className="border-none mb-0">
         <CardTitle className="text-lg font-medium text-default-800">
-          Informations de l'étudiant
+          Informations de l'éleve
         </CardTitle>
       </CardHeader>
       <CardContent className="px-4">

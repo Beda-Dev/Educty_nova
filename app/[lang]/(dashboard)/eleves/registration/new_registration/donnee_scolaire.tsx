@@ -334,14 +334,14 @@ export default function DonneeScolaire({
 
               <div className="flex justify-between mt-6">
                 (
-                  <Button
-                    variant="outline"
-                    onClick={onPrevious}
-                    className="w-32"
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Retour
-                  </Button>
+                <Button
+                  variant="outline"
+                  onClick={onPrevious}
+                  className="w-32"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Retour
+                </Button>
                 )
                 <Button
                   onClick={handleSubmit}
