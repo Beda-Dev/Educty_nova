@@ -20,14 +20,25 @@ export const inputVariants = cva(
           "border-success/50 text-success focus:outline-none focus:border-success-700 disabled:bg-success/30 disabled:placeholder:text-info  placeholder:text-success/70",
         destructive:
           "border-destructive/50 text-destructive focus:outline-none focus:border-destructive-700 disabled:bg-destructive/30 disabled:placeholder:text-destructive  placeholder:text-destructive/70",
+        skyblue:
+          "border-skyblue/50 text-skyblue focus:outline-none focus:border-skyblue-700 disabled:bg-skyblue/30 disabled:placeholder:text-skyblue  placeholder:text-skyblue/70",
+        bittersweet:
+          "border-bittersweet/50 text-bittersweet focus:outline-none focus:border-bittersweet-700 disabled:bg-bittersweet/30 disabled:placeholder:text-bittersweet  placeholder:text-bittersweet/70",
+        whitesmoke:
+          "border-whitesmoke/50 text-whitesmoke focus:outline-none focus:border-whitesmoke-700 disabled:bg-whitesmoke/30 disabled:placeholder:text-whitesmoke  placeholder:text-whitesmoke/70",
+        indigodye:
+          "border-indigodye/50 text-indigodye focus:outline-none focus:border-indigodye-700 disabled:bg-indigodye/30 disabled:placeholder:text-indigodye  placeholder:text-indigodye/70",
+        tyrian:
+          "border-tyrian/50 text-tyrian focus:outline-none focus:border-tyrian-700 disabled:bg-tyrian/30 disabled:placeholder:text-tyrian  placeholder:text-tyrian/70",
+        
       },
       variant: {
-        flat: "bg-default-100 read-only:bg-default-100",
+        flat: "bg-skyblue-100 read-only:bg-skyblue-100",
         underline: "border-b",
         bordered: "border  ",
-        faded: "border border-default-300 bg-default-100",
+        faded: "border border-skyblue-300 bg-skyblue-100",
         ghost: "border-0 focus:border",
-        "flat-underline": "bg-default-100 border-b",
+        "flat-underline": "bg-skyblue-100 border-b",
       },
       shadow: {
         none: "",
@@ -103,10 +114,91 @@ export const inputVariants = cva(
         color: "destructive",
         className: "bg-destructive/10 border-destructive/30",
       },
+      {
+        variant: "faded",
+        color: "skyblue",
+        className:
+          "bg-skyblue/10 border-skyblue/30 read-only:bg-skyblue/10 border-skyblue/30",
+      },
+      {
+        variant: "faded",
+        color: "bittersweet",
+        className:
+          "bg-bittersweet/10 border-bittersweet/30 read-only:bg-bittersweet/10 border-bittersweet/30",
+      },
+      {
+        variant: "faded",
+        color: "whitesmoke",
+        className:
+          "bg-whitesmoke/10 border-whitesmoke/30 read-only:bg-whitesmoke/10 border-whitesmoke/30",
+      },
+      {
+        variant: "faded",
+        color: "indigodye",
+        className:
+          "bg-indigodye/10 border-indigodye/30 read-only:bg-indigodye/10 border-indigodye/30",
+      },
+      {
+        variant: "faded",
+        color: "tyrian",
+        className:
+          "bg-tyrian/10 border-tyrian/30 read-only:bg-tyrian/10 border-tyrian/30",
+      },
+      {
+        variant: "ghost",
+        color: "skyblue",
+        className: "bg-skyblue/10 border-skyblue/30",
+      },
+      {
+        variant: "ghost",
+        color: "bittersweet",
+        className: "bg-bittersweet/10 border-bittersweet/30",
+      },
+      {
+        variant: "ghost",
+        color: "whitesmoke",
+        className: "bg-whitesmoke/10 border-whitesmoke/30",
+      },
+      {
+        variant: "ghost",
+        color: "indigodye",
+        className: "bg-indigodye/10 border-indigodye/30",
+      },
+      {
+        variant: "ghost",
+        color: "tyrian",
+        className: "bg-tyrian/10 border-tyrian/30",
+      },
+      {
+        variant: "flat-underline",
+        color: "skyblue",
+        className: "bg-skyblue/10 border-skyblue/30",
+      },
+      {
+        variant: "flat-underline",
+        color: "bittersweet",
+        className: "bg-bittersweet/10 border-bittersweet/30",
+      },
+      {
+        variant: "flat-underline",
+        color: "whitesmoke",
+        className: "bg-whitesmoke/10 border-whitesmoke/30",
+      },
+      {
+        variant: "flat-underline",
+        color: "indigodye",
+        className: "bg-indigodye/10 border-indigodye/30",
+      },
+      {
+        variant: "flat-underline",
+        color: "tyrian",
+        className: "bg-tyrian/10 border-tyrian/30",
+      }
+
     ],
 
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
       size: "md",
       variant: "bordered",
       radius: "md",
