@@ -138,25 +138,25 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       alert("Veuillez remplir tous les champs obligatoires")
       return
     }
-  
+
     if (selectedTutors.length === 0 && newTutors.length === 0) {
       alert("Veuillez ajouter au moins un tuteur")
       return
     }
-  
+
     // Ajouter la photo au formData si elle existe
     const dataToSend = { ...formData }
     if (photoFile) {
       dataToSend.photo = photoFile
     }
-  
+
     setStudentData(dataToSend)
     onNext()
   }
 
   return (
     <TooltipProvider>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -282,8 +282,8 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                 </div>
                 <div className="relative">
                   <VenusAndMars className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Select 
-                    value={formData.sexe} 
+                  <Select
+                    value={formData.sexe}
                     onValueChange={(value) => handleStudentChange("sexe", value)}
                   >
                     <SelectTrigger className="pl-9">
@@ -380,29 +380,54 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                     onChange={(e) => setTutorSearch(e.target.value)}
                   />
                 </div>
-                {filteredTutors.length > 0 && (
-                  <motion.div 
+                {(filteredTutors.length > 0 || tutorSearch) && (
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     className="border rounded-md overflow-hidden"
                   >
-                    {filteredTutors.map((tutor) => (
-                      <motion.div
-                        key={tutor.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.2 }}
-                        className="p-2 hover:bg-accent cursor-pointer border-b last:border-b-0"
-                        onClick={() => handleTutorSelect(tutor)}
-                      >
-                        {tutor.name} {tutor.first_name} - {tutor.phone_number}
-                      </motion.div>
-                    ))}
+                    {filteredTutors.length > 0 ? (
+                      filteredTutors.map((tutor) => (
+                        <motion.div
+                          key={tutor.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.2 }}
+                          className="p-2 hover:bg-accent cursor-pointer border-b"
+                          onClick={() => handleTutorSelect(tutor)}
+                        >
+                          {tutor.name} {tutor.first_name} - {tutor.phone_number}
+                        </motion.div>
+                      ))
+                    ) : (
+                      <div className="p-2 text-muted-foreground text-sm text-center">
+                        Aucun tuteur trouvé
+                      </div>
+                    )}
+
+                    {/* Bouton Créer un tuteur - toujours visible */}
+                    <div className="p-2 border-t">
+                      <TutorModal
+                        triggerButton={(trigger) => (
+                          <Button
+                            color="indigodye"
+                            className="w-full justify-start"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              trigger();
+                            }}
+                          >
+                            <User className="w-4 h-4 mr-2" />
+                            Ajouter un nouveau tuteur
+                          </Button>
+                        )}
+                      />
+                    </div>
                   </motion.div>
                 )}
               </div>
 
-              <TutorModal />
+
 
               {/* Selected Tutors */}
               {selectedTutors.length > 0 && (
@@ -410,8 +435,8 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                   <Label>Tuteurs sélectionnés</Label>
                   <div className="space-y-3">
                     {selectedTutors.map((tutor) => (
-                      <motion.div 
-                        key={tutor.id} 
+                      <motion.div
+                        key={tutor.id}
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -432,18 +457,18 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1">
-                            <Checkbox 
+                            <Checkbox
                               id={`legal-${tutor.id}`}
-                              checked={tutor.is_tutor_legal} 
-                              onCheckedChange={() => toggleTutorLegal(tutor.id)} 
+                              checked={tutor.is_tutor_legal}
+                              onCheckedChange={() => toggleTutorLegal(tutor.id)}
                             />
                             <Label htmlFor={`legal-${tutor.id}`} className="text-sm cursor-pointer">
                               Légal
                             </Label>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => removeTutor(tutor.id)}
                             className="text-destructive hover:text-destructive"
                           >
@@ -462,8 +487,8 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                   <Label>Nouveaux tuteurs créés</Label>
                   <div className="space-y-3">
                     {newTutors.map((tutor, index) => (
-                      <motion.div 
-                        key={index} 
+                      <motion.div
+                        key={index}
                         layout
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -482,9 +507,9 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                             )}
                           </div>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => removeNewTutor(index)}
                           className="text-destructive hover:text-destructive"
                         >
@@ -506,7 +531,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="lg:col-span-2 flex justify-end"
         >
-          <Button 
+          <Button
             onClick={handleNext}
             className="px-6 py-3 text-lg font-medium"
           >

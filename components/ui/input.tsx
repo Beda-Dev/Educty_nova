@@ -21,7 +21,7 @@ export const inputVariants = cva(
         destructive:
           "border-destructive/50 text-destructive focus:outline-none focus:border-destructive-700 disabled:bg-destructive/30 disabled:placeholder:text-destructive  placeholder:text-destructive/70",
         skyblue:
-          "border-skyblue/50 text-skyblue focus:outline-none focus:border-skyblue-700 disabled:bg-skyblue/30 disabled:placeholder:text-skyblue  placeholder:text-skyblue/70",
+          "border-skyblue/50 text-default focus:outline-none focus:border-skyblue-700 disabled:bg-skyblue/30 disabled:placeholder:text-default  placeholder:text-default/70",
         bittersweet:
           "border-bittersweet/50 text-bittersweet focus:outline-none focus:border-bittersweet-700 disabled:bg-bittersweet/30 disabled:placeholder:text-bittersweet  placeholder:text-bittersweet/70",
         whitesmoke:

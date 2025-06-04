@@ -53,6 +53,11 @@ import {
 } from "lucide-react"
 import type { TutorFormData } from "@/lib/interface"
 import { useSchoolStore } from "@/store/index"
+import { UseFormTrigger } from "react-hook-form"
+
+interface TutorModalProps {
+  triggerButton?: (trigger: UseFormTrigger<TutorFormValues>) => React.ReactNode;
+}
 
 // Schéma de validation
 const tutorFormSchema = z.object({
@@ -73,17 +78,17 @@ const tutorFormSchema = z.object({
 
 type TutorFormValues = z.infer<typeof tutorFormSchema>
 
-export function TutorModal() {
+export function TutorModal({ triggerButton }: TutorModalProps) {
   const [open, setOpen] = useState(false)
   const { addNewTutor, selectedTutors, newTutors } = useSchoolStore()
 
   const {
     register,
-    handleSubmit,
+    handleSubmit, 
     watch,
     reset,
-    setValue,
     trigger,
+    setValue,
     formState: { errors, isSubmitting }
   } = useForm<TutorFormValues>({
     resolver: zodResolver(tutorFormSchema),
@@ -153,17 +158,21 @@ export function TutorModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full group">
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center"
-          >
-            <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
-            <span>Créer un tuteur</span>
-          </motion.span>
-        </Button>
+        {triggerButton ? (
+          triggerButton(trigger)
+        ) : (
+          <Button variant="outline" className="w-full group">
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center"
+            >
+              <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
+              <span>Ajouter un tuteur</span>
+            </motion.span>
+          </Button>
+        )}
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-[425px]">
@@ -303,7 +312,7 @@ export function TutorModal() {
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner le sexe" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[9999]">
                   <SelectItem value="Homme">
                     <div className="flex items-center gap-2">
                       <Mars className="w-4 h-4 text-blue-500" />
@@ -394,16 +403,17 @@ export function TutorModal() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-around gap-2 pt-4">
               <Button
                 type="button"
-                variant="outline"
+                color="destructive"
                 onClick={() => setOpen(false)}
                 disabled={isSubmitting}
               >
                 Annuler
               </Button>
               <Button 
+              color="indigodye"
                 type="submit" 
                 className="gap-2"
                 disabled={isSubmitting}
