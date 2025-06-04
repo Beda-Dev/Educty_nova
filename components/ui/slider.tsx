@@ -23,6 +23,15 @@ const sliderVariants = cva(
         destructive:
           "[&_.range]:bg-destructive [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-destructive  focus-visible:[&_.range-thumb]:bg-destructive",
         dark: "[&_.range]:bg-default-950 [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-default-950  focus-visible:[&_.range-thumb]:bg-default-950",
+        tyrian: "[&_.range]:bg-tyrian [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-tyrian  focus-visible:[&_.range-thumb]:bg-tyrian",
+        bittersweet:
+          "[&_.range]:bg-bittersweet [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-bittersweet  focus-visible:[&_.range-thumb]:bg-bittersweet",
+        whitesmoke:
+          "[&_.range]:bg-whitesmoke [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-whitesmoke  focus-visible:[&_.range-thumb]:bg-whitesmoke",
+        skyblue:
+          "[&_.range]:bg-skyblue [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-skyblue  focus-visible:[&_.range-thumb]:bg-skyblue",
+        indigodye:
+          "[&_.range]:bg-indigodye [&_.range-thumb]:border-secondary [&_.range-thumb]:drop-shadow-sm [&_.range-thumb]:bg-indigodye  focus-visible:[&_.range-thumb]:bg-indigodye",
       },
 
       radius: {
@@ -41,7 +50,7 @@ const sliderVariants = cva(
     },
 
     defaultVariants: {
-      color: "primary",
+      color: "skyblue",
       size: "lg",
       radius: "md",
     },
@@ -50,7 +59,7 @@ const sliderVariants = cva(
 
 interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>,
   VariantProps<typeof sliderVariants> {
-  color?: "primary" | "info" | "warning" | "success" | "destructive" | 'dark'
+  color?: "primary" | "info" | "warning" | "success" | "destructive" | 'dark' | 'tyrian' | 'bittersweet' | 'whitesmoke' | 'skyblue' | 'indigodye'
   showTooltip?: boolean
   showSteps?: boolean
   marks?: Array<{ value: number; label: string }>

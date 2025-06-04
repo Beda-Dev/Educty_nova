@@ -1,9 +1,8 @@
-export const metadata = {
-  title: "Nouvelle inscription",
-};
+"use client"
+import { RegistrationReset } from "@/components/registration/registration-reset";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+  return <><RegistrationReset />{children}</>;
 };
 
 export default Layout;

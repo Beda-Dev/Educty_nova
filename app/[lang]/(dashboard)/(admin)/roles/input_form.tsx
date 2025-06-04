@@ -118,12 +118,13 @@ const InputFormValidation = () => {
               </FormItem>
             )}
           />
+          
           <Button 
             type="submit" 
             disabled={isLoading}
             className="w-full"
           >
-            {isLoading ? "Création en cours..." : "Créer le rôle"}
+            {isLoading ? "Ajout en cours..." : "Ajouter le rôle"}
           </Button>
         </form>
       </Form>

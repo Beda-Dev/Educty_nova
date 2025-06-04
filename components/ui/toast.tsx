@@ -38,10 +38,20 @@ const toastVariants = cva(
           "info group border-info bg-info text-info-foreground",
         secondary:
           "secondary group border-secondary bg-secondary text-secondary-foreground",
+        skyblue:
+          "skyblue group border-skyblue bg-skyblue text-skyblue-foreground",
+        tyrian:
+          "tyrian group border-tyrian bg-tyrian text-tyrian-foreground",
+        indigodye:
+          "indigodye group border-indigodye bg-indigodye text-indigodye-foreground",
+        whitesmoke:
+          "whitesmoke group border-whitesmoke bg-whitesmoke text-whitesmoke-foreground",
+        bittersweet:
+          "bittersweet group border-bittersweet bg-bittersweet text-bittersweet-foreground",
       },
     },
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
     },
   }
 );

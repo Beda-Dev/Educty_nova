@@ -155,33 +155,25 @@ const menuItems: MenuCategory = {
       path: "/parametres/scolarite",
       children: [
         {
-          id: "fees",
-          title: "Frais scolaires",
-          icon: <DollarSign className="w-4 h-4" />,
-          path: "/parametres/scolarite/frais-scolaires",
-          children: [
-            {
-              id: "fees_type",
-              title: "Types de frais",
-              description: "Gérer les différents types de frais scolaires",
-              icon: <List className="w-6 h-6" />,
-              path: "parametres/scolarite/frais-scolaires/fees_type",
-            },
-            {
-              id: "pricing",
-              title: "Tarification",
-              description: "Configurer les tarifs et montants des frais",
-              icon: <Tags className="w-6 h-6" />,
-              path: "parametres/scolarite/frais-scolaires/pricing",
-            },
-          ],
-        },
-        {
           id: "documents",
           title: "Documents",
-          description: "Modèles de documents",
+          description: "Gestion des types de documents et pièces justificatives",
           icon: <FileText className="w-4 h-4" />,
           path: "/parametres/scolarite/type_document",
+        },
+        {
+          id: "fees_type",
+          title: "Types de frais",
+          description: "Gestion des différents types de frais scolaires",
+          icon: <List className="w-6 h-6" />,
+          path: "parametres/scolarite/fees_type",
+        },
+        {
+          id: "pricing",
+          title: "Tarification",
+          description: "Gestion des tarifs et montants des frais",
+          icon: <Tags className="w-6 h-6" />,
+          path: "parametres/scolarite/pricing",
         },
       ],
     },
@@ -696,7 +688,7 @@ export default function DynamicMenu() {
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer hover:bg-muted transition-all",
                   isActive
-                    ? "bg-primary/15 text-primary font-medium"
+                    ? "bg-skyblue/15 text-skyblue font-medium"
                     : "text-foreground/90",
                   level > 0 && "px-3 py-1.5",
                   item.hidden && "hidden"

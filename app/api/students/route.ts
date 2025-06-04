@@ -9,11 +9,12 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(url);
     
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      throw new Error(`Erreur: ${data.error || response.status}`);
     }
 
-    const data = await response.json();
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error);
@@ -46,11 +47,13 @@ export async function POST(request: NextRequest) {
       body: body instanceof FormData ? body : options.body,
     });
 
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP: ${response.status}`);
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+      throw new Error(`Erreur: ${ JSON.stringify(data.error)}`);
     }
 
-    const data = await response.json();
+    
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Erreur lors de l'ajout des données :", error);

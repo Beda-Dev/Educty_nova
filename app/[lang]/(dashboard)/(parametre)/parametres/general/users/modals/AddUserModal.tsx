@@ -164,7 +164,7 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Création...
+                  ajout en cours...
                 </>
               ) : (
                 "Ajouter"

@@ -16,6 +16,14 @@ const badgeVariants = cva(
         warning: "bg-warning  border-transparent text-warning-foreground",
         secondary: "bg-secondary border-transparent text-foreground ",
         dark: "bg-accent-foreground border-transparent text-accent ",
+        tyrian: "bg-tyrian text-tyrian-foreground hover:bg-tyrian/80",
+        bittersweet:
+          "bg-bittersweet text-bittersweet-foreground hover:bg-bittersweet/80",
+        whitesmoke:
+          "bg-whitesmoke text-whitesmoke-foreground hover:bg-whitesmoke/80",
+        skyblue: "bg-skyblue text-skyblue-foreground hover:bg-skyblue/80",
+        indigodye:
+          "bg-indigodye text-indigodye-foreground hover:bg-indigodye/80",
       },
       variant: {
         outline: "border border-current bg-background  ",
@@ -96,9 +104,71 @@ const badgeVariants = cva(
         color: "default",
         className: "text-primary hover:text-primary",
       },
+      {
+        variant: "outline",
+        color: "tyrian",
+        className:
+          "text-tyrian hover:text-tyrian-foreground hover:border-tyrian hover:bg-tyrian",
+      },
+      {
+        variant: "soft",
+        color: "tyrian",
+        className: "bg-tyrian/10 text-tyrian hover:bg-tyrian/20",
+      },
+      // Bittersweet
+      {
+        variant: "outline",
+        color: "bittersweet",
+        className:
+          "text-bittersweet hover:text-bittersweet-foreground hover:border-bittersweet hover:bg-bittersweet",
+      },
+      {
+        variant: "soft",
+        color: "bittersweet",
+        className: "bg-bittersweet/10 text-bittersweet hover:bg-bittersweet/20",
+      },
+
+      // White Smoke
+      {
+        variant: "outline",
+        color: "whitesmoke",
+        className:
+          "text-whitesmoke hover:text-whitesmoke-foreground hover:border-whitesmoke hover:bg-whitesmoke",
+      },
+      {
+        variant: "soft",
+        color: "whitesmoke",
+        className: "bg-whitesmoke/50 text-whitesmoke hover:bg-whitesmoke/70",
+      },
+
+      // Vivid Sky Blue
+      {
+        variant: "outline",
+        color: "skyblue",
+        className:
+          "text-skyblue hover:text-skyblue-foreground hover:border-skyblue hover:bg-skyblue",
+      },
+      {
+        variant: "soft",
+        color: "skyblue",
+        className: "bg-skyblue/10 text-skyblue hover:bg-skyblue/20",
+      },
+
+      // Indigo Dye
+      {
+        variant: "outline",
+        color: "indigodye",
+        className:
+          "text-indigodye hover:text-indigodye-foreground hover:border-indigodye hover:bg-indigodye",
+      },
+      {
+        variant: "soft",
+        color: "indigodye",
+        className: "bg-indigodye/10 text-indigodye hover:bg-indigodye/20 ",
+      }
     ],
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
     },
   }
 );
@@ -106,7 +176,7 @@ export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
   VariantProps<typeof badgeVariants> {
   variant?: "outline" | "soft";
-  color?: "default" | "destructive" | "success" | "info" | "warning" | "dark" | "secondary";
+  color?: "default" | "destructive" | "success" | "info" | "warning" | "dark" | "secondary" | "tyrian" | "bittersweet" | "whitesmoke" | "skyblue" | "indigodye";
 }
 
 

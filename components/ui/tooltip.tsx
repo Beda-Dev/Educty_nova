@@ -15,16 +15,21 @@ const tooltipVariants = cva(
         success: "border border-success bg-success text-success-foreground",
         destructive:
           "border border-destructive bg-destructive text-destructive-foreground",
+        skyblue: "border border-skyblue bg-skyblue text-skyblue-foreground",
+        tyrian: "border border-tyrian bg-tyrian text-tyrian-foreground",
+        indigodye: "border border-indigodye bg-indigodye text-indigodye-foreground",
+        whitesmoke: "border border-whitesmoke bg-whitesmoke text-whitesmoke-foreground",
+        bittersweet: "border border-bittersweet bg-bittersweet text-bittersweet-foreground",
       },
     },
     defaultVariants: {
-      color: "primary",
+      color: "skyblue",
     },
   }
 );
 
 interface TolTipProps extends React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>, VariantProps<typeof tooltipVariants> {
-  color?: 'primary' | 'secondary' | 'warning' | 'info' | 'success' | 'destructive'
+  color?: 'primary' | 'secondary' | 'warning' | 'info' | 'success' | 'destructive' | 'skyblue' | 'tyrian' | 'indigodye' | 'whitesmoke' | 'bittersweet'
 
 }
 

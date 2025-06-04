@@ -29,7 +29,7 @@ const progressVariants = cva(
       },
     },
     defaultVariants: {
-      color: "primary",
+      color: "skyblue",
       size: "md",
     },
   }
@@ -63,7 +63,7 @@ const circleVariants = cva("[&_[path-color]]:text-default-200 ", {
     },
   },
   defaultVariants: {
-    color: "primary",
+    color: "skyblue",
     size: "md",
   },
 });
@@ -151,7 +151,7 @@ interface CircularProgressProps {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   value?: number;
   showValue?: boolean;
-  color?: "primary" | "dark" | "destructive" | "warning" | "info" | "success";
+  color?: "primary" | "dark" | "destructive" | "warning" | "info" | "success" | "skyblue" | "indigodye" | "bittersweet" | "whitesmoke" | "tyrian";
   isStripe?: boolean;
   isAnimate?: boolean;
   loading?: boolean;

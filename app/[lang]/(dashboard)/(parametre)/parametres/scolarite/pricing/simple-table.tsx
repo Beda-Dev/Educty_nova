@@ -113,7 +113,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                 className="w-full md:w-auto"
                 onClick={() =>
                   router.push(
-                    "/parametres/scolarite/frais-scolaires/pricing/creation"
+                    "/parametres/scolarite/pricing/creation"
                   )
                 }
               >

@@ -49,7 +49,7 @@ const EditEvaluationTypeModal = ({
     return true;
   };
 
-  const handleUpdate = async () => {
+  const handleUpdate: () => Promise<void> = async () => {
     if (!validateForm()) return;
 
     setLoading(true);
@@ -105,7 +105,7 @@ const EditEvaluationTypeModal = ({
 
           <div className="flex justify-evenly gap-3 mt-4">
             <DialogClose asChild>
-              <Button variant="outline" color="destructive" disabled={loading}>
+              <Button  color="destructive" disabled={loading}>
                 Annuler
               </Button>
             </DialogClose>

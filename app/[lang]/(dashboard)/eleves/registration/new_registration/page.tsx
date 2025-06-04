@@ -1,210 +1,75 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Stepper, Step, StepLabel } from "@/components/ui/steps";
-import { toast } from "react-hot-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { useRouter, usePathname } from "next/navigation";
-import { useSchoolStore } from "@/store";
-import {
-  AssignmentType,
-  Level,
-  Classe,
-  Student,
-  Registration,
-  Pricing
-} from "@/lib/interface";
-import  ImageUploader  from "./select_photo";
-import FileManager from "./input";
-import TarificationTable from "./tarificationTab";
-import FormulaireEnregistrement from "./Formulaire_nouvel_eleve";
-import DonneeScolaire from "./donnee_scolaire";
-import RegistrationFinal from "./final_register";
-import { getTarificationData } from "./fonction";
-import { verificationPermission } from "@/lib/fonction";
-import ErrorPage from "@/app/[lang]/non-Autoriser";
-import StepperWrapper from "../StepperWrapper";
-import { steps } from "./step";
+import { useState, useEffect } from "react"
+import { useSchoolStore } from "@/store/index"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { RegistrationStepper } from "@/components/registration/registration-stepper"
+import { Step1PersonalInfo } from "@/components/registration/step-1-personal-info"
+import { Step2SchoolInfo } from "@/components/registration/step-2-school-info"
+import { Step3Pricing } from "@/components/registration/step-3-pricing"
+import { Step4Documents } from "@/components/registration/step-4-documents"
+import { Step5Confirmation } from "@/components/registration/step-5-confirmation"
+import { RegistrationReceipt } from "@/components/registration/registration-receipt"
+import { fetchTutors , fetchPaymentMethods } from "@/store/schoolservice"
 
-export default function NewReregistration() {
-  const router = useRouter();
-  const {
-    reRegistration,
-    assignmentTypes,
-    levels,
-    classes,
-    documents,
-    pricing,
-    academicYears,
-    documentTypes,
-    userOnline,
-    Newstudent,
-    setNewStudent,
-    setReRegistrations
-  } = useSchoolStore();
-  const isTablet = useMediaQuery("(max-width: 1024px)");
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [lastAcademicYearId, setLastAcademicYearId] = useState<number>(1);
-  const [isValidAdd, setIsValidAdd] = useState(false);
-  const [isValidRegistration, setIsValidRegistration] = useState(false);
-  const [student, setStudent] = useState<Student>();
-  const [registration, setRegistration] = useState<{
-    success: boolean;
-    data?: Registration;
-  }>();
-  const [hasDocuments, setHasDocuments] = useState(true);
-  const permissionRequisInscrire = ["inscrire eleve"];
-  const hasAdminAccessInscrire = verificationPermission(
-    { permissionNames: userOnline?.permissionNames || [] },
-    permissionRequisInscrire
-  );
+export default function InscriptionPage() {
+  const { currentStep, setCurrentStep, resetRegistration, setTutors , methodPayment , setmethodPayment } = useSchoolStore()
+  const [showReceipt, setShowReceipt] = useState(false)
 
-  const pathname = usePathname();
-
-useEffect(() => {
-    if (!pathname.endsWith('/new_registration')) {
-    setNewStudent(null);
-  }
-  return () => {
-    setNewStudent(null);
-  };
-}, [pathname]);
-
-
-
-
-
-
-  const handleDocumentStatusChange = (isNotEmpty: boolean) => {
-    // console.log(isNotEmpty);
-  };
-  const handleResultAddStudent = (result: {
-    success: boolean;
-    data?: Student;
-  }) => {
-    if (result.success) {
-      setActiveStep((prev) => prev + 1);
-      console.log("Enregistrement réussi !");
-      if (result.data) {
-        setStudent(result.data);
-      }
-    } else {
-      console.log("Erreur lors de l'enregistrement.", result.data);
+  useEffect(() => { 
+    const fetchUpdate = async () => {
+      const updatedTutors = await fetchTutors()
+      setTutors(updatedTutors)
+      const updatedMethodPayment = await fetchPaymentMethods()
+      setmethodPayment(updatedMethodPayment)
     }
-  };
-
-  const handleSubmissionResult = (result: {
-    success: boolean;
-    data?: Registration;
-  }) => {
-    if (result.success) {
-      //console.log("Inscription réussie :", result.data);
-      setRegistration(result);
-      setActiveStep((prev) => prev + 1)
-    } else {
-      console.error("Échec de l'inscription.");
-    }
-  };
-
-
-  const [levelChoice, setLevelChoice] = useState(
-    Number(reRegistration?.classe?.level_id ?? 0)
-  );
-  const [New, setNew] = useState({
-    class_id: reRegistration?.class_id,
-    academic_year_id: reRegistration?.academic_year_id,
-    student_id: reRegistration?.student_id,
-    registration_date: new Date(),
-  });
+    fetchUpdate()
+  }, [])
 
   const handleNext = () => {
-    setActiveStep((prev) => prev + 1);
+    setCurrentStep(currentStep + 1)
+  }
 
-    if (activeStep === steps.length - 1 ) {
-      setReRegistrations(null);
-      router.push('/eleves/registration')
-      
+  const handlePrevious = () => {
+    setCurrentStep(currentStep - 1)
+  }
 
-      //setIsValidAdd(true);
-      
-    }
-  };
+  const handleComplete = () => {
+    setShowReceipt(true)
+  }
 
-  if (hasAdminAccessInscrire === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
+  const handleNewRegistration = () => {
+    resetRegistration()
+    setShowReceipt(false)
+  }
+
+  if (showReceipt) {
+    return <RegistrationReceipt onNewRegistration={handleNewRegistration} />
   }
 
   return (
     <Card>
       <CardHeader>
-        <StepperWrapper steps={steps} currentStep={activeStep} />
+        <h1 className="text-3xl font-bold text-center mb-2">Inscription d'un élève</h1>
+        <p className="text-gray-600 text-center">
+          Suivez les étapes pour inscrire un nouvel élève dans l'établissement
+        </p>
+
       </CardHeader>
       <CardContent>
-      {activeStep === 0 && (
-        <FormulaireEnregistrement
-          isValid={isValidAdd}
-          onSubmitResult={handleResultAddStudent}
-          onPrevious={() => setActiveStep((prev) => prev - 1)}
-          onNext={handleNext}
-          isLastStep={activeStep === steps.length - 1}
-        />
-      )}
-      {activeStep === 1 && student && (
-        <FileManager
-          student={student}
-          onDocumentStatus={handleDocumentStatusChange}
-          onPrevious={() => setActiveStep((prev) => prev - 1)}
-          onNext={handleNext}
-          isLastStep={activeStep === steps.length - 1}
-        />
-      )}
 
-      {activeStep === 2 && student && (
-        <DonneeScolaire
-          student={student}
-          onSubmitResult={handleSubmissionResult}
-          onPrevious={() => setActiveStep((prev) => prev - 1)}
-          onNext={handleNext}
-          isLastStep={activeStep === steps.length - 1}
-        />
-      )}
 
-      {activeStep === 3 && registration && registration.success === true && registration.data && (
-        <RegistrationFinal
-          registration={registration.data}
-          finance={getTarificationData(
-            pricing,
-            registration.data?.classe?.level_id ?? 0,
-            registration.data.student?.assignment_type_id ?? 0,
-            registration.data.academic_year_id
-          )}
-          onPrevious={() => setActiveStep((prev) => prev - 1)}
-          onNext={handleNext}
-          isLastStep={activeStep === steps.length - 1}
-        />
-      )}
+
+        <RegistrationStepper currentStep={currentStep} />
+
+        <div className="mt-8">
+          {currentStep === 1 && <Step1PersonalInfo onNext={handleNext} />}
+          {currentStep === 2 && <Step2SchoolInfo onNext={handleNext} onPrevious={handlePrevious} />}
+          {currentStep === 3 && <Step3Pricing onNext={handleNext} onPrevious={handlePrevious} />}
+          {currentStep === 4 && <Step4Documents onNext={handleNext} onPrevious={handlePrevious} />}
+          {currentStep === 5 && <Step5Confirmation onPrevious={handlePrevious} onComplete={handleComplete} />}
+        </div>
       </CardContent>
     </Card>
-  );
+  )
 }

@@ -142,7 +142,7 @@ const DialogForm = () => {
             </div>
           </ScrollArea>
 
-          <div className="flex justify-center gap-3 mt-4">
+          <div className="flex justify-around gap-3 mt-4">
             <DialogClose asChild>
               <Button color="destructive" type="button"  disabled={loading}>
                 Annuler

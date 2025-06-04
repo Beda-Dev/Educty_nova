@@ -16,6 +16,12 @@ const switchVariants = cva(
         success: "data-[state=checked]:bg-success ",
         destructive: "data-[state=checked]:bg-destructive ",
         dark: "data-[state=checked]:bg-foreground ",
+        skyblue: "data-[state=checked]:bg-skyblue ",
+        tyrian: "data-[state=checked]:bg-tyrian",
+        indigodye: "data-[state=checked]:bg-indigodye",
+        whitesmoke: "data-[state=checked]:bg-whitesmoke",
+        bittersweet: "data-[state=checked]:bg-bittersweet",
+
       },
       size: {
         sm: "h-4 w-[30px]  [&_.content-box]:text-[7px] [&_.content-box>svg]:h-2.5  [&_.content-box>svg]:w-2.5 ",
@@ -25,7 +31,7 @@ const switchVariants = cva(
     },
 
     defaultVariants: {
-      color: "primary",
+      color: "skyblue",
       size: "md",
     },
   }
@@ -36,7 +42,7 @@ interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimit
   thumbClass?: string
   startContent?: React.ReactNode
   endContent?: React.ReactNode
-  color?: 'primary' | 'secondary' | 'info' | 'warning' | 'success' | 'destructive' | 'dark'
+  color?: 'primary' | 'secondary' | 'info' | 'warning' | 'success' | 'destructive' | 'dark' | 'skyblue' | 'tyrian' | 'indigodye' | 'whitesmoke' | 'bittersweet'
 
 }
 const Switch = React.forwardRef<

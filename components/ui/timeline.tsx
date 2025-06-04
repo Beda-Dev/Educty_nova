@@ -29,7 +29,7 @@ const timelineVariants = cva(" flex grow  flex-col", {
 
 interface CompoundVariant {
   variant: "ghost" | "outline" | "ping";
-  color: "default" | "primary" | "secondary" | "warning" | "destructive" | "success" | "info";
+  color: "default" | "primary" | "secondary" | "warning" | "destructive" | "success" | "info" | "skyblue" | "tyrian" | "indigodye" | "whitesmoke" | "bittersweet";
   className: string;
 }
 
@@ -45,6 +45,11 @@ const dotVariants = cva(
         destructive: "bg-destructive",
         success: "bg-success",
         info: "bg-info",
+        skyblue: "bg-skyblue",
+        tyrian: "bg-tyrian",
+        indigodye: "bg-indigodye",
+        whitesmoke: "bg-whitesmoke",
+        bittersweet: "bg-bittersweet",
       },
       variant: {
         ghost: "bg-transparent",
@@ -61,6 +66,11 @@ const dotVariants = cva(
         "dark",
         "secondary",
         "primary",
+        "skyblue",
+        "tyrian",
+        "indigodye",
+        "whitesmoke",
+        "bittersweet",
       ].map((color) => ({
         variant: "outline",
         color,
@@ -74,6 +84,11 @@ const dotVariants = cva(
         "dark",
         "secondary",
         "primary",
+        "skyblue",
+        "tyrian",
+        "indigodye",
+        "whitesmoke",
+        "bittersweet",
       ].map((color) => ({
         variant: "ping",
         className: `before:bg-${color}`,
@@ -81,7 +96,7 @@ const dotVariants = cva(
     ] as CompoundVariant[],
 
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
     },
   }
 );
@@ -249,8 +264,8 @@ interface TimelineDotProps extends React.HTMLAttributes<HTMLDivElement>,
   VariantProps<typeof dotVariants> {
   children?: React.ReactNode;
 
-  color?: "default" | "primary" | "secondary" | "warning" | "destructive" | "success" | "info";
-  variant?: "ghost" | "outline" | "ping"
+  color?: "default" | "primary" | "secondary" | "warning" | "destructive" | "success" | "info" | "skyblue" | "tyrian" | "indigodye" | "whitesmoke" | "bittersweet";
+  variant?: "ghost" | "outline" | "ping" 
 
 }
 

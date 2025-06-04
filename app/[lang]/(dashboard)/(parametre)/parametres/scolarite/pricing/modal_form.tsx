@@ -118,7 +118,7 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
       });
   
       if (!pricingResponse.ok) {
-        throw new Error("Erreur lors de la création de la tarification.");
+        throw new Error("Erreur lors de l'ajout de la tarification.");
       }
   
       const createdPricing = await pricingResponse.json();
@@ -140,11 +140,11 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
       });
   
       if (!installmentResponse.ok) {
-        throw new Error("Tarification créée mais erreur lors de la création de l'échéance.");
+        throw new Error("Tarification ajoutée mais erreur lors de l'ajout de l'échéance.");
       }
   
       toast.dismiss();
-      toast.success("Tarification et échéance créées avec succès !");
+      toast.success("Tarification et échéance ajoutées avec succès !");
       
       // Réinitialisation du formulaire
       setLabel("");
@@ -176,7 +176,7 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
       <DialogContent size="xl">
         <DialogHeader>
           <DialogTitle className="text-base font-medium text-default-700">
-            Créer une nouvelle tarification
+          Ajouter une nouvelle tarification
           </DialogTitle>
         </DialogHeader>
         <div>
@@ -235,6 +235,7 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      color="indigodye"
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal",
@@ -258,14 +259,14 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
             </div>
           </ScrollArea>
 
-          <div className="flex justify-center gap-3 mt-4">
+          <div className="flex justify-around gap-3 mt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={loading} color="destructive">
+              <Button type="button"  disabled={loading} color="destructive">
                 Annuler
               </Button>
             </DialogClose>
-            <Button type="button" onClick={handleSubmit} disabled={loading} color="success" >
-              {loading ? "Création..." : "Créer"}
+            <Button type="button" onClick={handleSubmit} disabled={loading} color="indigodye" >
+              {loading ? "Ajout en cours..." : "Ajouter"}
             </Button>
           </div>
         </div>

@@ -31,6 +31,11 @@ export default function CashRegisterForm({ onSuccess }: CashRegisterFormProps) {
     resolver: zodResolver(cashRegisterSchema),
   });
 
+  const handleCancel = () => {
+    reset();
+    onSuccess();
+  };
+
   const onSubmit = async (data: CashRegisterFormValues) => {
     try {
       setIsSubmitting(true);
@@ -73,13 +78,21 @@ export default function CashRegisterForm({ onSuccess }: CashRegisterFormProps) {
           </p>
         )}
       </div>
-      <Button color="indigodye" type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          "Ajouter la caisse"
-        )}
-      </Button>
+      <div className="flex justify-around gap-2">
+
+        <Button color="destructive" onClick={handleCancel}>
+          Annuler
+        </Button>
+        <Button color="indigodye" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            "Ajouter la caisse"
+          )}
+        </Button>
+
+      </div>
+
     </form>
   );
 }

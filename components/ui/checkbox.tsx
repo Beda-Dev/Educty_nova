@@ -7,32 +7,32 @@ import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
 
 const checkboxVariants = cva(
-  "peer group  shrink-0   ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:stroke-primary-foreground ",
+  "peer group shrink-0 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:stroke-primary-foreground",
   {
     variants: {
       color: {
-        default:
-          "border border-default-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary  ",
-        secondary:
-          "border border-default-300 data-[state=checked]:bg-default-300/90 ",
-
-        destructive:
-          "border  border-default-400 data-[state=checked]:border-destructive data-[state=checked]:bg-destructive ",
-        warning:
-          "border  border-default-400 data-[state=checked]:border-warning data-[state=checked]:bg-warning ",
-        info: "border  border-default-400 data-[state=checked]:border-info data-[state=checked]:bg-info ",
-        success:
-          "border  border-default-400 data-[state=checked]:border-success data-[state=checked]:bg-success ",
-        dark: "border  border-default-400 data-[state=checked]:bg-slate-900 data-[state=checked]:bg-slate-900 ",
+        default: "border border-default-400 data-[state=checked]:border-primary data-[state=checked]:bg-primary",
+        secondary: "border border-default-300 data-[state=checked]:bg-default-300/90",
+        destructive: "border border-default-400 data-[state=checked]:border-destructive data-[state=checked]:bg-destructive",
+        warning: "border border-default-400 data-[state=checked]:border-warning data-[state=checked]:bg-warning",
+        info: "border border-default-400 data-[state=checked]:border-info data-[state=checked]:bg-info",
+        success: "border border-default-400 data-[state=checked]:border-success data-[state=checked]:bg-success",
+        dark: "border border-default-400 data-[state=checked]:bg-slate-900",
+        
+        // Nouvelles couleurs
+        tyrian: "border border-default-400 data-[state=checked]:border-tyrian data-[state=checked]:bg-tyrian",
+        bittersweet: "border border-default-400 data-[state=checked]:border-bittersweet data-[state=checked]:bg-bittersweet",
+        whitesmoke: "border border-default-400 data-[state=checked]:border-whitesmoke data-[state=checked]:bg-whitesmoke",
+        skyblue: "border border-default-400 data-[state=checked]:border-skyblue data-[state=checked]:bg-skyblue",
+        indigodye: "border border-default-400 data-[state=checked]:border-indigodye data-[state=checked]:bg-indigodye",
       },
       variant: {
         solid: "bg-default-600",
-        plain: " bg-transparent border-none",
+        plain: "bg-transparent border-none",
         faded: "bg-card",
         filled: "bg-default-200",
-        outline: " border border-current data-[state=checked]:bg-card",
-        "filled-outline":
-          "bg-default-200 border-current data-[state=checked]:bg-card",
+        outline: "border border-current data-[state=checked]:bg-card",
+        "filled-outline": "bg-default-200 border-current data-[state=checked]:bg-card",
       },
       radius: {
         none: "",
@@ -54,43 +54,88 @@ const checkboxVariants = cva(
       {
         variant: "outline",
         color: "destructive",
-        className:
-          " [&_svg]:stroke-destructive border-destructive border-destructive",
+        className: "[&_svg]:stroke-destructive border-destructive",
       },
       {
         variant: "outline",
         color: "success",
-        className: " [&_svg]:stroke-success border-success",
+        className: "[&_svg]:stroke-success border-success",
       },
       {
         variant: "outline",
         color: "info",
-        className: " [&_svg]:stroke-info border-info",
+        className: "[&_svg]:stroke-info border-info",
       },
       {
         variant: "outline",
         color: "warning",
-        className: " [&_svg]:stroke-warning border-warning",
+        className: "[&_svg]:stroke-warning border-warning",
       },
       {
         variant: "outline",
         color: "dark",
-        className: " [&_svg]:stroke-foreground border-foreground",
+        className: "[&_svg]:stroke-foreground border-foreground",
       },
       {
         variant: "outline",
         color: "default",
-        className: " [&_svg]:stroke-primary border-primary",
-      },
-      {
-        variant: "filled-outline",
-        color: "default",
         className: "[&_svg]:stroke-primary border-primary",
       },
+      // Variants outline pour les nouvelles couleurs
+      {
+        variant: "outline",
+        color: "tyrian",
+        className: "[&_svg]:stroke-tyrian border-tyrian",
+      },
+      {
+        variant: "outline",
+        color: "bittersweet",
+        className: "[&_svg]:stroke-bittersweet border-bittersweet",
+      },
+      {
+        variant: "outline",
+        color: "whitesmoke",
+        className: "[&_svg]:stroke-whitesmoke border-whitesmoke",
+      },
+      {
+        variant: "outline",
+        color: "skyblue",
+        className: "[&_svg]:stroke-skyblue border-skyblue",
+      },
+      {
+        variant: "outline",
+        color: "indigodye",
+        className: "[&_svg]:stroke-indigodye border-indigodye",
+      },
+      // Variants soft pour les nouvelles couleurs
+      {
+        variant: "filled",
+        color: "tyrian",
+        className: "bg-tyrian/10 text-tyrian hover:bg-tyrian/20",
+      },
+      {
+        variant: "filled",
+        color: "bittersweet",
+        className: "bg-bittersweet/10 text-bittersweet hover:bg-bittersweet/20",
+      },
+      {
+        variant: "filled",
+        color: "whitesmoke",
+        className: "bg-whitesmoke/50 text-whitesmoke hover:bg-whitesmoke/70",
+      },
+      {
+        variant: "filled",
+        color: "skyblue",
+        className: "bg-skyblue/10 text-skyblue hover:bg-skyblue/20",
+      },
+      {
+        variant: "filled",
+        color: "indigodye",
+        className: "bg-indigodye/10 text-indigodye hover:bg-indigodye/20",
+      },
     ],
-
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
       size: "md",
       radius: "base",
       variant: "faded",

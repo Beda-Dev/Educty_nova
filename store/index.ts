@@ -28,7 +28,12 @@ import {
   CashRegisterSession,
   Setting,
   Matter,
-  TypeEvaluation
+  TypeEvaluation,
+  StudentFormData,
+  TutorFormData,
+  RegistrationFormData,
+  PaymentFormData,
+  DocumentFormData
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -122,10 +127,6 @@ export const useSidebar = create<SidebarState>()(
 );
 
 // Store pour les données scolaires
-
-
-
-
 interface SchoolStore {
   classes: Classe[];
   setClasses: (data: Classe[]) => void;
@@ -193,10 +194,10 @@ interface SchoolStore {
   permissions: Permission[];
   setPermission: (data: Permission[]) => void;
 
-  CodeOTP: InterfaceOTP | null ;
+  CodeOTP: InterfaceOTP | null;
   setCodeOTP: (data: InterfaceOTP | null) => void;
 
-  methodPayment: PaymentMethod[] ;
+  methodPayment: PaymentMethod[];
   setmethodPayment: (data: PaymentMethod[]) => void;
 
   validationExpenses: ValidationExpense[];
@@ -224,11 +225,42 @@ interface SchoolStore {
   setNewStudent: (data: Student | null) => void;
 
   matters: Matter[];
-  setMatters: (data: Matter[])=> void;
+  setMatters: (data: Matter[]) => void;
 
   typeEvaluations: TypeEvaluation[];
-  setTypeEvaluations: (data: TypeEvaluation[])=> void;
+  setTypeEvaluations: (data: TypeEvaluation[]) => void;
 
+  // Registration store data
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+
+  studentData: StudentFormData | null;
+  setStudentData: (data: StudentFormData) => void;
+
+  selectedTutors: (Tutor & { is_tutor_legal: boolean })[];
+  newTutors: TutorFormData[];
+  setSelectedTutors: (tutors: (Tutor & { is_tutor_legal: boolean })[]) => void;
+  setNewTutors: (tutors: TutorFormData[]) => void;
+  addNewTutor: (tutor: TutorFormData) => void;
+  removeNewTutor: (index: number) => void;
+
+  registrationData: RegistrationFormData | null;
+  setRegistrationData: (data: RegistrationFormData) => void;
+
+  availablePricing: Pricing[];
+  setAvailablePricing: (pricing: Pricing[]) => void;
+
+  paymentsForm: PaymentFormData[];
+  setPaymentsForm: (payments: PaymentFormData[]) => void;
+  paidAmount: number;
+  setPaidAmount: (amount: number) => void;
+
+  documentsForm: DocumentFormData[];
+  setDocumentsForm: (documents: DocumentFormData[]) => void;
+  addDocumentForm: (document: DocumentFormData) => void;
+  removeDocumentForm: (index: number) => void;
+
+  resetRegistration: () => void;
 }
 
 export const useSchoolStore = create<SchoolStore>()(
@@ -298,45 +330,92 @@ export const useSchoolStore = create<SchoolStore>()(
       setAcademicYearCurrent: (data) => set({ academicYearCurrent: data }),
 
       permissions: [],
-      setPermission: (data) => set({permissions: data}),
+      setPermission: (data) => set({ permissions: data }),
 
-      CodeOTP: null ,
-      setCodeOTP: (data) => set({CodeOTP: data}),
+      CodeOTP: null,
+      setCodeOTP: (data) => set({ CodeOTP: data }),
 
       methodPayment: [],
-      setmethodPayment: (data: PaymentMethod[]) => set({methodPayment: data}),
+      setmethodPayment: (data: PaymentMethod[]) => set({ methodPayment: data }),
 
       validationExpenses: [],
-      setValidationExpenses: (data: ValidationExpense[]) => set({validationExpenses: data}),
+      setValidationExpenses: (data: ValidationExpense[]) => set({ validationExpenses: data }),
 
       tutors: [],
-      setTutors: (data: Tutor[]) => set({tutors: data}),
+      setTutors: (data: Tutor[]) => set({ tutors: data }),
 
       transactions: [],
-      setTransactions: (data: Transaction[]) => set({transactions: data}),
+      setTransactions: (data: Transaction[]) => set({ transactions: data }),
 
       cashRegisterSessions: [],
-      setCashRegisterSessions: (data: CashRegisterSession[]) => set({cashRegisterSessions: data}),
+      setCashRegisterSessions: (data: CashRegisterSession[]) => set({ cashRegisterSessions: data }),
 
       cashRegisterSessionCurrent: null,
-      setCashRegisterSessionCurrent: (data : CashRegisterSession | null ) => set({cashRegisterSessionCurrent: data}),
+      setCashRegisterSessionCurrent: (data: CashRegisterSession | null) => set({ cashRegisterSessionCurrent: data }),
 
       newRegistration: null,
-      setNewRegistrations: (data: Registration | null) => set({newRegistration: data}),
+      setNewRegistrations: (data: Registration | null) => set({ newRegistration: data }),
 
       cashRegisterCurrent: null,
-      setCashRegisterCurrent: (data: CashRegister | null) => set({cashRegisterCurrent: data}),
+      setCashRegisterCurrent: (data: CashRegister | null) => set({ cashRegisterCurrent: data }),
 
       Newstudent: null,
-      setNewStudent: (data: Student | null) => set({Newstudent: data}),
+      setNewStudent: (data: Student | null) => set({ Newstudent: data }),
 
-      matters:[],
+      matters: [],
       setMatters: (data: Matter[]) => set({ matters: data }),
 
-      typeEvaluations:[],
-      setTypeEvaluations:(data:TypeEvaluation[]) => set({ typeEvaluations: data}),
+      typeEvaluations: [],
+      setTypeEvaluations: (data: TypeEvaluation[]) => set({ typeEvaluations: data }),
 
+      // Registration store implementation
+      currentStep: 1,
+      setCurrentStep: (step) => set({ currentStep: step }),
 
+      studentData: null,
+      setStudentData: (data) => set({ studentData: data }),
+
+      selectedTutors: [],
+      newTutors: [],
+      setSelectedTutors: (tutors) => set({ selectedTutors: tutors }),
+      setNewTutors: (tutors) => set({ newTutors: tutors }),
+      addNewTutor: (tutor) => set((state) => ({ newTutors: [...state.newTutors, tutor] })),
+      removeNewTutor: (index) =>
+        set((state) => ({
+          newTutors: state.newTutors.filter((_, i) => i !== index),
+        })),
+
+      registrationData: null,
+      setRegistrationData: (data) => set({ registrationData: data }),
+
+      availablePricing: [],
+      setAvailablePricing: (pricing) => set({ availablePricing: pricing }),
+
+      paymentsForm: [],
+      setPaymentsForm: (payments) => set({ paymentsForm: payments }),
+      paidAmount: 0,
+      setPaidAmount: (amount) => set({ paidAmount: amount }),
+
+      documentsForm: [],
+      setDocumentsForm: (documents) => set({ documentsForm: documents }),
+      addDocumentForm: (document) => set((state) => ({ documentsForm: [...state.documentsForm, document] })),
+      removeDocumentForm: (index) =>
+        set((state) => ({
+          documentsForm: state.documentsForm.filter((_, i) => i !== index),
+        })),
+
+      resetRegistration: () =>
+        set({
+          currentStep: 1,
+          studentData: null,
+          selectedTutors: [],
+          newTutors: [],
+          registrationData: null,
+          availablePricing: [],
+          paymentsForm: [],
+          paidAmount: 0,
+          documentsForm: [],
+        }),
     }),
     {
       name: "school-store",

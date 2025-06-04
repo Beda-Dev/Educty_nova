@@ -249,7 +249,7 @@ export default function TarificationPage() {
       });
 
       if (!pricingResponse.ok) {
-        throw new Error("Erreur lors de la création de la tarification");
+        throw new Error("Erreur lors de l'ajout de la tarification");
       }
 
       const pricingResult = await pricingResponse.json();
@@ -273,7 +273,7 @@ export default function TarificationPage() {
           });
 
           if (!installmentResponse.ok) {
-            throw new Error(`Erreur lors de la création du versement ${i + 1}`);
+            throw new Error(`Erreur lors de l'ajout du versement ${i + 1}`);
           }
         }
       }

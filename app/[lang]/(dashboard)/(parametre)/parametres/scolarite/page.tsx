@@ -26,7 +26,9 @@ import {
   Clock,
   BookOpen,
   Calculator,
-  Mail
+  Mail,
+  List,
+  Tags
 } from "lucide-react";
 import { useParams } from "next/navigation";
 
@@ -66,20 +68,28 @@ export default function Page() {
 
   const menuItems = [
     {
-      id: "fees",
-      title: "Frais Scolaires",
-      description: "Gestion des frais et paiements",
-      icon: <DollarSign className="w-6 h-6" />,
-      path: "parametres/scolarite/frais-scolaires",
-      color: itemColors[4]
-    },
-    {
       id: "documents",
       title: "Documents",
-      description: "Gestion des documents",
+      description: "Gestion des types de documents et pièces justificatives",
       icon: <FileText className="w-6 h-6" />,
       path: "parametres/scolarite/type_document",
       color: itemColors[5]
+    },
+    {
+      id: "fees_type",
+      title: "Types de frais",
+      description: "Gestion des différents types de frais scolaires",
+      icon: <List className="w-6 h-6" />,
+      path: "parametres/scolarite/fees_type",
+      color: itemColors[0]
+    },
+    {
+      id: "pricing",
+      title: "Tarification",
+      description: "Gestion des tarifs et montants des frais",
+      icon: <Tags className="w-6 h-6" />,
+      path: "parametres/scolarite/pricing",
+      color: itemColors[1]
     }
   ];
 
@@ -131,7 +141,7 @@ export default function Page() {
                 Scolarité
               </h1>
               <p className="text-sm text-muted-foreground">
-                Gestion les paramètres liés a la  scolarité
+                Gestion des paramètres liés a la  scolarité
               </p>
             </div>
           </div>

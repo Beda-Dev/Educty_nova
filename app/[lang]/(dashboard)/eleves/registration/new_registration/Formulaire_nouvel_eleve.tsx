@@ -39,7 +39,9 @@ const studentSchema = z.object({
   registration_number: z.string().min(1, "Matricule requis"),
   name: z.string().min(1, "Nom requis"),
   first_name: z.string().min(1, "Prénom requis"),
-  birth_date: z.string().min(1, "Date de naissance requise"),
+  birth_date: z.string().refine(val => !isNaN(Date.parse(val)), {
+    message: "Date invalide"
+  }),
   sexe: z.enum(["Masculin", "Feminin"], { required_error: "Sexe requis" }),
 });
 
@@ -62,7 +64,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
   isLastStep,
   isValid,
 }) => {
-  const { assignmentTypes, students, Newstudent, setNewStudent } =
+  const { assignmentTypes, students, Newstudent, setNewStudent, tutors: tutorsStore, setTutors: setTutorsStore } =
     useSchoolStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -73,6 +75,9 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
       id?: number;
     }[]
   >([]);
+  const [hasExistingTutor, setHasExistingTutor] = useState<boolean>(false);
+  const [selectedExistingTutor, setSelectedExistingTutor] = useState<number | null>(null);
+  const [showTutorForm, setShowTutorForm] = useState<boolean>(true);
 
   const {
     register,
@@ -83,17 +88,18 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
     resolver: zodResolver(studentSchema),
     defaultValues: Newstudent
       ? {
-          assignment_type_id: Newstudent.assignment_type_id,
-          registration_number: Newstudent.registration_number,
-          name: Newstudent.name,
-          first_name: Newstudent.first_name,
-          birth_date: Newstudent.birth_date,
-          sexe: Newstudent.sexe as "Masculin" | "Feminin",
-        }
+        assignment_type_id: Newstudent.assignment_type_id,
+        registration_number: Newstudent.registration_number,
+        name: Newstudent.name,
+        first_name: Newstudent.first_name,
+        birth_date: Newstudent.birth_date,
+        sexe: Newstudent.sexe as "Masculin" | "Feminin",
+      }
       : undefined,
   });
 
   useEffect(() => {
+    let isMounted = true;
     if (Newstudent?.id) {
       const fetchTutors = async () => {
         try {
@@ -123,7 +129,10 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
       };
       fetchTutors();
     }
-  }, [Newstudent]);
+    return () => {
+      isMounted = false;
+    };
+  }, [Newstudent?.id]);
 
   const isMatriculeUnique = (matricule: string): boolean => {
     return !students.some(
@@ -196,15 +205,16 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
       return false;
     }
 
-    try {
-      tutors.forEach((tutor) => {
-        tutorSchema.parse(tutor.data);
-      });
-      return true;
-    } catch (error) {
-      toast.error("Veuillez vérifier les informations des tuteurs");
-      return false;
+    for (const tutor of tutors) {
+      const result = tutorSchema.safeParse(tutor.data);
+      if (!result.success) {
+        result.error.errors.forEach(err => {
+          toast.error(`${err.path.join('.')}: ${err.message}`);
+        });
+        return false;
+      }
     }
+    return true;
   };
 
   const onSubmit = async (studentData: z.infer<typeof studentSchema>) => {
@@ -253,8 +263,8 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
         body: studentBody,
         headers: isEditing
           ? {
-              "Content-Type": "application/json",
-            }
+            "Content-Type": "application/json",
+          }
           : undefined,
       });
 
@@ -319,11 +329,48 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
       onSubmitResult({ success: true, data: studentResult });
     } catch (error) {
       console.error("Erreur:", error);
-      toast.error("Une erreur est survenue lors de l'enregistrement");
+      let errorMessage = "Une erreur est survenue";
+      if (error instanceof Error) {
+        try {
+          const errorData = JSON.parse(error.message);
+          errorMessage = errorData.message || error.message;
+        } catch {
+          errorMessage = error.message;
+        }
+      }
+      toast.error(errorMessage);
       onSubmitResult({ success: false });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAddExistingTutor = () => {
+    if (!selectedExistingTutor) {
+      toast.error("Veuillez sélectionner un tuteur");
+      return;
+    }
+
+    const existingTutor = tutorsStore.find(t => t.id === selectedExistingTutor);
+    if (!existingTutor) return;
+
+    setTutors([
+      ...tutors,
+      {
+        data: {
+          name: existingTutor.name,
+          first_name: existingTutor.first_name,
+          phone_number: existingTutor.phone_number,
+          sexe: existingTutor.sexe as "Homme" | "Femme",
+          type_tutor: existingTutor.type_tutor,
+        },
+        isLegalTutor: tutors.length === 0,
+        id: existingTutor.id
+      }
+    ]);
+
+    setHasExistingTutor(false);
+    setSelectedExistingTutor(null);
   };
 
   return (
@@ -515,15 +562,67 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={addTutor}
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              Ajouter un tuteur
-            </Button>
+            <div className="space-y-4 mb-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="has-existing-tutor"
+                  checked={hasExistingTutor}
+                  onCheckedChange={(checked) => {
+                    setHasExistingTutor(checked);
+                    setShowTutorForm(!checked);
+                  }}
+                />
+                <Label htmlFor="has-existing-tutor">
+                  Ce tuteur a déjà un enfant dans l'établissement
+                </Label>
+              </div>
+
+              {hasExistingTutor && (
+                <div className="grid gap-4">
+                  <Select
+                    value={selectedExistingTutor?.toString() || ""}
+                    onValueChange={(value) => setSelectedExistingTutor(Number(value))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Sélectionner un tuteur existant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tutorsStore
+                        .filter(tutor =>
+                          !tutors.some(t => t.id === tutor.id) // Exclure les tuteurs déjà ajoutés
+                        )
+                        .map((tutor) => (
+                          <SelectItem
+                            key={tutor.id}
+                            value={tutor.id.toString()}
+                          >
+                            {tutor.name} {tutor.first_name} - {tutor.phone_number}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    type="button"
+                    onClick={handleAddExistingTutor}
+                    className="w-full"
+                  >
+                    Ajouter ce tuteur
+                  </Button>
+                </div>
+              )}
+            </div>
+            {!hasExistingTutor && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addTutor}
+                className="flex items-center gap-2"
+              >
+                <Plus size={16} />
+                Ajouter un tuteur
+              </Button>
+            )}
 
             {tutors.length > 0 && (
               <div className="space-y-6">
@@ -547,7 +646,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor={`tutor-name-${index}`}>Nom *</Label>
+                        <Label htmlFor={`tutor-name-${index}`}>Nom </Label>
                         <Input
                           id={`tutor-name-${index}`}
                           value={tutor.data.name}
@@ -562,7 +661,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
 
                       <div className="space-y-2">
                         <Label htmlFor={`tutor-first-name-${index}`}>
-                          Prénom *
+                          Prénom
                         </Label>
                         <Input
                           id={`tutor-first-name-${index}`}
@@ -580,7 +679,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor={`tutor-phone-${index}`}>
-                          Numéro de téléphone *
+                          Numéro de téléphone (unique)
                         </Label>
                         <Input
                           id={`tutor-phone-${index}`}
@@ -596,7 +695,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
 
                       <div className="space-y-2">
                         <Label htmlFor={`tutor-type-${index}`}>
-                          Lien de parenté *
+                          Lien de parenté
                         </Label>
                         <Input
                           id={`tutor-type-${index}`}
@@ -612,7 +711,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor={`tutor-sexe-${index}`}>Sexe *</Label>
+                        <Label htmlFor={`tutor-sexe-${index}`}>Sexe </Label>
                         <Select
                           value={tutor.data.sexe}
                           onValueChange={(value) =>
@@ -664,7 +763,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
         </Button>
         <Button
           type="submit"
-          disabled={isSubmitting }
+          disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>

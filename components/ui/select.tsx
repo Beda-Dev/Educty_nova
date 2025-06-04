@@ -20,6 +20,16 @@ const selectVariants = cva(
           "border-success/50 text-success focus:outline-none focus:border-success-700 disabled:bg-success/30 disabled:placeholder:text-info  placeholder:text-success/70",
         destructive:
           "border-destructive/50 text-destructive focus:outline-none focus:border-destructive-700 disabled:bg-destructive/30 disabled:placeholder:text-destructive  placeholder:text-destructive/70",
+        tyrian:
+          "border-tyrian/50 text-tyrian focus:outline-none focus:border-tyrian-700 disabled:bg-tyrian/30 disabled:placeholder:text-tyrian  placeholder:text-tyrian/70",
+        bittersweet:
+          "border-bittersweet/50 text-bittersweet focus:outline-none focus:border-bittersweet-700 disabled:bg-bittersweet/30 disabled:placeholder:text-bittersweet  placeholder:text-bittersweet/70",
+        whitesmoke:
+          "border-whitesmoke/50 text-whitesmoke focus:outline-none focus:border-whitesmoke-700 disabled:bg-whitesmoke/30 disabled:placeholder:text-whitesmoke  placeholder:text-whitesmoke/70",
+        skyblue:
+          "border-skyblue/50 text-skyblue focus:outline-none focus:border-skyblue-700 disabled:bg-skyblue/30 disabled:placeholder:text-skyblue  placeholder:text-skyblue/70",
+        indigodye:
+          "border-indigodye/50 text-indigodye focus:outline-none focus:border-indigodye-700 disabled:bg-indigodye/30 disabled:placeholder:text-indigodye  placeholder:text-indigodye/70",
       },
       variant: {
         flat: "read-only:bg-default-500/10 ",
@@ -103,9 +113,34 @@ const selectVariants = cva(
         color: "destructive",
         className: "read-only:bg-destructive/10 border-destructive/30",
       },
+      {
+        variant: "faded",
+        color: "tyrian",
+        className: "read-only:bg-tyrian/10 border-tyrian/30",
+      },
+      {
+        variant: "faded",
+        color: "bittersweet",
+        className: "read-only:bg-bittersweet/10 border-bittersweet/30",
+      },
+      {
+        variant: "faded",
+        color: "whitesmoke",
+        className: "read-only:bg-whitesmoke/10 border-whitesmoke/30",
+      },
+      {
+        variant: "faded",
+        color: "skyblue",
+        className: "read-only:bg-skyblue/10 border-skyblue/30",
+      },
+      {
+        variant: "faded",
+        color: "indigodye",
+        className: "read-only:bg-indigodye/10 border-indigodye/30",
+      },
     ],
     defaultVariants: {
-      color: "default",
+      color: "skyblue",
       size: "lg",
       variant: "bordered",
       radius: "md",
@@ -122,7 +157,7 @@ const SelectValue = SelectPrimitive.Value;
 interface SelectTriggerProps extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>,
   VariantProps<typeof selectVariants> {
   icon?: React.ReactNode
-  color?: 'default' | 'primary' | 'info' | 'warning' | 'success' | 'destructive'
+  color?: 'default' | 'primary' | 'info' | 'warning' | 'success' | 'destructive' | 'tyrian' | 'bittersweet' | 'whitesmoke' | 'skyblue' | 'indigodye'
 }
 
 const SelectTrigger = React.forwardRef<

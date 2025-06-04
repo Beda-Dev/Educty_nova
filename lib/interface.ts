@@ -437,3 +437,53 @@ export interface TypeEvaluation {
   created_at: string;
   updated_at: string;
 }
+
+
+// interface liée au processus d'inscription
+export interface StudentFormData {
+  assignment_type_id: number
+  registration_number: string
+  name: string
+  first_name: string
+  birth_date: string
+  status: string
+  photo?: File | null
+  sexe: string
+}
+
+export interface TutorFormData {
+  name: string
+  first_name: string
+  phone_number: string
+  sexe: string
+  type_tutor: string
+  is_tutor_legal: boolean
+}
+
+export interface RegistrationFormData {
+  class_id: number
+  academic_year_id: number
+  student_id: number
+  registration_date: string
+}
+
+export interface PaymentFormData {
+  student_id: string
+  installment_id: string
+  cash_register_id: string
+  cashier_id: string
+  amount: number
+  transaction_id: string
+  methods: Array<{
+    id: number
+    montant: string
+  }>
+}
+
+export interface DocumentFormData {
+  document_type_id: number
+  student_id: number
+  label: string
+  path: File
+}
+

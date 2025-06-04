@@ -119,7 +119,7 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
-            Créer une nouvelle matière
+          Ajouter une nouvelle matière
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
@@ -184,10 +184,10 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Création...
+                  Ajout en cours...
                 </>
               ) : (
-                "Créer"
+                "Ajouter"
               )}
             </Button>
           </div>

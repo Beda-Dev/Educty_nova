@@ -53,8 +53,18 @@ const LevelPage = ({ data }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const { setLevels, userOnline } = useSchoolStore();
   const [filtered, setFiltered] = useState(() =>
-  data.filter((item) => item.active === 1)
-);
+    data.filter((item) => item.active === 1)
+  );
+
+  const filteredData = filtered;
+  const ITEMS_PER_PAGE = 5;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const {
     register,
@@ -105,16 +115,17 @@ const LevelPage = ({ data }: Props) => {
         },
         body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Échec de la mise à jour");
       }
-
+  
       toast.success("Niveau mis à jour avec succès");
       const updatedLevels: Level[] = await fetchLevels();
       setLevels(updatedLevels);
       setIsModalOpen(false);
+      reset(); // Réinitialise le formulaire
     } catch (error) {
       console.error("Update error:", error);
       toast.error(
@@ -125,16 +136,6 @@ const LevelPage = ({ data }: Props) => {
     }
   };
 
-  const filteredData = filtered;
-
-  const ITEMS_PER_PAGE = 5;
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
 
   const columns = [
     { key: "label", label: "Niveau" },
@@ -146,8 +147,8 @@ const LevelPage = ({ data }: Props) => {
   }
 
   useEffect(() => {
-  setFiltered(data.filter((item) => item.active === 1));
-}, [data]);
+    setFiltered(data.filter((item) => item.active === 1));
+  }, [data]);
 
 
   if (hasAdminAccessVoir === false) {
@@ -302,35 +303,54 @@ const LevelPage = ({ data }: Props) => {
           </Table>
 
           {totalPages > 1 && (
-            <Pagination className="mt-4">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    className={
-                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
-                    }
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <span className="text-sm px-2">
-                    Page {currentPage} sur {totalPages}
-                  </span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    className={
-                      currentPage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : ""
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+            <div className="mt-4 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={
+                        currentPage === 1 ? undefined : () => setCurrentPage((p) => Math.max(1, p - 1))
+                      }
+                      aria-disabled={currentPage === 1}
+                      tabIndex={currentPage === 1 ? -1 : 0}
+                      className={
+                        currentPage === 1
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i + 1}>
+                      <Button
+                        variant={currentPage === i + 1 ? "outline" : "ghost"}
+                        onClick={() => setCurrentPage(i + 1)}
+                      >
+                        {i + 1}
+                      </Button>
+                    </PaginationItem>
+                  ))}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={
+                        currentPage === totalPages
+                          ? undefined
+                          : () => setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      aria-disabled={currentPage === totalPages}
+                      tabIndex={currentPage === totalPages ? -1 : 0}
+                      className={
+                        currentPage === totalPages
+                          ? "pointer-events-none opacity-50 text-muted-foreground"
+                          : ""
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           )}
         </CardContent>
       </Card>

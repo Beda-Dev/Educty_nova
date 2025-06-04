@@ -1,33 +1,38 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import EvaluationTypeTable from "./type_evaluation";
 import { useSchoolStore } from "@/store";
 import { fetchTypeEvaluations } from "@/store/schoolservice";
-// import {
-//   User,
-//   CashRegister,
-//   UserSingle,
-//   CashRegisterSession,
-// } from "@/lib/interface";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Page() {
   const { typeEvaluations, setTypeEvaluations } = useSchoolStore();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchTypeEval = async () => {
-      const updatedTypeEvaluation = await fetchTypeEvaluations();
-      setTypeEvaluations(updatedTypeEvaluation);
+    const fetchData = async () => {
+      try {
+        const updatedTypeEvaluation = await fetchTypeEvaluations();
+        setTypeEvaluations(updatedTypeEvaluation);
+      } catch (error) {
+        console.error("Erreur lors du chargement des données:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
-    // Fetch transactions if needed
-    // const fetchTransactionsData = async () => {
-    //   const transactions = await fetchTransactions();
-    //   setTransactions(transactions);
-    // };
 
-    fetchTypeEval();
-    // fetchTransactionsData();
+    fetchData();
   }, [setTypeEvaluations]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
 
   return <EvaluationTypeTable />;
 }

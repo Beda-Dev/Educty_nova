@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -53,12 +53,19 @@ interface Props {
   data: AcademicYear[];
 }
 
-const AcademicYearPage = ({ data }: Props) => {
+const AcademicYearPage = ({ data : initialData }: Props) => {
   const [selectedYear, setSelectedYear] = useState<AcademicYear | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
-  const { userOnline } = useSchoolStore();
-  const [filtered, setFiltered] = useState(data);
+  const { userOnline , academicYears } = useSchoolStore();
+  const [filtered, setFiltered] = useState(initialData);
+  const [data, setData] = useState(initialData); 
+
+
+  useEffect(() => {
+    setData(academicYears);
+    setFiltered(academicYears);
+  }, [academicYears]);
 
   const permissionRequisCreer = ["creer annee_Academique"];
   const permissionRequisSupprimer = ["supprimer annee_Academique"];
@@ -89,7 +96,7 @@ const AcademicYearPage = ({ data }: Props) => {
 
   const filteredData = filtered;
 
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -236,38 +243,55 @@ const AcademicYearPage = ({ data }: Props) => {
                 ))}
               </TableBody>
             </Table>
-            {totalPages > 1 && (
-              <Pagination className="mt-4">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <span className="text-sm px-2">
-                      Page {currentPage} sur {totalPages}
-                    </span>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+            {filteredData.length > ITEMS_PER_PAGE && (
+              <div className="mt-4 flex justify-center">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        onClick={
+                          currentPage === 1 ? undefined : () => setCurrentPage((p) => Math.max(1, p - 1))
+                        }
+                        aria-disabled={currentPage === 1}
+                        tabIndex={currentPage === 1 ? -1 : 0}
+                        className={
+                          currentPage === 1
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i + 1}>
+                        <Button
+                          variant={currentPage === i + 1 ? "outline" : "ghost"}
+                          onClick={() => setCurrentPage(i + 1)}
+                        >
+                          {i + 1}
+                        </Button>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={
+                          currentPage === totalPages
+                            ? undefined
+                            : () => setCurrentPage((p) => Math.min(totalPages, p + 1))
+                        }
+                        aria-disabled={currentPage === totalPages}
+                        tabIndex={currentPage === totalPages ? -1 : 0}
+                        className={
+                          currentPage === totalPages
+                            ? "pointer-events-none opacity-50"
+                            : ""
+                        }
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             )}
           </CardContent>
         </Card>

@@ -21,6 +21,16 @@ const radioVariants = cva(
           "data-[state=checked]:border-destructive data-[state=checked]:text-destructive",
         secondary:
           "data-[state=checked]:border-default-300 data-[state=checked]:text-default-300",
+        tyrian:
+          "data-[state=checked]:border-tyrian data-[state=checked]:text-tyrian",
+        bittersweet:
+          "data-[state=checked]:border-bittersweet data-[state=checked]:text-bittersweet",
+        whitesmoke:
+          "data-[state=checked]:border-whitesmoke data-[state=checked]:text-whitesmoke",
+        skyblue:
+          "data-[state=checked]:border-skyblue data-[state=checked]:text-skyblue",
+        indigodye:
+          "data-[state=checked]:border-indigodye data-[state=checked]:text-indigodye",
       },
       variant: {
         faded: "",
@@ -44,7 +54,7 @@ const radioVariants = cva(
     compoundVariants: [],
 
     defaultVariants: {
-      color: "primary",
+      color: "skyblue",
       size: "md",
       radius: "base",
       variant: "faded",

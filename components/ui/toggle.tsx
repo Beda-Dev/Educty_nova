@@ -9,7 +9,8 @@ const toggleVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary/60 text-primary-foreground",
+        default: "bg-background text-foreground",
+        skyblue: "bg-skyblue/60 text-skyblue-foreground",
         outline:
           "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
       },
@@ -24,7 +25,7 @@ const toggleVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "skyblue",
       size: "default",
     },
   }

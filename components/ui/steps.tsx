@@ -8,8 +8,8 @@ const stepVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "[&_[step-bar-bg=disable]]:before:bg-default-200 [&_[step-bar-bg=current]]:before:bg-default-200 [&_[step-bar-bg=completed]]:before:bg-primary [&_[step-box=current]]:border-2 [&_[step-box=current]]:border-primary [&_[step-box=completed]]:bg-primary   [&_[step-box=disable]]:bg-default-200 [&_[step-box=error]]:bg-destructive [&_[step-box=error]]:text-destructive-foreground  ",
+        skyblue:
+          "[&_[step-bar-bg=disable]]:before:bg-skyblue [&_[step-bar-bg=current]]:before:bg-skyblue [&_[step-bar-bg=completed]]:before:bg-skyblue [&_[step-box=current]]:border-2 [&_[step-box=current]]:border-skyblue [&_[step-box=completed]]:bg-skyblue   [&_[step-box=disable]]:bg-default-200 [&_[step-box=error]]:bg-destructive [&_[step-box=error]]:text-destructive-foreground  ",
       },
       size: {
         sm: "[&_[step-box]]:h-5 [&_[step-box]]:w-5 [&_[step-box]]:text-[10px]",
@@ -23,7 +23,7 @@ const stepVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "skyblue",
       size: "lg",
       content: "bottom",
     },
@@ -257,18 +257,22 @@ const Step = React.forwardRef<HTMLLIElement, StepProps>(
 Step.displayName = "Step";
 
 
-interface CommonProps extends React.HTMLAttributes<HTMLDivElement> {
-
+interface CommonProps {
   error?: boolean
-
+  icon?: React.ReactNode
+  completed?: boolean
+  active?: boolean
+  className?: string
+  children?: React.ReactNode; // Added children prop
 }
-const StepLabel = React.forwardRef<HTMLDivElement, CommonProps>(
-  ({ className, children, error, ...props }, ref) => {
+
+const StepLabel = React.forwardRef<HTMLDivElement, CommonProps & React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, children, error, icon, completed, active, ...props }, ref) => {
     return (
       <div
         ref={ref}
         className={cn(
-          "text-sm text-default-600  font-medium mt-2",
+          "text-sm text-skyblue  font-medium mt-2",
           {
             "text-destructive": error,
           },

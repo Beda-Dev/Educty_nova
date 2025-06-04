@@ -1,8 +1,8 @@
 
 // color type
-export type color = "primary" | "info" | "warning" | "success" | "destructive" | "secondary";
-export type TextAreaColor = "primary" | "info" | "warning" | "success" | "destructive";
-export type InputColor = "primary" | "info" | "warning" | "success" | "destructive";
+export type color = "primary" | "info" | "warning" | "success" | "destructive" | "secondary" | "bittersweet" | "whitesmoke" | "skyblue" | "indigodye" | "tyrian";
+export type TextAreaColor = "primary" | "info" | "warning" | "success" | "destructive" | "bittersweet" | "whitesmoke" | "skyblue" | "indigodye" | "tyrian";
+export type InputColor = "primary" | "info" | "warning" | "success" | "destructive" | "bittersweet" | "whitesmoke" | "skyblue" | "indigodye" | "tyrian";
 
 
 //  variant
