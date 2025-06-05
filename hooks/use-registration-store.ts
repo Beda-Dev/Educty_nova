@@ -90,29 +90,39 @@ export const useRegistrationStore = create<RegistrationStore>()(
       studentData: null,
       setStudentData: async (data: StudentFormData) => {
         try {
-          const processedData: StudentFormDataWithFile = { ...data }
+          // Initialiser processedData avec le bon type
+          const processedData: StudentFormDataWithFile = {
+            ...data,
+            photo: data.photo ? (data.photo instanceof File ? { file: data.photo } : data.photo) : null
+          }
 
-          // Si une photo est fournie, la stocker dans IndexedDB
-          if (data.photo) {
-            console.log("Storing student photo in IndexedDB:", data.photo.name, data.photo.size)
-            const fileId = await get().storeFileInIndexedDB(data.photo)
+          // Si c'est un fichier, le stocker dans IndexedDB
+          if (processedData.photo?.file) {
+            const file = processedData.photo.file
+            console.log("Storing student photo in IndexedDB:", file.name, file.size)
+            const fileId = await get().storeFileInIndexedDB(file)
+
+            // Mettre à jour la structure avec la référence stockée
             processedData.photo = {
               stored: {
                 fileId,
-                originalName: data.photo.name,
-                size: data.photo.size,
-                type: data.photo.type,
+                originalName: file.name,
+                size: file.size,
+                type: file.type,
                 isRestored: false,
-              },
+              }
             }
             console.log("Student photo stored with ID:", fileId)
           }
-
           set({ studentData: processedData })
         } catch (error) {
           console.error("Error storing student photo:", error)
           // Fallback: stocker comme fichier natif
-          set({ studentData: { ...data, photo: data.photo ? { file: data.photo } : null } })
+          // Handle both File and StoredFileReference cases
+          const photoData = data.photo ? 
+            (data.photo instanceof File ? { file: data.photo } : data.photo) 
+            : null;
+          set({ studentData: { ...data, photo: photoData } })
         }
       },
 

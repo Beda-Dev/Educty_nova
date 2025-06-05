@@ -137,11 +137,23 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
   // Gérer la restauration de la photo depuis le store
   useEffect(() => {
-    if (studentData?.photo?.file && !previewImage) {
-      const url = URL.createObjectURL(studentData.photo.file)
-      setPreviewImage(url)
+    if (studentData?.photo && !previewImage) {
+      if (studentData.photo.file) {
+        const url = URL.createObjectURL(studentData.photo.file)
+        setPreviewImage(url)
+      } else if (studentData.photo?.stored) {
+        // Si c'est un fichier stocké, on doit le récupérer depuis IndexedDB
+        const getFileFromPath = async () => {
+          const file = await useRegistrationStore.getState().getFileFromPath(studentData.photo!)
+          if (file) {
+            const url = URL.createObjectURL(file)
+            setPreviewImage(url)
+          }
+        }
+        getFileFromPath()
+      }
     }
-  }, [studentData?.photo?.file])
+  }, [studentData?.photo])
 
 
   const handleStudentChange = (field: keyof StudentFormData, value: any) => {

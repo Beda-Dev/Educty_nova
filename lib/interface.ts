@@ -440,6 +440,21 @@ export interface TypeEvaluation {
 
 
 // interface liée au processus d'inscription
+
+interface StoredFileReference {
+  fileId: string // ID du fichier dans IndexedDB
+  originalName: string
+  size: number
+  type: string
+  isRestored?: boolean // Flag pour indiquer si le fichier a été restauré
+}
+
+interface FileOrStored {
+  file?: File // Fichier natif
+  stored?: StoredFileReference // Référence vers IndexedDB
+}
+
+
 export interface StudentFormData {
   assignment_type_id: number
   registration_number: string
@@ -447,7 +462,7 @@ export interface StudentFormData {
   first_name: string
   birth_date: string
   status: string
-  photo?: File | null
+  photo?: File | null | FileOrStored
   sexe: string
 }
 
