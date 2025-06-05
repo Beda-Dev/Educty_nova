@@ -1,5 +1,9 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge";
+import html2canvas from "html2canvas"
+import jsPDF from "jspdf"
+import { toast } from "sonner"
+
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -218,3 +222,67 @@ export const translate = (title: string, trans: Translations): string => {
   return title;
 };
 
+
+// utils/pdf-utils.ts
+
+
+/**
+ * Génère un PDF à partir d'un élément DOM
+ * @param elementRef Ref d’un élément HTML à capturer (ex: useRef<HTMLDivElement>(...))
+ * @param fileName Nom du fichier à télécharger (si mode "download")
+ * @param mode "print" ou "download"
+ */
+export async function generatePDFfromRef(
+  elementRef: React.RefObject<HTMLElement>,
+  fileName: string,
+  mode: "print" | "download"
+): Promise<void> {
+  if (!elementRef.current) return
+
+  const toastId = toast.loading("Génération du PDF...")
+  try {
+    const canvas = await html2canvas(elementRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    })
+
+    const pdf = new jsPDF("p", "mm", "a4")
+    const imgData = canvas.toDataURL("image/png")
+    const { width, height } = canvas
+    const pdfWidth = 190
+    const pdfHeight = (height * pdfWidth) / width
+
+    pdf.addImage(imgData, "PNG", 10, 10, pdfWidth, pdfHeight)
+
+    if (mode === "download") {
+      pdf.save(`${fileName}.pdf`)
+      toast.success("PDF téléchargé avec succès", { id: toastId })
+    } else {
+      const blob = pdf.output("blob")
+      const url = URL.createObjectURL(blob)
+      const printWindow = window.open(url, "_blank")
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print()
+          toast.success("Impression prête", { id: toastId })
+        }
+      } else {
+        toast.error("Impossible d'ouvrir la fenêtre d'impression", { id: toastId })
+      }
+    }
+  } catch (error) {
+    toast.error("Erreur lors de la génération du PDF", { id: toastId })
+    console.error("PDF generation error:", error)
+  }
+}
+
+// import { generatePDFfromRef } from "@/utils/pdf-utils"
+
+// const handlePDF = async (mode: "download" | "print") => {
+//   await generatePDFfromRef(printRef, `reçu_inscription_${student?.registration_number}`, mode)
+// }
+
+
+// <Button onClick={() => handlePDF("download")}>Télécharger</Button>
+// <Button onClick={() => handlePDF("print")}>Imprimer</Button>

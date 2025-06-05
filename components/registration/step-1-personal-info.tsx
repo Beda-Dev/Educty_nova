@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { X, Info, User, User2, Calendar, Hash, Image as ImageIcon, VenusAndMars, Upload } from "lucide-react"
+import { toast } from "react-hot-toast"
 import { useSchoolStore } from "@/store/index"
 import { TutorModal } from "./tutor-modal"
 import type { StudentFormData, AssignmentType, Tutor } from "@/lib/interface"
@@ -17,14 +18,19 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
+import { isMatriculeUnique } from "@/lib/fonction"
 
 interface Step1Props {
   onNext: () => void
 }
 
 export function Step1PersonalInfo({ onNext }: Step1Props) {
-  const { assignmentTypes, tutors, studentData, setStudentData, selectedTutors, setSelectedTutors, newTutors, removeNewTutor } =
+  const { assignmentTypes, tutors , students } =
     useSchoolStore()
+
+  const { studentData, setStudentData, selectedTutors, setSelectedTutors, newTutors, removeNewTutor } =
+    useRegistrationStore()
 
   const [formData, setFormData] = useState<StudentFormData>({
     assignment_type_id: 0,
@@ -39,16 +45,79 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
   const [tutorSearch, setTutorSearch] = useState("")
   const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([])
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [hasRestoredPhoto, setHasRestoredPhoto] = useState(false)
+  const [isPhotoLoading, setIsPhotoLoading] = useState(false)
+  const [fileError, setFileError] = useState("")
+
+  // Nettoyer les URLs d'images lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage)
+      }
+    }
+  }, [previewImage])
+
+  const handlePhoto = async (file: File | null) => {
+    setFileError("")
+    setIsPhotoLoading(true)
+
+    if (!file) {
+      setPhotoFile(null)
+      setPreviewImage(null)
+      setFormData({ ...formData, photo: null })
+      setIsPhotoLoading(false)
+      return
+    }
+
+    try {
+      // Validation du fichier
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Le fichier ne doit pas dépasser 5 Mo")
+      }
+
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"]
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error("Format de fichier non supporté. Utilisez JPG, PNG ou GIF")
+      }
+
+      // Mettre à jour l'état local
+      setPhotoFile(file)
+      // Créer l'URL de prévisualisation avant de mettre à jour le store
+      const previewUrl = URL.createObjectURL(file)
+      setPreviewImage(previewUrl)
+      
+      // Mettre à jour le formulaire
+      const updatedData = { ...formData, photo: file }
+      setFormData(updatedData)
+
+      // Stocker immédiatement dans le store
+      await setStudentData(updatedData)
+    } catch (error) {
+      setFileError(error instanceof Error ? error.message : "Une erreur est survenue")
+      toast.error(error instanceof Error ? error.message : "Une erreur est survenue")
+    } finally {
+      setIsPhotoLoading(false)
+    }
+  }
+
+  const [openTutorModal, setOpenTutorModal] = useState(false)
+
 
   useEffect(() => {
     if (studentData) {
-      setFormData(studentData)
-      if (studentData.photo && (typeof studentData.photo === 'object' && !!(studentData.photo as File | Blob))) {
-        setPreviewImage(URL.createObjectURL(studentData.photo))
-      } else if (typeof studentData.photo === 'string') {
-        setPreviewImage(studentData.photo)
+      // Convertir les données stockées vers le format du formulaire
+      const convertedData: StudentFormData = {
+        ...studentData,
+        photo: studentData.photo?.file ?? null,
+      }
+      setFormData(convertedData)
+
+      // Vérifier si la photo a été restaurée
+      if (studentData.photo?.stored?.isRestored) {
+        setHasRestoredPhoto(true)
       }
     }
   }, [studentData])
@@ -65,6 +134,15 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       setFilteredTutors([])
     }
   }, [tutorSearch])
+
+  // Gérer la restauration de la photo depuis le store
+  useEffect(() => {
+    if (studentData?.photo?.file && !previewImage) {
+      const url = URL.createObjectURL(studentData.photo.file)
+      setPreviewImage(url)
+    }
+  }, [studentData?.photo?.file])
+
 
   const handleStudentChange = (field: keyof StudentFormData, value: any) => {
     const updatedData = { ...formData, [field]: value }
@@ -94,39 +172,23 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       .some((t) => t.is_tutor_legal)
 
     if (hasOtherLegalTutor) {
-      alert("Un tuteur légal existe déjà. Il ne peut y avoir qu'un seul tuteur légal.")
+      toast.error("Un tuteur légal existe déjà. Il ne peut y avoir qu'un seul tuteur légal.")
       return
     }
 
     setSelectedTutors(selectedTutors.map((t) => (t.id === tutorId ? { ...t, is_tutor_legal: !t.is_tutor_legal } : t)))
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0]
-    if (file) {
-      if (file.size > 3 * 1024 * 1024) {
-        alert("La taille de la photo ne doit pas excéder 3Mo")
-        return
-      }
-      if (!file.type.startsWith("image/")) {
-        alert("Veuillez sélectionner une image valide")
-        return
-      }
-      setPreviewImage(URL.createObjectURL(file))
-      setPhotoFile(file)
-    }
-  }, [])
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
+    onDrop: (files) => handlePhoto(files[0]),
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png']
+      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
     },
-    maxSize: 3 * 1024 * 1024,
+    maxSize: 5 * 1024 * 1024,
     maxFiles: 1
   })
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (
       !formData.assignment_type_id ||
       !formData.name ||
@@ -135,23 +197,28 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       !formData.sexe ||
       !formData.registration_number
     ) {
-      alert("Veuillez remplir tous les champs obligatoires")
+      toast.error("Veuillez remplir tous les champs obligatoires")
       return
     }
 
     if (selectedTutors.length === 0 && newTutors.length === 0) {
-      alert("Veuillez ajouter au moins un tuteur")
+      toast.error("Veuillez ajouter au moins un tuteur")
       return
     }
 
-    // Ajouter la photo au formData si elle existe
-    const dataToSend = { ...formData }
-    if (photoFile) {
-      dataToSend.photo = photoFile
+    if (!isMatriculeUnique(students, formData.registration_number)) {
+      toast.error("ce matricule existe deja veuiller enregistrer un autre matricule")
+      return
+    }
+    try {
+      // Les données sont déjà stockées dans le store via handlePhoto
+      await setStudentData(formData)
+      onNext()
+    } catch (error) {
+      console.error("Error saving student data:", error)
+      toast.error("Une erreur s'est produite lors de la sauvegarde des données")
     }
 
-    setStudentData(dataToSend)
-    onNext()
   }
 
   return (
@@ -408,14 +475,15 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                     {/* Bouton Créer un tuteur - toujours visible */}
                     <div className="p-2 border-t">
                       <TutorModal
-                        triggerButton={(trigger) => (
+                        open={openTutorModal}
+                        onOpenChange={setOpenTutorModal}
+                        triggerButton={() => (
                           <Button
-                            color="indigodye"
-                            className="w-full justify-start"
                             onClick={(e) => {
-                              e.preventDefault();
-                              trigger();
+                              e.preventDefault()
+                              setOpenTutorModal(true)
                             }}
+                            className="w-full justify-center"
                           >
                             <User className="w-4 h-4 mr-2" />
                             Ajouter un nouveau tuteur
@@ -443,13 +511,13 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <User className="w-5 h-5 text-primary" />
+                          <User className="w-5 h-5 text-skyblue" />
                           <div>
                             <span className="font-medium">
                               {tutor.name} {tutor.first_name}
                             </span>
                             {tutor.is_tutor_legal && (
-                              <Badge className="ml-2 bg-primary hover:bg-primary">
+                              <Badge color="skyblue" className="ml-2">
                                 Tuteur légal
                               </Badge>
                             )}
@@ -467,10 +535,11 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                             </Label>
                           </div>
                           <Button
-                            variant="ghost"
+                            color="destructive"
+                            variant="outline"
                             size="sm"
                             onClick={() => removeTutor(tutor.id)}
-                            className="text-destructive hover:text-destructive"
+                            className=""
                           >
                             <X className="w-4 h-4" />
                           </Button>

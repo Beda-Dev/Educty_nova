@@ -334,7 +334,7 @@ export default function CloseSessionPage({ params }: Props) {
                 </CardTitle>
                 <CardDescription>Remplissez les informations pour fermer la session</CardDescription>
               </div>
-              <Badge color="secondary" className="px-3 py-1 text-sm font-medium">
+              <Badge color="skyblue" className="px-3 py-1 text-sm font-medium">
                 #{session.id}
               </Badge>
             </div>

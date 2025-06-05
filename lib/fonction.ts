@@ -1,4 +1,4 @@
-import { Registration , AcademicYear  , Classe  , User , Role, Permission , CashRegisterSession} from "./interface";
+import { Registration , AcademicYear  , Classe  , User , Role, Permission , CashRegisterSession , Student} from "./interface";
 
 
 // Description: Fonctions utilitaires pour les mises à jour des classes
@@ -348,6 +348,12 @@ export function getLastOpenSessionForUser(
   return openSessions.length > 0 ? openSessions[0] : null;
 }
 
+export const isMatriculeUnique = (students : Student[], matricule: string): boolean => {
+  return !students.some(
+    (student) =>
+      student.registration_number.trim().toLowerCase() === matricule.trim().toLowerCase() 
+  );
+};
 
 
   

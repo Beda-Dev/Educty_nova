@@ -710,7 +710,7 @@ const StudentInfoCard = ({
                 <Badge variant="outline">
                   {donneesEtudiant.informationsEtudiant.registration_number}
                 </Badge>
-                <Badge color="secondary">
+                <Badge color="skyblue">
                   {donneesEtudiant.informationsInscription?.classe?.label ||
                     "Non défini"}
                 </Badge>

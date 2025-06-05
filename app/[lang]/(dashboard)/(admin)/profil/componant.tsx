@@ -208,7 +208,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
             <div className="space-y-1.5">
               <CardTitle className="text-2xl flex items-center gap-2">
                 {user?.name || "Utilisateur inconnu"}
-                <Badge color="secondary" className="h-5">
+                <Badge color="skyblue" className="h-5">
                   ID: {user?.id || "N/A"}
                 </Badge>
               </CardTitle>
@@ -452,7 +452,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
                             <h3 className="text-lg font-semibold capitalize">
                               {role.name}
                             </h3>
-                            <Badge color="secondary">{role.guard_name}</Badge>
+                            <Badge color="skyblue">{role.guard_name}</Badge>
                           </div>
                           <ChevronRight className="h-5 w-5 text-muted-foreground" />
                         </div>

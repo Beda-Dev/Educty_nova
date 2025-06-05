@@ -1,39 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { getLastMatchingRegistration } from "./searchStudents";
+import { UserPlus, RotateCcw, GraduationCap, BookOpen, ShieldCheck, Clock } from "lucide-react";
 import { useSchoolStore } from "@/store";
-import { toast } from "sonner";
 import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
-import { 
-  Book, 
-  UserPlus, 
-  SearchCheck, 
-  ArrowRight,
-  BadgeCheck,
-  BadgeAlert,
-  Loader2
-} from "lucide-react";
-import {paiementRegistration} from "./fonction"
 
 export default function HomePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [userInput, setUserInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { registrations, setReRegistrations, userOnline } = useSchoolStore();
+  const { userOnline } = useSchoolStore();
   const router = useRouter();
 
   const permissionRequisInscrire = ["inscrire eleve"];
@@ -49,67 +26,6 @@ export default function HomePage() {
     permissionRequisInscrire
   );
 
-  const handleReinscriptionClick = () => setIsModalOpen(true);
-
-  const handleValidation = async () => {
-    if (!userInput.trim()) {
-      toast.error("Veuillez entrer un matricule valide.");
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      // Simulation d'un délai pour le chargement
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const foundRegistration = getLastMatchingRegistration(
-        userInput,
-        registrations
-      );
-
-      if (!foundRegistration) {
-        toast.error(
-          <div className="flex items-center gap-2">
-            <BadgeAlert className="w-5 h-5 text-red-500" />
-            <span>Aucun élève trouvé avec ce matricule</span>
-          </div>,
-          {
-            description: "Vérifiez le matricule et réessayez."
-          }
-        );
-        setReRegistrations(null);
-        return;
-      }
-
-      setReRegistrations(foundRegistration);
-      toast.success(
-        <div className="flex items-center gap-2">
-          <BadgeCheck className="w-5 h-5 text-green-500" />
-          <span>Élève trouvé avec succès</span>
-        </div>,
-        {
-          description: "Redirection en cours..."
-        }
-      );
-      
-      setIsModalOpen(false);
-      router.push(`/eleves/registration/re-registration`);
-    } catch (error) {
-      toast.error(
-        <div className="flex items-center gap-2">
-          <BadgeAlert className="w-5 h-5 text-red-500" />
-          <span>Erreur lors de la recherche</span>
-        </div>,
-        {
-          description: "Une erreur s'est produite. Veuillez réessayer."
-        }
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   if (hasAdminAccessInscrire === false) {
     return (
       <Card className="w-full min-h-[80vh] flex items-center justify-center p-6">
@@ -118,88 +34,103 @@ export default function HomePage() {
     );
   }
 
+  const handleReinscriptionClick = () => {
+    router.push("/eleves/registration/re-registration");
+  };
+
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-50 p-4">
-      <Card className="w-full max-w-md p-8 space-y-6 shadow-lg border-0 rounded-xl">
-        <div className="text-center space-y-2">
-          <div className="mx-auto bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mb-4">
-            <Book className="w-8 h-8 text-blue-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800">Gestion des inscriptions</h2>
-          <p className="text-gray-600">
-            Sélectionnez le type d'inscription à effectuer
-          </p>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4 flex items-center justify-center space-x-3">
+            <GraduationCap className="w-10 h-10 " />
+            <span>Système de Gestion Scolaire</span>
+          </h1>
+          <p className="text-xl">Gérez facilement les inscriptions et réinscriptions des élèves</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Button 
-            className="w-full sm:w-auto justify-start gap-2 h-14" 
-            onClick={handleReinscriptionClick}
-          >
-            <SearchCheck className="w-5 h-5" />
-            <span className="flex-1 text-left">Réinscription</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-          
-          <Button
-            className="w-full sm:w-auto justify-start gap-2 h-14"
-            variant="outline"
-            onClick={() => router.push("/eleves/registration/new_registration")}
-          >
-            <UserPlus className="w-5 h-5" />
-            <span className="flex-1 text-left">Nouvelle inscription</span>
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-        </div>
-      </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <UserPlus className="w-8 h-8" />
+              </div>
+              <CardTitle className="text-2xl ">Nouvelle Inscription</CardTitle>
+              <CardDescription className="text-base">
+                Inscrire un nouvel élève dans l'établissement avec toutes les informations nécessaires
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="space-y-4 mb-6">
+                <div className="text-sm">
+                  <p className="flex items-center justify-center gap-2"><ShieldCheck className="w-4 h-4 " />Informations personnelles et tuteurs</p>
+                  <p className="flex items-center justify-center gap-2"><BookOpen className="w-4 h-4 " />Choix de la classe et tarification</p>
+                  <p className="flex items-center justify-center gap-2"><Clock className="w-4 h-4 " />Gestion des paiements par échéances</p>
+                </div>
+              </div>
+              <Button 
+                color="indigodye"
+                size="lg" 
+                onClick={() => router.push("/eleves/registration/new_registration")}
+              >
+                Commencer l'inscription
+              </Button>
+            </CardContent>
+          </Card>
 
-      {/* Modale pour la réinscription */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-lg">
-          <DialogHeader>
-            <div className="mx-auto bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mb-4">
-              <SearchCheck className="w-6 h-6 text-blue-600" />
-            </div>
-            <DialogTitle className="text-center">Vérification du matricule</DialogTitle>
-            <DialogDescription className="text-center">
-              Entrez le matricule de l'élève à réinscrire
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="userId">Matricule de l'élève</Label>
-              <Input
-                id="userId"
-                type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                placeholder="Ex: MAT-2023-001"
-                className="py-2 h-12"
-                onKeyDown={(e) => e.key === 'Enter' && handleValidation()}
-              />
-            </div>
-            
-            <Button 
-              onClick={handleValidation} 
-              disabled={!userInput.trim() || isLoading}
-              className="w-full gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Recherche en cours...</span>
-                </>
-              ) : (
-                <>
-                  <SearchCheck className="w-4 h-4" />
-                  <span>Valider et rechercher</span>
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <RotateCcw className="w-8 h-8" />
+              </div>
+              <CardTitle className="text-2xl ">Réinscription</CardTitle>
+              <CardDescription className="text-base ">
+                Réinscrire un élève existant pour une nouvelle année académique
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="space-y-4 mb-6">
+                <div className="text-sm ">
+                  <p className="flex items-center justify-center gap-2"><ShieldCheck className="w-4 h-4 text-tyrian" />Recherche d'élève existant</p>
+                  <p className="flex items-center justify-center gap-2"><BookOpen className="w-4 h-4 text-tyrian" />Sélection de la nouvelle classe</p>
+                  <p className="flex items-center justify-center gap-2"><Clock className="w-4 h-4 text-tyrian" />Calcul automatique des frais</p>
+                </div>
+              </div>
+              <Button 
+                size="lg" 
+                color="indigodye"
+                variant="outline" 
+                className="w-full"
+                onClick={handleReinscriptionClick}
+              >
+                Procéder à la réinscription
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="mt-12 text-center">
+          <Card className="">
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-2 text-indigodye">Fonctionnalités du système</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-skyblue">
+                <div>
+                  <p className="font-medium mb-1 text-indigodye">Gestion complète</p>
+                  <p>Suivi des élèves, tuteurs, classes et paiements</p>
+                </div>
+                <div>
+                  <p className="font-medium mb-1 text-indigodye">Interface intuitive</p>
+                  <p>Processus guidé étape par étape</p>
+                </div>
+                <div>
+                  <p className="font-medium mb-1 text-indigodye">Sécurisé</p>
+                  <p>Validation des données et sauvegarde automatique</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

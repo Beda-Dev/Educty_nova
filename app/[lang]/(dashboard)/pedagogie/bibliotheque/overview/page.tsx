@@ -30,7 +30,7 @@ export default function Home() {
         >
           <Library className="h-6 w-6 text-primary" />
           <span className="text-lg font-semibold">BiblioGestion</span>
-          <Badge color="secondary" className="ml-2">Beta</Badge>
+          <Badge color="skyblue" className="ml-2">Beta</Badge>
         </motion.div>
       </header>
 

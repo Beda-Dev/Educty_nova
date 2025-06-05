@@ -228,7 +228,7 @@ export default function ListePresence() {
                                         {coursItem.heureDebut} - {coursItem.heureFin}
                                       </span>
                                     </div>
-                                    <Badge color="secondary" className="px-2 py-1 text-xs">
+                                    <Badge color="skyblue" className="px-2 py-1 text-xs">
                                       {coursItem.salle}
                                     </Badge>
                                   </div>

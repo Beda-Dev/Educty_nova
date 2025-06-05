@@ -54,6 +54,7 @@ import {
 import type { TutorFormData } from "@/lib/interface"
 import { useSchoolStore } from "@/store/index"
 import { UseFormTrigger } from "react-hook-form"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
 
 interface TutorModalProps {
   triggerButton?: (trigger: UseFormTrigger<TutorFormValues>) => React.ReactNode;
@@ -78,9 +79,15 @@ const tutorFormSchema = z.object({
 
 type TutorFormValues = z.infer<typeof tutorFormSchema>
 
-export function TutorModal({ triggerButton }: TutorModalProps) {
-  const [open, setOpen] = useState(false)
-  const { addNewTutor, selectedTutors, newTutors } = useSchoolStore()
+interface TutorModalProps {
+  triggerButton?: (trigger: UseFormTrigger<TutorFormValues>) => React.ReactNode
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function TutorModal({ triggerButton, open, onOpenChange }: TutorModalProps) {
+  const { tutors } = useSchoolStore()
+  const { addNewTutor , selectedTutors, newTutors } = useRegistrationStore()
 
   const {
     register,
@@ -122,6 +129,17 @@ export function TutorModal({ triggerButton }: TutorModalProps) {
 
   const onSubmit = async (data: TutorFormValues) => {
     try {
+      const verify = tutors.find(tutor => tutor.phone_number === data.phone_number)
+      if (verify) {
+        toast.error("Un tuteur avec ce numéro de téléphone existe déjà", {
+          description: "Veuillez choisir un autre numéro de téléphone.",
+          action: {
+            label: "Compris",
+            onClick: () => {}
+          },
+        })
+        return
+      }
       // Vérification du tuteur légal
       const hasLegalTutor = [...selectedTutors, ...newTutors].some(tutor => tutor.is_tutor_legal)
       if (data.is_tutor_legal && hasLegalTutor) {
@@ -142,12 +160,12 @@ export function TutorModal({ triggerButton }: TutorModalProps) {
         phone_number: data.phone_number.toUpperCase(),
       })
 
-      toast.success("Tuteur créé avec succès", {
+      toast.success("Tuteur ajouter avec succès", {
         description: `${data.first_name} ${data.name} a été ajouté comme tuteur.`,
       })
 
       reset()
-      setOpen(false)
+      onOpenChange(false)
     } catch (error) {
       toast.error("Erreur lors de la création", {
         description: "Une erreur est survenue lors de la création du tuteur.",
@@ -156,7 +174,7 @@ export function TutorModal({ triggerButton }: TutorModalProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         {triggerButton ? (
           triggerButton(trigger)
@@ -358,7 +376,7 @@ export function TutorModal({ triggerButton }: TutorModalProps) {
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner le type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[9999]">
                     {getTutorTypeOptions(sexe).map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
@@ -407,7 +425,7 @@ export function TutorModal({ triggerButton }: TutorModalProps) {
               <Button
                 type="button"
                 color="destructive"
-                onClick={() => setOpen(false)}
+                onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Annuler

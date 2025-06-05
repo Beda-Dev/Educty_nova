@@ -1,19 +1,20 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { useSchoolStore } from "@/store/index"
-import type { DocumentFormData, DocumentType } from "@/lib/interface"
-import { X, Upload, FileText, Image, File, HelpCircle } from "lucide-react"
-import { toast } from "react-hot-toast"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
+import { useSchoolStore } from "@/store"
+import type { DocumentFormData } from "@/lib/interface"
+import { X, Upload, FileText, Image, File, Info, AlertTriangle, RefreshCw } from "lucide-react"
+import { fileStorage } from "@/lib/indexeddb-storage"
 import { motion, AnimatePresence } from "framer-motion"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface Step4Props {
   onNext: () => void
@@ -21,14 +22,127 @@ interface Step4Props {
 }
 
 export function Step4Documents({ onNext, onPrevious }: Step4Props) {
-  const { documentTypes, documentsForm, addDocumentForm, removeDocumentForm } = useSchoolStore()
+  const { documentTypes } = useSchoolStore()
+  const { documents, addDocument, removeDocument, getFileSize, restoreFilesFromIndexedDB } = useRegistrationStore()
   const [selectedDocType, setSelectedDocType] = useState<number>(0)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
+  const [fileError, setFileError] = useState("")
+  const [dbStatus, setDbStatus] = useState<string>("Vérification de la base de données...")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(false)
+
+  // Effet de surveillance des documents dans le store
+  useEffect(() => {
+    // Vérifier si nous avons des documents à restaurer
+    const hasStoredFiles = documents.some(doc => doc.path.stored?.fileId)
+    if (hasStoredFiles && !isRestoring) {
+      setIsRestoring(true)
+      restoreFilesFromIndexedDB()
+        .then(() => {
+          setDbStatus("Documents restaurés avec succès")
+        })
+        .catch(error => {
+          console.error("Erreur lors de la restauration des documents:", error)
+          setDbStatus("Erreur lors de la restauration des documents")
+        })
+        .finally(() => {
+          setIsRestoring(false)
+        })
+    }
+  }, [documents, restoreFilesFromIndexedDB, isRestoring])
+
+  // Vérifier l'état d'IndexedDB au montage
+  useEffect(() => {
+    checkIndexedDBStatus()
+  }, [])
+
+  // Effet de surveillance des erreurs
+  useEffect(() => {
+    const handleStoreError = () => {
+      // En cas d'erreur, tenter de restaurer les documents
+      if (documents.some(doc => doc.path.stored?.fileId)) {
+        setIsRestoring(true)
+        restoreFilesFromIndexedDB()
+          .then(() => {
+            setDbStatus("Documents restaurés avec succès")
+          })
+          .catch(error => {
+            console.error("Erreur lors de la restauration des documents:", error)
+            setDbStatus("Erreur lors de la restauration des documents")
+          })
+          .finally(() => {
+            setIsRestoring(false)
+          })
+      }
+    }
+
+    // Ajouter un écouteur d'erreur sur le store
+    const unsubscribe = useRegistrationStore.subscribe(
+      (state) => {
+        const newDocuments = state.documents;
+        if (newDocuments.some(doc => doc.path.stored?.isRestored === false)) {
+          handleStoreError()
+        }
+      }
+    )
+
+    return () => unsubscribe()
+  }, [documents, restoreFilesFromIndexedDB])
+
+  const checkIndexedDBStatus = async () => {
+    try {
+      await fileStorage.init()
+      const files = await fileStorage.getAllFiles()
+      setDbStatus(`IndexedDB prêt - ${files.length} fichiers stockés`)
+    } catch (error) {
+      console.error("Error checking IndexedDB status:", error)
+      setDbStatus("Erreur d'accès à IndexedDB")
+    }
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    handleFile(file)
+    setFileError("")
+
+    if (!file) {
+      setSelectedFile(null)
+      return
+    }
+
+    validateFile(file)
+  }
+
+  const validateFile = (file: File) => {
+    if (file.size === 0) {
+      setFileError("Le fichier est vide")
+      setSelectedFile(null)
+      return false
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFileError("Le fichier ne doit pas dépasser 5 Mo")
+      setSelectedFile(null)
+      return false
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ]
+
+    if (!allowedTypes.includes(file.type)) {
+      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, JPG, PNG, DOC ou DOCX`)
+      setSelectedFile(null)
+      return false
+    }
+
+    setSelectedFile(file)
+    return true
   }
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -44,44 +158,68 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
     e.preventDefault()
     setIsDragging(false)
     const file = e.dataTransfer.files?.[0]
-    handleFile(file)
+    if (file) validateFile(file)
   }
 
-  const handleFile = (file: File | undefined) => {
-    if (!file) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Fichier trop volumineux , Le fichier ne doit pas dépasser 5 Mo")
-      return
-    }
-    setSelectedFile(file)
-  }
-
-  const handleAddDocument = () => {
+  const handleAddDocument = async () => {
     if (!selectedDocType || !selectedFile) {
-      toast.error("Champs manquants , Veuillez sélectionner un type de document et un fichier")
+      setFileError("Veuillez sélectionner un type de document et un fichier")
       return
     }
 
-    const docType = documentTypes.find((dt) => dt.id === selectedDocType)
-    if (!docType) return
+    setIsLoading(true)
 
-    const newDocument: DocumentFormData = {
-      document_type_id: selectedDocType,
-      student_id: 0,
-      label: selectedFile.name,
-      path: selectedFile,
+    try {
+      const docType = documentTypes.find((dt) => dt.id === selectedDocType)
+      if (!docType) return
+
+      const newDocument: DocumentFormData = {
+        document_type_id: selectedDocType,
+        student_id: 0,
+        label: selectedFile.name,
+        path: selectedFile,
+      }
+
+      // Essayer d'ajouter le document
+      await addDocument(newDocument)
+      
+      // Vérifier si le document a été correctement stocké
+      const storedDocument = documents.find(doc => 
+        doc.label === selectedFile.name && 
+        doc.document_type_id === selectedDocType
+      )
+
+      if (!storedDocument?.path.stored?.fileId) {
+        throw new Error("Le document n'a pas été correctement stocké")
+      }
+
+      setSelectedDocType(0)
+      setSelectedFile(null)
+      setFileError("")
+      
+      // Reset file input
+      const fileInput = document.getElementById("document-file") as HTMLInputElement
+      if (fileInput) fileInput.value = ""
+
+      await checkIndexedDBStatus()
+    } catch (error) {
+      console.error("Error adding document:", error)
+      setFileError("Erreur lors de l'ajout du document: " + (error instanceof Error ? error.message : "Une erreur est survenue"))
+      
+      // Tenter de restaurer les documents existants
+      if (documents.some(doc => doc.path.stored?.fileId)) {
+        setIsRestoring(true)
+        restoreFilesFromIndexedDB()
+          .catch(error => {
+            console.error("Erreur lors de la restauration:", error)
+          })
+          .finally(() => {
+            setIsRestoring(false)
+          })
+      }
+    } finally {
+      setIsLoading(false)
     }
-
-    addDocumentForm(newDocument)
-    setSelectedDocType(0)
-    setSelectedFile(null)
-
-    // Reset file input
-    const fileInput = document.getElementById("document-file") as HTMLInputElement
-    if (fileInput) fileInput.value = ""
-
-    toast.success("Document ajouté , Le document a bien été ajouté à la liste")
   }
 
   const formatFileSize = (bytes: number): string => {
@@ -101,16 +239,13 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
     const extension = fileName.split('.').pop()?.toLowerCase()
     switch (extension) {
       case 'pdf': return <FileText className="w-5 h-5 text-red-500" />
-      case 'jpg': case 'jpeg': case 'png': case 'gif': case 'bmp': case 'webp': case 'svg':
-        return <Image className="w-5 h-5 text-blue-500" />
-      case 'xls': case 'xlsx': case 'csv': case 'ods':
-        return <File className="w-5 h-5 text-green-500" />
-      case 'doc': case 'docx': case 'odt': case 'rtf':
-        return <FileText className="w-5 h-5 text-blue-600" />
-      case 'txt': return <FileText className="w-5 h-5 text-gray-600" />
+      case 'jpg': case 'jpeg': case 'png': return <Image className="w-5 h-5 text-blue-500" />
+      case 'doc': case 'docx': return <FileText className="w-5 h-5 text-blue-600" />
       default: return <File className="w-5 h-5 text-gray-500" />
     }
   }
+
+  const hasRestoredDocuments = documents.some((doc) => doc.path.stored?.isRestored)
 
   return (
     <motion.div
@@ -119,22 +254,56 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
+      {/* Information Card */}
+      <Card className="border-indigodye/20 bg-indigodye/5">
+        <CardContent className="pt-6">
+          <div className="flex items-start space-x-3">
+            <Info className="w-5 h-5 text-indigodye mt-0.5" />
+            <div className="space-y-2">
+              <h4 className="font-medium text-indigodye">Gestion des documents</h4>
+              <div className="text-sm text-skyblue space-y-1">
+                <p>• Ajoutez les documents nécessaires pour l'inscription</p>
+                <p>• Taille maximale par fichier: 5 Mo</p>
+                <p>• Formats acceptés: PDF, JPG, PNG, DOC, DOCX</p>
+                <p>• Les fichiers sont sauvegardés dans IndexedDB en cas de rechargement</p>
+                <p className="font-medium">• État de la base de données: {dbStatus}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {hasRestoredDocuments && (
+        <Alert className="border-tyrian/20 bg-tyrian/5">
+          <RefreshCw className="h-4 w-4 text-tyrian" />
+          <AlertDescription className="text-tyrian">
+            Certains documents ont été restaurés depuis IndexedDB. Ils sont prêts à être utilisés.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {fileError && (
+        <Alert color="destructive" className="border-bittersweet">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{fileError}</AlertDescription>
+        </Alert>
+      )}
+
       <Card className="border-0 shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-gray-800 flex items-center">
+          <CardTitle className="text-2xl font-bold text-indigodye flex items-center">
             Documents et Pièces justificatives
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <HelpCircle className="w-5 h-5 ml-2 text-gray-400 hover:text-gray-600" />
+                  <Info className="w-5 h-5 ml-2 text-skyblue hover:text-indigodye" />
                 </TooltipTrigger>
                 <TooltipContent className="max-w-[300px]">
                   <p>Ajoutez ici tous les documents nécessaires pour compléter l'inscription.</p>
                   <p className="mt-2 font-medium">Formats acceptés:</p>
                   <ul className="list-disc pl-5 text-sm">
-                    <li>Documents: PDF, DOC, DOCX, TXT, RTF</li>
-                    <li>Tableurs: XLS, XLSX, CSV, ODS</li>
-                    <li>Images: JPG, PNG, GIF, SVG, WEBP</li>
+                    <li>Documents: PDF, DOC, DOCX</li>
+                    <li>Images: JPG, PNG</li>
                   </ul>
                   <p className="mt-2 text-sm">Taille maximale: 5 Mo</p>
                 </TooltipContent>
@@ -147,9 +316,9 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="flex items-center">
+                <Label className="flex items-center text-indigodye">
                   Type de document
-                  <span className="text-red-500 ml-1">*</span>
+                  <span className="text-bittersweet ml-1">*</span>
                 </Label>
                 <Select
                   value={selectedDocType.toString()}
@@ -169,13 +338,13 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               </div>
 
               <div className="space-y-2">
-                <Label className="flex items-center">
+                <Label className="flex items-center text-indigodye">
                   Fichier (max 5 Mo)
-                  <span className="text-red-500 ml-1">*</span>
+                  <span className="text-bittersweet ml-1">*</span>
                 </Label>
                 <div
                   className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                    isDragging ? 'border-primary bg-primary/10' : 'border-gray-300 hover:border-gray-400'
+                    isDragging ? 'border-indigodye bg-indigodye/10' : 'border-gray-300 hover:border-gray-400'
                   }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -185,17 +354,17 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     id="document-file"
                     type="file"
                     onChange={handleFileSelect}
-                    accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.webp,.svg,.doc,.docx,.xls,.xlsx,.csv,.txt,.odt,.ods,.rtf"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     className="hidden"
                   />
                   <label htmlFor="document-file" className="cursor-pointer">
                     <div className="flex flex-col items-center justify-center space-y-2">
-                      <Upload className="w-8 h-8 text-gray-400" />
-                      <p className="text-sm text-gray-500">
+                      <Upload className="w-8 h-8 text-skyblue" />
+                      <p className="text-sm text-skyblue">
                         {isDragging ? 'Déposez le fichier ici' : 'Glissez-déposez ou cliquez pour sélectionner'}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        PDF, Word, Excel, images (max 5 Mo)
+                      <p className="text-xs text-skyblue/70">
+                        PDF, Word, images (max 5 Mo)
                       </p>
                     </div>
                   </label>
@@ -203,7 +372,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               </div>
             </div>
 
-            {selectedFile && (
+            {selectedFile && !fileError && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -213,16 +382,20 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                   <div className="flex items-center space-x-4">
                     {getFileIcon(selectedFile.name)}
                     <div>
-                      <p className="font-medium text-gray-800 truncate max-w-[200px]">{selectedFile.name}</p>
-                      <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                      <p className="font-medium text-indigodye truncate max-w-[200px]">{selectedFile.name}</p>
+                      <p className="text-sm text-skyblue">{formatFileSize(selectedFile.size)}</p>
                     </div>
                   </div>
                   <Button 
-                    color="indigodye"
                     onClick={handleAddDocument} 
-                    className="gap-2 bg-blue-600 hover:bg-blue-700"
+                    className="gap-2 bg-indigodye hover:bg-indigodye/90"
+                    disabled={isLoading}
                   >
-                    <Upload className="w-4 h-4" />
+                    {isLoading ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
                     Ajouter
                   </Button>
                 </div>
@@ -231,12 +404,12 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
           </div>
 
           <div className="space-y-4">
-            <Label>Documents ajoutés</Label>
+            <Label className="text-indigodye">Documents ajoutés</Label>
             
             <AnimatePresence>
-              {documentsForm.length > 0 ? (
+              {documents.length > 0 ? (
                 <motion.div layout className="space-y-3">
-                  {documentsForm.map((doc, index) => (
+                  {documents.map((doc, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, y: 10 }}
@@ -249,22 +422,24 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                         {getFileIcon(doc.label)}
                         <div className="min-w-0">
                           <div className="flex items-center space-x-2">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs bg-indigodye/10 text-indigodye border-indigodye/20">
                               {getDocumentTypeName(doc.document_type_id)}
                             </Badge>
-                            <p className="font-medium text-gray-800 truncate">{doc.label}</p>
+                            <p className="font-medium text-indigodye truncate">{doc.label}</p>
                           </div>
-                          <p className="text-sm text-gray-500">{formatFileSize(doc.path.size)}</p>
+                          <p className="text-sm text-skyblue">{formatFileSize(getFileSize(doc.path))}</p>
+                          {doc.path.stored?.isRestored && (
+                            <p className="text-xs text-tyrian">Restauré depuis IndexedDB</p>
+                          )}
                         </div>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => {
-                          removeDocumentForm(index)
-                          toast.success("Document supprimé , Le document a été retiré de la liste")
+                          removeDocument(index)
                         }}
-                        className="text-gray-400 hover:text-red-500 hover:bg-red-50"
+                        className="text-gray-400 hover:text-bittersweet hover:bg-bittersweet/10"
                       >
                         <X className="w-4 h-4" />
                       </Button>
@@ -275,15 +450,28 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-12 text-gray-400 border-2 border-dashed rounded-lg bg-gray-50"
+                  className="text-center py-12 text-skyblue border-2 border-dashed rounded-lg bg-indigodye/5"
                 >
-                  <Upload className="w-12 h-12 mx-auto mb-4" />
-                  <p className="text-lg font-medium">Aucun document ajouté</p>
+                  <Upload className="w-12 h-12 mx-auto mb-4 text-skyblue" />
+                  <p className="text-lg font-medium text-indigodye">Aucun document ajouté</p>
                   <p className="text-sm">Commencez par ajouter un document ci-dessus</p>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              await fileStorage.listAllFiles()
+              checkIndexedDBStatus()
+            }}
+            className="mt-4 border-indigodye/30 text-indigodye hover:bg-indigodye/10"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Vérifier les fichiers stockés
+          </Button>
         </CardContent>
       </Card>
 
@@ -291,14 +479,14 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         <Button 
           variant="outline" 
           onClick={onPrevious} 
-          className="gap-2 border-gray-300 hover:bg-gray-50"
+          
         >
           Précédent
         </Button>
         <Button 
           onClick={onNext} 
-          className="gap-2 border-gray-300"
-          disabled={documentsForm.length === 0}
+          
+          disabled={false}
         >
           Suivant
         </Button>

@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Installment } from "@/lib/interface"
 import { useDocumentStorage } from "@/hooks/useDocumentStorage"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
 
 const padTo2Digits = (num: number): string => num.toString().padStart(2, '0')
 
@@ -36,13 +37,7 @@ interface Step5Props {
 
 export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const {
-    studentData,
-    selectedTutors,
-    newTutors,
-    registrationData,
-    paidAmount,
     documentTypes,
-    paymentsForm,
     userOnline,
     cashRegisterSessionCurrent,
     methodPayment,
@@ -50,22 +45,54 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     academicYears,
     pricing,
     installements,
-    documentsForm,
   } = useSchoolStore()
+  const transactionIds: number[] = []
 
-  const { documents, addDocument, removeDocument, clearDocuments } = useDocumentStorage()
 
-  // Synchroniser avec le store
-  useEffect(() => {
-    if (documents) {
-      documents.forEach(doc => {
-        addDocument({
-          label: doc.label,
-          path: doc.path
-        });
-      });
+
+  const rollbackCreatedEntities = async (createdEntities: any) => {
+    try {
+      // Delete created payments
+      for (const paymentId of createdEntities.payments) {
+        await fetch(`/api/payment?id=${paymentId}`, { method: "DELETE" })
+      }
+      if(transactionIds.length > 0){
+      for (const transactionId of transactionIds) {
+        await fetch(`/api/transaction?id=${transactionId}`, { method: "DELETE" })
+      }
     }
-  }, [documents, addDocument]);
+
+      // Delete created documents
+      for (const documentId of createdEntities.documents) {
+        await fetch(`/api/document?id=${documentId}`, { method: "DELETE" })
+      }
+
+      // Delete created tutors
+      for (const tutorId of createdEntities.tutors) {
+        await fetch(`/api/tutor?id=${tutorId}`, { method: "DELETE" })
+      }
+
+      // Delete created registration
+      if (createdEntities.registration) {
+        await fetch(`/api/registration?id=${createdEntities.registration}`, { method: "DELETE" })
+      }
+    } catch (error) {
+      console.error("Erreur lors du rollback:", error)
+    }
+  }
+
+  const {
+    studentData,
+    selectedTutors,
+    newTutors,
+    registrationData,
+    availablePricing,
+    payments,
+    documents,
+    paidAmount,
+    getFileFromPath,
+    getFileSize,
+  } = useRegistrationStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")
@@ -73,6 +100,14 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const handleConfirm = async () => {
     setIsSubmitting(true)
     setSubmitError("")
+
+    const createdEntities = {
+      student_id: null as number | null,
+      tutors: [] as number[],
+      payments: [] as number[],
+      documents: [] as number[],
+      registration: null as number | null,
+    }
 
     try {
       // Step 1: Create student
@@ -87,15 +122,13 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         studentFormData.append("sexe", studentData.sexe)
 
         if (studentData.photo) {
-          // Si c'est une URL base64, la convertir en File
-          if (typeof studentData.photo === 'string' && (studentData.photo as string).startsWith('data:')) {
-            const blob = await (await fetch(studentData.photo)).blob();
-            const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
-            studentFormData.append("photo", file);
-          } else if (studentData.photo instanceof File) {
-            studentFormData.append("photo", studentData.photo as File);
+          console.log("Processing student photo for submission")
+          const photoFile = await getFileFromPath(studentData.photo)
+          if (photoFile) {
+            studentFormData.append("photo", photoFile)
+            console.log("Photo added to FormData:", photoFile.name, photoFile.size)
           } else {
-            console.error('Type de photo non supporté');
+            console.warn("Failed to retrieve photo file from IndexedDB")
           }
         }
       }
@@ -111,6 +144,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
       const createdStudent = await studentResponse.json()
       const studentId = createdStudent.id
+      createdEntities.student_id = studentId
 
       // Step 2: Create new tutors if any
       const createdTutorIds: number[] = []
@@ -127,6 +161,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
         const createdTutor = await tutorResponse.json()
         createdTutorIds.push(createdTutor.id)
+        createdEntities.tutors.push(createdTutor.id)
       }
 
       // Step 3: Assign tutors to student
@@ -168,15 +203,14 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       }
 
       // Step 5: Create payments
-      for (const payment of paymentsForm) {
-
+      for (const payment of payments) {
         const transactionResponse = await fetch("/api/transaction", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             user_id: userOnline?.id,
             cash_register_session_id: cashRegisterSessionCurrent?.id,
-            transaction_date: formatDate(new Date()), // Use formatted date
+            transaction_date: formatDate(new Date()),
             total_amount: payment.amount,
             transaction_type: "encaissement",
           }),
@@ -187,6 +221,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         if (!transactionResponse.ok) {
           throw new Error(`Erreur lors de la transaction: ${transaction.message}`)
         }
+        transactionIds.push(transaction.id)
 
         const paymentResponse = await fetch("/api/payment", {
           method: "POST",
@@ -203,25 +238,63 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         if (!paymentResponse.ok) {
           throw new Error(`Erreur lors du paiement: ${paymentresponse.message}`)
         }
+        createdEntities.payments.push(paymentresponse.id)
       }
 
       // Step 6: Upload documents
-      for (const doc of documentsForm) {
+      for (const doc of documents) {
+        console.log("Processing document:", doc.label)
+
         const docFormData = new FormData()
         docFormData.append("document_type_id", doc.document_type_id.toString())
         docFormData.append("student_id", studentId.toString())
         docFormData.append("label", doc.label)
-        docFormData.append("path", doc.path)
 
-        const docResponse = await fetch("/api/document", {
-          method: "POST",
-          body: docFormData,
-        })
+        const file = await getFileFromPath(doc.path)
+        console.log("Retrieved file from IndexedDB:", file ? `${file.name} (${file.size} bytes)` : "null")
 
-        const docresponse = await docResponse.json()
+        if (file && file.size > 0) {
+          docFormData.append("path", file)
+          console.log("FormData prepared with file:", file.name)
 
-        if (!docResponse.ok) {
-          throw new Error(`Erreur lors du téléchargement des documents: ${docresponse.message}`)
+          try {
+            const docResponse = await fetch("/api/document", {
+              method: "POST",
+              body: docFormData,
+            })
+
+            if (!docResponse.ok) {
+              let errorText
+              try {
+                const errorJson = await docResponse.json()
+                errorText = JSON.stringify(errorJson)
+              } catch (jsonError) {
+                try {
+                  errorText = await docResponse.text()
+                  if (errorText.length > 500) {
+                    errorText = errorText.substring(0, 500) + "... [texte tronqué]"
+                  }
+                } catch (textError) {
+                  errorText = "Impossible de lire le corps de la réponse"
+                }
+              }
+
+              console.error(`Document upload failed (${docResponse.status}):`, errorText)
+              throw new Error(
+                `Erreur lors du téléchargement du document "${doc.label}" (${docResponse.status}): ${errorText}`,
+              )
+            }
+
+            const createdDocument = await docResponse.json()
+            console.log("Document uploaded successfully:", createdDocument.id)
+            createdEntities.documents.push(createdDocument.id)
+          } catch (error) {
+            console.error("Error during document upload:", error)
+            throw error
+          } 
+        } else {
+          console.error("Failed to get valid file for document:", doc.label, "File is null or empty")
+          throw new Error(`Impossible de récupérer un fichier valide pour le document "${doc.label}"`)
         }
       }
 
@@ -229,6 +302,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error)
       setSubmitError(error instanceof Error ? error.message : "Une erreur inattendue s'est produite")
+      await rollbackCreatedEntities(createdEntities)
     } finally {
       setIsSubmitting(false)
     }
@@ -241,6 +315,14 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     const i = Math.floor(Math.log(bytes) / Math.log(k))
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
+
+  const paymentsForm = payments.map(payment => ({
+    ...payment,
+    methods: payment.methods.map(method => ({
+      ...method,
+      montant: method.montant
+    }))
+  }))
 
   return (
     <TooltipProvider>
@@ -274,7 +356,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                 <User className="w-5 h-5 text-skyblue" />
                 <h4 className="font-semibold text-lg text-tyrian">Informations de l'élève</h4>
               </div>
-              
+
               {studentData && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-whitesmoke/50 rounded-lg">
                   {[
@@ -283,7 +365,11 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                     { label: "Matricule", value: studentData.registration_number, icon: <Hash className="w-4 h-4" /> },
                     { label: "Date de naissance", value: new Date(studentData.birth_date).toLocaleDateString("fr-FR"), icon: <Calendar className="w-4 h-4" /> },
                     { label: "Sexe", value: studentData.sexe },
-                    { label: "Statut", value: studentData.status, badge: true }
+                    { label: "Statut", value: studentData.status, badge: true },
+                    { label: "Photo", value: studentData.photo ? "Photo ajoutée" : "Aucune photo", 
+                      badge: true,
+                      extra: studentData.photo?.stored?.isRestored && "(restaurée depuis IndexedDB)" 
+                    }
                   ].map((item, index) => (
                     <div key={index} className="flex items-center space-x-3">
                       {item.icon && (
@@ -297,7 +383,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                       <span className="text-gray-600">{item.label}:</span>
                       {item.badge ? (
                         <Badge variant="outline" className="bg-indigodye/10 text-indigodye">
-                          {item.value}
+                          {item.value} {item.extra && <span className="text-xs ml-1">{item.extra}</span>}
                         </Badge>
                       ) : (
                         <span className="font-medium text-tyrian">{item.value}</span>
@@ -325,7 +411,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                 <AnimatePresence>
                   {[...selectedTutors, ...newTutors].map((tutor, index) => (
                     <motion.div
-                      key={ index}
+                      key={index}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -336,15 +422,18 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                           <div className="flex items-center space-x-2">
                             <User className="w-4 h-4 text-gray-500" />
                             <span className="font-medium">{tutor.name} {tutor.first_name}</span>
+                            {index >= selectedTutors.length && (
+                              <Badge color="skyblue" className="ml-2">Nouveau</Badge>
+                            )}
                           </div>
                           <div className="text-sm text-gray-600 ml-6">{tutor.type_tutor}</div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <Info className="w-4 h-4 text-gray-500" />
                           <span className="text-sm">{tutor.phone_number}</span>
                         </div>
-                        
+
                         <div className="flex justify-end">
                           {tutor.is_tutor_legal && (
                             <Badge className="bg-indigodye text-white">
@@ -375,18 +464,18 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-whitesmoke/50 rounded-lg">
                   {[
-                    { 
-                      label: "Classe", 
-                      value: classes.find(c => c.id === registrationData.class_id)?.label,
+                    {
+                      label: "Classe",
+                      value: classes.find(c => c.id === registrationData.class_id)?.label || `ID ${registrationData.class_id}`,
                       icon: <BookOpen className="w-4 h-4" />
                     },
-                    { 
-                      label: "Année académique", 
-                      value: academicYears.find(a => a.id === registrationData.academic_year_id)?.label,
+                    {
+                      label: "Année académique",
+                      value: academicYears.find(a => a.id === registrationData.academic_year_id)?.label || `ID ${registrationData.academic_year_id}`,
                       icon: <Calendar className="w-4 h-4" />
                     },
-                    { 
-                      label: "Date d'inscription", 
+                    {
+                      label: "Date d'inscription",
                       value: new Date(registrationData.registration_date).toLocaleDateString("fr-FR"),
                       icon: <Calendar className="w-4 h-4" />
                     }
@@ -446,7 +535,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                           <div className="flex-1">
                             <div className="flex items-center space-x-2">
                               <h4 className="font-semibold text-lg text-tyrian">
-                                {feeType || 'Type de frais non défini'}
+                                {feeType || `Échéance ID: ${payment.installment_id}`}
                               </h4>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -460,7 +549,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                                 </TooltipContent>
                               </Tooltip>
                             </div>
-                            
+
                             {installment?.due_date && (
                               <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
                                 <Calendar className="w-4 h-4" />
@@ -547,14 +636,14 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                 <FileText className="w-5 h-5 text-bittersweet" />
                 <h4 className="font-semibold text-lg text-tyrian">
                   Documents et pièces justificatives
-                  <span className="ml-2 text-gray-500">({documentsForm.length})</span>
+                  <span className="ml-2 text-gray-500">({documents.length})</span>
                 </h4>
               </div>
 
-              {documentsForm.length > 0 ? (
+              {documents.length > 0 ? (
                 <div className="space-y-2">
                   <AnimatePresence>
-                    {documentsForm.map((doc, index) => (
+                    {documents.map((doc, index) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, x: -10 }}
@@ -566,9 +655,16 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                           <FileText className="w-4 h-4 text-indigodye" />
                           <span className="truncate max-w-xs">{doc.label}</span>
                         </div>
-                        <span className="text-sm text-gray-500">
-                          {formatFileSize(documents[index]?.path.size || 0)}
-                        </span>
+                        <div className="flex space-x-2">
+                          <span className="text-sm text-gray-500">
+                            {formatFileSize(getFileSize(doc.path))}
+                          </span>
+                          {doc.path?.stored?.isRestored && (
+                            <Badge variant="outline" className="text-xs">
+                              Restauré depuis IndexedDB
+                            </Badge>
+                          )}
+                        </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
@@ -592,7 +688,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
               >
                 <Alert color="destructive" className="border-bittersweet/20 bg-bittersweet/10">
                   <AlertTriangle className="h-4 w-4 text-bittersweet" />
-                  <AlertDescription className="text-bittersweet">
+                  <AlertDescription color="destructive" className="text-bittersweet">
                     {submitError}
                   </AlertDescription>
                 </Alert>
@@ -611,15 +707,16 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
             variant="outline"
             onClick={onPrevious}
             disabled={isSubmitting}
-            className="border-indigodye/30 text-indigodye hover:bg-indigodye/10 hover:text-indigodye"
+            
           >
             Précédent
           </Button>
-          
+
           <Button
             onClick={handleConfirm}
             disabled={isSubmitting}
             color="indigodye"
+            
           >
             {isSubmitting ? (
               <>

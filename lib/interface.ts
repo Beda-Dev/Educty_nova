@@ -140,7 +140,7 @@ export interface Student {
     first_name: string;
     phone_number: string;
     sexe: string;
-    type: string;
+    type_tutor: string;
     created_at: string;
     updated_at: string;
     pivot: {

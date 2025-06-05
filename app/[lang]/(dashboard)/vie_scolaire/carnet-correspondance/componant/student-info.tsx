@@ -34,7 +34,7 @@ export default function StudentInfo({ student }: StudentInfoProps) {
           <div>
             <CardTitle className="text-2xl flex items-center gap-3">
               {student.prenom} {student.nom}
-              <Badge color="secondary" className="text-sm font-normal">
+              <Badge color="skyblue" className="text-sm font-normal">
                 {student.classe}
               </Badge>
             </CardTitle>

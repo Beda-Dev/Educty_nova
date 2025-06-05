@@ -1,11 +1,11 @@
 "use client"
 import { usePathname } from "next/navigation"
 import { useEffect, useRef } from "react"
-import { useSchoolStore } from "@/store/index"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
 
 export function RegistrationReset() {
   const pathname = usePathname()
-  const { resetRegistration } = useSchoolStore()
+  const { reset } = useRegistrationStore()
   const previousPathname = useRef<string | null>(null)
 
   useEffect(() => {
@@ -14,12 +14,12 @@ export function RegistrationReset() {
       const isNowRegistrationPage = pathname?.includes('/eleves/registration/new_registration')
       
       if (wasRegistrationPage && !isNowRegistrationPage) {
-        resetRegistration()
+        reset()
       }
     }
     
     previousPathname.current = pathname
-  }, [pathname, resetRegistration])
+  }, [pathname, reset])
 
   return null
 }

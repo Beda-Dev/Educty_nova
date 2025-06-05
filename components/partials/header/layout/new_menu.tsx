@@ -37,6 +37,8 @@ import {
   CalendarCheck,
   CheckCircle,
   Clipboard,
+  UserPlus,
+  UserCheck 
 } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import { forwardRef } from "react";
@@ -261,7 +263,20 @@ const menuItems: MenuCategory = {
       title: "Inscription",
       path: "/eleves/registration",
       icon: <User className="w-4 h-4" />,
-      children: [],
+      children: [
+        {
+          id: "new-registration",
+          title: "Nouvelle inscription",
+          path: "/eleves/registration/new_registration",
+          icon: <UserPlus  className="w-4 h-4" />,
+        },
+        {
+          id: "re-registration",
+          title: "Re-inscription",
+          path: "/eleves/registration/re_registration",
+          icon: <UserCheck  className="w-4 h-4" />,
+        },
+      ],
     },
     {
       id: "eleves-inscrits",

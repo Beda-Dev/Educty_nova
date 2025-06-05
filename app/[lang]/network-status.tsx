@@ -23,7 +23,7 @@ export default function NetworkStatus() {
           <div className="flex items-center gap-2">
             <Icon icon="ion:wifi-off-outline" className="text-xl" />
             <div>
-              <p className="font-medium">Connexion perdue</p>
+              <p className="font-medium">Aucune connexion</p>
               <p className="text-xs opacity-90">Fonctionnalités limitées</p>
             </div>
           </div>,

@@ -10,10 +10,14 @@ import { Step3Pricing } from "@/components/registration/step-3-pricing"
 import { Step4Documents } from "@/components/registration/step-4-documents"
 import { Step5Confirmation } from "@/components/registration/step-5-confirmation"
 import { RegistrationReceipt } from "@/components/registration/registration-receipt"
-import { fetchTutors , fetchPaymentMethods } from "@/store/schoolservice"
+import { fetchTutors , fetchPaymentMethods , fetchStudents , fetchRegistration , fetchPayment } from "@/store/schoolservice"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
+import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function InscriptionPage() {
-  const { currentStep, setCurrentStep, resetRegistration, setTutors , methodPayment , setmethodPayment } = useSchoolStore()
+  const {  setTutors , methodPayment , setmethodPayment , setRegistration  , setStudents  , setPayments , academicYearCurrent , classes , registrations } = useSchoolStore()
+  const {currentStep, setCurrentStep , reset} = useRegistrationStore()
+
   const [showReceipt, setShowReceipt] = useState(false)
 
   useEffect(() => { 
@@ -34,12 +38,25 @@ export default function InscriptionPage() {
     setCurrentStep(currentStep - 1)
   }
 
-  const handleComplete = () => {
+  const handleComplete = async() => {
+    try {
+      const response = await fetchRegistration()
+      setRegistration(response)
+      const responseStudents = await fetchStudents()
+      setStudents(responseStudents)
+      const responsePayments = await fetchPayment()
+      setPayments(responsePayments)
+      await updateStudentCountByClass(registrations, academicYearCurrent, classes);
+
+
+    } catch (error) {
+      console.error(error)
+    }
     setShowReceipt(true)
   }
 
   const handleNewRegistration = () => {
-    resetRegistration()
+    reset()
     setShowReceipt(false)
   }
 

@@ -110,7 +110,7 @@ const TarificationTable: React.FC<Props> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Frais scolaires à payer</h3>
         {filteredTarifications.length > 0 && (
-          <Badge color="secondary" className="px-3 py-1">
+          <Badge color="skyblue" className="px-3 py-1">
             {filteredTarifications.length} type{filteredTarifications.length > 1 ? "s" : ""} de frais
           </Badge>
         )}

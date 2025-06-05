@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useSchoolStore } from "@/store/index"
 import type { PaymentFormData, PaymentMethod } from "@/lib/interface"
 import { AlertTriangle } from "lucide-react"
+import { useRegistrationStore } from "@/hooks/use-registration-store"
 
 interface Step3Props {
   onNext: () => void
@@ -18,15 +19,12 @@ interface Step3Props {
 }
 
 export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
-  const { 
-    methodPayment, 
-    availablePricing, 
-    paymentsForm, 
-    setPaymentsForm, 
-    paidAmount, 
-    setPaidAmount, 
-    cashRegisterSessionCurrent 
+  const {
+    methodPayment,
+    cashRegisterSessionCurrent
   } = useSchoolStore()
+  const { setPaidAmount, setPayments, payments, paidAmount, availablePricing, setAvailablePricing } =
+    useRegistrationStore()
 
   const [selectedInstallments, setSelectedInstallments] = useState<number[]>([])
   const [installmentAmounts, setInstallmentAmounts] = useState<Record<number, number>>({})
@@ -87,7 +85,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
       })
     }
     // Update given amount to match the new total
-    setGivenAmount(Object.values({...installmentAmounts, [installmentId]: amount}).reduce((sum, amount) => sum + amount, 0))
+    setGivenAmount(Object.values({ ...installmentAmounts, [installmentId]: amount }).reduce((sum, amount) => sum + amount, 0))
   }
 
   const addPaymentMethod = (installmentId: number) => {
@@ -160,7 +158,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
       })),
     }))
 
-    setPaymentsForm(paymentObjects)
+    setPayments(paymentObjects)
     onNext()
   }
 

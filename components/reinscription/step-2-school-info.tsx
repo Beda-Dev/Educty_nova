@@ -6,11 +6,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useSchoolStore } from "@/store/index"
-import type { RegistrationFormData, Classe, AcademicYear, Pricing } from "@/lib/interface"
+import { useReinscriptionStore } from "@/hooks/use-reinscription-store"
+import type { RegistrationFormData, Classe, AcademicYear, Pricing, Installment } from "@/lib/interface"
 import { AlertTriangle } from "lucide-react"
-import { motion } from "framer-motion"
-import { useRegistrationStore } from "@/hooks/use-registration-store"
+import { toast } from "react-hot-toast"
+import { useSchoolStore } from "@/store/index"
 
 
 interface Step2Props {
@@ -19,14 +19,13 @@ interface Step2Props {
 }
 
 export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
-  const { classes, academicYearCurrent, pricing } = useSchoolStore()
-  const { studentData, registrationData, setRegistrationData, setAvailablePricing } =
-    useRegistrationStore()
+  const { selectedStudent, registrationData, setRegistrationData, setAvailablePricing } = useReinscriptionStore()
+  const { classes , pricing , academicYearCurrent } = useSchoolStore()
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     class_id: 0,
     academic_year_id: academicYearCurrent.id,
-    student_id: 0,
+    student_id: selectedStudent?.id || 0,
     registration_date: new Date().toISOString().split("T")[0],
   })
 
@@ -42,7 +41,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
   }, [registrationData])
 
   useEffect(() => {
-    if (formData.class_id && studentData) {
+    if (formData.class_id && selectedStudent) {
       const classe = classes.find((c) => c.id === formData.class_id)
       setSelectedClass(classe || null)
 
@@ -57,7 +56,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
         // Find matching pricing
         const matchingPricing = pricing.filter(
           (p) =>
-            p.assignment_type_id === studentData.assignment_type_id &&
+            p.assignment_type_id === selectedStudent.assignment_type_id &&
             p.academic_years_id === academicYearCurrent.id &&
             p.level_id === classe.level_id,
         )
@@ -73,16 +72,16 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
         }
       }
     }
-  }, [formData.class_id, studentData, setAvailablePricing])
+  }, [formData.class_id, selectedStudent, setAvailablePricing])
 
   const handleNext = () => {
     if (!formData.class_id) {
-      alert("Veuillez sélectionner une classe")
+      toast.error("Veuillez sélectionner une classe")
       return
     }
 
     if (pricingError) {
-      alert("Veuillez résoudre les problèmes de tarification avant de continuer")
+      toast.error("Veuillez résoudre les problèmes de tarification avant de continuer")
       return
     }
 
@@ -104,7 +103,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Classe *</Label>
+              <Label>Nouvelle classe *</Label>
               <Select
                 value={formData.class_id.toString()}
                 onValueChange={(value) => setFormData({ ...formData, class_id: Number.parseInt(value) })}
@@ -141,7 +140,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label>Date d'inscription</Label>
+              <Label>Date de réinscription</Label>
               <Select value={formData.registration_date} disabled>
                 <SelectTrigger>
                   <SelectValue />
@@ -173,8 +172,10 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
                   </div>
                   {pricing.installments && pricing.installments.length > 0 && (
                     <div className="space-y-2">
-                      <p className="text-sm text-gray-600">Échéances de paiement :</p>
-                      {pricing.installments.map((installment) => (
+                      <p className="text-sm text-gray-600">
+                        {pricing.installments.length === 1 ? "Paiement unique" : "Paiement par échéances"}:
+                      </p>
+                      {pricing.installments.map((installment: Installment) => (
                         <div key={installment.id} className="flex justify-between text-sm">
                           <span>{installment.status}</span>
                           <span>

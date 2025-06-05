@@ -400,7 +400,7 @@ export default function GestionNotesEleve() {
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
-                              <Badge color="secondary" className="px-3 py-1">
+                              <Badge color="skyblue" className="px-3 py-1">
                                 Coef: {matiere.coefficient}
                               </Badge>
                               <div className="flex flex-col items-end">
