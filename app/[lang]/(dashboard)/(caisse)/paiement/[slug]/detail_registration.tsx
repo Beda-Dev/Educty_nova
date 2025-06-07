@@ -217,7 +217,7 @@ const PaymentDetail = ({ registration, studentData }: dataProps) => {
                   <div className="mt-6 flex items-start gap-4">
                     {studentData.informationsEtudiant.photo ? (
                       <img
-                        src={studentData.informationsEtudiant.photo}
+                        src={typeof studentData.informationsEtudiant.photo === 'string' ? studentData.informationsEtudiant.photo : ''}
                         alt="Photo de l'élève"
                         width={100}
                         height={100}

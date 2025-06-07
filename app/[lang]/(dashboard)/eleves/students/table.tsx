@@ -159,7 +159,7 @@ const StudentTableStatus = ({
           <div className="flex items-center gap-3">
             {student.photo ? (
               <Image
-                src={student.photo}
+                src={typeof student.photo === 'string' ? student.photo : ''}
                 alt={`${student.name} ${student.first_name}`}
                 width={40}
                 height={40}

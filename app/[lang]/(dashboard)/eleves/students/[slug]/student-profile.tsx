@@ -149,7 +149,7 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                 <Avatar className="h-24 w-24">
                   {data.photo ? (
                     <Image
-                      src={data.photo}
+                      src={typeof data.photo === 'string' ? data.photo : ''}
                       alt={`${data.name} ${data.first_name}`}
                       width={40}
                       height={40}
