@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useSchoolStore } from "@/store";
-import { Student, Tutor } from "@/lib/interface";
+import { Student, Tutor , FileOrStored } from "@/lib/interface";
 
 // Components
 import { Input } from "@/components/ui/input";
@@ -373,6 +373,12 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
     setSelectedExistingTutor(null);
   };
 
+  const getImageUrl = (photo: string | FileOrStored | undefined | null): string | null => {
+    if (!photo) return null;
+    if (typeof photo === 'string') return photo;
+    else return null;
+  };
+
   return (
     <motion.form
       onSubmit={handleSubmit(onSubmit)}
@@ -406,12 +412,6 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 space-y-4">
-            <div className="flex flex-col items-center gap-4">
-              <ImageUploader
-                initialImage={Newstudent?.photo || ""}
-                onImageChange={handleImageChange}
-              />
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="registration_number">Matricule </Label>

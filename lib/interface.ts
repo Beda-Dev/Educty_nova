@@ -451,7 +451,7 @@ interface StoredFileReference {
   isRestored?: boolean // Flag pour indiquer si le fichier a été restauré
 }
 
-interface FileOrStored {
+export interface FileOrStored {
   file?: File // Fichier natif
   stored?: StoredFileReference // Référence vers IndexedDB
 }

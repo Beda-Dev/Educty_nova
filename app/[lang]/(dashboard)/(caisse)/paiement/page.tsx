@@ -683,11 +683,11 @@ const StudentInfoCard = ({
         <div className="space-y-6">
           <div className="flex items-center gap-4">
             <Avatar className="h-20 w-20 border-2 border-primary">
-              {donneesEtudiant.informationsEtudiant.photo?.startsWith(
+               { donneesEtudiant.informationsEtudiant.photo && donneesEtudiant.informationsEtudiant.photo instanceof String && donneesEtudiant.informationsEtudiant.photo.startsWith(
                 "http"
               ) ? (
                 <AvatarImage
-                  src={donneesEtudiant.informationsEtudiant.photo}
+                  src={donneesEtudiant.informationsEtudiant.photo as string}
                   alt={`${donneesEtudiant.informationsEtudiant.name}`}
                 />
               ) : (

@@ -10,15 +10,33 @@ import User from "@/public/images/avatar/user.png"; // Image par défaut
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { Fragment, useState, useRef } from "react";
-import { Student } from '@/lib/interface';
+import { Student, StudentPhoto } from '@/lib/interface';
 
 interface HeaderProps {
-  eleve: Student; 
+  eleve: Student;
 }
 
 const Header = ({ eleve }: HeaderProps) => {
   const location = usePathname();
-  const [photo, setPhoto] = useState<string | null>(eleve.photo); // État pour la photo
+  const formatPhoto = (photo: StudentPhoto | undefined): string | null => {
+    if (!photo) return null;
+    if (typeof photo === 'string') return photo;
+    if ('file' in photo && photo.file) {
+      return URL.createObjectURL(photo.file);
+    }
+    if ('stored' in photo && photo.stored) {
+      // Handle the case where the photo is stored in IndexedDB
+      // You'll need to implement a function to retrieve it from IndexedDB
+      return null; // or a loading state
+    }
+    return null;
+  };
+  const [photo, setPhoto] = useState<string | null>(() => {
+    return formatPhoto(eleve.photo);
+  });
+
+
+
   const fileInputRef = useRef<HTMLInputElement>(null); // Référence pour le champ de fichier
 
   // Gestion des erreurs pour les images invalides
@@ -65,57 +83,57 @@ const Header = ({ eleve }: HeaderProps) => {
 
   return (
 
-      <Card className="mt-6 rounded-t-2xl">
-        <CardContent className="p-0">
-          <div
-            className="relative h-[200px] lg:h-[296px] rounded-t-2xl w-full object-cover bg-no-repeat"
-            style={{ backgroundImage: `url(${coverImage.src})` }}
-          >
-            <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
-              <div>
-                {/* Afficher la photo de l'étudiant ou une image par défaut */}
-                <Image
-                  src={photo || User.src} // Utilise la photo de l'étudiant ou l'image par défaut
-                  alt={`${eleve.name} ${eleve.first_name}`}
-                  className="h-20 w-20 lg:w-32 lg:h-32 rounded-full"
-                  width={128}
-                  height={128}
-                  onError={handleImageError} // Gestion des erreurs d'image
-                />
+    <Card className="mt-6 rounded-t-2xl">
+      <CardContent className="p-0">
+        <div
+          className="relative h-[200px] lg:h-[296px] rounded-t-2xl w-full object-cover bg-no-repeat"
+          style={{ backgroundImage: `url(${coverImage.src})` }}
+        >
+          <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
+            <div>
+              {/* Afficher la photo de l'étudiant ou une image par défaut */}
+              <Image
+                src={photo || User.src} // Utilise la photo de l'étudiant ou l'image par défaut
+                alt={`${eleve.name} ${eleve.first_name}`}
+                className="h-20 w-20 lg:w-32 lg:h-32 rounded-full"
+                width={128}
+                height={128}
+                onError={handleImageError} // Gestion des erreurs d'image
+              />
+            </div>
+            <div>
+              {/* Afficher le nom et le prénom de l'étudiant */}
+              <div className="text-xl lg:text-2xl font-semibold text-primary-foreground mb-1">
+                {eleve.name} {eleve.first_name}
               </div>
-              <div>
-                {/* Afficher le nom et le prénom de l'étudiant */}
-                <div className="text-xl lg:text-2xl font-semibold text-primary-foreground mb-1">
-                  {eleve.name} {eleve.first_name}
-                </div>
-                {/* Afficher le statut de l'étudiant */}
-                <div className="text-xs lg:text-sm font-medium text-default-100 dark:text-default-900 pb-1.5">
-                  {eleve.assignment_type.label}
-                </div>
+              {/* Afficher le statut de l'étudiant */}
+              <div className="text-xs lg:text-sm font-medium text-default-100 dark:text-default-900 pb-1.5">
+                {eleve.assignment_type.label}
               </div>
             </div>
-            {/* Bouton pour modifier la photo */}
-            <Button
-              className="absolute bottom-5 ltr:right-6 rtl:left-6 rounded px-5 hidden lg:flex"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()} // Déclenche le champ de fichier
-            >
-              <Icon
-                className="w-4 h-4 ltr:mr-1 rtl:ml-1"
-                icon="heroicons:pencil-square"
-              />
-              Modifier la photo
-            </Button>
-            {/* Champ de fichier caché */}
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*"
-              className="hidden"
-              onChange={handlePhotoUpload}
-            />
           </div>
-          {/* <div className="flex flex-wrap justify-end gap-4 lg:gap-8 pt-7 lg:pt-5 pb-4 px-6">
+          {/* Bouton pour modifier la photo */}
+          <Button
+            className="absolute bottom-5 ltr:right-6 rtl:left-6 rounded px-5 hidden lg:flex"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()} // Déclenche le champ de fichier
+          >
+            <Icon
+              className="w-4 h-4 ltr:mr-1 rtl:ml-1"
+              icon="heroicons:pencil-square"
+            />
+            Modifier la photo
+          </Button>
+          {/* Champ de fichier caché */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoUpload}
+          />
+        </div>
+        {/* <div className="flex flex-wrap justify-end gap-4 lg:gap-8 pt-7 lg:pt-5 pb-4 px-6">
             {[
               {
                 title: "Overview",
@@ -149,8 +167,8 @@ const Header = ({ eleve }: HeaderProps) => {
               </Link>
             ))}
           </div> */}
-        </CardContent>
-      </Card>
+      </CardContent>
+    </Card>
   );
 };
 
