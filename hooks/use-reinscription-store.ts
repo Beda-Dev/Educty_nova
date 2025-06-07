@@ -10,6 +10,7 @@ import {
   DocumentFormData,
   Pricing,
 } from "@/lib/interface"
+import merge from 'lodash.merge';
 
 // Types pour la gestion des fichiers avec IndexedDB
 interface StoredFileReference {
@@ -256,22 +257,37 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
               const file = await fileStorage.getFile(state.studentModifications.photo.stored.fileId)
               if (file) {
                 console.log("Student photo successfully restored")
-                set((state) => ({
-                  studentModifications: {
-                    ...state.studentModifications,
-                    photo: {
-                      ...state.studentModifications?.photo,
-                      file: file, // Stocker également le fichier natif
-                      stored: {
-                        fileId: state.studentModifications?.photo?.stored?.fileId,
-                        originalName: state.studentModifications?.photo?.stored?.originalName,
-                        size: state.studentModifications?.photo?.stored?.size,
-                        type: state.studentModifications?.photo?.stored?.type,
-                        isRestored: true,
+                set((state) => {
+                  // Créer un nouvel objet avec les modifications
+                  const studentModifications = state.studentModifications as Partial<Student & { photo?: FileOrStored }> | null;
+                  const updatedModifications = studentModifications 
+                    ? { ...studentModifications }
+                    : {} as Partial<Student & { photo?: FileOrStored }>;
+                
+                  // Mettre à jour la photo avec le fichier restaur
+                  return {
+                    studentModifications: {
+                      ...updatedModifications,
+                      photo: {
+                        ...(typeof updatedModifications.photo === "object" && updatedModifications.photo !== null ? updatedModifications.photo : {}),
+                        file: file,
+                        stored: {
+                          ...(typeof updatedModifications.photo === "object" &&
+                              updatedModifications.photo !== null &&
+                              typeof updatedModifications.photo.stored === "object" &&
+                              updatedModifications.photo.stored !== null
+                            ? updatedModifications.photo.stored
+                            : {}),
+                          fileId: updatedModifications.photo && typeof updatedModifications.photo === "object" && updatedModifications.photo.stored?.fileId ? updatedModifications.photo.stored.fileId : '',
+                          originalName: updatedModifications.photo && typeof updatedModifications.photo === "object" && updatedModifications.photo.stored?.originalName ? updatedModifications.photo.stored.originalName : file.name,
+                          size: updatedModifications.photo && typeof updatedModifications.photo === "object" && updatedModifications.photo.stored?.size ? updatedModifications.photo.stored.size : file.size,
+                          type: updatedModifications.photo && typeof updatedModifications.photo === "object" && updatedModifications.photo.stored?.type ? updatedModifications.photo.stored.type : file.type,
+                          isRestored: true,
+                        },
                       },
                     },
-                  },
-                }))
+                  };
+                })
                 hasChanges = true
               } else {
                 console.warn("Failed to restore student photo - file not found")
@@ -295,7 +311,7 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
                     ...doc,
                     path: {
                       ...doc.path,
-                      file: file, // Stocker également le fichier natif
+                      file: file,
                       stored: {
                         ...doc.path.stored,
                         isRestored: true,

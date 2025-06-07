@@ -34,6 +34,7 @@ import { toast } from "react-hot-toast";
 import { AcademicYear } from "@/lib/interface";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import {Loader2} from "lucide-react"
 
 const FormSchema = z.object({
   label: z.string().min(1, "Le label est requis"),
@@ -229,7 +230,7 @@ const EditModal: React.FC<EditModalProps> = ({
             </div>
 
             <DialogFooter>
-              <div className="flex justify-end space-x-3">
+              <div className="flex justify-around space-x-3">
                 <DialogClose asChild>
                   <Button type="button" color="bittersweet" disabled={isLoading}>
                     Annuler
@@ -238,7 +239,7 @@ const EditModal: React.FC<EditModalProps> = ({
                 <Button color="indigodye" type="submit" disabled={isLoading} className="">
                   {isLoading ? (
                     <>
-                      <span className="animate-spin mr-2">↻</span>
+                      <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
                       Enregistrement...
                     </>
                   ) : (

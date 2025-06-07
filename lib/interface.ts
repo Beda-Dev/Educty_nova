@@ -117,6 +117,8 @@ export interface UserSingle {
   avatar?: string | null;
 }
 
+export type StudentPhoto = string | FileOrStored | null;
+
 export interface Student {
   id: number;
   assignment_type_id: number;
@@ -128,7 +130,7 @@ export interface Student {
   active: number;
   created_at: string;
   updated_at: string;
-  photo: string;
+  photo: StudentPhoto;
   sexe: string;
   assignment_type: AssignmentType;
   documents: Document[];
@@ -161,7 +163,7 @@ export interface StudentOnly {
   first_name: string;
   birth_date: string;
   status: string;
-  photo: string;
+  photo: StudentPhoto;
   active: number;
   created_at: string;
   updated_at: string;

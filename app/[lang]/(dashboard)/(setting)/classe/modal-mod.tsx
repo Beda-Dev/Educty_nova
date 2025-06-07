@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
 import { Classe } from "@/lib/interface";
 import { useSchoolStore } from "@/store";
+import {Loader2} from "lucide-react"
 
 interface EditClassModalProps {
   classData: Classe;
@@ -137,14 +138,20 @@ const EditClassModal = ({ classData, onClose, onUpdate, onOpen }: EditClassModal
             </div>
           </ScrollArea>
 
-          <div className="flex justify-evenly gap-3 mt-4">
+          <div className="flex justify-around gap-3 mt-4">
             <DialogClose asChild>
               <Button color="destructive" type="button"  disabled={loading} onClick={onClose}>
                 Annuler
               </Button>
             </DialogClose>
             <Button color="tyrian" type="button" onClick={handleUpdate} disabled={loading}>
-              {loading ? "Mise à jour..." : "Mettre à jour"}
+              {loading ? (
+                <>
+                  <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
+                  Mise à jour...
+                </>) : 
+                "Mettre à jour"
+                }
             </Button>
           </div>
         </div>

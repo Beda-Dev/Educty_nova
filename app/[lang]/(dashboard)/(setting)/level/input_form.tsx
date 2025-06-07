@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { fetchLevels } from "@/store/schoolservice";
 import { useSchoolStore } from "@/store";
+import { Loader2 } from "lucide-react"
 
 const FormSchema = z.object({
   level: z.string().min(1, {
@@ -60,7 +61,9 @@ const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
         description: "Le niveau a été ajouté avec succès.",
       });
       form.reset();
-      onSuccess?.();
+      if (onSuccess) {
+        onSuccess();
+      }
     } else {
       toast({
         title: "Erreur",
@@ -95,11 +98,28 @@ const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
             </FormItem>
           )}
         />
-        <Button color="indigodye" type="submit" disabled={isLoading}>
-          {isLoading ? "Ajout en cours..." : "Ajouter"}
-        </Button>
+        <div className="flex justify-around">
+
+          <Button color="destructive" type="button" onClick={() => {
+            if (onSuccess) {
+              onSuccess();
+            }
+          }} disabled={isLoading}>
+            Annuler
+          </Button>
+
+          <Button color="indigodye" type="submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
+                Ajout en cours...
+              </>) :
+              "Ajouter"
+            }
+          </Button>
+        </div>
       </form>
-    </Form>
+    </Form >
   );
 };
 

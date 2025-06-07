@@ -11,7 +11,19 @@ import type { RegistrationFormData, Classe, AcademicYear, Pricing } from "@/lib/
 import { AlertTriangle } from "lucide-react"
 import { motion } from "framer-motion"
 import { useRegistrationStore } from "@/hooks/use-registration-store"
-
+import { toast } from "react-hot-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 
 interface Step2Props {
   onNext: () => void
@@ -34,6 +46,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
   const [availablePricing, setLocalAvailablePricing] = useState<Pricing[]>([])
   const [classWarning, setClassWarning] = useState("")
   const [pricingError, setPricingError] = useState("")
+  const [openConfirmModal, setOpenConfirmModal] = useState(false)
 
   useEffect(() => {
     if (registrationData) {
@@ -77,73 +90,107 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
 
   const handleNext = () => {
     if (!formData.class_id) {
-      alert("Veuillez sélectionner une classe")
+      toast.error("Veuillez sélectionner une classe", {
+        position: "top-center",
+      })
       return
     }
 
     if (pricingError) {
-      alert("Veuillez résoudre les problèmes de tarification avant de continuer")
+      toast.error("Veuillez résoudre les problèmes de tarification avant de continuer", {
+        position: "top-center",
+      })
       return
     }
 
     if (classWarning) {
-      const confirm = window.confirm("La classe sélectionnée est pleine. Voulez-vous continuer ?")
-      if (!confirm) return
+      setOpenConfirmModal(true)
+      return
     }
 
     setRegistrationData(formData)
     onNext()
   }
 
+  const handleConfirm = () => {
+    setRegistrationData(formData)
+    setOpenConfirmModal(false)
+    onNext()
+  }
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations scolaires</CardTitle>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardTitle className="text-2xl font-bold tracking-tight">Informations scolaires</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Classe *</Label>
+        <CardContent className="space-y-4 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Label className="text-sm font-medium leading-none">Classe *</Label>
               <Select
                 value={formData.class_id.toString()}
                 onValueChange={(value) => setFormData({ ...formData, class_id: Number.parseInt(value) })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue placeholder="Sélectionner une classe" />
                 </SelectTrigger>
                 <SelectContent>
                   {classes.map((classe) => (
                     <SelectItem key={classe.id} value={classe.id.toString()}>
-                      {classe.label} ({classe.student_number}/{classe.max_student_number} élèves)
+                      <div className="flex items-center gap-2">
+                        <span>{classe.label}</span>
+                        <Badge variant="outline">
+                          {classe.student_number}/{classe.max_student_number}
+                        </Badge>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {classWarning && (
-                <Alert color="destructive">
+                <Alert color="destructive" className="mt-2">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>{classWarning}</AlertDescription>
                 </Alert>
               )}
-            </div>
+            </motion.div>
 
-            <div className="space-y-2">
-              <Label>Année académique</Label>
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Label className="text-sm font-medium leading-none">Année académique</Label>
               <Select value={academicYearCurrent.id.toString()} disabled>
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={academicYearCurrent.id.toString()}>{academicYearCurrent.label}</SelectItem>
+                  <SelectItem value={academicYearCurrent.id.toString()}>
+                    {academicYearCurrent.label}
+                  </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </motion.div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label>Date d'inscription</Label>
+            <motion.div 
+              className="space-y-2 md:col-span-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Label className="text-sm font-medium leading-none">Date d'inscription</Label>
               <Select value={formData.registration_date} disabled>
-                <SelectTrigger>
+                <SelectTrigger className="h-10">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -152,61 +199,138 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </motion.div>
           </div>
         </CardContent>
       </Card>
 
       {/* Pricing Preview */}
       {availablePricing.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Frais à payer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {availablePricing.map((pricing) => (
-                <div key={pricing.id} className="border rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold">{pricing.label}</h4>
-                    <span className="text-lg font-bold">{Number.parseInt(pricing.amount).toLocaleString()} FCFA</span>
-                  </div>
-                  {pricing.installments && pricing.installments.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">Échéances de paiement :</p>
-                      {pricing.installments.map((installment) => (
-                        <div key={installment.id} className="flex justify-between text-sm">
-                          <span>{installment.status}</span>
-                          <span>
-                            {Number.parseInt(installment.amount_due).toLocaleString()} FCFA -{" "}
-                            {new Date(installment.due_date).toLocaleDateString("fr-FR")}
-                          </span>
-                        </div>
-                      ))}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="border-none shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+              <CardTitle className="text-2xl font-bold tracking-tight">Frais à payer</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-6">
+                {availablePricing.map((pricing) => (
+                  <motion.div 
+                    key={pricing.id} 
+                    className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+                    whileHover={{ y: -2 }}
+                  >
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="font-semibold text-lg">{pricing.label}</h4>
+                      <span className="text-xl font-bold text-primary">
+                        {Number.parseInt(pricing.amount).toLocaleString()} FCFA
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                    {pricing.installments && pricing.installments.length > 0 && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-600">
+                            Échéances de paiement :
+                          </span>
+                          <Badge color="secondary">
+                            {pricing.installments.length} tranches
+                          </Badge>
+                        </div>
+                        <Separator />
+                        {pricing.installments.map((installment) => (
+                          <div key={installment.id} className="grid grid-cols-3 gap-4 items-center">
+                            <div className="col-span-1">
+                              <Badge variant="outline" className="capitalize">
+                                {installment.status}
+                              </Badge>
+                            </div>
+                            <div className="col-span-1 text-right">
+                              <span className="font-medium">
+                                {Number.parseInt(installment.amount_due).toLocaleString()} FCFA
+                              </span>
+                            </div>
+                            <div className="col-span-1 text-right text-sm text-muted-foreground">
+                              {new Date(installment.due_date).toLocaleDateString("fr-FR")}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
 
       {pricingError && (
-        <Alert color="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>{pricingError}</AlertDescription>
-        </Alert>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Alert color="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{pricingError}</AlertDescription>
+          </Alert>
+        </motion.div>
       )}
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious}>
+      <motion.div 
+        className="flex justify-between pt-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
           Précédent
         </Button>
-        <Button onClick={handleNext} disabled={!!pricingError}>
+        <Button  onClick={handleNext} disabled={!!pricingError} className="h-10 px-6">
           Suivant
         </Button>
-      </div>
-    </div>
+      </motion.div>
+
+      {/* Confirmation Modal */}
+      <Dialog open={openConfirmModal} onOpenChange={setOpenConfirmModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">Classe complète</DialogTitle>
+            <DialogDescription>
+              La classe sélectionnée a atteint sa capacité maximale. Voulez-vous vraiment continuer ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-2">
+              <Label>Classe: {selectedClass?.label}</Label>
+              <div className="flex items-center gap-2">
+                <Progress
+                  value={
+                    (Number.parseInt(selectedClass?.student_number || "0") /
+                      Number.parseInt(selectedClass?.max_student_number || "1")) *
+                    100
+                  }
+                  className="h-2"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {selectedClass?.student_number}/{selectedClass?.max_student_number} élèves
+                </span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" color="destructive" onClick={() => setOpenConfirmModal(false)}>
+              Annuler
+            </Button>
+            <Button color="indigodye" onClick={handleConfirm}>
+              Confirmer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   )
 }

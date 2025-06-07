@@ -41,6 +41,7 @@ import InputFormValidation from "./input_form";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { fetchLevels } from "@/store/schoolservice";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   data: Level[];
@@ -205,7 +206,7 @@ const LevelPage = ({ data }: Props) => {
               )}
             </div>
 
-            <div className="flex justify-between gap-3 pt-4">
+            <div className="flex justify-around gap-3 pt-4">
               <Button
                 type="button"
                 color="destructive"
@@ -216,10 +217,11 @@ const LevelPage = ({ data }: Props) => {
               </Button>
               <Button
                 type="submit"
-                color="indigodye"
+                color="tyrian"
                 disabled={isLoading}
                 className="min-w-[120px]"
               >
+                {isLoading && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
                 {isLoading ? "En cours..." : "Mettre à jour"}
               </Button>
             </div>

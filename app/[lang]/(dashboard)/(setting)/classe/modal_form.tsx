@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchClasses } from "@/store/schoolservice";
 import { Classe } from "@/lib/interface";
+import { Loader2 } from "lucide-react";
 interface ClassData {
   level_id: number;
   label: string;
@@ -154,7 +155,13 @@ const DialogForm = () => {
               onClick={handleSubmit}
               disabled={loading}
             >
-              {loading ? "Création..." : "Créer"}
+              {loading ? (
+                <>
+                  <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
+                  Ajout en cours...
+                </>) : 
+                "Ajouter"
+                }
             </Button>
           </div>
         </div>

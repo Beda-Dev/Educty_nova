@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { toast } from "react-hot-toast"
 import { useReinscriptionStore } from "@/hooks/use-reinscription-store"
 import { TutorEditModal } from "./tutor-edit-modal"
-import { StudentFormData, AssignmentType, Tutor } from "@/lib/interface"
+import { StudentFormData, AssignmentType, Tutor, StudentPhoto } from "@/lib/interface"
 import { X, Plus, AlertTriangle, RefreshCw , User } from "lucide-react"
 import { useSchoolStore } from "@/store/index"
 import { motion } from "framer-motion"
@@ -47,7 +47,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
     first_name: "",
     birth_date: "",
     status: "actif",
-    photo: null as File | null,
+    photo: null as StudentPhoto,
     sexe: "",
   })
 
@@ -63,7 +63,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
         first_name: selectedStudent.first_name,
         birth_date: selectedStudent.birth_date,
         status: selectedStudent.status,
-        photo: null,
+        photo: selectedStudent.photo ?? null,
         sexe: selectedStudent.sexe,
       })
 
@@ -112,7 +112,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       return
     }
 
-    setFormData({ ...formData, photo: file })
+    setFormData({ ...formData, photo: file ? { file } : null })
 
     // Stocker immédiatement dans IndexedDB
     try {
@@ -190,26 +190,27 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
         for (const key of Object.keys(formData)) {
           const typedKey = key as keyof typeof formData
           if (formData[typedKey] !== (selectedStudent as any)[key]) {
-            if (key === "photo" && formData.photo) {
-              // Stocker la photo dans IndexedDB et garder la référence
-              try {
-                const fileId = await storeFileInIndexedDB(formData.photo)
-                modifications[key] = {
-                  stored: {
-                    fileId,
-                    originalName: formData.photo.name,
-                    size: formData.photo.size,
-                    type: formData.photo.type,
-                    isRestored: false,
-                  },
+            if (key === "photo") {
+              if (formData.photo && typeof formData.photo === "object" && "file" in formData.photo && formData.photo.file) {
+                // Nouvelle photo sélectionnée
+                try {
+                  const fileId = await storeFileInIndexedDB(formData.photo.file)
+                  modifications[key] = {
+                    stored: {
+                      fileId,
+                      originalName: formData.photo.file.name,
+                      size: formData.photo.file.size,
+                      type: formData.photo.file.type,
+                      isRestored: false,
+                    },
+                  }
+                } catch (error) {
+                  modifications[key] = { file: formData.photo.file }
                 }
-              } catch (error) {
-                console.error("Error storing photo:", error)
-                // Fallback: garder le fichier natif
-                modifications[key] = { file: formData.photo }
+              } else {
+                // Pas de nouvelle photo sélectionnée, on envoie null
+                modifications[key] = formData[typedKey]
               }
-            } else {
-              modifications[key] = formData[typedKey]
             }
           }
         }
@@ -334,6 +335,27 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                   accept="image/*"
                   onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
                 />
+                {/* Affichage de la photo actuelle */}
+                {formData.photo && typeof formData.photo === "string" && (
+                  <div className="mt-2">
+                    <img
+                      src={formData.photo}
+                      alt="Photo élève"
+                      className="w-24 h-24 object-cover rounded border"
+                    />
+                    <div className="text-xs text-gray-500">Photo actuelle (lien externe)</div>
+                  </div>
+                )}
+                {formData.photo && typeof formData.photo === "object" && formData.photo instanceof File && (
+                  <div className="mt-2">
+                    <img
+                      src={URL.createObjectURL(formData.photo)}
+                      alt="Nouvelle photo élève"
+                      className="w-24 h-24 object-cover rounded border"
+                    />
+                    <div className="text-xs text-gray-500">Nouvelle photo sélectionnée</div>
+                  </div>
+                )}
                 {fileError && (
                   <Alert color="destructive">
                     <AlertTriangle className="h-4 w-4" />

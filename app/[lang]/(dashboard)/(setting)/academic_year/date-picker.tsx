@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchAcademicYears } from "@/store/schoolservice";
+import {Loader2} from "lucide-react"
 
 
 interface DatePickerFormProps {
@@ -53,6 +54,12 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const closed = () => {
+    if (onSuccess) {
+      onSuccess();
+    }
+  }
+
   async function onSubmit(data: FormSchemaType) {
     setIsLoading(true);
     const response = await fetch("/api/academic_year", {
@@ -72,7 +79,7 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
         onSuccess();
       }
     } else {
-      console.error("Erreur lors de l'envoi des dates" , response);
+      console.error("Erreur lors de l'envoi des dates", response);
       toast.error("Une erreur est survenue");
     }
     setIsLoading(false);
@@ -141,9 +148,24 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
         <input type="hidden" {...form.register("start_date")} />
         <input type="hidden" {...form.register("end_date")} />
 
-        <Button color="indigodye" type="submit" disabled={!startDate || !endDate || isLoading} className="w-full">
-          {isLoading ? "Envoi..." : "Ajouter"}
-        </Button>
+        <div className="flex justify-around">
+          <Button color="destructive" onClick={closed} disabled={!startDate || !endDate || isLoading} className="">
+            Annuler
+          </Button>
+          <Button color="indigodye" type="submit" disabled={!startDate || !endDate || isLoading} className="">
+            {isLoading ? (
+              <>
+                <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
+                Ajout en cours...
+              </>) : 
+              "Ajouter"
+              }
+
+          </Button>
+
+        </div>
+
+
       </form>
     </Form>
   );
