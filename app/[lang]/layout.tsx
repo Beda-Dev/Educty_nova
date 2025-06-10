@@ -1,3 +1,4 @@
+
 import "../assets/scss/globals.scss";
 import "../assets/scss/theme.scss";
 import { Inter } from "next/font/google";
@@ -9,6 +10,7 @@ import "flatpickr/dist/themes/light.css";
 import DirectionProvider from "@/provider/direction.provider";
 import DataFetcher from "./update";
 import NetworkStatus from "./network-status";
+import {RegistrationReset} from "@/components/registration/registration-reset";
 
 
 const inter = Inter({ subsets: ["latin"] });
@@ -35,6 +37,7 @@ export default function RootLayout({
           <DirectionProvider lang={lang}>
             <NetworkStatus />
             <DataFetcher />
+            <RegistrationReset />
             {children}
           </DirectionProvider>
         </Providers>

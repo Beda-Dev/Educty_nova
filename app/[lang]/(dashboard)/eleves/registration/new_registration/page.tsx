@@ -10,17 +10,17 @@ import { Step3Pricing } from "@/components/registration/step-3-pricing"
 import { Step4Documents } from "@/components/registration/step-4-documents"
 import { Step5Confirmation } from "@/components/registration/step-5-confirmation"
 import { RegistrationReceipt } from "@/components/registration/registration-receipt"
-import { fetchTutors , fetchPaymentMethods , fetchStudents , fetchRegistration , fetchPayment } from "@/store/schoolservice"
+import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment } from "@/store/schoolservice"
 import { useRegistrationStore } from "@/hooks/use-registration-store"
 import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function InscriptionPage() {
-  const {  setTutors , methodPayment , setmethodPayment , setRegistration  , setStudents  , setPayments , academicYearCurrent , classes , registrations } = useSchoolStore()
-  const {currentStep, setCurrentStep , reset} = useRegistrationStore()
+  const { setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations } = useSchoolStore()
+  const { currentStep, setCurrentStep, reset } = useRegistrationStore()
 
   const [showReceipt, setShowReceipt] = useState(false)
 
-  useEffect(() => { 
+  useEffect(() => {
     const fetchUpdate = async () => {
       const updatedTutors = await fetchTutors()
       setTutors(updatedTutors)
@@ -38,7 +38,7 @@ export default function InscriptionPage() {
     setCurrentStep(currentStep - 1)
   }
 
-  const handleComplete = async() => {
+  const handleComplete = async () => {
     try {
       const response = await fetchRegistration()
       setRegistration(response)
@@ -46,7 +46,7 @@ export default function InscriptionPage() {
       setStudents(responseStudents)
       const responsePayments = await fetchPayment()
       setPayments(responsePayments)
-      
+
       await updateStudentCountByClass(registrations, academicYearCurrent, classes);
 
 

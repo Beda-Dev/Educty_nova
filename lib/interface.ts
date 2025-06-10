@@ -97,7 +97,7 @@ export interface User {
   created_at: string;
   updated_at: string;
   roles: Role[];
-  superior?: null;
+  superior?: null | UserSingle;
   subordinates?: UserSingle[];
   avatar?: string | null;
   permissions?: Permission[];
@@ -112,7 +112,7 @@ export interface UserSingle {
   email_verified_at: null;
   created_at: string;
   updated_at: string;
-  superior?: null;
+  superior?: null | UserSingle;
   subordinates?: UserSingle[];
   avatar?: string | null;
 }
@@ -406,22 +406,22 @@ export interface Transaction {
 
 export interface Setting {
   id: number;
-  registration_number_format: string;
+  registration_number_format?: string;
   created_at: string; // ou Date si vous convertissez les dates
   updated_at: string; // ou Date si vous convertissez les dates
-  establishment_phone_1: string;
-  establishment_phone_2: string | null;
-  establishment_logo: string | null; // URL ou chemin du fichier
-  establishment_name: string;
-  approval_number: string | null;
-  status: string;
-  address: string;
-  email: string | null;
-  longitude: string | number | null; // plus précis que string pour les coordonnées
-  latitude: string | number | null; // plus précis que string pour les coordonnées
-  expense_approval_level: number;
-  primary_validator: string | null;
-  currency: string | null;
+  establishment_phone_1?: string;
+  establishment_phone_2?: string | null;
+  establishment_logo?: string | null; //  envoyer une image
+  establishment_name?: string;
+  approval_number?: string | null; // Numéro d'approbation
+  status?: string; // status: string; // privé , public ,  semi privé dans un select
+  address?: string;
+  email?: string | null;
+  longitude?: string | number | null; // plus précis que string pour les coordonnées
+  latitude?: string | number | null; // plus précis que string pour les coordonnées
+  expense_approval_level?: number; // niveau de validation des depenses dans select
+  primary_validator?: string | null; // validateur principal
+  currency?: string | null; // devise FCFA par defaut dans un select
 }
 
 export interface Matter {

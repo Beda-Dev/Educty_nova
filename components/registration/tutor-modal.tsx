@@ -179,7 +179,7 @@ export function TutorModal({ triggerButton, open, onOpenChange }: TutorModalProp
         {triggerButton ? (
           triggerButton(trigger)
         ) : (
-          <Button variant="outline" className="w-full group">
+          <Button color="indigodye" className="w-full group">
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}

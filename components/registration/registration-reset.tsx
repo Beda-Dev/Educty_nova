@@ -9,13 +9,10 @@ export function RegistrationReset() {
   const previousPathname = useRef<string | null>(null)
 
   useEffect(() => {
-    if (previousPathname.current) {
-      const wasRegistrationPage = previousPathname.current.includes('/eleves/registration/new_registration')
-      const isNowRegistrationPage = pathname?.includes('/eleves/registration/new_registration')
-      
-      if (wasRegistrationPage && !isNowRegistrationPage) {
-        reset()
-      }
+    // Reset the registration store when navigating away from registration page
+    if (previousPathname.current?.includes('/eleves/registration/new_registration') && 
+        !pathname?.includes('/eleves/registration/new_registration')) {
+      reset()
     }
     
     previousPathname.current = pathname

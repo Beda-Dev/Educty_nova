@@ -56,7 +56,7 @@ const ProfileInfo = () => {
         <DropdownMenuGroup>
           {[
             { name: "Profil", icon: "heroicons:user", href: "/profil" },
-            // { name: "parametre", icon: "heroicons:cog", href: "/parametre" },
+            { name: "Paramètres de l'établissement", icon: "heroicons:cog", href: "/establishment_settings" },
           ].map((item, index) => (
             <Link
               href={item.href}

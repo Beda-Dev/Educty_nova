@@ -189,7 +189,21 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         doc.document_type_id === selectedDocType
       )
 
+      if (!storedDocument) {
+        console.error("Document non trouvé après l'ajout:", { 
+          label: selectedFile.name, 
+          docType: selectedDocType,
+          documents: documents.map(d => ({ 
+            label: d.label, 
+            type: d.document_type_id,
+            stored: d.path.stored?.fileId 
+          }))
+        })
+        throw new Error("Le document n'a pas été trouvé après l'ajout")
+      }
+
       if (!storedDocument?.path.stored?.fileId) {
+        console.error("Document stocké sans ID:", storedDocument)
         throw new Error("Le document n'a pas été correctement stocké")
       }
 
@@ -204,6 +218,15 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       await checkIndexedDBStatus()
     } catch (error) {
       console.error("Error adding document:", error)
+      if (error instanceof Error) {
+        // Log more details about the error
+        console.error("Detailed error:", {
+          message: error.message,
+          name: error.name,
+          stack: error.stack
+        })
+      }
+      
       setFileError("Erreur lors de l'ajout du document: " + (error instanceof Error ? error.message : "Une erreur est survenue"))
       
       // Tenter de restaurer les documents existants

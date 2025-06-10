@@ -79,6 +79,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
           setLocalAvailablePricing(matchingPricing)
           setAvailablePricing(matchingPricing)
           setPricingError("")
+          console.log("Tarification trouvée pour ces paramètres." , matchingPricing )
         } else {
           setLocalAvailablePricing([])
           setAvailablePricing([])

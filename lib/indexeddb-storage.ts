@@ -75,15 +75,24 @@ class IndexedDBFileStorage {
 
   async storeFile(file: File, customId?: string): Promise<string> {
     try {
+      console.log("Starting file storage process:", {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      })
+
       if (!this.db) {
+        console.log("IndexedDB not initialized, attempting to initialize...")
         await this.init()
       }
 
       if (!this.db) {
+        console.error("Failed to initialize IndexedDB")
         throw new Error("IndexedDB not initialized")
       }
 
       const id = customId || `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      console.log("Generated file ID:", id)
 
       const fileData: StoredFileData = {
         id,
@@ -96,13 +105,29 @@ class IndexedDBFileStorage {
         },
       }
 
+      console.log("File data to store:", {
+        id: fileData.id,
+        name: fileData.metadata.originalName,
+        size: fileData.metadata.size,
+        type: fileData.metadata.type
+      })
+
       return new Promise((resolve, reject) => {
         try {
+          console.log("Starting IndexedDB transaction...")
           const transaction = this.db!.transaction([this.storeName], "readwrite")
 
+          transaction.oncomplete = () => {
+            console.log("Transaction completed successfully")
+          }
+
           transaction.onerror = (event) => {
-            console.error("Transaction error:", transaction.error)
-            console.error("Transaction error event:", event)
+            console.error("Transaction error:", {
+              error: transaction.error,
+              event: event,
+              errorName: transaction.error?.name,
+              errorCode: transaction.error?.code
+            })
             reject(transaction.error)
           }
 
@@ -111,20 +136,46 @@ class IndexedDBFileStorage {
 
           request.onsuccess = () => {
             console.log(`File stored in IndexedDB: ${id}, ${file.name}, ${file.size}`)
+            console.log("File storage successful, verifying file...")
+            
+            // Vérifier si le fichier existe bien
+            this.getFile(id).then(storedFile => {
+              if (storedFile) {
+                console.log("File verification successful")
+              } else {
+                console.error("File verification failed: file not found after storage")
+              }
+            }).catch(error => {
+              console.error("Error during file verification:", error)
+            })
+
             resolve(id)
           }
 
           request.onerror = () => {
-            console.error("Error storing file in IndexedDB:", request.error)
+            console.error("Error storing file in IndexedDB:", {
+              error: request.error,
+              errorName: request.error?.name,
+              errorCode: request.error?.code,
+              errorMessage: request.error?.message
+            })
             reject(request.error)
           }
         } catch (error) {
-          console.error("Exception in storeFile transaction:", error)
+          console.error("Exception in storeFile transaction:", {
+            error: error,
+            errorName: error?.name,
+            errorMessage: error?.message
+          })
           reject(error)
         }
       })
     } catch (error) {
-      console.error("Error in storeFile:", error)
+      console.error("Error in storeFile:", {
+        error: error,
+        errorName: error?.name,
+        errorMessage: error?.message
+      })
       throw error
     }
   }

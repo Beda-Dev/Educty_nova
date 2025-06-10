@@ -288,7 +288,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                       <Info className="w-4 h-4 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Numéro d'identification unique de l'élève</p>
+                      <p>Numéro Matricule unique de l'élève</p>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -491,6 +491,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         onOpenChange={setOpenTutorModal}
                         triggerButton={() => (
                           <Button
+                          color="indigodye"
                             onClick={(e) => {
                               e.preventDefault()
                               setOpenTutorModal(true)

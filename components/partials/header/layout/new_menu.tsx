@@ -273,7 +273,7 @@ const menuItems: MenuCategory = {
         {
           id: "re-registration",
           title: "Re-inscription",
-          path: "/eleves/registration/re_registration",
+          path: "/eleves/registration/re-registration",
           icon: <UserCheck  className="w-4 h-4" />,
         },
       ],

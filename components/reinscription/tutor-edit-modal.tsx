@@ -97,7 +97,7 @@ export function TutorEditModal({ tutor, isNew = false }: TutorEditModalProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {isNew ? (
-          <Button variant="outline" className="w-full group">
+          <Button color="indigodye" variant="outline" className="w-full group">
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
