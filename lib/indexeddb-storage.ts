@@ -164,17 +164,17 @@ class IndexedDBFileStorage {
         } catch (error) {
           console.error("Exception in storeFile transaction:", {
             error: error,
-            errorName: error?.name,
-            errorMessage: error?.message
+            errorName: error instanceof Error ? error.name : 'UnknownError',
+            errorMessage: error instanceof Error ? error.message : 'Unknown error occurred'
           })
           reject(error)
         }
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in storeFile:", {
         error: error,
-        errorName: error?.name,
-        errorMessage: error?.message
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+        errorMessage: error instanceof Error ? error.message : 'Unknown error occurred'
       })
       throw error
     }
