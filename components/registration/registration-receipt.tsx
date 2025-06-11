@@ -55,6 +55,8 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
       }, 0)
       setTotalPayer(total)
     }
+
+    
   }, [payments])
 
   const SearchFeeType = (id: number): Pricing | undefined => {
@@ -81,64 +83,67 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
   const handleDownload = () => handlePDF("download")
 
   const ReceiptCopy = () => (
-    <div className="p-3 bg-white" style={{ fontSize: '11px' }}>
+    <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: '12px' }}>
       {/* Header */}
-      <div className="flex justify-between items-start border-b pb-1 mb-1">
-        <div className="flex items-start gap-1">
+      <div className="flex justify-between items-start border-b pb-3 mb-4">
+        <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
             <Image
               src={schoolInfo.logo}
               alt="Logo"
-              width={48}
-              height={48}
+              width={56}
+              height={56}
               className="object-contain"
             />
           ) : (
-            <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs">
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">
               Logo
             </div>
           )}
-          <div>
-            <h1 className="text-xs font-bold leading-tight">{schoolInfo.name}</h1>
-            <p className="text-[10px] text-gray-600 leading-tight">
+          <div className="space-y-1">
+            <h1 className="text-sm font-bold leading-snug">{schoolInfo.name}</h1>
+            <p className="text-xs text-gray-600 leading-snug">
               {schoolInfo.address} | Tél: {schoolInfo.phone}
             </p>
-            <p className="text-[10px] text-gray-600 leading-tight">
-              Année: {academicYearCurrent.label}
+            <p className="text-xs text-gray-600 leading-snug">
+              Année scolaire: {academicYearCurrent.label}
             </p>
           </div>
         </div>
-        <div className="text-right">
-          <h2 className="text-xs font-semibold leading-tight">REÇU D'INSCRIPTION</h2>
-          <p className="text-[10px] text-gray-600 leading-tight">
+        <div className="text-right space-y-1">
+          <h2 className="text-sm font-semibold leading-snug">REÇU D'INSCRIPTION</h2>
+          <p className="text-xs text-gray-600 leading-snug">
             N° {schoolInfo.receiptNumber}
+          </p>
+          <p className="text-xs text-gray-600 leading-snug">
+            Date: {new Date().toLocaleDateString("fr-FR")}
           </p>
         </div>
       </div>
 
       <Card className="print:shadow-none border-0">
-        <CardContent className="p-1">
+        <CardContent className="p-3 space-y-4">
           {/* Student Info */}
           {studentData && (
-            <div className="mb-1">
-              <h3 className="text-xs font-semibold text-blue-800 mb-0.5">ÉLÈVE</h3>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
-                <Info label="Nom" value={`${studentData.name} ${studentData.first_name}`} />
+            <div className="mb-4">
+              <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE L'ÉLÈVE</h3>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                <Info label="Nom complet" value={`${studentData.name} ${studentData.first_name}`} />
                 <Info label="Matricule" value={studentData.registration_number} />
-                <Info label="Naissance" value={new Date(studentData.birth_date).toLocaleDateString("fr-FR")} />
+                <Info label="Date de naissance" value={new Date(studentData.birth_date).toLocaleDateString("fr-FR")} />
                 <Info label="Sexe" value={studentData.sexe} />
                 <Info label="Classe" value={Classe?.label || "N/A"} />
-                <Info label="Inscription" value={registrationData ? new Date(registrationData.registration_date).toLocaleDateString("fr-FR") : "N/A"} />
+                <Info label="Date d'inscription" value={registrationData ? new Date(registrationData.registration_date).toLocaleDateString("fr-FR") : "N/A"} />
               </div>
             </div>
           )}
 
-          <Separator className="my-1 h-[0.5px]" />
+          <Separator className="my-4" />
 
           {/* Payment Summary */}
-          <div className="mb-1">
-            <h3 className="text-xs font-semibold text-blue-800 mb-0.5">PAIEMENTS</h3>
-            <div className="space-y-0.5">
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-blue-800 mb-3">DÉTAIL DES PAIEMENTS</h3>
+            <div className="space-y-2 mb-4">
               {payments.reduce((acc, payment) => {
                 const feeType = SearchFeeType(Number(payment.installment_id))
                 if (!feeType) return acc
@@ -158,50 +163,50 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
               }, [] as { feeType: string; amount: number; count: number }[])
               .sort((a, b) => a.feeType.localeCompare(b.feeType))
               .map((item, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <span className="text-xs">
+                <div key={index} className="flex justify-between items-center py-1">
+                  <span className="text-sm">
                     {item.feeType} {item.count > 1 ? `(${item.count}x)` : ''}
                   </span>
-                  <span className="text-xs font-medium">{item.amount.toLocaleString()} {schoolInfo.currency}</span>
+                  <span className="text-sm font-medium">{item.amount.toLocaleString()} {schoolInfo.currency}</span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-1 space-y-0.5 text-xs">
-              <div className="flex justify-between">
+            <div className="space-y-2 text-sm bg-gray-50 p-3 rounded-lg">
+              <div className="flex justify-between py-1">
                 <span>Total à payer:</span>
                 <span className="font-medium">{totalPayer.toLocaleString()} {schoolInfo.currency}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between py-1">
                 <span>Montant payé:</span>
                 <span className="font-medium text-green-600">{paidAmount.toLocaleString()} {schoolInfo.currency}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between py-1 font-semibold">
                 <span>Reste à payer:</span>
-                <span className={`font-medium ${totalPayer - paidAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                <span className={`${totalPayer - paidAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
                   {(totalPayer - paidAmount).toLocaleString()} {schoolInfo.currency}
                 </span>
               </div>
             </div>
           </div>
 
-          <Separator className="my-1 h-[0.5px]" />
+          <Separator className="my-4" />
 
           {/* Signatures */}
-          <div className="grid grid-cols-2 gap-1 mt-1">
-            <div className="text-[10px] text-gray-700 text-center">
-              <div className="border-t border-gray-400 h-6 w-32 mx-auto"></div>
-              <span>Signature du parent</span>
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            <div className="text-xs text-gray-700 text-center space-y-2">
+              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+              <span>Signature du parent/tuteur</span>
             </div>
-            <div className="text-[10px] text-gray-700 text-center">
-              <div className="border-t border-gray-400 h-6 w-32 mx-auto"></div>
-              <span>Cachet et signature</span>
+            <div className="text-xs text-gray-700 text-center space-y-2">
+              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+              <span>Cachet et signature de l'établissement</span>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-[10px] text-gray-600 mt-1 pt-1 border-t">
-            <p>Document officiel de {schoolInfo.name}</p>
+          <div className="text-center text-xs text-gray-600 mt-6 pt-4 border-t">
+            <p className="mb-1">Document officiel de {schoolInfo.name}</p>
             <p>Émis le {new Date().toLocaleDateString("fr-FR")} à {new Date().toLocaleTimeString("fr-FR", {hour: '2-digit', minute:'2-digit'})}</p>
           </div>
         </CardContent>
@@ -210,37 +215,38 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
   )
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div ref={printRef} className="space-y-1">
+    <div className="max-w-4xl mx-auto p-4">
+      <div ref={printRef} className="space-y-6">
         <ReceiptCopy />
+        <div className="text-xs text-center text-gray-500 py-2">---------------------------- ---------------------------- ----------------------------</div>
         <ReceiptCopy />
       </div>
 
-      <div className="flex justify-center gap-1.5 mt-3 print:hidden">
+      <div className="flex justify-center gap-3 mt-6 print:hidden">
         <Button 
           onClick={handlePrint} 
           variant="outline" 
           size="sm" 
-          className="h-7 px-2 text-xs"
+          className="h-9 px-4 text-sm"
           disabled={isPrinting}
         >
-          <Print className="w-3 h-3 mr-1" />
+          <Print className="w-4 h-4 mr-2" />
           Imprimer
         </Button>
         <Button 
           onClick={handleDownload} 
           variant="outline" 
           size="sm" 
-          className="h-7 px-2 text-xs"
+          className="h-9 px-4 text-sm"
           disabled={isPrinting}
         >
-          <Download className="w-3 h-3 mr-1" />
-          PDF
+          <Download className="w-4 h-4 mr-2" />
+          Télécharger PDF
         </Button>
         <Button 
           onClick={onNewRegistration} 
           size="sm" 
-          className="h-7 px-2 text-xs"
+          className="h-9 px-4 text-sm bg-blue-600 hover:bg-blue-700"
         >
           Nouvelle inscription
         </Button>
@@ -250,8 +256,8 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
 }
 
 const Info = ({ label, value }: { label: string; value?: string | number | null }) => (
-  <p className="text-xs truncate">
-    <span className="font-semibold">{label}:</span>{" "}
-    <span className="text-gray-800">{value || "N/A"}</span>
-  </p>
+  <div className="flex items-start">
+    <span className="font-semibold min-w-[120px]">{label}:</span>
+    <span className="text-gray-800 ml-2">{value || "N/A"}</span>
+  </div>
 )
