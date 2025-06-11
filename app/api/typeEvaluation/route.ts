@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     
-    const data = await fetch('https://educty.digifaz.com/api/typeNote').then(res => res.json());
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typeNote`).then(res => res.json());
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error);
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const response = await fetch('https://educty.digifaz.com/api/typeNote', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typeNote`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const id = new URL(request.url).searchParams.get('id');
     
-    const response = await fetch(`https://educty.digifaz.com/api/typeNote/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typeNote/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -54,7 +54,7 @@ export async function DELETE(request: NextRequest) {
   try {
    const id = new URL(request.url).searchParams.get('id');
     
-    const response = await fetch(`https://educty.digifaz.com/api/typeNote/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typeNote/${id}`, {
       method: 'DELETE',
     });
     const data = await response.json();

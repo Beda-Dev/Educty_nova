@@ -51,34 +51,44 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
 
   const rollbackCreatedEntities = async (createdEntities: any) => {
+    const results: Record<string, any> = {};
     try {
-      // Delete created payments
-      for (const paymentId of createdEntities.payments) {
-        await fetch(`/api/payment?id=${paymentId}`, { method: "DELETE" })
-      }
-      if(transactionIds.length > 0){
-      for (const transactionId of transactionIds) {
-        await fetch(`/api/transaction?id=${transactionId}`, { method: "DELETE" })
-      }
-    }
+      // Helper pour suppression parallèle et rapport
+      const deleteEntities = async (label: string, ids: any[], endpoint: string) => {
+        if (!Array.isArray(ids) || ids.length === 0) return;
+        const uniqueIds = Array.from(new Set(ids));
+        const res = await Promise.allSettled(
+          uniqueIds.map(id =>
+            fetch(`${endpoint}?id=${id}`, { method: "DELETE" })
+          )
+        );
+        results[label] = res.map((r, i) => ({
+          id: uniqueIds[i],
+          status: r.status,
+          reason: r.status === "rejected" ? r.reason : undefined
+        }));
+      };
 
-      // Delete created documents
-      for (const documentId of createdEntities.documents) {
-        await fetch(`/api/document?id=${documentId}`, { method: "DELETE" })
+      await deleteEntities("payments", createdEntities.payments, "/api/payment");
+      if (typeof transactionIds !== "undefined" && transactionIds.length > 0) {
+        await deleteEntities("transactions", transactionIds, "/api/transaction");
       }
+      await deleteEntities("documents", createdEntities.documents, "/api/document");
+      await deleteEntities("tutors", createdEntities.tutors, "/api/tutor");
 
-      // Delete created tutors
-      for (const tutorId of createdEntities.tutors) {
-        await fetch(`/api/tutor?id=${tutorId}`, { method: "DELETE" })
-      }
-
-      // Delete created registration
       if (createdEntities.registration) {
-        await fetch(`/api/registration?id=${createdEntities.registration}`, { method: "DELETE" })
+        try {
+          await fetch(`/api/registration?id=${createdEntities.registration}`, { method: "DELETE" });
+          results.registration = { id: createdEntities.registration, status: "fulfilled" };
+        } catch (err) {
+          results.registration = { id: createdEntities.registration, status: "rejected", reason: err };
+        }
       }
     } catch (error) {
-      console.error("Erreur lors du rollback:", error)
+      console.error("Erreur lors du rollback:", error);
+      results.globalError = error;
     }
+    return results;
   }
 
   const {
@@ -128,7 +138,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
             studentFormData.append("photo", photoFile)
             console.log("Photo added to FormData:", photoFile.name, photoFile.size)
           } else {
-            console.warn("Failed to retrieve photo file from IndexedDB")
+            console.warn("Failed to retrieve photo file from storage")
           }
         }
       }
@@ -173,7 +183,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         })),
       ]
 
-      const assignTutorResponse = await fetch("https://educty.digifaz.com/api/student/assign-tutor", {
+      const assignTutorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/assign-tutor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -251,7 +261,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         docFormData.append("label", doc.label)
 
         const file = await getFileFromPath(doc.path)
-        console.log("Retrieved file from IndexedDB:", file ? `${file.name} (${file.size} bytes)` : "null")
+        // console.log("Photo file retrieved", file ? `${file.name} (${file.size} bytes)` : "null")
 
         if (file && file.size > 0) {
           docFormData.append("path", file)
@@ -368,7 +378,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                     { label: "Statut", value: studentData.status, badge: true },
                     { label: "Photo", value: studentData.photo ? "Photo ajoutée" : "Aucune photo", 
                       badge: true,
-                      extra: studentData.photo?.stored?.isRestored && "(restaurée depuis IndexedDB)" 
+                      extra: studentData.photo?.stored?.isRestored && "(restaurée automatiquement)" 
                     }
                   ].map((item, index) => (
                     <div key={index} className="flex items-center space-x-3">
@@ -661,7 +671,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                           </span>
                           {/* {doc.path?.stored?.isRestored && (
                             <Badge variant="outline" className="text-xs">
-                              Restauré depuis IndexedDB
+                              Restauré automatiquement
                             </Badge>
                           )} */}
                         </div>

@@ -46,7 +46,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
     setError(null);
 
     try {
-      const response = await fetch(`https://educty.digifaz.com/api/academicYear/set-current/${value}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/academicYear/set-current/${value}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });

@@ -5,8 +5,8 @@ export async function GET(request: NextRequest) {
     try {
       // Récupération des niveaux et des classes en parallèle
       const [levelsResponse, classesResponse] = await Promise.all([
-        fetch("https://educty.digifaz.com/api/level"),
-        fetch("https://educty.digifaz.com/api/classe"),
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/level`),
+        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/classe`),
       ]);
   
       if (!levelsResponse.ok || !classesResponse.ok) {
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const response = await fetch('https://educty.digifaz.com/api/level', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/level`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -62,7 +62,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const id = new URL(request.url).searchParams.get('id');
     
-    const response = await fetch(`https://educty.digifaz.com/api/level/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/level/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -80,7 +80,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
     
-    const response = await fetch(`https://educty.digifaz.com/api/level/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/level/${id}`, {
       method: 'DELETE',
     });
     const data = await response.json();

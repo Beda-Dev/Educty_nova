@@ -343,7 +343,7 @@ export function RegistrationForm({
 
       // 3. Associer les tuteurs à l'élève
       const assignTutorResponse = await fetch(
-        "https://educty.digifaz.com/api/student/assign-tutor",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/assign-tutor`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

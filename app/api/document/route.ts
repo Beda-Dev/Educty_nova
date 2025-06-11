@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const data = await fetch('https://educty.digifaz.com/api/document').then(res => res.json());
+    const data = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`).then(res => res.json());
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error('Erreur lors de la récupération des données :', error);
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData(); // Récupérer FormData depuis la requête
 
-    const response = await fetch('https://educty.digifaz.com/api/document', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`, {
       method: 'POST',
       body: formData, // Envoyer FormData directement
     });
@@ -32,7 +32,7 @@ export async function PUT(request: NextRequest) {
     const formData = await request.formData();
     const id = new URL(request.url).searchParams.get('id');
 
-    const response = await fetch(`https://educty.digifaz.com/api/document/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document/${id}`, {
       method: 'PUT',
       body: formData, // Envoyer FormData directement
     });
@@ -49,7 +49,7 @@ export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
 
-    const response = await fetch(`https://educty.digifaz.com/api/document/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document/${id}`, {
       method: 'DELETE',
     });
 

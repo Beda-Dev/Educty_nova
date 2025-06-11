@@ -60,7 +60,7 @@ export function EditPasswordForm({ user, onCloseAction, onSuccess }: EditPasswor
     }
 
     try {
-      const response = await fetch(`https://educty.digifaz.com/api/users/${user.id}/update-password`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}/update-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

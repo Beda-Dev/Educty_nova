@@ -70,22 +70,6 @@ export default function HomePage() {
       className="container mx-auto px-4 py-12"
     >
       <div className="max-w-6xl mx-auto">
-        {/* Header Section */}
-        <motion.div 
-          variants={itemVariants}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center justify-center bg-primary/10 p-4 rounded-full mb-6">
-            <GraduationCap className="w-10 h-10 text-primary" />
-          </div>
-          <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">
-            Gestion du type d'inscription
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Gérer les inscriptions et réinscriptions des élèves avec efficacité
-          </p>
-        </motion.div>
-
         {/* Main Cards Grid */}
         <motion.div 
           variants={containerVariants}
@@ -175,52 +159,6 @@ export default function HomePage() {
               </CardContent>
             </Card>
           </motion.div>
-        </motion.div>
-
-        {/* Features Section */}
-        <motion.div variants={itemVariants}>
-          <Card className="bg-gradient-to-r from-primary/5 to-secondary/5 border-0 shadow-sm">
-            <CardContent className="p-8">
-              <h3 className="text-2xl font-semibold text-center mb-8 text-gray-900 dark:text-white">
-                Fonctionnalités du système
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {[
-                  {
-                    title: "Gestion complète",
-                    description: "Suivi des élèves, tuteurs, classes et paiements en temps réel",
-                    icon: <ShieldCheck className="w-6 h-6 text-primary" />
-                  },
-                  {
-                    title: "Interface intuitive",
-                    description: "Processus guidé étape par étape pour une prise en main facile",
-                    icon: <BookOpen className="w-6 h-6 text-primary" />
-                  },
-                  {
-                    title: "Sécurisé et fiable",
-                    description: "Validation des données et sauvegarde automatique des informations",
-                    icon: <Clock className="w-6 h-6 text-primary" />
-                  }
-                ].map((feature, index) => (
-                  <motion.div 
-                    key={index}
-                    whileHover={{ y: -5 }}
-                    className="flex flex-col items-center text-center"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                      {feature.icon}
-                    </div>
-                    <h4 className="text-lg font-medium mb-2 text-gray-900 dark:text-white">
-                      {feature.title}
-                    </h4>
-                    <p className="text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </motion.div>
       </div>
     </motion.div>

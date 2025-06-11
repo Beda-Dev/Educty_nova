@@ -40,9 +40,14 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const [installmentAmounts, setInstallmentAmounts] = useState<Record<number, number>>({})
   const [paymentMethods, setPaymentMethods] = useState<Record<number, Array<{ id: number; amount: number }>>>({})
   const [totalPaidAmount, setTotalPaidAmount] = useState(0)
+  // Montant donné saisi manuellement
   const [givenAmount, setGivenAmount] = useState(0)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(methodPayment[0]?.id || 0)
   const [openConfirmModal, setOpenConfirmModal] = useState(false)
+  // Gestion des erreurs locales par échéance
+  const [installmentErrors, setInstallmentErrors] = useState<Record<number, string>>({})
+  // Gestion d'une erreur globale
+  const [globalError, setGlobalError] = useState<string>("")
 
   const allInstallments = availablePricing.flatMap((pricing) => pricing.installments || [])
 
@@ -50,7 +55,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
     const total = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0)
     setTotalPaidAmount(total)
     setPaidAmount(total)
-    setGivenAmount(total)
+    // NE PAS mettre à jour givenAmount ici, il doit rester manuel
   }, [installmentAmounts, setPaidAmount])
 
   const handleInstallmentToggle = (installmentId: number) => {
@@ -84,23 +89,35 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const handleAmountChange = (installmentId: number, amount: number | string) => {
     // Convertir une chaîne vide en 0, sinon convertir en nombre
     const numericAmount = amount === '' ? 0 : Number(amount) || 0;
-    
+    // Validation stricte : empêcher la saisie qui ferait dépasser le montant donné
+    const totalSansActuel = Object.entries(installmentAmounts)
+      .filter(([id]) => Number(id) !== installmentId)
+      .reduce((sum, [, amt]) => sum + amt, 0);
+    if (numericAmount + totalSansActuel > givenAmount) {
+      setGlobalError("La somme répartie dépasse le montant donné.");
+      return;
+    } else {
+      setGlobalError("");
+    }
     setInstallmentAmounts(prev => ({
       ...prev,
       [installmentId]: numericAmount,
     }))
-
+    // Vérification immédiate de la cohérence des sous-montants pour cette échéance
     const currentMethods = paymentMethods[installmentId] || []
     if (currentMethods.length === 1) {
       setPaymentMethods(prev => ({
         ...prev,
         [installmentId]: [{ ...currentMethods[0], amount: numericAmount }],
       }))
+      // Vérification de cohérence
+      setInstallmentErrors(prev => ({
+        ...prev,
+        [installmentId]: currentMethods[0].amount !== numericAmount
+          ? `La somme des méthodes (${currentMethods[0].amount}) ne correspond pas au montant de l'échéance (${numericAmount}).`
+          : ''
+      }))
     }
-    setGivenAmount(prev => {
-      const newAmounts = { ...installmentAmounts, [installmentId]: numericAmount };
-      return Object.values(newAmounts).reduce((sum, amt) => sum + amt, 0);
-    })
   }
 
   const addPaymentMethod = (installmentId: number) => {
@@ -126,6 +143,15 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
       ...paymentMethods,
       [installmentId]: updatedMethods,
     })
+    // Vérification immédiate de la cohérence des sous-montants pour cette échéance
+    const totalMethodAmount = updatedMethods.reduce((sum, method) => sum + method.amount, 0)
+    const installmentAmount = installmentAmounts[installmentId] || 0
+    setInstallmentErrors(prev => ({
+      ...prev,
+      [installmentId]: totalMethodAmount !== installmentAmount
+        ? `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${installmentAmount}).`
+        : ''
+    }))
   }
 
   const validatePaymentMethods = (installmentId: number): boolean => {
@@ -152,6 +178,13 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
         position: "top-center",
       })
       return
+    }
+
+    if (totalPaidAmount > givenAmount) {
+      toast.error("La somme répartie ne peut pas dépasser le montant donné.", {
+        position: "top-center",
+      })
+      return;
     }
 
     if (givenAmount < totalPaidAmount) {
@@ -434,7 +467,10 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
         <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
           Précédent
         </Button>
-        <Button onClick={handleNext} className="h-10 px-6">
+        <Button onClick={handleNext} className="h-10 px-6" disabled={
+          !!globalError ||
+          Object.values(installmentErrors).some((err) => !!err)
+        }>
           Suivant
         </Button>
       </motion.div>

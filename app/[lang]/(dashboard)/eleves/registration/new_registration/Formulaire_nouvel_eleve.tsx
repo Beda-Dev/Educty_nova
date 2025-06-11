@@ -104,7 +104,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
       const fetchTutors = async () => {
         try {
           const response = await fetch(
-            `https://educty.digifaz.com/api/student/${Newstudent.id}`
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${Newstudent.id}`
           );
           if (response.ok) {
             const data = await response.json();
@@ -233,8 +233,8 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
     try {
       // 1. Créer/mettre à jour l'élève
       const studentUrl = isEditing
-        ? `https://educty.digifaz.com/api/student/${Newstudent.id}`
-        : "https://educty.digifaz.com/api/student";
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${Newstudent.id}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student`;
       const studentMethod = isEditing ? "PUT" : "POST";
 
       let studentBody: BodyInit;
@@ -278,8 +278,8 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
       // 2. Créer/mettre à jour les tuteurs
       const tutorPromises = tutors.map(async (tutor) => {
         const tutorUrl = tutor.id
-          ? `https://educty.digifaz.com/api/tutor/${tutor.id}`
-          : "https://educty.digifaz.com/api/tutor";
+          ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor/${tutor.id}`
+          : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor`;
         const tutorMethod = tutor.id ? "PUT" : "POST";
 
         const tutorResponse = await fetch(tutorUrl, {
@@ -301,7 +301,7 @@ const FormulaireEnregistrement: React.FC<FormProps> = ({
 
       // 3. Associer les tuteurs à l'élève
       const assignTutorResponse = await fetch(
-        "https://educty.digifaz.com/api/student/assign-tutor",
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/assign-tutor`,
         {
           method: "POST",
           body: JSON.stringify({

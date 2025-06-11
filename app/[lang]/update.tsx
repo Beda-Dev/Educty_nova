@@ -57,6 +57,8 @@ const DataFetcher = () => {
 
   useEffect(() => {
     console.log("Composant monté ou dépendances mises à jour");
+    const abortController = new AbortController();
+    let isMounted = true;
 
     const loadData = async () => {
       console.log("Début du chargement des données...");
@@ -144,17 +146,11 @@ const DataFetcher = () => {
     // Charger les données immédiatement au montage du composant
     loadData();
 
-    // // Configurer un intervalle pour recharger les données toutes les 5 secondes
-    // const interval = setInterval(() => {
-    //   console.log("Intervalle déclenché - Rechargement des données...");
-    //   loadData();
-    // }, 300000);
-
-    // // Nettoyer l'intervalle lors du démontage du composant
-    // return () => {
-    //   console.log("Composant démonté - Nettoyage de l'intervalle");
-    //   clearInterval(interval);
-    // };
+    return () => {
+      isMounted = false;
+      abortController.abort();
+      console.log("Composant démonté - fetchs annulés");
+    };
   }, [
     setClasses,
     setLevels,

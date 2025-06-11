@@ -53,6 +53,10 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
   const checkIndexedDBStatus = async () => {
     try {
+      if (!fileStorage) {
+        setDbStatus("Stockage local non disponible sur ce navigateur ou en SSR")
+        return
+      }
       await fileStorage.init()
       const files = await fileStorage.getAllFiles()
       setDbStatus(`IndexedDB prêt - ${files.length} fichiers stockés`)
@@ -64,6 +68,11 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
   // Améliorons la validation des fichiers
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!fileStorage) {
+      setFileError("Stockage local non disponible sur ce navigateur ou en SSR")
+      toast.error("Stockage local non disponible sur ce navigateur ou en SSR")
+      return
+    }
     const file = e.target.files?.[0]
     setFileError("")
 
@@ -116,6 +125,12 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       return
     }
 
+    if (!fileStorage) {
+      setFileError("Stockage local non disponible sur ce navigateur ou en SSR")
+      toast.error("Stockage local non disponible sur ce navigateur ou en SSR")
+      return
+    }
+
     const docType = documentTypes.find((dt) => dt.id === selectedDocType)
     if (!docType) return
 
@@ -129,7 +144,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
       const newDocument: DocumentFormData = {
         document_type_id: selectedDocType,
-        student_id: selectedStudent?.id || 0,
+        student_id: selectedStudent?.id ?? 0,
         label: selectedFile.name,
         path: selectedFile, // Store as native File object
       }

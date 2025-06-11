@@ -127,7 +127,7 @@ export const usePermissionsLogic = ({
       if (permissionsToRemove.length > 0) {
         requests.push(
           fetchWithRetry(
-            `https://educty.digifaz.com/api/role/${roleId}/revokePermissionTo`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/role/${roleId}/revokePermissionTo`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -140,7 +140,7 @@ export const usePermissionsLogic = ({
       if (permissionsToAdd.length > 0) {
         requests.push(
           fetchWithRetry(
-            `https://educty.digifaz.com/api/role/${roleId}/givePermissionTo`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/role/${roleId}/givePermissionTo`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const response = await fetch('https://educty.digifaz.com/api/matter', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const id = new URL(request.url).searchParams.get('id');
     
-    const response = await fetch(`https://educty.digifaz.com/api/matter/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -55,7 +55,7 @@ export async function DELETE(request: NextRequest) {
         const body = await request.json();
     const id = new URL(request.url).searchParams.get('id');
     
-    const response = await fetch(`https://educty.digifaz.com/api/matter/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter/${id}`, {
       method: 'DELETE',
     });
     const data = await response.json();

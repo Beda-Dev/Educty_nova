@@ -55,36 +55,44 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const transactionIds: number[] = []
 
   const rollbackCreatedEntities = async (createdEntities: any) => {
+    const results: Record<string, any> = {};
     try {
-      // Delete created payments
-      for (const paymentId of createdEntities.payments) {
-        
-        
-        await fetch(`/api/payment?id=${paymentId}`, { method: "DELETE" })
-      }
-      if(transactionIds.length > 0){
-      for (const transactionId of transactionIds) {
-        await fetch(`/api/transaction?id=${transactionId}`, { method: "DELETE" })
-      }
-    }
+      // Helper pour suppression parallèle et rapport
+      const deleteEntities = async (label: string, ids: any[], endpoint: string) => {
+        if (!Array.isArray(ids) || ids.length === 0) return;
+        const uniqueIds = Array.from(new Set(ids));
+        const res = await Promise.allSettled(
+          uniqueIds.map(id =>
+            fetch(`${endpoint}?id=${id}`, { method: "DELETE" })
+          )
+        );
+        results[label] = res.map((r, i) => ({
+          id: uniqueIds[i],
+          status: r.status,
+          reason: r.status === "rejected" ? r.reason : undefined
+        }));
+      };
 
-      // Delete created documents
-      for (const documentId of createdEntities.documents) {
-        await fetch(`/api/document?id=${documentId}`, { method: "DELETE" })
+      await deleteEntities("payments", createdEntities.payments, "/api/payment");
+      if (typeof transactionIds !== "undefined" && transactionIds.length > 0) {
+        await deleteEntities("transactions", transactionIds, "/api/transaction");
       }
+      await deleteEntities("documents", createdEntities.documents, "/api/document");
+      await deleteEntities("tutors", createdEntities.tutors, "/api/tutor");
 
-      // Delete created tutors
-      for (const tutorId of createdEntities.tutors) {
-        await fetch(`/api/tutor?id=${tutorId}`, { method: "DELETE" })
-      }
-
-      // Delete created registration
       if (createdEntities.registration) {
-        await fetch(`/api/registration?id=${createdEntities.registration}`, { method: "DELETE" })
+        try {
+          await fetch(`/api/registration?id=${createdEntities.registration}`, { method: "DELETE" });
+          results.registration = { id: createdEntities.registration, status: "fulfilled" };
+        } catch (err) {
+          results.registration = { id: createdEntities.registration, status: "rejected", reason: err };
+        }
       }
     } catch (error) {
-      console.error("Erreur lors du rollback:", error)
+      console.error("Erreur lors du rollback:", error);
+      results.globalError = error;
     }
+    return results;
   }
 
   const handleConfirm = async () => {
@@ -169,7 +177,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         })),
       ]
 
-      const assignTutorResponse = await fetch("https://educty.digifaz.com/api/student/assign-tutor", {
+      const assignTutorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/assign-tutor`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -251,7 +259,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
         // Get the actual File object from IndexedDB
         const file = await getFileFromPath(doc.path)
-        console.log("Retrieved file from IndexedDB:", file ? `${file.name} (${file.size} bytes)` : "null")
+        // console.log("Photo file retrieved", file ? `${file.name} (${file.size} bytes)` : "null")
 
         if (file && file.size > 0) {
           docFormData.append("path", file)
@@ -392,7 +400,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                     <span className="text-gray-600">Photo:</span>
                     {/* <Badge variant="outline" className="ml-2">
                       Nouvelle photo ajoutée
-                      {studentModifications.photo.stored?.isRestored && " (restaurée depuis IndexedDB)"}
+                      {studentModifications.photo.stored?.isRestored && " (restaurée automatiquement)"}
                     </Badge> */}
                   </div>
                 )}
@@ -492,7 +500,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                     <div className="flex space-x-2">
                       <span className="text-sm text-gray-500">{getFileSize(doc.path)} bytes</span>
                       <Badge variant="outline">
-                        Nouveau{doc.path.stored?.isRestored && " (restauré depuis IndexedDB)"}
+                        Nouveau{doc.path.stored?.isRestored && " (restauré automatiquement)"}
                       </Badge>
                     </div>
                   </div>

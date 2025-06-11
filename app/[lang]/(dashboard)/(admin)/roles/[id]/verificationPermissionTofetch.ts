@@ -39,7 +39,7 @@ export const fetchWithRetry = async (
     );
     if (existingPermission) return existingPermission;
   
-    const res = await fetchWithRetry(`https://educty.digifaz.com/api/permission`, {
+    const res = await fetchWithRetry(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permission`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: permissionName }),

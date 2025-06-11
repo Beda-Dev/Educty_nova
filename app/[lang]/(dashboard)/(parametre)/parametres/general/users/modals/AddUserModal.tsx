@@ -71,7 +71,7 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
       await Promise.all(
         newUser.roles.map(async (roleName) => {
           const roleResponse = await fetch(
-            `https://educty.digifaz.com/api/users/${createdUser.id}/assign-role`,
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${createdUser.id}/assign-role`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

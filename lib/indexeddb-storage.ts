@@ -26,6 +26,10 @@ class IndexedDBFileStorage {
 
     this.initPromise = new Promise((resolve, reject) => {
       console.log(`Opening IndexedDB: ${this.dbName}, version ${this.dbVersion}`)
+      if (typeof window === "undefined" || typeof indexedDB === "undefined") {
+        reject(new Error("IndexedDB is not available in this environment (SSR)"));
+        return;
+      }
       const request = indexedDB.open(this.dbName, this.dbVersion)
 
       request.onerror = (event) => {
@@ -137,7 +141,7 @@ class IndexedDBFileStorage {
           request.onsuccess = () => {
             console.log(`File stored in IndexedDB: ${id}, ${file.name}, ${file.size}`)
             console.log("File storage successful, verifying file...")
-            
+
             // Vérifier si le fichier existe bien
             this.getFile(id).then(storedFile => {
               if (storedFile) {
@@ -391,9 +395,11 @@ class IndexedDBFileStorage {
 }
 
 // Instance singleton
-export const fileStorage = new IndexedDBFileStorage()
+export const fileStorage = (typeof window !== "undefined" && typeof indexedDB !== "undefined") ? new IndexedDBFileStorage() : null;
 
-// Initialiser automatiquement
-fileStorage.init().catch((error) => {
-  console.error("Failed to initialize IndexedDB storage:", error)
-})
+// Initialiser automatiquement côté client uniquement
+if (fileStorage) {
+  fileStorage.init().catch((error) => {
+    console.error("Failed to initialize IndexedDB storage:", error)
+  })
+}

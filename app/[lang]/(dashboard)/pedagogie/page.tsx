@@ -131,7 +131,10 @@ export default function PedagogiePage() {
               <Bookmark className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              <h1
+  className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+  style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
+>
                 Pédagogie
               </h1>
               <p className="text-sm text-muted-foreground">

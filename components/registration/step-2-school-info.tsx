@@ -31,7 +31,7 @@ interface Step2Props {
 }
 
 export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
-  const { classes, academicYearCurrent, pricing } = useSchoolStore()
+  const { classes, levels, academicYearCurrent, pricing } = useSchoolStore()
   const { studentData, registrationData, setRegistrationData, setAvailablePricing } =
     useRegistrationStore()
 
@@ -41,6 +41,8 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
     student_id: 0,
     registration_date: new Date().toISOString().split("T")[0],
   })
+
+  const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
 
   const [selectedClass, setSelectedClass] = useState<Classe | null>(null)
   const [availablePricing, setLocalAvailablePricing] = useState<Pricing[]>([])
@@ -137,25 +139,57 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
               whileHover={{ scale: 1.01 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <Label className="text-sm font-medium leading-none">Classe *</Label>
+              <Label className="text-sm font-medium leading-none">Niveau *</Label>
               <Select
-                value={formData.class_id.toString()}
-                onValueChange={(value) => setFormData({ ...formData, class_id: Number.parseInt(value) })}
+                value={selectedLevelId ? selectedLevelId.toString() : ''}
+                onValueChange={(value) => {
+                  const newLevelId = Number.parseInt(value)
+                  setSelectedLevelId(newLevelId)
+                  setFormData({ ...formData, class_id: 0 }) // reset class if level changes
+                }}
               >
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Sélectionner une classe" />
+                  <SelectValue placeholder="Sélectionner un niveau" />
                 </SelectTrigger>
                 <SelectContent>
-                  {classes.map((classe) => (
-                    <SelectItem key={classe.id} value={classe.id.toString()}>
-                      <div className="flex items-center gap-2">
-                        <span>{classe.label}</span>
-                        <Badge variant="outline">
-                          {classe.student_number}/{classe.max_student_number}
-                        </Badge>
-                      </div>
+                  {levels.map((level) => (
+                    <SelectItem key={level.id} value={level.id.toString()}>
+                      {level.label}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </motion.div>
+
+            <motion.div 
+              className="space-y-2"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            >
+              <Label className="text-sm font-medium leading-none">Classe *</Label>
+              <Select
+                value={formData.class_id ? formData.class_id.toString() : ''}
+                onValueChange={(value) => setFormData({ ...formData, class_id: Number.parseInt(value) })}
+                disabled={!selectedLevelId}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder={!selectedLevelId ? "Sélectionnez d'abord un niveau" : "Sélectionner une classe"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.filter((classe) => classe.level_id === selectedLevelId).length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground">Aucune classe pour ce niveau</div>
+                  ) : (
+                    classes.filter((classe) => classe.level_id === selectedLevelId).map((classe) => (
+                      <SelectItem key={classe.id} value={classe.id.toString()}>
+                        <div className="flex items-center gap-2">
+                          <span>{classe.label}</span>
+                          <Badge variant="outline">
+                            {classe.student_number}/{classe.max_student_number}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {classWarning && (

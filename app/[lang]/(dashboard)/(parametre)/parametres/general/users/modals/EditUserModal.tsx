@@ -69,7 +69,7 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
       await Promise.all(
         roles.map(async (roleName) => {
           const response = await fetch(
-            `https://educty.digifaz.com/api/users/${user.id}/assign-role`, 
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}/assign-role`, 
             {
               method: "POST",
               headers: {

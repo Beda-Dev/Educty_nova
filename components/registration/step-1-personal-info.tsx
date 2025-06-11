@@ -103,7 +103,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
     }
   }
 
-  const [openTutorModal, setOpenTutorModal] = useState(false)
+
 
 
   useEffect(() => {
@@ -500,23 +500,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
                     {/* Bouton Créer un tuteur - toujours visible */}
                     <div className="p-2 border-t">
-                      <TutorModal
-                        open={openTutorModal}
-                        onOpenChange={setOpenTutorModal}
-                        triggerButton={() => (
-                          <Button
-                            color="indigodye"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              setOpenTutorModal(true)
-                            }}
-                            className="w-full justify-center"
-                          >
-                            <User className="w-4 h-4 mr-2" />
-                            Ajouter un nouveau tuteur
-                          </Button>
-                        )}
-                      />
+                      <TutorModal />
                     </div>
                   </motion.div>
                 )}

@@ -20,7 +20,7 @@ interface Step2Props {
 
 export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
   const { selectedStudent, registrationData, setRegistrationData, setAvailablePricing } = useReinscriptionStore()
-  const { classes , pricing , academicYearCurrent } = useSchoolStore()
+  const { classes, levels, pricing, academicYearCurrent } = useSchoolStore()
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     class_id: 0,
@@ -28,6 +28,8 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
     student_id: selectedStudent?.id || 0,
     registration_date: new Date().toISOString().split("T")[0],
   })
+
+  const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
 
   const [selectedClass, setSelectedClass] = useState<Classe | null>(null)
   const [availablePricing, setLocalAvailablePricing] = useState<Pricing[]>([])
@@ -103,20 +105,48 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Nouvelle classe *</Label>
+              <Label>Niveau *</Label>
               <Select
-                value={formData.class_id.toString()}
-                onValueChange={(value) => setFormData({ ...formData, class_id: Number.parseInt(value) })}
+                value={selectedLevelId ? selectedLevelId.toString() : ''}
+                onValueChange={(value) => {
+                  const newLevelId = Number.parseInt(value)
+                  setSelectedLevelId(newLevelId)
+                  setFormData({ ...formData, class_id: 0 }) // reset class if level changes
+                }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner une classe" />
+                  <SelectValue placeholder="Sélectionner un niveau" />
                 </SelectTrigger>
                 <SelectContent>
-                  {classes.map((classe) => (
-                    <SelectItem key={classe.id} value={classe.id.toString()}>
-                      {classe.label} ({classe.student_number}/{classe.max_student_number} élèves)
+                  {levels.map((level) => (
+                    <SelectItem key={level.id} value={level.id.toString()}>
+                      {level.label}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Nouvelle classe *</Label>
+              <Select
+                value={formData.class_id ? formData.class_id.toString() : ''}
+                onValueChange={(value) => setFormData({ ...formData, class_id: Number.parseInt(value) })}
+                disabled={!selectedLevelId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={!selectedLevelId ? "Sélectionnez d'abord un niveau" : "Sélectionner une classe"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.filter((classe) => classe.level_id === selectedLevelId).length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground">Aucune classe pour ce niveau</div>
+                  ) : (
+                    classes.filter((classe) => classe.level_id === selectedLevelId).map((classe) => (
+                      <SelectItem key={classe.id} value={classe.id.toString()}>
+                        {classe.label} ({classe.student_number}/{classe.max_student_number} élèves)
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               {classWarning && (

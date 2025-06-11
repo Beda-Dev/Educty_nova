@@ -92,12 +92,16 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
   const checkIndexedDBStatus = async () => {
     try {
+      if (!fileStorage) {
+        setDbStatus("Stockage local non disponible sur ce navigateur ou en SSR")
+        return
+      }
       await fileStorage.init()
       const files = await fileStorage.getAllFiles()
-      setDbStatus(`IndexedDB prêt - ${files.length} fichiers stockés`)
+      setDbStatus(`Stockage prêt - ${files.length} fichiers stockés`)
     } catch (error) {
       console.error("Error checking IndexedDB status:", error)
-      setDbStatus("Erreur d'accès à IndexedDB")
+      setDbStatus("Erreur d'accès au stockage")
     }
   }
 
@@ -164,6 +168,11 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   const handleAddDocument = async () => {
     if (!selectedDocType || !selectedFile) {
       setFileError("Veuillez sélectionner un type de document et un fichier")
+      return
+    }
+
+    if (!fileStorage) {
+      setFileError("Stockage local non disponible sur ce navigateur ou en SSR")
       return
     }
 
@@ -288,7 +297,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                 <p>• Ajoutez les documents nécessaires pour l'inscription</p>
                 <p>• Taille maximale par fichier: 5 Mo</p>
                 <p>• Formats acceptés: PDF, JPG, PNG, DOC, DOCX</p>
-                {/* <p>• Les fichiers sont sauvegardés dans IndexedDB en cas de rechargement</p> */}
+                {/* <p>• Les fichiers sont sauvegardés localement en cas de rechargement</p> */}
                 {/* <p className="font-medium">• État de la base de données: {dbStatus}</p> */}
               </div>
             </div>
@@ -300,7 +309,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         <Alert className="border-tyrian/20 bg-tyrian/5">
           <RefreshCw className="h-4 w-4 text-tyrian" />
           <AlertDescription className="text-tyrian">
-            Certains documents ont été restaurés depuis IndexedDB. Ils sont prêts à être utilisés.
+            Certains documents ont été restaurés automatiquement. Ils sont prêts à être utilisés.
           </AlertDescription>
         </Alert>
       )} */}
@@ -456,7 +465,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                           </div>
                           <p className="text-sm text-skyblue">{formatFileSize(getFileSize(doc.path))}</p>
                           {/* {doc.path.stored?.isRestored && (
-                            <p className="text-xs text-tyrian">Restauré depuis IndexedDB</p>
+                            <p className="text-xs text-tyrian">Restauré automatiquement</p>
                           )} */}
                         </div>
                       </div>
@@ -513,7 +522,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         <Button 
           onClick={onNext} 
           
-          disabled={false}
+          
         >
           Suivant
         </Button>

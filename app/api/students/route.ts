@@ -4,8 +4,8 @@ export async function GET(request: NextRequest) {
   try {
     const id = request.nextUrl.searchParams.get('id');
     const url = id 
-      ? `https://educty.digifaz.com/api/student/${id}`
-      : 'https://educty.digifaz.com/api/student';
+      ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${id}`
+      : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student`;
 
     const response = await fetch(url);
     
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
       options.body = JSON.stringify(body);
     }
 
-    const response = await fetch('https://educty.digifaz.com/api/student', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student`, {
       ...options,
       body: body instanceof FormData ? body : options.body,
     });
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
       options.body = JSON.stringify(body);
     }
 
-    const response = await fetch(`https://educty.digifaz.com/api/student/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${id}`, {
       ...options,
       body: body instanceof FormData ? body : options.body,
     });
@@ -120,7 +120,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`https://educty.digifaz.com/api/student/${id}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${id}`, {
       method: 'DELETE',
     });
 

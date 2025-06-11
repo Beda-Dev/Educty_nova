@@ -1,6 +1,6 @@
-export const fetchClasses = async () => {
+export const fetchClasses = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch("https://educty.digifaz.com/api/classe");
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/classe`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des classes :", error);
@@ -19,9 +19,9 @@ export const fetchClasses = async () => {
   }
 };
 
-export const fetchLevels = async () => {
+export const fetchLevels = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/level`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/level`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des niveaux :", error);
@@ -43,9 +43,9 @@ export const fetchLevels = async () => {
   }
 };
 
-export const fetchAcademicYears = async () => {
+export const fetchAcademicYears = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch("https://educty.digifaz.com/api/academicYear");
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/academicYear`, opts);
     return await response.json();
   } catch (error) {
     console.error(
@@ -70,9 +70,9 @@ export const fetchAcademicYears = async () => {
   }
 };
 
-export const fetchStudents = async () => {
+export const fetchStudents = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch("https://educty.digifaz.com/api/student");
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des élèves :", error);
@@ -94,9 +94,9 @@ export const fetchStudents = async () => {
   }
 };
 
-export const fetchUsers = async () => {
+export const fetchUsers = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/users`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des utilisateur :", error);
@@ -118,9 +118,9 @@ export const fetchUsers = async () => {
   }
 };
 
-export const fetchRoles = async () => {
+export const fetchRoles = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/role`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/role`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des roles :", error);
@@ -142,9 +142,9 @@ export const fetchRoles = async () => {
   }
 };
 
-export const fetchpricing = async () => {
+export const fetchpricing = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/pricing`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pricing`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des tarification :", error);
@@ -166,9 +166,9 @@ export const fetchpricing = async () => {
   }
 };
 
-export const fetchRegistration = async () => {
+export const fetchRegistration = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/registration`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registration`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des inscription :", error);
@@ -190,10 +190,10 @@ export const fetchRegistration = async () => {
   }
 };
 
-export const fetchAssignmentType = async () => {
+export const fetchAssignmentType = async (opts: RequestInit = {}) => {
   try {
     const response = await fetch(
-      `https://educty.digifaz.com/api/assignmentType`
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/assignmentType`, opts
     );
     return await response.json();
   } catch (error) {
@@ -219,9 +219,9 @@ export const fetchAssignmentType = async () => {
   }
 };
 
-export const fetchFeeType = async () => {
+export const fetchFeeType = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/feeType`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/feeType`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des type de frais :", error);
@@ -243,9 +243,9 @@ export const fetchFeeType = async () => {
   }
 };
 
-export const fetchDocumentType = async () => {
+export const fetchDocumentType = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/documentType`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/documentType`, opts);
     return await response.json();
   } catch (error) {
     console.error(
@@ -270,9 +270,9 @@ export const fetchDocumentType = async () => {
   }
 };
 
-export const fetchDocument = async () => {
+export const fetchDocument = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/document`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des documents :", error);
@@ -294,9 +294,9 @@ export const fetchDocument = async () => {
   }
 };
 
-export const fetchPayment = async () => {
+export const fetchPayment = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/payment`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payment`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des payments :", error);
@@ -318,9 +318,9 @@ export const fetchPayment = async () => {
   }
 };
 
-export const fetchInstallment = async () => {
+export const fetchInstallment = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/installment`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/installment`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des versements :", error);
@@ -342,9 +342,9 @@ export const fetchInstallment = async () => {
   }
 };
 
-export const fetchCashRegister = async () => {
+export const fetchCashRegister = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/cashRegister`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cashRegister`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des caisse :", error);
@@ -366,9 +366,9 @@ export const fetchCashRegister = async () => {
   }
 };
 
-export const fetchSetting = async () => {
+export const fetchSetting = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/setting`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/setting`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des parametres :", error);
@@ -390,9 +390,9 @@ export const fetchSetting = async () => {
   }
 };
 
-export const fetchExpenseType = async () => {
+export const fetchExpenseType = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/expenseType`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/expenseType`, opts);
     return await response.json();
   } catch (error) {
     console.error(
@@ -417,9 +417,9 @@ export const fetchExpenseType = async () => {
   }
 };
 
-export const fetchExpenses = async () => {
+export const fetchExpenses = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/expense`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/expense`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des depenses :", error);
@@ -441,9 +441,9 @@ export const fetchExpenses = async () => {
   }
 };
 
-export const fetchPermissions = async () => {
+export const fetchPermissions = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/permission`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permission`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des permission :", error);
@@ -465,10 +465,10 @@ export const fetchPermissions = async () => {
   }
 };
 
-export const fetchPaymentMethods = async () => {
+export const fetchPaymentMethods = async (opts: RequestInit = {}) => {
   try {
     const response = await fetch(
-      `https://educty.digifaz.com/api/paymentMethod`
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/paymentMethod`, opts
     );
     return await response.json();
   } catch (error) {
@@ -494,10 +494,10 @@ export const fetchPaymentMethods = async () => {
   }
 };
 
-export const fetchValidationExpenses = async () => {
+export const fetchValidationExpenses = async (opts: RequestInit = {}) => {
   try {
     const response = await fetch(
-      `https://educty.digifaz.com/api/validationExpense`
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/validationExpense`, opts
     );
     return await response.json();
   } catch (error) {
@@ -523,9 +523,9 @@ export const fetchValidationExpenses = async () => {
   }
 };
 
-export const fetchTutors = async () => {
+export const fetchTutors = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/tutor`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des parents :", error);
@@ -547,9 +547,9 @@ export const fetchTutors = async () => {
   }
 };
 
-export const fetchTransactions = async () => {
+export const fetchTransactions = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/transaction`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/transaction`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des transactions :", error);
@@ -571,10 +571,10 @@ export const fetchTransactions = async () => {
   }
 };
 
-export const fetchCashRegisterSessions = async () => {
+export const fetchCashRegisterSessions = async (opts: RequestInit = {}) => {
   try {
     const response = await fetch(
-      `https://educty.digifaz.com/api/cashRegisterSession`
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cashRegisterSession`, opts
     );
     return await response.json();
   } catch (error) {
@@ -596,13 +596,13 @@ export const fetchCashRegisterSessions = async () => {
       }
     } else {
       return [];
-    }
+    } 
   }
 };
 
-export const fetchMatters = async () => {
+export const fetchMatters = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/matter`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération des matieres :", error);
@@ -624,9 +624,9 @@ export const fetchMatters = async () => {
   }
 };
 
-export const fetchTypeEvaluations = async () => {
+export const fetchTypeEvaluations = async (opts: RequestInit = {}) => {
   try {
-    const response = await fetch(`https://educty.digifaz.com/api/typeNote`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typeNote`, opts);
     return await response.json();
   } catch (error) {
     console.error("Erreur lors de la récupération type d'evaluation :", error);

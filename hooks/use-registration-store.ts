@@ -187,7 +187,8 @@ export const useRegistrationStore = create<RegistrationStore>()(
         // Supprimer le fichier d'IndexedDB si nécessaire
         if (docToRemove?.path.stored?.fileId) {
           try {
-            await fileStorage.removeFile(docToRemove.path.stored.fileId)
+            if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
+await fileStorage.removeFile(docToRemove.path.stored.fileId)
             console.log("File removed from IndexedDB:", docToRemove.path.stored.fileId)
           } catch (error) {
             console.error("Error removing file from IndexedDB:", error)
@@ -211,7 +212,8 @@ export const useRegistrationStore = create<RegistrationStore>()(
         if (path.stored?.fileId) {
           console.log("Retrieving file from IndexedDB:", path.stored.fileId)
           try {
-            const file = await fileStorage.getFile(path.stored.fileId)
+            if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
+const file = await fileStorage.getFile(path.stored.fileId)
             if (file) {
               console.log("File retrieved from IndexedDB:", file.name, file.size)
               return file
@@ -241,7 +243,8 @@ export const useRegistrationStore = create<RegistrationStore>()(
 
       storeFileInIndexedDB: async (file: File): Promise<string> => {
         try {
-          const fileId = await fileStorage.storeFile(file)
+          if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
+const fileId = await fileStorage.storeFile(file)
           console.log("File stored in IndexedDB with ID:", fileId)
           return fileId
         } catch (error) {
@@ -257,7 +260,8 @@ export const useRegistrationStore = create<RegistrationStore>()(
           let hasChanges = false
 
           // Lister tous les fichiers dans IndexedDB pour le débogage
-          await fileStorage.listAllFiles()
+          if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
+await fileStorage.listAllFiles()
 
           // Restaurer la photo de l'élève si nécessaire
           if (state.studentData?.photo?.stored?.fileId && !state.studentData.photo.file) {
@@ -337,13 +341,15 @@ export const useRegistrationStore = create<RegistrationStore>()(
         try {
           // Supprimer la photo de l'élève
           if (state.studentData?.photo?.stored?.fileId) {
-            await fileStorage.removeFile(state.studentData.photo.stored.fileId)
+            if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
+await fileStorage.removeFile(state.studentData.photo.stored.fileId)
           }
 
           // Supprimer les documents
           for (const doc of state.documents) {
             if (doc.path.stored?.fileId) {
-              await fileStorage.removeFile(doc.path.stored.fileId)
+              if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
+await fileStorage.removeFile(doc.path.stored.fileId)
             }
           }
 
