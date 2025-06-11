@@ -36,6 +36,7 @@ export default function CreateExpensePage() {
     cashRegisters,
     cashRegisterCurrent,
     setCashRegisterSessionCurrent,
+    settings,
   } = useSchoolStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
