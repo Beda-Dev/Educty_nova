@@ -96,7 +96,7 @@ const ExpenseTypeForm = ({ onSuccess, onClose }: InputFormValidationProps) => {
     <>
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
-          <Pencil className="h-5 w-5" />
+          
           Ajouter un type de dépense
         </DialogTitle>
       </DialogHeader>

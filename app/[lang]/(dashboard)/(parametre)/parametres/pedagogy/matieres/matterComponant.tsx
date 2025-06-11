@@ -175,7 +175,6 @@ function MatterTable() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-primary" />
               <CardTitle>Matières</CardTitle>
             </div>
             <Badge variant="outline">

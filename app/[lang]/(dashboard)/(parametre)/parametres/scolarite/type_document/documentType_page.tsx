@@ -229,7 +229,7 @@ const DocumentTypeComponant = ({ data }: Props) => {
           {hasAdminAccessCreer && (
             <div className="flex">
               <Button color="indigodye" onClick={handleCreate}>
-                <Icon icon="heroicons:plus" className="mr-2 h-4 w-4" />
+                
                 Ajouter un type
               </Button>
             </div>
@@ -267,7 +267,7 @@ const DocumentTypeComponant = ({ data }: Props) => {
                             onClick={() => handleEdit(item)}
                             className=""
                           >
-                            <Icon icon="heroicons:pencil" className="h-4 w-4" />
+                            
                           </Button>
                         </TableCell>
                       )}

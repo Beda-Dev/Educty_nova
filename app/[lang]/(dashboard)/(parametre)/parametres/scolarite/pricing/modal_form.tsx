@@ -22,7 +22,7 @@ import { Pricing } from "@/lib/interface";
 import { Calendar } from "@/components/ui/calendar"; // Import du composant Calendar
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon , PlusCircle , Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PricingData {
@@ -266,7 +266,18 @@ const DialogForm = ({ onSuccess }: DialogFormProps) => {
               </Button>
             </DialogClose>
             <Button type="button" onClick={handleSubmit} disabled={loading} color="indigodye" >
-              {loading ? "Ajout en cours..." : "Ajouter"}
+
+              {loading ? (
+                <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Ajout en cours...
+                </>
+              ) : (
+                <>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                "Ajouter"
+                </>
+              )}
             </Button>
           </div>
         </div>

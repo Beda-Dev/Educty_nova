@@ -118,7 +118,7 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
       <Dialog open={isModalOpenAdd} onOpenChange={setIsModalOpenAdd}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Créer une année académique</DialogTitle>
+            <DialogTitle>Ajouter une année académique</DialogTitle>
           </DialogHeader>
           <DatePickerForm onSuccess={() => setIsModalOpenAdd(false)} />
         </DialogContent>
@@ -179,7 +179,7 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
                   color="indigodye"
                   onClick={() => setIsModalOpenAdd(true)}
                 >
-                  Créer une année académique
+                  Ajouter une année académique
                 </Button>
               )}
             </div>

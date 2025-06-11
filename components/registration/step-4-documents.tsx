@@ -296,14 +296,14 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         </CardContent>
       </Card>
 
-      {hasRestoredDocuments && (
+      {/* {hasRestoredDocuments && (
         <Alert className="border-tyrian/20 bg-tyrian/5">
           <RefreshCw className="h-4 w-4 text-tyrian" />
           <AlertDescription className="text-tyrian">
             Certains documents ont été restaurés depuis IndexedDB. Ils sont prêts à être utilisés.
           </AlertDescription>
         </Alert>
-      )}
+      )} */}
 
       {fileError && (
         <Alert color="destructive" className="border-bittersweet">
@@ -410,8 +410,9 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     </div>
                   </div>
                   <Button 
+                    color="indigodye"
                     onClick={handleAddDocument} 
-                    className="gap-2 bg-indigodye hover:bg-indigodye/90"
+                    className="gap-2"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -419,7 +420,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     ) : (
                       <Upload className="w-4 h-4" />
                     )}
-                    Ajouter
+                    Cliquez pour  ajouter
                   </Button>
                 </div>
               </motion.div>
@@ -451,9 +452,9 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                             <p className="font-medium text-indigodye truncate">{doc.label}</p>
                           </div>
                           <p className="text-sm text-skyblue">{formatFileSize(getFileSize(doc.path))}</p>
-                          {doc.path.stored?.isRestored && (
+                          {/* {doc.path.stored?.isRestored && (
                             <p className="text-xs text-tyrian">Restauré depuis IndexedDB</p>
-                          )}
+                          )} */}
                         </div>
                       </div>
                       <Button
@@ -483,7 +484,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
             </AnimatePresence>
           </div>
 
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={async () => {
@@ -494,7 +495,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Vérifier les fichiers stockés
-          </Button>
+          </Button> */}
         </CardContent>
       </Card>
 

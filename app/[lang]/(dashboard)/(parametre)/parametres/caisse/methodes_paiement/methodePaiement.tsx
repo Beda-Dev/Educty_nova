@@ -193,7 +193,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" />
+              {/* <CreditCard className="h-5 w-5 text-primary" /> */}
               <CardTitle>Méthodes de paiement</CardTitle>
             </div>
             <Badge variant="outline">
@@ -222,7 +222,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
                 onClick={() => setIsModalOpenAdd(true)}
                 className="w-full md:w-auto"
               >
-                <PlusCircle className="mr-2 h-4 w-4" />
+                {/* <PlusCircle className="mr-2 h-4 w-4" /> */}
                 Ajouter une méthode
               </Button>
             </div>
@@ -388,8 +388,8 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
         <DialogContent className="sm:max-w-[450px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5" />
-              Modifier la méthode
+              
+              Modifier la méthode de paiement
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -400,7 +400,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
                 onChange={(e) => setEditMethodLabel(e.target.value)}
               />
             </div>
-            <div className="flex justify-between gap-3 pt-4">
+            <div className="flex justify-around gap-3 pt-4">
               <Button
                 color="destructive"
                 onClick={() => setIsModalOpen(false)}
@@ -409,6 +409,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
                 Annuler
               </Button>
               <Button
+              color="tyrian"
                 onClick={updatePaymentMethod}
                 disabled={isSubmitting}
                 className="min-w-[120px]"

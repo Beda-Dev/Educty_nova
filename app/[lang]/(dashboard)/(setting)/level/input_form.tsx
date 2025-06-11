@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { fetchLevels } from "@/store/schoolservice";
 import { useSchoolStore } from "@/store";
-import { Loader2 } from "lucide-react"
+import { Loader2, PlusCircle } from "lucide-react"
 
 const FormSchema = z.object({
   level: z.string().min(1, {
@@ -114,7 +114,10 @@ const InputFormValidation = ({ onSuccess }: InputFormValidationProps) => {
                 <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
                 Ajout en cours...
               </>) :
-              "Ajouter"
+              <>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Ajouter
+              </>
             }
           </Button>
         </div>

@@ -65,7 +65,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
   const [selectedValidator, setSelectedValidator] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
 
-  const { setExpenses, userOnline } = useSchoolStore();
+  const { setExpenses, userOnline , settings} = useSchoolStore();
   const router = useRouter();
 
   const permissionRequisCreer = ["creer depenses"];
@@ -144,7 +144,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
   };
 
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat("fr-FR").format(amount) + " FCFA";
+    return new Intl.NumberFormat("fr-FR").format(amount) + " " + (settings[0].currency? settings[0].currency : "FCFA");
   };
 
   const resetFilters = () => {
@@ -212,7 +212,6 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <Pencil className="h-5 w-5 text-primary" />
             <CardTitle>Dépenses</CardTitle>
           </div>
           <Badge variant="outline">

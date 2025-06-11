@@ -169,7 +169,6 @@ const onUpdate = async () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-primary" />
               <CardTitle>Types d'évaluation</CardTitle>
             </div>
             <Badge variant="outline">
@@ -222,6 +221,7 @@ const onUpdate = async () => {
                         {true && (
                           <TableCell className="flex justify-end gap-2">
                             <Button
+                              color="tyrian"
                               variant="outline"
                               size="icon"
                               onClick={() => handleEditClick(item)}

@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchClasses } from "@/store/schoolservice";
 import { Classe } from "@/lib/interface";
-import { Loader2 } from "lucide-react";
+import { Loader2 , PlusCircle } from "lucide-react";
 interface ClassData {
   level_id: number;
   label: string;
@@ -138,7 +138,7 @@ const DialogForm = () => {
               </div>
               <div className="flex flex-col gap-2">
                 <Label>Nombre d'élèves actuels</Label>
-                <Input type="number" value={studentNumber} disabled />
+                <Input type="number" value={studentNumber} readOnly />
               </div>
             </div>
           </ScrollArea>
@@ -160,7 +160,10 @@ const DialogForm = () => {
                   <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
                   Ajout en cours...
                 </>) : 
-                "Ajouter"
+                <>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Ajouter
+                </>
                 }
             </Button>
           </div>

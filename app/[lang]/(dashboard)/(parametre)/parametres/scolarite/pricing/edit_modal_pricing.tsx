@@ -14,6 +14,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { Pricing } from "@/lib/interface";
+import { Plus , Loader2 } from "lucide-react";
 
 interface PricingData {
   assignment_type_id: number;
@@ -208,14 +209,24 @@ const DialogForm: React.FC<DialogFormProps> = ({
             </div>
           </ScrollArea>
 
-          <div className="flex justify-center gap-3 mt-4">
+          <div className="flex justify-around gap-3 mt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={loading}>
+              <Button color="destructive" type="button" variant="outline" disabled={loading}>
                 Annuler
               </Button>
             </DialogClose>
-            <Button type="button" onClick={handleSubmit} disabled={loading}>
-              {loading ? "Mise à jour..." : "Mettre à jour"}
+            <Button color="tyrian" type="button" onClick={handleSubmit} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Mise à jour...
+                </>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4 " />
+                  Mettre à jour
+                </>
+              )}
             </Button>
           </div>
         </div>

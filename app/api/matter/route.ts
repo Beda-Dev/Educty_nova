@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const data = await fetch('').then(res => res.json());
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error('Erreur lors de la récupération des données :', error);
+    console.error('Erreur lors de la récupération des données :', error);
     return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
   }
 }
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data, { status: 200 });
   } catch (error) {
-    console.error('Erreur lors de la suppression des données :', error);
+    console.error('Erreur lors de la suppression des données :', error);
     return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
   }
 }

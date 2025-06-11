@@ -56,7 +56,7 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
       setTotalPayer(total)
     }
 
-    
+
   }, [payments])
 
   const SearchFeeType = (id: number): Pricing | undefined => {
@@ -244,9 +244,10 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
           Télécharger PDF
         </Button>
         <Button 
+          color="indigodye"
           onClick={onNewRegistration} 
           size="sm" 
-          className="h-9 px-4 text-sm bg-blue-600 hover:bg-blue-700"
+          className="h-9 px-4 text-sm "
         >
           Nouvelle inscription
         </Button>

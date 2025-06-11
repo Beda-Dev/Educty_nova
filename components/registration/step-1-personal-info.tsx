@@ -26,7 +26,7 @@ interface Step1Props {
 }
 
 export function Step1PersonalInfo({ onNext }: Step1Props) {
-  const { assignmentTypes, tutors , students } =
+  const { assignmentTypes, tutors, students } =
     useSchoolStore()
 
   const { studentData, setStudentData, selectedTutors, setSelectedTutors, newTutors, removeNewTutor } =
@@ -88,7 +88,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       // Créer l'URL de prévisualisation avant de mettre à jour le store
       const previewUrl = URL.createObjectURL(file)
       setPreviewImage(previewUrl)
-      
+
       // Mettre à jour le formulaire
       const updatedData = { ...formData, photo: file }
       setFormData(updatedData)
@@ -390,7 +390,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                 <input {...getInputProps()} />
                 {previewImage ? (
                   <div className="flex flex-col items-center gap-4">
-                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-primary/20">
+                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-primary/20 group">
                       <Image
                         src={previewImage}
                         alt="Preview"
@@ -398,6 +398,20 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         className="object-cover"
                         onLoad={() => URL.revokeObjectURL(previewImage)}
                       />
+                      <Button
+                        type="button"
+                        color="destructive"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePhoto(null);
+                        }}
+                        className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                        title="Supprimer la photo"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Cliquez pour changer ou glissez-déposez une nouvelle image
@@ -491,7 +505,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         onOpenChange={setOpenTutorModal}
                         triggerButton={() => (
                           <Button
-                          color="indigodye"
+                            color="indigodye"
                             onClick={(e) => {
                               e.preventDefault()
                               setOpenTutorModal(true)

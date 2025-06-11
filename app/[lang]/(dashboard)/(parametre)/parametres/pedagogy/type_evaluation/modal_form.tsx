@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2 , PlusCircle } from "lucide-react";
 
 interface AddTypeModalProps {
   onUpdate: () => void;
@@ -105,8 +105,12 @@ const DialogForm = ({ onUpdate }: AddTypeModalProps) => {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Ajout en cours...
                 </>
-              ) : (
+              ) : ( 
+
+                <>
+                <PlusCircle className="mr-2 h-4 w-4" />
                 "Ajouter"
+                </>
               )}
             </Button>
           </div>

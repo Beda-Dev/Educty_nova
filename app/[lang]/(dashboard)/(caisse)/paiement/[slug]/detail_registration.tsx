@@ -45,6 +45,7 @@ const PaymentDetail = ({ registration, studentData }: dataProps) => {
   const [visibleNotifications, setVisibleNotifications] = useState<
     Record<string, boolean>
   >({});
+  
 
   useEffect(() => {
     if (studentData.detailsPaiements) {

@@ -186,7 +186,7 @@ export function TutorModal({ triggerButton, open, onOpenChange }: TutorModalProp
               transition={{ duration: 0.2 }}
               className="flex items-center"
             >
-              <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform" />
+              <Plus className="w-4 h-4 mr-2 " />
               <span>Ajouter un tuteur</span>
             </motion.span>
           </Button>

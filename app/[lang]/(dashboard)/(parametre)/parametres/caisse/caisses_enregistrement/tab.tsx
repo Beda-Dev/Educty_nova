@@ -150,7 +150,7 @@ export default function CashRegisterTable({ data }: Props) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-primary" />
+
               <CardTitle>Caisses enregistrées</CardTitle>
             </div>
             <Badge variant="outline">
@@ -178,7 +178,7 @@ export default function CashRegisterTable({ data }: Props) {
                 onClick={() => setIsModalOpenAdd(true)}
                 className="w-full md:w-auto"
               >
-                <PlusCircle className="mr-2 h-4 w-4" />
+                
                 Ajouter une caisse
               </Button>
             </div>

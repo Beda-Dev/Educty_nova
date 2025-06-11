@@ -188,14 +188,14 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         </CardContent>
       </Card>
 
-      {hasRestoredDocuments && (
+      {/* {hasRestoredDocuments && (
         <Alert>
           <RefreshCw className="h-4 w-4" />
           <AlertDescription>
             Certains documents ont été restaurés. Ils sont prêts à être utilisés.
           </AlertDescription>
         </Alert>
-      )}
+      )} */}
 
       <Card>
         <CardHeader>
@@ -274,9 +274,9 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     <p className="font-medium">{selectedFile.name}</p>
                     <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
                   </div>
-                  <Button onClick={handleAddDocument} size="sm">
+                  <Button color="indigodye" onClick={handleAddDocument} size="sm">
                     <Upload className="w-4 h-4 mr-2" />
-                    Ajouter
+                    Cliquez pour ajouter
                   </Button>
                 </div>
               </div>
@@ -295,9 +295,9 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                       <div>
                         <p className="font-medium">{doc.label}</p>
                         <p className="text-sm text-gray-500">{formatFileSize(getFileSize(doc.path))}</p>
-                        {doc.path.stored?.isRestored && (
+                        {/* {doc.path.stored?.isRestored && (
                           <p className="text-xs text-blue-600">Restauré depuis IndexedDB</p>
-                        )}
+                        )} */}
                         {doc.path.stored?.fileId && (
                           <p className="text-xs text-gray-500">ID: {doc.path.stored.fileId.substring(0, 10)}...</p>
                         )}
@@ -320,7 +320,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
             </div>
           )}
 
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={async () => {
@@ -330,7 +330,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
             className="mt-4"
           >
             Vérifier les fichiers stockés
-          </Button>
+          </Button> */}
         </CardContent>
       </Card>
 

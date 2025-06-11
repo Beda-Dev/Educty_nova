@@ -18,7 +18,7 @@ import { Icon } from "@iconify/react";
 import { Role } from "@/lib/interface";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast"; // ✅ Shadcn toast
-import { Loader2 } from "lucide-react"; // ✅ Spinning loader
+import { Loader2, PlusCircle } from "lucide-react"; // ✅ Spinning loader
 import { motion } from "framer-motion"; // ✅ Animation
 
 interface AddUserModalProps {
@@ -167,7 +167,10 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
                   ajout en cours...
                 </>
               ) : (
+                <>
+                <PlusCircle className="mr-2 h-4 w-4" />
                 "Ajouter"
+                </>
               )}
             </Button>
           </div>

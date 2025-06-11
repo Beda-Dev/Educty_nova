@@ -16,7 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "@/components/ui/use-toast";
 import { useSchoolStore } from "@/store";
 import { Matter } from "@/lib/interface";
-import { Loader2 } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -119,11 +119,11 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
-          Ajouter une nouvelle matière
+            Ajouter une nouvelle matière
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <ScrollArea className="max-h-[60vh]">
+          <ScrollArea className="">
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom de la matière</Label>
@@ -157,11 +157,11 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
                   </SelectTrigger>
                   <SelectContent className="z-[9999]">
                     <SelectItem value="1" className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-green-500" />
+
                       Active
                     </SelectItem>
                     <SelectItem value="0" className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-red-500" />
+
                       Inactive
                     </SelectItem>
                   </SelectContent>
@@ -187,7 +187,10 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
                   Ajout en cours...
                 </>
               ) : (
-                "Ajouter"
+                <>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  "Ajouter"
+                </>
               )}
             </Button>
           </div>

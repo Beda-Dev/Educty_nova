@@ -9,23 +9,16 @@ import {
 } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { useSchoolStore } from "@/store/index";
 
 interface SessionSectionProps {
   cashRegisterSession: CashRegisterSession;
 }
 
-  function formatCurrency(amount: string): import("react").ReactNode {
-    const number = typeof amount === "string" ? parseFloat(amount) : amount;
-    if (isNaN(number)) return "Invalid amount";
-    return number.toLocaleString("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }) + " FCFA";
-  }
+
 
 export function SessionSection({ cashRegisterSession }: SessionSectionProps) {
+  const {settings} = useSchoolStore()
   // Function to get session status badge
   const getStatusBadge = (status: string) => {
     return status === "open" ? (
@@ -38,6 +31,19 @@ export function SessionSection({ cashRegisterSession }: SessionSectionProps) {
       </Badge>
     );
   };
+
+  
+
+  function formatCurrency(amount: string): import("react").ReactNode {
+    const number = typeof amount === "string" ? parseFloat(amount) : amount;
+    if (isNaN(number)) return "Invalid amount";
+    return number.toLocaleString("fr-FR", {
+      style: "currency",
+      currency: "XOF",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }) + " " + (settings[0].currency? settings[0].currency : "FCFA");
+  }
 
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">

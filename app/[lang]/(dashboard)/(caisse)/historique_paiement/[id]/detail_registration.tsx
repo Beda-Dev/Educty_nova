@@ -19,28 +19,33 @@ import { Payment } from "@/lib/interface";
 import { DetailsPaiement } from "./fonction";
 import { motion } from "framer-motion";
 import {generationNumero} from "@/lib/fonction"
+import {useSchoolStore} from "@/store/index"
 
 interface Props {
   payment: Payment;
   detail: DetailsPaiement;
 }
 
-const formatFCFA = (amount: number | string) => {
-  const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-  if (isNaN(numAmount)) return "0 FCFA";
 
-  return (
-    new Intl.NumberFormat("fr-FR", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(numAmount) + "\u00A0FCFA"
-  );
-};
 
 const PaymentDetail = ({ payment, detail }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const {settings} = useSchoolStore()
+
+
+  const formatFCFA = (amount: number | string) => {
+    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+    if (isNaN(numAmount)) return "0 " + (settings[0].currency? settings[0].currency : "FCFA");
+  
+    return (
+      new Intl.NumberFormat("fr-FR", {
+        style: "decimal",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }).format(numAmount) + "\u00A0" + (settings[0].currency? settings[0].currency : "FCFA")
+    );
+  };
 
   const generatePDF = async (action: "print" | "download") => {
     setIsProcessing(true);

@@ -54,6 +54,7 @@ const DetailSessionPage = ({ params }: Props) => {
     cashRegisterSessions,
     transactions,
     setValidationExpenses,
+    settings,
   } = useSchoolStore();
   const { id } = params;
 
@@ -109,7 +110,7 @@ const DetailSessionPage = ({ params }: Props) => {
       toast({
         title: "Succès",
         description: "Le statut a été mis à jour avec succès",
-        color: "default",
+        color: "success",
       });
     } catch (error) {
       toast({
@@ -291,7 +292,7 @@ const DetailSessionPage = ({ params }: Props) => {
                   <p className="text-sm font-medium text-gray-500">Montant</p>
                   <p className="font-semibold">
                     {parseFloat(currentExpense.amount).toLocaleString("fr-FR")}{" "}
-                    FCFA
+                    {settings[0].currency? settings[0].currency : "FCFA"}
                   </p>
                 </div>
 
@@ -325,7 +326,7 @@ const DetailSessionPage = ({ params }: Props) => {
                   </p>
                   <p>
                     {parseFloat(currentExpense.amount).toLocaleString("fr-FR")}{" "}
-                    FCFA
+                    {settings[0].currency? settings[0].currency : "FCFA"}
                   </p>
                 </div>
 
@@ -388,7 +389,7 @@ const DetailSessionPage = ({ params }: Props) => {
                   {parseFloat(currentSession.opening_amount).toLocaleString(
                     "fr-FR"
                   )}{" "}
-                  FCFA
+                  {settings[0].currency? settings[0].currency : "FCFA"}
                 </p>
                 <p className="text-sm text-gray-500">
                   {format(new Date(currentSession.opening_date), "PPPp", {
@@ -403,7 +404,7 @@ const DetailSessionPage = ({ params }: Props) => {
                     {parseFloat(currentSession.closing_amount).toLocaleString(
                       "fr-FR"
                     )}{" "}
-                    FCFA
+                    {settings[0].currency? settings[0].currency : "FCFA"}
                   </p>
                   <p className="text-sm text-gray-500">
                     {format(new Date(currentSession.closing_date), "PPPp", {

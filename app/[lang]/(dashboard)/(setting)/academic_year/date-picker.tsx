@@ -26,7 +26,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchAcademicYears } from "@/store/schoolservice";
-import {Loader2} from "lucide-react"
+import { Loader2, PlusCircle } from "lucide-react"
 
 
 interface DatePickerFormProps {
@@ -157,9 +157,12 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
               <>
                 <span className="animate-spin mr-2"><Loader2 className="h-4 w-4" /></span>
                 Ajout en cours...
-              </>) : 
-              "Ajouter"
-              }
+              </>) :
+              <>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Ajouter
+              </>
+            }
 
           </Button>
 

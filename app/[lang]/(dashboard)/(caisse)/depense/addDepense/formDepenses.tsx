@@ -44,6 +44,7 @@ export default function CreateExpensePage({ onSuccess }: Props) {
     cashRegisterCurrent,
     cashRegisterSessionCurrent,
     setCashRegisterSessionCurrent,
+    settings,
   } = useSchoolStore();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -307,7 +308,7 @@ export default function CreateExpensePage({ onSuccess }: Props) {
                     </div>
 
                     <div>
-                      <Label htmlFor="amount">Montant (FCFA)</Label>
+                      <Label htmlFor="amount">Montant {settings[0].currency? settings[0].currency : "FCFA"}</Label>
                       <div className="relative mt-1">
                         <Input
                           id="amount"
@@ -318,7 +319,7 @@ export default function CreateExpensePage({ onSuccess }: Props) {
                             min: {
                               value: 1,
                               message:
-                                "Le montant doit être supérieur à 0 FCFA",
+                                "Le montant doit être supérieur à 0 " + (settings[0].currency? settings[0].currency : "FCFA"),
                             },
                             valueAsNumber: true,
                           })}

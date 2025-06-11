@@ -271,7 +271,6 @@ const FeesTypePage = ({ data }: Props) => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <Pencil className="h-5 w-5 text-primary" />
               <CardTitle>Types de Frais</CardTitle>
             </div>
             <Badge variant="outline">
@@ -298,7 +297,7 @@ const FeesTypePage = ({ data }: Props) => {
                   onClick={() => setIsModalOpenAdd(true)}
                   className="w-full md:w-auto"
                 >
-                  <PlusCircle className="mr-2 h-4 w-4" />
+                  
                   Ajouter un type
                 </Button>
               )}

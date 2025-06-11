@@ -327,15 +327,15 @@ export default function TarificationPage() {
                   </span>
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
-                <Button color="skyblue" variant="outline" onClick={() => router.push("/parametres/scolarite/frais-scolaires/pricing")}>
+              {/* <div className="flex gap-2">
+                <Button color="skyblue" variant="outline" onClick={() => router.push("/parametres/scolarite/pricing")}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Retour
-                </Button>
-                {/* <Button variant="outline" onClick={retourModification}>
+                </Button> 
+                 <Button variant="outline" onClick={retourModification}>
                   <ArrowLeft className="mr-2 h-4 w-4" /> Retour à la
                   modification
-                </Button> */}
-              </div>
+                </Button> 
+              </div> */}
             </div>
           </CardHeader>
           <CardContent>
@@ -405,7 +405,7 @@ export default function TarificationPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    color="success"
+                    
                     variant="outline"
                     onClick={() => generatePDF("print")}
                     disabled={isProcessing}
@@ -422,7 +422,7 @@ export default function TarificationPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                  color="success"
+                  
                     variant="outline"
                     onClick={() => generatePDF("download")}
                     disabled={isProcessing}
@@ -692,12 +692,35 @@ export default function TarificationPage() {
                         <Input
                           id="montant-paiement"
                           type="number"
-                          placeholder="Ex: 100000"
+                          min="1"
+                          step="1"
+                          max={montantRestant}
+                          placeholder={`Max: ${montantRestant.toLocaleString()}`}
                           value={nouveauMontantPaiement}
-                          onChange={(e) =>
-                            setNouveauMontantPaiement(e.target.value)
-                          }
-                          className="focus-visible:ring-primary"
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            const numValue = parseFloat(value);
+                            
+                            if (value === '') {
+                              setNouveauMontantPaiement('');
+                              return;
+                            }
+                            
+                            if (!isNaN(numValue) && numValue > 0) {
+                              if (numValue <= montantRestant) {
+                                setNouveauMontantPaiement(value);
+                              } else {
+                                // Si la valeur dépasse le montant restant, on met le maximum
+                                setNouveauMontantPaiement(montantRestant.toString());
+                              }
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === '-' || e.key === 'e' || e.key === 'E') {
+                              e.preventDefault();
+                            }
+                          }}
+                          className="focus-visible:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         />
                       </div>
                       <Button
@@ -847,15 +870,16 @@ export default function TarificationPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex justify-end gap-4"
+            className="flex justify-around gap-4"
           >
-            <Button variant="outline" onClick={() => router.back()}>
+            <Button color="destructive" onClick={() => router.push("/parametres/scolarite/pricing")}>
               Annuler
             </Button>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
+                    color="indigodye"
                     className="w-full md:w-auto px-8 py-6 text-lg"
                     onClick={handleSubmit}
                     disabled={!isFormValid() || isSubmitting}

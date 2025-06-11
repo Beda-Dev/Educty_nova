@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Edit, PlusCircle } from "lucide-react";
+import { Edit, PlusCircle , Pencil } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -117,7 +117,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                   )
                 }
               >
-                Ajouter un tarif
+                Ajouter une tarification
               </Button>
             )}
           </div>
@@ -162,7 +162,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                             color="tyrian"
                             title="Modifier"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Pencil className="w-4 h-4" />
                           </Button>
                         </TableCell>
                       )}

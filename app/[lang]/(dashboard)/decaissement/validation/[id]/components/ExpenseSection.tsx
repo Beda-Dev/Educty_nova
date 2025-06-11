@@ -8,13 +8,15 @@ import {
   CardTitle 
 } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
+import { useSchoolStore } from "@/store";
 // If you need formatCurrency, make sure to implement and export it from "@/lib/utils"
 
 interface ExpenseSectionProps {
   expense: Expense;
 }
 
-export function ExpenseSection({ expense }: ExpenseSectionProps) {
+export function ExpenseSection({ expense }: ExpenseSectionProps) {  
+  const {settings} = useSchoolStore()
   function formatCurrency(amount: string): import("react").ReactNode {
     const number = typeof amount === "string" ? parseFloat(amount) : amount;
     if (isNaN(number)) return "Invalid amount";
@@ -23,7 +25,7 @@ export function ExpenseSection({ expense }: ExpenseSectionProps) {
       currency: "XOF",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
-    }) + " FCFA";
+    }) + " " + (settings[0].currency? settings[0].currency : "FCFA");
   }
   return (
     <Card className="overflow-hidden transition-all duration-200 hover:shadow-md">

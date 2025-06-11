@@ -232,7 +232,7 @@ const EditModal: React.FC<EditModalProps> = ({
             <DialogFooter>
               <div className="flex justify-around space-x-3">
                 <DialogClose asChild>
-                  <Button type="button" color="bittersweet" disabled={isLoading}>
+                  <Button type="button" color="bittersweet">
                     Annuler
                   </Button>
                 </DialogClose>

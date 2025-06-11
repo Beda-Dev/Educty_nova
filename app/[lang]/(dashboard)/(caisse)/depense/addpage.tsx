@@ -245,7 +245,7 @@ export default function CreateExpensePage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="amount">Montant (FCFA)*</Label>
+                    <Label htmlFor="amount">Montant {settings[0].currency? settings[0].currency : "FCFA"}</Label>
                     <Input
                       id="amount"
                       type="number"
