@@ -390,10 +390,10 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                 {studentModifications?.photo && (
                   <div className="md:col-span-2">
                     <span className="text-gray-600">Photo:</span>
-                    <Badge variant="outline" className="ml-2">
+                    {/* <Badge variant="outline" className="ml-2">
                       Nouvelle photo ajoutée
                       {studentModifications.photo.stored?.isRestored && " (restaurée depuis IndexedDB)"}
-                    </Badge>
+                    </Badge> */}
                   </div>
                 )}
               </div>

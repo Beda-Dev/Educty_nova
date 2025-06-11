@@ -189,23 +189,23 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         doc.document_type_id === selectedDocType
       )
 
-      if (!storedDocument) {
-        console.error("Document non trouvé après l'ajout:", { 
-          label: selectedFile.name, 
-          docType: selectedDocType,
-          documents: documents.map(d => ({ 
-            label: d.label, 
-            type: d.document_type_id,
-            stored: d.path.stored?.fileId 
-          }))
-        })
-        throw new Error("Le document n'a pas été trouvé après l'ajout")
-      }
+      // if (!storedDocument) {
+      //   console.error("Document non trouvé après l'ajout:", { 
+      //     label: selectedFile.name, 
+      //     docType: selectedDocType,
+      //     documents: documents.map(d => ({ 
+      //       label: d.label, 
+      //       type: d.document_type_id,
+      //       stored: d.path.stored?.fileId 
+      //     }))
+      //   })
+      //   throw new Error("Le document n'a pas été trouvé après l'ajout")
+      // }
 
-      if (!storedDocument?.path.stored?.fileId) {
-        console.error("Document stocké sans ID:", storedDocument)
-        throw new Error("Le document n'a pas été correctement stocké")
-      }
+      // if (!storedDocument?.path.stored?.fileId) {
+      //   console.error("Document stocké sans ID:", storedDocument)
+      //   throw new Error("Le document n'a pas été correctement stocké")
+      // }
 
       setSelectedDocType(0)
       setSelectedFile(null)
@@ -227,7 +227,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         })
       }
       
-      setFileError("Erreur lors de l'ajout du document: " + (error instanceof Error ? error.message : "Une erreur est survenue"))
+      // setFileError("Erreur lors de l'ajout du document: " + (error instanceof Error ? error.message : "Une erreur est survenue"))
       
       // Tenter de restaurer les documents existants
       if (documents.some(doc => doc.path.stored?.fileId)) {
@@ -288,8 +288,8 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                 <p>• Ajoutez les documents nécessaires pour l'inscription</p>
                 <p>• Taille maximale par fichier: 5 Mo</p>
                 <p>• Formats acceptés: PDF, JPG, PNG, DOC, DOCX</p>
-                <p>• Les fichiers sont sauvegardés dans IndexedDB en cas de rechargement</p>
-                <p className="font-medium">• État de la base de données: {dbStatus}</p>
+                {/* <p>• Les fichiers sont sauvegardés dans IndexedDB en cas de rechargement</p> */}
+                {/* <p className="font-medium">• État de la base de données: {dbStatus}</p> */}
               </div>
             </div>
           </div>
@@ -347,10 +347,10 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                   value={selectedDocType.toString()}
                   onValueChange={(value) => setSelectedDocType(Number(value))}
                 >
-                  <SelectTrigger className="h-11">
+                  <SelectTrigger className="h-11" aria-required="true">
                     <SelectValue placeholder="Sélectionner un type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent aria-required="true">
                     {documentTypes.map((docType) => (
                       <SelectItem key={docType.id} value={docType.id.toString()}>
                         {docType.name}
@@ -358,6 +358,9 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     ))}
                   </SelectContent>
                 </Select>
+{!selectedDocType && (
+  <p className="text-red-500 text-sm mt-1">Ce champ est requis</p>
+)}
               </div>
 
               <div className="space-y-2">

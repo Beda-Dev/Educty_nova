@@ -23,7 +23,7 @@ interface Step3Props {
 
 export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const { availablePricing, payments, setPayments, paidAmount, setPaidAmount } = useReinscriptionStore()
-  const { cashRegisterSessionCurrent , methodPayment } = useSchoolStore()
+  const { cashRegisterSessionCurrent, methodPayment } = useSchoolStore()
 
   const [studentPaidAmount, setStudentPaidAmount] = useState(0)
   const [selectedInstallments, setSelectedInstallments] = useState<number[]>([])
@@ -71,18 +71,21 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
     }
   }
 
-  const handleAmountChange = (installmentId: number, amount: number) => {
+  const handleAmountChange = (installmentId: number, amount: number | string) => {
+    // Si le montant est une chaîne vide, on le convertit en 0
+    const numericAmount = amount === '' ? 0 : Number(amount) || 0;
+    
     const maxAmount = Math.min(
       Number.parseInt(allInstallments.find((i) => i.id === installmentId)?.amount_due || "0"),
       studentPaidAmount - totalDistributedAmount + (installmentAmounts[installmentId] || 0),
     )
 
-    const finalAmount = Math.min(amount, maxAmount)
+    const finalAmount = Math.min(numericAmount, maxAmount)
 
-    setInstallmentAmounts({
-      ...installmentAmounts,
+    setInstallmentAmounts(prev => ({
+      ...prev,
       [installmentId]: finalAmount,
-    })
+    }))
 
     // Update payment methods to match new amount
     const currentMethods = paymentMethods[installmentId] || []
@@ -186,8 +189,11 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
             <Input
               id="student-amount"
               type="number"
-              value={studentPaidAmount}
-              onChange={(e) => setStudentPaidAmount(Number.parseInt(e.target.value) || 0)}
+              value={studentPaidAmount || ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                setStudentPaidAmount(value === '' ? 0 : Number.parseInt(value, 10) || 0);
+              }}
               placeholder="Ex: 50000"
               className="text-lg"
             />
@@ -266,15 +272,15 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                                 <Label>Montant à payer</Label>
                                 <Input
                                   type="number"
-                                  value={installmentAmounts[installment.id] || 0}
+                                  value={installmentAmounts[installment.id] || ''}
                                   onChange={(e) =>
-                                    handleAmountChange(installment.id, Number.parseInt(e.target.value) || 0)
+                                    handleAmountChange(installment.id, e.target.value)
                                   }
                                   max={Math.min(
                                     Number.parseInt(installment.amount_due),
                                     studentPaidAmount -
-                                      totalDistributedAmount +
-                                      (installmentAmounts[installment.id] || 0),
+                                    totalDistributedAmount +
+                                    (installmentAmounts[installment.id] || 0),
                                   )}
                                   placeholder="Montant"
                                 />

@@ -390,7 +390,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                 <input {...getInputProps()} />
                 {previewImage ? (
                   <div className="flex flex-col items-center gap-4">
-                    <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-primary/20 group">
+                    <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20 group">
                       <Image
                         src={previewImage}
                         alt="Preview"

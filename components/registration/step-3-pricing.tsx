@@ -72,26 +72,35 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
         })
         setPaymentMethods({
           ...paymentMethods,
-          [installmentId]: [{ id: selectedPaymentMethod, amount: Number.parseInt(installment.amount_due) }],
+          [installmentId]: [{
+            id: methodPayment[0]?.id || 0,
+            amount: Number.parseInt(installment.amount_due)
+          }],
         })
       }
     }
   }
 
-  const handleAmountChange = (installmentId: number, amount: number) => {
-    setInstallmentAmounts({
-      ...installmentAmounts,
-      [installmentId]: amount,
-    })
+  const handleAmountChange = (installmentId: number, amount: number | string) => {
+    // Convertir une chaîne vide en 0, sinon convertir en nombre
+    const numericAmount = amount === '' ? 0 : Number(amount) || 0;
+    
+    setInstallmentAmounts(prev => ({
+      ...prev,
+      [installmentId]: numericAmount,
+    }))
 
     const currentMethods = paymentMethods[installmentId] || []
     if (currentMethods.length === 1) {
-      setPaymentMethods({
-        ...paymentMethods,
-        [installmentId]: [{ ...currentMethods[0], amount }],
-      })
+      setPaymentMethods(prev => ({
+        ...prev,
+        [installmentId]: [{ ...currentMethods[0], amount: numericAmount }],
+      }))
     }
-    setGivenAmount(Object.values({ ...installmentAmounts, [installmentId]: amount }).reduce((sum, amount) => sum + amount, 0))
+    setGivenAmount(prev => {
+      const newAmounts = { ...installmentAmounts, [installmentId]: numericAmount };
+      return Object.values(newAmounts).reduce((sum, amt) => sum + amt, 0);
+    })
   }
 
   const addPaymentMethod = (installmentId: number) => {
@@ -228,29 +237,6 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                 Minimum: {totalPaidAmount.toLocaleString()} FCFA
               </p>
             </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.01 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              className="space-y-2"
-            >
-              <Label className="text-sm font-medium leading-none">Méthode principale</Label>
-              <Select
-                value={selectedPaymentMethod.toString()}
-                onValueChange={(value) => setSelectedPaymentMethod(Number(value))}
-              >
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Sélectionnez une méthode" />
-                </SelectTrigger>
-                <SelectContent>
-                  {methodPayment.map((pm) => (
-                    <SelectItem key={pm.id} value={pm.id.toString()}>
-                      {pm.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </motion.div>
           </div>
 
           {availablePricing.map((pricing) => (
@@ -310,9 +296,10 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                             <Label>Montant à verser</Label>
                             <Input
                               type="number"
-                              value={installmentAmounts[installment.id] || 0}
-                              onChange={(e) => handleAmountChange(installment.id, Number.parseInt(e.target.value) || 0)}
-                              max={Number.parseInt(installment.amount_due)}
+                              value={installmentAmounts[installment.id] || ''}
+                              onChange={(e) => handleAmountChange(installment.id, e.target.value)}
+                              max={Number(installment.amount_due) || 0}
+                              min={0}
                               className="h-10"
                             />
                             <Progress
@@ -353,13 +340,13 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                                 <Input
                                   type="number"
                                   placeholder="Montant"
-                                  value={method.amount}
+                                  value={method.amount || ''}
                                   onChange={(e) =>
                                     updatePaymentMethod(
                                       installment.id,
                                       index,
                                       "amount",
-                                      Number.parseInt(e.target.value) || 0
+                                      e.target.value === '' ? 0 : (Number(e.target.value) || 0)
                                     )
                                   }
                                   className="w-32 h-10"

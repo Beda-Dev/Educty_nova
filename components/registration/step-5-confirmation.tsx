@@ -659,11 +659,11 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                           <span className="text-sm text-gray-500">
                             {formatFileSize(getFileSize(doc.path))}
                           </span>
-                          {doc.path?.stored?.isRestored && (
+                          {/* {doc.path?.stored?.isRestored && (
                             <Badge variant="outline" className="text-xs">
                               Restauré depuis IndexedDB
                             </Badge>
-                          )}
+                          )} */}
                         </div>
                       </motion.div>
                     ))}
