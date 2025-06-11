@@ -57,7 +57,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
-import {Paiement , PricingData , InstallmentData } from "./data"
+import { Paiement, PricingData, InstallmentData } from "./data"
 import ControlledSelectData from "./componants/SelectData";
 
 
@@ -104,11 +104,11 @@ export default function TarificationPage() {
     }
   }, [academicYearCurrent, academicYears]);
 
-  const montantRestant =
-    useEcheancier && paiements.length > 0
-      ? Number.parseInt(amount || "0") -
-        paiements.reduce((sum, p) => sum + p.montant, 0)
-      : 0;
+  const montantRestant = Math.max(
+    0,
+    Number.parseInt(amount || "0") -
+    (useEcheancier ? paiements.reduce((sum, p) => sum + p.montant, 0) : 0)
+  );
 
   const ajouterPaiement = () => {
     if (
@@ -119,10 +119,20 @@ export default function TarificationPage() {
       return;
     }
 
+    const montant = Number.parseInt(nouveauMontantPaiement);
+    if (montant > montantRestant) {
+      toast({
+        title: "Erreur",
+        description: "Le montant saisi dépasse le montant restant",
+        color: "destructive",
+      });
+      return;
+    }
+
     const nouveauPaiement: Paiement = {
       id: Date.now().toString(),
       date: nouvelleDatePaiement,
-      montant: Number.parseInt(nouveauMontantPaiement),
+      montant: montant,
     };
 
     setPaiements([...paiements, nouveauPaiement]);
@@ -405,7 +415,7 @@ export default function TarificationPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    
+
                     variant="outline"
                     onClick={() => generatePDF("print")}
                     disabled={isProcessing}
@@ -422,7 +432,7 @@ export default function TarificationPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                  
+
                     variant="outline"
                     onClick={() => generatePDF("download")}
                     disabled={isProcessing}
@@ -699,13 +709,13 @@ export default function TarificationPage() {
                           value={nouveauMontantPaiement}
                           onChange={(e) => {
                             const value = e.target.value;
-                            const numValue = parseFloat(value);
-                            
+
                             if (value === '') {
                               setNouveauMontantPaiement('');
                               return;
                             }
-                            
+
+                            const numValue = parseFloat(value);
                             if (!isNaN(numValue) && numValue > 0) {
                               if (numValue <= montantRestant) {
                                 setNouveauMontantPaiement(value);
@@ -724,7 +734,7 @@ export default function TarificationPage() {
                         />
                       </div>
                       <Button
-                      color="indigodye"
+                        color="indigodye"
                         onClick={ajouterPaiement}
                         disabled={
                           !nouvelleDatePaiement ||
@@ -809,7 +819,7 @@ export default function TarificationPage() {
                                     0
                                   ) /
                                     Number.parseInt(amount || "1")) *
-                                    100
+                                  100
                                 )}
                                 %
                               </span>
@@ -887,8 +897,8 @@ export default function TarificationPage() {
                     {isSubmitting
                       ? "Enregistrement..."
                       : useEcheancier
-                      ? "Valider l'échéancier"
-                      : "Enregistrer la tarification"}
+                        ? "Valider l'échéancier"
+                        : "Enregistrer la tarification"}
                   </Button>
                 </TooltipTrigger>
                 {!isFormValid() && (
