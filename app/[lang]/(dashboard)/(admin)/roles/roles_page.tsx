@@ -142,7 +142,7 @@ const RolePage = ({ data, isLoading = false }: Props) => {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell className="flex justify-end gap-2">
-                    {hasAdminAccessAssigner ? (
+                    {true ? (
                       <Button
                         size="icon"
                         variant="ghost"
@@ -152,8 +152,9 @@ const RolePage = ({ data, isLoading = false }: Props) => {
                         <Pencil className="h-4 w-4" />
                       </Button>
                     ) : null}
-                    {hasAdminAccessSupprimer ? (
+                    {true ? (
                       <Button
+
                         size="icon"
                         variant="ghost"
                         title="Supprimer"
@@ -180,7 +181,7 @@ const RolePage = ({ data, isLoading = false }: Props) => {
         </Table>
       </Card>
 
-      {hasAdminAccessCreer ? (
+      {true ? (
         <div className="bg-transparent p-2 h-[300px] rounded-sm w-[90%] mx-auto text-center items-center justify-center text-sm">
           <InputFormValidation />
         </div>

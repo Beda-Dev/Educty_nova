@@ -83,7 +83,15 @@ export default function Page() {
       description: "Gestion des types d'évaluation",
       icon: <Clipboard className="w-6 h-6" />,
       path: "/parametres/pedagogy/type_evaluation",
-      color: itemColors[3],
+      color: itemColors[4],
+    },
+    {
+      id: "periodes",
+      title: "Periodes",
+      description: "Gestion des periodes academique",
+      icon: <Calendar className="w-6 h-6" />,
+      path: "/parametres/pedagogy/periodes",
+      color: itemColors[5],
     },
   ];
 

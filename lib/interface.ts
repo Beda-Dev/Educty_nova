@@ -440,6 +440,13 @@ export interface TypeEvaluation {
   updated_at: string;
 }
 
+export interface Period {
+  id: number;
+  label: string;
+  created_at: string;
+  updated_at: string;
+}
+
 
 // interface liée au processus d'inscription
 
@@ -503,4 +510,6 @@ export interface DocumentFormData {
   label: string
   path: File
 }
+
+
 

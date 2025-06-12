@@ -115,7 +115,7 @@ const menuItems: MenuCategory = {
       children: [
         {
           id: "academic-year",
-          title: "Année",
+          title: "Année academique",
           description: "Année scolaire",
           icon: <Calendar className="w-4 h-4" />,
           path: "/academic_year",
@@ -147,6 +147,13 @@ const menuItems: MenuCategory = {
           description: "Gestion des types d'évaluation",
           icon: <Clipboard className="w-6 h-6" />,
           path: "/parametres/pedagogy/type_evaluation",
+        },
+        {
+          id: "periodes",
+          title: "Periodes",
+          description: "Gestion des periodes academique",
+          icon: <Calendar className="w-6 h-6" />,
+          path: "/parametres/pedagogy/periodes",
         },
       ],
     },

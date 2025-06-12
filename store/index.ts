@@ -33,7 +33,8 @@ import {
   TutorFormData,
   RegistrationFormData,
   PaymentFormData,
-  DocumentFormData
+  DocumentFormData,
+  Period
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -230,6 +231,9 @@ interface SchoolStore {
   typeEvaluations: TypeEvaluation[];
   setTypeEvaluations: (data: TypeEvaluation[]) => void;
 
+  periods: Period[];
+  setPeriods: (data: Period[]) => void;
+
   // Registration store data
   currentStep: number;
   setCurrentStep: (step: number) => void;
@@ -367,6 +371,9 @@ export const useSchoolStore = create<SchoolStore>()(
 
       typeEvaluations: [],
       setTypeEvaluations: (data: TypeEvaluation[]) => set({ typeEvaluations: data }),
+
+      periods: [],
+      setPeriods: (data: Period[]) => set({ periods: data }),
 
       // Registration store implementation
       currentStep: 1,

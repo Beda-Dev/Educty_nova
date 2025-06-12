@@ -296,8 +296,6 @@ const InvoicePage = () => {
         matricule
       );
       setDonneesEtudiant(updatedData);
-
-      // Envoi du SMS de confirmation
       // if (donneesEtudiant.informationsEtudiant.tutors.) {
       //   const messageToSend = `Bonjour ${
       //     donneesEtudiant.informationsEtudiant.tutor_name
@@ -692,7 +690,7 @@ const StudentInfoCard = ({
                 />
               ) : (
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${donneesEtudiant.informationsEtudiant.photo}`}
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${donneesEtudiant.informationsEtudiant.photo}`}
                   alt={`${donneesEtudiant.informationsEtudiant.name}`}
                 />
               )}

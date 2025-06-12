@@ -109,14 +109,14 @@ const LogInForm = () => {
     });
   };
 
-  if (!users?.length || !roles?.length || !permissions?.length) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="text-primary">Chargement des données...</span>
-      </div>
-    );
-  }
+  // if (!users?.length || !roles?.length || !permissions?.length) {
+  //   return (
+  //     <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-background">
+  //       <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  //       <span className="text-primary">Chargement des données...</span>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="w-full bg-whitesmoke ">
