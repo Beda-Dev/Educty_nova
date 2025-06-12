@@ -53,12 +53,12 @@ const PermissionsPage = ({ data, isLoading = false }: Props) => {
     setIsDeleting(true);
     
     try {
-      const response = await fetch(`/api/permission/${permissionToDelete}`, {
+      const response = await fetch(`/api/permission?id=${permissionToDelete}`, {
         method: "DELETE",
       });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Erreur lors de la suppression");
+        throw new Error(errorData.data.message || "Erreur lors de la suppression");
       }
 
       toast.success("Permission supprimée avec succès");
@@ -72,12 +72,12 @@ const PermissionsPage = ({ data, isLoading = false }: Props) => {
     }
   };
 
-  if(hasAdminAccess === false){
-    return ( <Card>
-      <ErrorPage />
-    </Card>
-    );
-  }
+  // if(hasAdminAccess === false){
+  //   return ( <Card>
+  //     <ErrorPage />
+  //   </Card>
+  //   );
+  // }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-1">

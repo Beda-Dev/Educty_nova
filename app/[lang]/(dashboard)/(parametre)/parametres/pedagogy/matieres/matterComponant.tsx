@@ -98,10 +98,10 @@ function MatterTable() {
       const response = await fetch(`/api/matter?id=${matterToDelete.id}`, {
         method: "DELETE",
       });
+      const result = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erreur lors de la suppression");
+        throw new Error(result.data?.message || "Erreur lors de la suppression");
       }
 
       toast({
@@ -111,10 +111,8 @@ function MatterTable() {
       await onUpdate();
       setIsDeleteOpen(false);
     } catch (error: any) {
-      console.error("Erreur lors de la suppression :", error);
-
       toast({
-        description: "Erreur lors de la suppression !",
+        description: error instanceof Error ? error.message : String(error),
         color: "destructive",
       });
 

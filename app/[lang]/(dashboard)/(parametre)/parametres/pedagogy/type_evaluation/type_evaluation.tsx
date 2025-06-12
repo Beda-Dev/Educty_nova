@@ -98,6 +98,10 @@ const handleDelete = async () => {
       method: "DELETE",
     });
 
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.data?.message || "Échec de la suppression");
+
 
 
     toast({ description: "Type supprimé avec succès." });
@@ -112,7 +116,7 @@ const handleDelete = async () => {
     console.error("Erreur DELETE :", error);
     setDeleteError("Impossible de supprimer ce type.");
     toast({
-      description: "Erreur lors de la suppression",
+      description: error instanceof Error ? error.message : String(error),
       color: "destructive",
     });
   } finally {

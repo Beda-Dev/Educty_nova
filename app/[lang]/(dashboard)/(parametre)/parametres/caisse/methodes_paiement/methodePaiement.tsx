@@ -138,6 +138,10 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
         method: "DELETE",
       });
 
+      const result = await response.json();
+
+      if (!response.ok) throw new Error(result.data?.message || "Erreur lors de la suppression");
+
       
 
       const updatedMethods = await fetchPaymentMethods();
@@ -153,7 +157,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
       console.error("Erreur lors de la suppression:", error);
       toast({
         title: "Erreur",
-        description: "Échec de la suppression",
+        description: error instanceof Error ? error.message : String(error),
         color: "destructive",
       });
     } finally {

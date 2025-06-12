@@ -133,13 +133,13 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
     try {
       // Validate file
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error("Le fichier ne doit pas dépasser 5 Mo")
+      if (file.size > 3 * 1024 * 1024) {
+        throw new Error("Le fichier ne doit pas dépasser 3 Mo")
       }
 
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"]
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/svg+xml"];
       if (!allowedTypes.includes(file.type)) {
-        throw new Error("Format de fichier non supporté. Utilisez JPG, PNG ou GIF")
+        throw new Error("Format de fichier non supporté. Utilisez JPG, PNG, GIF ou SVG")
       }
 
       // Create preview

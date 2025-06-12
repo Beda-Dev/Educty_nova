@@ -30,12 +30,13 @@ export const DeleteUserModal = ({ userId, onSuccess }: DeleteUserModalProps) => 
       const response = await fetch(`/api/user?id=${userId}`, {
         method: "DELETE",
       });
-      if (!response.ok) throw new Error("Échec de la suppression");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.data?.message || "Échec de la suppression");
 
       onSuccess();
       toast.success("Utilisateur supprimé !");
     } catch (error) {
-      toast.error("Erreur lors de la suppression");
+      toast.error(error instanceof Error ? error.message : String(error));
     } finally {
       setIsDeleting(false);
     }

@@ -116,13 +116,17 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         for (const [key, value] of Object.entries(studentModifications)) {
           if (value !== null && value !== undefined) {
             if (key === "photo" && value && typeof value === "object" && ("file" in value || "stored" in value)) {
-              // Get the actual File object from IndexedDB
-              const file = await getFileFromPath(value as any)
-              if (file) {
-                studentFormData.append(key, file)
-                console.log("Photo added to FormData:", file.name, file.size)
-              }
-            } else {
+  // Get the actual File object from IndexedDB
+  const file = await getFileFromPath(value as any)
+  if (file) {
+    studentFormData.append(key, file)
+    console.log("Photo added to FormData:", file.name, file.size)
+  } else {
+    setSubmitError("Impossible de retrouver la photo de l'élève. Merci de la réimporter avant de confirmer la réinscription.");
+    setIsSubmitting(false);
+    return;
+  }
+} else {
               studentFormData.append(key, value.toString())
             }
           }

@@ -112,7 +112,7 @@ const ExpenseTypePage = ({ data }: Props) => {
       setIsModalOpenEdit(false);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
+        error instanceof Error ? error.message : String(error)
       );
     } finally {
       setIsSubmitting(false);
@@ -125,8 +125,9 @@ const ExpenseTypePage = ({ data }: Props) => {
       const response = await fetch(`/api/expenseType?id=${id}`, {
         method: "DELETE",
       });
+      const result = await response.json();
 
-      if (!response.ok) throw new Error("Échec de la suppression");
+      if (!response.ok) throw new Error(result.data?.message || "Échec de la suppression");
 
       const updatedExpenses = await fetchExpenseType();
       setExpenseTypes(updatedExpenses);
@@ -134,7 +135,7 @@ const ExpenseTypePage = ({ data }: Props) => {
       toast.success("Type de dépense supprimé avec succès");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
+        error instanceof Error ? error.message : String(error),
       );
     } finally {
       setIsSubmitting(false);

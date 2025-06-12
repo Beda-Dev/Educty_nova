@@ -31,6 +31,7 @@ interface Step3Props {
   onPrevious: () => void
 }
 
+
 export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const { methodPayment, cashRegisterSessionCurrent } = useSchoolStore()
   const { setPaidAmount, setPayments, payments, paidAmount, availablePricing, setAvailablePricing } =
@@ -40,6 +41,8 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const [installmentAmounts, setInstallmentAmounts] = useState<Record<number, number>>({})
   const [paymentMethods, setPaymentMethods] = useState<Record<number, Array<{ id: number; amount: number }>>>({})
   const [totalPaidAmount, setTotalPaidAmount] = useState(0)
+  const { settings } = useSchoolStore();
+  const currency = (settings && settings[0]?.currency) || 'FCFA';
   // Montant donné saisi manuellement
   const [givenAmount, setGivenAmount] = useState(0)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(methodPayment[0]?.id || 0)
@@ -260,14 +263,33 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
             >
               <Label className="text-sm font-medium leading-none">Montant donné</Label>
               <Input
-                type="number"
-                value={givenAmount}
-                onChange={(e) => setGivenAmount(Number(e.target.value) || 0)}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9 ]*"
+                value={givenAmount ? givenAmount.toLocaleString('fr-FR').replace(/,/g, ' ') : ''}
+                onChange={e => {
+                  // On enlève tous les caractères non numériques
+                  const raw = e.target.value.replace(/\D/g, '');
+                  setGivenAmount(raw ? Number(raw) : 0);
+                }}
                 min={totalPaidAmount}
-                className="h-10"
+                className="h-10 no-spinner"
+                autoComplete="off"
+                style={{ MozAppearance: 'textfield' }}
               />
+              <style jsx global>{`
+  input.no-spinner::-webkit-outer-spin-button,
+  input.no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input.no-spinner[type=text] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+`}</style>
               <p className="text-sm text-muted-foreground">
-                Minimum: {totalPaidAmount.toLocaleString()} FCFA
+                Minimum: {totalPaidAmount.toLocaleString()}
               </p>
             </motion.div>
           </div>
@@ -282,7 +304,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
             >
               <div className="flex justify-between items-center mb-4">
                 <h4 className="font-semibold text-lg">
-                  {pricing.fee_type.label} - {Number.parseInt(pricing.amount).toLocaleString()} FCFA
+                  {pricing.fee_type.label} - {Number.parseInt(pricing.amount).toLocaleString()} {currency}
                 </h4>
                 <Badge color="secondary">
                   {pricing.installments?.length || 0} échéance{pricing.installments?.length !== 1 ? 's' : ''}
@@ -310,7 +332,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                           <div className="flex justify-between items-center">
                             <span className="font-medium">{installment.status}</span>
                             <span className="text-primary font-semibold">
-                              {Number.parseInt(installment.amount_due).toLocaleString()} FCFA
+                              {Number.parseInt(installment.amount_due).toLocaleString()} {currency}
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground">
@@ -327,18 +349,29 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                         >
                           <div className="space-y-2">
                             <Label>Montant à verser</Label>
-                            <Input
-                              type="number"
-                              value={installmentAmounts[installment.id] || ''}
-                              onChange={(e) => handleAmountChange(installment.id, e.target.value)}
-                              max={Number(installment.amount_due) || 0}
-                              min={0}
-                              className="h-10"
-                            />
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9 ]*"
+                                value={installmentAmounts[installment.id] ? installmentAmounts[installment.id].toLocaleString('fr-FR').replace(/,/g, ' ') : ''}
+                                onChange={e => {
+                                  const raw = e.target.value.replace(/\D/g, '');
+                                  handleAmountChange(installment.id, raw ? Number(raw) : '');
+                                }}
+                                max={Number(installment.amount_due) || 0}
+                                min={0}
+                                className="h-10 no-spinner"
+                                autoComplete="off"
+                                style={{ MozAppearance: 'textfield' }}
+                                placeholder={`Montant (${currency})`}
+                              />
+                              <span className="text-gray-500 text-sm">{currency}</span>
+                            </div>
                             <Progress
                               value={
                                 ((installmentAmounts[installment.id] || 0) /
-                                Number.parseInt(installment.amount_due)) *
+                                  Number.parseInt(installment.amount_due)) *
                                 100
                               }
                               className="h-2"
@@ -371,18 +404,23 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                                   </SelectContent>
                                 </Select>
                                 <Input
-                                  type="number"
+                                  type="text"
                                   placeholder="Montant"
-                                  value={method.amount || ''}
-                                  onChange={(e) =>
+                                  inputMode="numeric"
+                                  pattern="[0-9 ]*"
+                                  value={method.amount ? method.amount.toLocaleString('fr-FR').replace(/,/g, ' ') : ''}
+                                  onChange={e => {
+                                    const raw = e.target.value.replace(/\D/g, '');
                                     updatePaymentMethod(
                                       installment.id,
                                       index,
                                       "amount",
-                                      e.target.value === '' ? 0 : (Number(e.target.value) || 0)
-                                    )
-                                  }
-                                  className="w-32 h-10"
+                                      raw ? Number(raw) : 0
+                                    );
+                                  }}
+                                  className="w-32 h-10 no-spinner"
+                                  autoComplete="off"
+                                  style={{ MozAppearance: 'textfield' }}
                                 />
                                 {(paymentMethods[installment.id] || []).length > 1 && (
                                   <Button
@@ -437,19 +475,19 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total à payer</p>
                   <p className="text-xl font-bold text-primary">
-                    {totalPaidAmount.toLocaleString()} FCFA
+                    {totalPaidAmount.toLocaleString()} {currency}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Montant donné</p>
                   <p className="text-xl font-bold">
-                    {givenAmount.toLocaleString()} FCFA
+                    {givenAmount.toLocaleString()} {currency}
                   </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
                   <p className="text-xl font-bold">
-                    {(givenAmount - totalPaidAmount).toLocaleString()} FCFA
+                    {Math.max(givenAmount - totalPaidAmount, 0).toLocaleString()} {currency}
                   </p>
                 </div>
               </div>
@@ -458,22 +496,49 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
         </CardContent>
       </Card>
 
-      <motion.div
-        className="flex justify-between pt-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
-          Précédent
-        </Button>
-        <Button onClick={handleNext} className="h-10 px-6" disabled={
-          !!globalError ||
-          Object.values(installmentErrors).some((err) => !!err)
-        }>
-          Suivant
-        </Button>
-      </motion.div>
+      {givenAmount < totalPaidAmount ? (
+        <motion.div
+          className="flex flex-col items-center pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="w-full flex justify-between">
+            <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
+              Précédent
+            </Button>
+            <div className="flex-1 flex justify-center">
+              <Button onClick={handleNext} className="h-10 px-6" disabled={
+                !!globalError ||
+                Object.values(installmentErrors).some((err) => !!err) ||
+                givenAmount < totalPaidAmount
+              }>
+                Suivant
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs text-red-600 mt-4 text-center">Le montant donné doit être au moins égal au total à payer pour pouvoir continuer.</p>
+        </motion.div>
+      ) : (
+        <motion.div
+          className="flex justify-between pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
+            Précédent
+          </Button>
+          <Button onClick={handleNext} className="h-10 px-6" disabled={
+            !!globalError ||
+            Object.values(installmentErrors).some((err) => !!err) ||
+            givenAmount < totalPaidAmount
+          }>
+            Suivant
+          </Button>
+        </motion.div>
+      )}
+
 
       {/* Confirmation Modal */}
       <Dialog open={openConfirmModal} onOpenChange={setOpenConfirmModal}>
@@ -490,12 +555,12 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Total à payer</p>
-                  <p className="font-medium">{totalPaidAmount.toLocaleString()} FCFA</p>
+                  <p className="font-medium">{totalPaidAmount.toLocaleString()} {currency}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Montant donné</p>
                   <p className="font-medium text-destructive">
-                    {givenAmount.toLocaleString()} FCFA
+                    {givenAmount.toLocaleString()} {currency}
                   </p>
                 </div>
               </div>
@@ -503,7 +568,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
             <Separator />
             <div className="text-center">
               <p className="font-semibold">
-                Différence: {(totalPaidAmount - givenAmount).toLocaleString()} FCFA
+                Différence: {(totalPaidAmount - givenAmount).toLocaleString()} {currency}
               </p>
             </div>
           </div>

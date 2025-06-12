@@ -10,9 +10,10 @@ import { useSchoolStore } from "@/store/index"
 import { CheckCircle, AlertTriangle, Loader2, CreditCard, Calendar, Info, Hash, User, BookOpen, FileText, Shield } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import type { Installment } from "@/lib/interface"
+import type { Installment, PaymentFormData } from "@/lib/interface"
 import { useDocumentStorage } from "@/hooks/useDocumentStorage"
 import { useRegistrationStore } from "@/hooks/use-registration-store"
+
 
 const padTo2Digits = (num: number): string => num.toString().padStart(2, '0')
 
@@ -36,6 +37,8 @@ interface Step5Props {
 }
 
 export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
+  
+
   const {
     documentTypes,
     userOnline,
@@ -103,6 +106,11 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     getFileFromPath,
     getFileSize,
   } = useRegistrationStore()
+  const { restoreFilesFromIndexedDB } = useRegistrationStore();
+
+  useEffect(() => {
+    console.log("[DEBUG Step5] studentData au montage:", studentData);
+  }, [studentData]);
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")
@@ -110,6 +118,26 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const handleConfirm = async () => {
     setIsSubmitting(true)
     setSubmitError("")
+
+      // Restaurer d'abord les fichiers
+  try {
+    await restoreFilesFromIndexedDB();
+  } catch (error) {
+    console.error("Erreur lors de la restauration des fichiers:", error);
+    setSubmitError("Erreur lors de la restauration des fichiers. Veuillez réessayer.");
+    setIsSubmitting(false);
+    return;
+  }
+
+    // Vérifier que la photo est présente
+    if (studentData?.photo) {
+      const photoFile = await getFileFromPath(studentData.photo);
+      if (!photoFile) {
+        setSubmitError("Impossible de récupérer la photo de l'élève. Veuillez la réimporter.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
     const createdEntities = {
       student_id: null as number | null,
@@ -120,6 +148,21 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     }
 
     try {
+      // --- UTILS pour harmoniser PaymentFormData avant fetch ---
+      const normalizePaymentFormData = (payment: any): PaymentFormData => ({
+        student_id: payment.student_id?.toString?.() ?? '',
+        installment_id: payment.installment_id?.toString?.() ?? '',
+        cash_register_id: payment.cash_register_id?.toString?.() ?? '',
+        cashier_id: payment.cashier_id?.toString?.() ?? '',
+        amount: Number(payment.amount),
+        transaction_id: payment.transaction_id?.toString?.() ?? '',
+        methods: Array.isArray(payment.methods)
+          ? payment.methods.map((m: { id: any; montant: any }) => ({
+            id: Number(m.id),
+            montant: m.montant !== undefined ? String(m.montant) : '0',
+          }))
+          : [],
+      });
       // Step 1: Create student
       const studentFormData = new FormData()
       if (studentData) {
@@ -131,16 +174,20 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         studentFormData.append("status", studentData.status)
         studentFormData.append("sexe", studentData.sexe)
 
+        console.log("[DEBUG] studentData.photo:", studentData.photo);
         if (studentData.photo) {
-          console.log("Processing student photo for submission")
-          const photoFile = await getFileFromPath(studentData.photo)
-          if (photoFile) {
-            studentFormData.append("photo", photoFile)
-            console.log("Photo added to FormData:", photoFile.name, photoFile.size)
-          } else {
-            console.warn("Failed to retrieve photo file from storage")
-          }
-        }
+  console.log("[DEBUG] Passing to getFileFromPath:", studentData.photo);
+  const photoFile = await getFileFromPath(studentData.photo);
+  console.log("[DEBUG] Result from getFileFromPath:", photoFile);
+  if (photoFile) {
+    studentFormData.append("photo", photoFile);
+    console.log("[DEBUG] Photo added to FormData:", photoFile.name, photoFile.size);
+  } else {
+    setSubmitError("Impossible de retrouver la photo de l'élève. Merci de la réimporter avant de confirmer l'inscription.");
+    setIsSubmitting(false);
+    return;
+  }
+}
       }
 
       const studentResponse = await fetch("/api/students", {
@@ -212,7 +259,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         }
       }
 
-      // Step 5: Create payments
       for (const payment of payments) {
         const transactionResponse = await fetch("/api/transaction", {
           method: "POST",
@@ -233,22 +279,23 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         }
         transactionIds.push(transaction.id)
 
-        const paymentResponse = await fetch("/api/payment", {
+        const paymentPayload = normalizePaymentFormData({
+          ...payment,
+          student_id: studentId.toString(),
+          transaction_id: transaction.id.toString(),
+        });
+
+        const paymentRes = await fetch("/api/payment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...payment,
-            student_id: studentId.toString(),
-            transaction_id: transaction.id.toString(),
-          }),
-        })
+          body: JSON.stringify(paymentPayload),
+        });
 
-        const paymentresponse = await paymentResponse.json()
-
-        if (!paymentResponse.ok) {
-          throw new Error(`Erreur lors du paiement: ${paymentresponse.message}`)
+        const paymentData = await paymentRes.json();
+        if (!paymentRes.ok) {
+          throw new Error(`Erreur lors du paiement: ${paymentData.message}`);
         }
-        createdEntities.payments.push(paymentresponse.id)
+        createdEntities.payments.push(paymentData.id);
       }
 
       // Step 6: Upload documents
@@ -261,14 +308,13 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         docFormData.append("label", doc.label)
 
         const file = await getFileFromPath(doc.path)
-        // console.log("Photo file retrieved", file ? `${file.name} (${file.size} bytes)` : "null")
 
         if (file && file.size > 0) {
           docFormData.append("path", file)
           console.log("FormData prepared with file:", file.name)
 
           try {
-            const docResponse = await fetch("/api/document", {
+            const docResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ocument`, {
               method: "POST",
               body: docFormData,
             })
@@ -301,7 +347,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           } catch (error) {
             console.error("Error during document upload:", error)
             throw error
-          } 
+          }
         } else {
           console.error("Failed to get valid file for document:", doc.label, "File is null or empty")
           throw new Error(`Impossible de récupérer un fichier valide pour le document "${doc.label}"`)
@@ -376,9 +422,10 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                     { label: "Date de naissance", value: new Date(studentData.birth_date).toLocaleDateString("fr-FR"), icon: <Calendar className="w-4 h-4" /> },
                     { label: "Sexe", value: studentData.sexe },
                     { label: "Statut", value: studentData.status, badge: true },
-                    { label: "Photo", value: studentData.photo ? "Photo ajoutée" : "Aucune photo", 
+                    {
+                      label: "Photo", value: studentData.photo ? "Photo ajoutée" : "Aucune photo",
                       badge: true,
-                      extra: studentData.photo?.stored?.isRestored && "(restaurée automatiquement)" 
+                      extra: studentData.photo?.stored?.isRestored && "(restaurée automatiquement)"
                     }
                   ].map((item, index) => (
                     <div key={index} className="flex items-center space-x-3">
@@ -717,7 +764,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
             variant="outline"
             onClick={onPrevious}
             disabled={isSubmitting}
-            
+
           >
             Précédent
           </Button>
@@ -726,7 +773,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
             onClick={handleConfirm}
             disabled={isSubmitting}
             color="indigodye"
-            
+
           >
             {isSubmitting ? (
               <>

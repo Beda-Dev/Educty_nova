@@ -10,22 +10,12 @@ export async function DELETE(request, response) {
     if (index !== -1) {
       // Remove the item from the array
       calendarEvents.splice(index, 1);
-      return NextResponse.json({
-        status: "success",
-        message: "Event deleted successfully",
-      });
+      return NextResponse.json({ data: { message: "Event deleted successfully" } });
     } else {
-      return NextResponse.json({
-        status: "fail",
-        message: "Event not found",
-      });
+      return NextResponse.json({ data: { message: "Event not found" } }, { status: 404 });
     }
   } catch (error) {
-    return NextResponse.json({
-      status: "fail",
-      message: "Something went wrong",
-      data: error,
-    });
+    return NextResponse.json({ data: { message: error?.message || "Something went wrong" } }, { status: 500 });
   }
 }
 
@@ -42,22 +32,11 @@ export async function PUT(request, response) {
         ...updatedEventData,
       };
 
-      return NextResponse.json({
-        status: "success",
-        message: "Event updated successfully",
-        data: calendarEvents[index],
-      });
+      return NextResponse.json({ data: { message: "Event updated successfully", event: calendarEvents[index] } });
     } else {
-      return NextResponse.json({
-        status: "fail",
-        message: "Event not found",
-      });
+      return NextResponse.json({ data: { message: "Event not found" } }, { status: 404 });
     }
   } catch (error) {
-    return NextResponse.json({
-      status: "fail",
-      message: "Something went wrong",
-      data: error,
-    });
+    return NextResponse.json({ data: { message: error?.message || "Something went wrong" } }, { status: 500 });
   }
 }

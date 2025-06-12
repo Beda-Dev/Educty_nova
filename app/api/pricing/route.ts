@@ -43,24 +43,24 @@ export async function PUT(request: NextRequest) {
     });
     const data = await response.json();
     return NextResponse.json(data, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de la mise à jour des données :', error);
-    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+    return NextResponse.json({ data: { message: error?.message || 'Erreur interne du serveur' } }, { status: 500 });
   }
 }
 
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { id } = await request.json();
+    const id = new URL(request.url).searchParams.get('id');
     
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/pricing/${id}`, {
       method: 'DELETE',
     });
     const data = await response.json();
     return NextResponse.json(data, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de la suppression des données :', error);
-    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+    return NextResponse.json({ data: { message: error?.message || 'Erreur interne du serveur' } }, { status: 500 });
   }
 }

@@ -115,12 +115,11 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
 
   const sexe = watch("sexe")
   const isTutorLegal = watch("is_tutor_legal")
+  // Nouvelle liste statique des types de tuteur
+  const tutorTypes = ["Père", "Mère", "Tuteur"];
+  const typeTutorValue = watch("type_tutor");
 
-  useEffect(() => {
-    if (!sexe) {
-      setValue("type_tutor", "")
-    }
-  }, [sexe, setValue])
+  
 
   // OPTIMISATION : handler mémoïsé
   const onSubmit = useCallback(async (data: TutorFormValues) => {
@@ -268,54 +267,48 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
 
           <div className="space-y-2">
             <Label>Sexe</Label>
-            <Select
-              value={sexe}
-              onValueChange={(value) => {
-                setValue("sexe", value as "Homme" | "Femme")
-                // OPTIMISATION : validation uniquement au blur, plus de trigger ici
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner le sexe" />
-              </SelectTrigger>
-              <SelectContent className="z-[9999]">
-                <SelectItem value="Homme">
-                  <div className="flex items-center gap-2">
-                    <Mars className="w-4 h-4 text-blue-500" />
-                    <span>Masculin</span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="Femme">
-                  <div className="flex items-center gap-2">
-                    <Venus className="w-4 h-4 text-pink-500" />
-                    <span>Féminin</span>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative w-full">
+  <select
+    value={sexe ?? ""}
+    onChange={e => {
+      setValue("sexe", e.target.value as "Homme" | "Femme");
+      console.log("[TutorModal] Sexe sélectionné:", e.target.value);
+    }}
+    className="block w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
+  >
+    <option value="">Sélectionner le sexe</option>
+    <option value="Homme">
+      ♂ Homme
+    </option>
+    <option value="Femme">
+      ♀ Femme
+    </option>
+  </select>
+  {/* Chevron icon for dropdown effect */}
+  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+  </span>
+</div>
             <ErrorMessage message={errors.sexe?.message} />
           </div>
 
-          {sexe && (
-            <div className="space-y-2">
-              <Label>Type de tuteur</Label>
-              <Select
-                value={watch("type_tutor")}
-                onValueChange={(value) => {
-                  setValue("type_tutor", value)
-                  // OPTIMISATION : validation uniquement au blur, plus de trigger ici
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le type" />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <TutorTypeOptions sexe={sexe} />
-                </SelectContent>
-              </Select>
-              <ErrorMessage message={errors.type_tutor?.message} />
-            </div>
-          )}
+          <div className="space-y-2">
+  <Label>Type de tuteur</Label>
+  <select
+  value={typeTutorValue ?? ""}
+  onChange={e => {
+    setValue("type_tutor", e.target.value);
+    console.log("[TutorModal] type_tutor changé:", e.target.value);
+  }}
+  className="w-full border rounded p-2"
+>
+  <option value="">Sélectionner le type</option>
+  <option value="Père">Père</option>
+  <option value="Mère">Mère</option>
+  <option value="Tuteur">Tuteur</option>
+</select>
+  <ErrorMessage message={errors.type_tutor?.message} />
+</div>
 
           <div className="flex items-center space-x-2 pt-2">
             <Checkbox

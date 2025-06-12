@@ -14,7 +14,17 @@ import { useReinscriptionStore } from "@/hooks/use-reinscription-store"
 import type { PaymentFormData, PaymentMethod } from "@/lib/interface"
 import { AlertTriangle, Info, CreditCard, Banknote } from "lucide-react"
 import { useSchoolStore } from "@/store/index"
-
+import { Separator } from "@/components/ui/separator"
+import { motion } from "framer-motion"
+import { Progress } from "@/components/ui/progress"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 interface Step3Props {
   onNext: () => void
@@ -30,13 +40,16 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const [installmentAmounts, setInstallmentAmounts] = useState<Record<number, number>>({})
   const [paymentMethods, setPaymentMethods] = useState<Record<number, Array<{ id: number; amount: number }>>>({})
   const [totalDistributedAmount, setTotalDistributedAmount] = useState(0)
+  const [openConfirmModal, setOpenConfirmModal] = useState(false)
+  const [installmentErrors, setInstallmentErrors] = useState<Record<number, string>>({})
+  const [globalError, setGlobalError] = useState("")
+  const { settings } = useSchoolStore();
+  const currency = (settings && settings[0]?.currency) || 'FCFA';
 
-  // Get all installments from available pricing
   const allInstallments = availablePricing.flatMap((pricing) => pricing.installments || [])
   const totalDue = availablePricing.reduce((sum, pricing) => sum + Number.parseInt(pricing.amount), 0)
 
   useEffect(() => {
-    // Calculate total distributed amount
     const total = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0)
     setTotalDistributedAmount(total)
     setPaidAmount(total)
@@ -65,36 +78,56 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
         })
         setPaymentMethods({
           ...paymentMethods,
-          [installmentId]: [{ id: methodPayment[2].id, amount: Math.max(0, defaultAmount) }], // Default to "Espèces"
+          [installmentId]: [{ id: methodPayment[2].id, amount: Math.max(0, defaultAmount) }],
         })
       }
     }
   }
 
   const handleAmountChange = (installmentId: number, amount: number | string) => {
-    // Si le montant est une chaîne vide, on le convertit en 0
     const numericAmount = amount === '' ? 0 : Number(amount) || 0;
-    
-    const maxAmount = Math.min(
-      Number.parseInt(allInstallments.find((i) => i.id === installmentId)?.amount_due || "0"),
-      studentPaidAmount - totalDistributedAmount + (installmentAmounts[installmentId] || 0),
-    )
-
-    const finalAmount = Math.min(numericAmount, maxAmount)
-
+    const totalSansActuel = Object.entries(installmentAmounts)
+      .filter(([id]) => Number(id) !== installmentId)
+      .reduce((sum, [, amt]) => sum + amt, 0);
+    if (numericAmount + totalSansActuel > studentPaidAmount) {
+      setGlobalError("La somme répartie dépasse le montant donné.");
+      return;
+    } else {
+      setGlobalError("");
+    }
     setInstallmentAmounts(prev => ({
       ...prev,
-      [installmentId]: finalAmount,
+      [installmentId]: numericAmount,
     }))
-
-    // Update payment methods to match new amount
     const currentMethods = paymentMethods[installmentId] || []
     if (currentMethods.length === 1) {
-      setPaymentMethods({
-        ...paymentMethods,
-        [installmentId]: [{ ...currentMethods[0], amount: finalAmount }],
-      })
+      setPaymentMethods(prev => ({
+        ...prev,
+        [installmentId]: [{ ...currentMethods[0], amount: numericAmount }],
+      }))
+      setInstallmentErrors(prev => ({
+        ...prev,
+        [installmentId]: currentMethods[0].amount !== numericAmount
+          ? `La somme des méthodes (${currentMethods[0].amount}) ne correspond pas au montant de l'échéance (${numericAmount}).`
+          : ''
+      }))
     }
+  }
+
+  const addPaymentMethod = (installmentId: number) => {
+    const currentMethods = paymentMethods[installmentId] || []
+    setPaymentMethods({
+      ...paymentMethods,
+      [installmentId]: [...currentMethods, { id: methodPayment[0]?.id || 0, amount: 0 }],
+    })
+  }
+
+  const removePaymentMethod = (installmentId: number, index: number) => {
+    const currentMethods = paymentMethods[installmentId] || []
+    setPaymentMethods({
+      ...paymentMethods,
+      [installmentId]: currentMethods.filter((_, i) => i !== index),
+    })
   }
 
   const updatePaymentMethod = (installmentId: number, index: number, field: "id" | "amount", value: number) => {
@@ -104,6 +137,14 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
       ...paymentMethods,
       [installmentId]: updatedMethods,
     })
+    const totalMethodAmount = updatedMethods.reduce((sum, method) => sum + method.amount, 0)
+    const installmentAmount = installmentAmounts[installmentId] || 0
+    setInstallmentErrors(prev => ({
+      ...prev,
+      [installmentId]: totalMethodAmount !== installmentAmount
+        ? `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${installmentAmount}).`
+        : ''
+    }))
   }
 
   const validatePaymentMethods = (installmentId: number): boolean => {
@@ -115,36 +156,66 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
 
   const handleNext = () => {
     if (studentPaidAmount === 0) {
-      toast.error("Veuillez saisir le montant versé par l'élève")
+      toast.error("Veuillez saisir le montant versé par l'élève", {
+        position: "top-center",
+      })
       return
     }
 
     if (selectedInstallments.length === 0) {
-      toast.error("Veuillez sélectionner au moins une échéance à payer")
+      toast.error("Veuillez sélectionner au moins une échéance à payer", {
+        position: "top-center",
+      })
       return
     }
 
     if (totalDistributedAmount > studentPaidAmount) {
-      toast.error("Le montant total réparti ne peut pas dépasser le montant versé par l'élève")
+      toast.error("Le montant total réparti ne peut pas dépasser le montant versé par l'élève", {
+        position: "top-center",
+      })
       return
     }
 
-    // Validate payment methods for each installment
     for (const installmentId of selectedInstallments) {
       if (!validatePaymentMethods(installmentId)) {
-        toast.error(`La répartition des méthodes de paiement pour l'échéance ${installmentId} ne correspond pas au montant`)
+        toast.error(`La répartition des méthodes de paiement pour l'échéance ${installmentId} ne correspond pas au montant`, {
+          position: "top-center",
+        })
         return
       }
     }
 
-    // Create payment objects
+    if (studentPaidAmount < totalDistributedAmount) {
+      setOpenConfirmModal(true)
+      return
+    }
+
     const paymentObjects: PaymentFormData[] = selectedInstallments.map((installmentId) => ({
-      student_id: "0", // Will be updated after student creation
+      student_id: "0",
       installment_id: installmentId.toString(),
       cash_register_id: cashRegisterSessionCurrent?.cash_register.id.toString() || "",
       cashier_id: cashRegisterSessionCurrent?.user_id.toString() || "",
       amount: installmentAmounts[installmentId],
-      transaction_id: "0", // Default transaction
+      transaction_id: "0",
+      methods: (paymentMethods[installmentId] || []).map((method) => ({
+        id: method.id,
+        montant: method.amount.toString(),
+      })),
+    }))
+
+    setPayments(paymentObjects)
+    onNext()
+  }
+
+  const handleConfirmPayment = () => {
+    setOpenConfirmModal(false)
+    const paymentObjects: PaymentFormData[] = selectedInstallments.map((installmentId) => ({
+      student_id: "0",
+      installment_id: installmentId.toString(),
+      cash_register_id: cashRegisterSessionCurrent?.cash_register.id.toString() || "",
+      cashier_id: cashRegisterSessionCurrent?.user_id.toString() || "",
+      amount: installmentAmounts[installmentId],
+      transaction_id: "0",
       methods: (paymentMethods[installmentId] || []).map((method) => ({
         id: method.id,
         montant: method.amount.toString(),
@@ -156,144 +227,151 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Information Card */}
-      <Card className="border-blue-200 bg-blue-50">
-        <CardContent className="pt-6">
-          <div className="flex items-start space-x-3">
-            <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-            <div className="space-y-2">
-              <h4 className="font-medium text-blue-900">Comment ça marche ?</h4>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>• Saisissez le montant total que l'élève verse aujourd'hui</p>
-                <p>• Choisissez les échéances à payer avec ce montant</p>
-                <p>• Le système répartira automatiquement le montant</p>
-                <p>• Vous pouvez payer partiellement une échéance</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Amount Input */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Banknote className="w-5 h-5" />
-            <span>Montant versé aujourd'hui</span>
-          </CardTitle>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
+      <Card className="border-none shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardTitle className="text-2xl font-bold tracking-tight">Paiement des frais de réinscription</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="student-amount">Montant total versé (FCFA)</Label>
-            <Input
-              id="student-amount"
-              type="number"
-              value={studentPaidAmount || ''}
-              onChange={(e) => {
-                const value = e.target.value;
-                setStudentPaidAmount(value === '' ? 0 : Number.parseInt(value, 10) || 0);
-              }}
-              placeholder="Ex: 50000"
-              className="text-lg"
-            />
+        <CardContent className="space-y-6 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              className="space-y-2"
+            >
+              <Label className="text-sm font-medium leading-none">Montant versé par l'élève</Label>
+              <Input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9 ]*"
+                value={studentPaidAmount ? studentPaidAmount.toLocaleString('fr-FR').replace(/,/g, ' ') : ''}
+                onChange={e => {
+                  const raw = e.target.value.replace(/\D/g, '');
+                  setStudentPaidAmount(raw ? Number(raw) : 0);
+                }}
+                min={totalDistributedAmount}
+                className="h-10 no-spinner"
+                autoComplete="off"
+                style={{ MozAppearance: 'textfield' }}
+              />
+              <style jsx global>{`
+                input.no-spinner::-webkit-outer-spin-button,
+                input.no-spinner::-webkit-inner-spin-button {
+                  -webkit-appearance: none;
+                  margin: 0;
+                }
+                input.no-spinner[type=text] {
+                  appearance: textfield;
+                  -moz-appearance: textfield;
+                }
+              `}</style>
+              <p className="text-sm text-muted-foreground">
+                Minimum: {totalDistributedAmount.toLocaleString()} {currency}
+              </p>
+            </motion.div>
           </div>
 
-          {studentPaidAmount > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-green-50 p-3 rounded-md text-center">
-                <p className="text-sm text-green-600">Montant versé</p>
-                <p className="text-lg font-bold text-green-700">{studentPaidAmount.toLocaleString()} FCFA</p>
+          {availablePricing.map((pricing) => (
+            <motion.div
+              key={pricing.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-semibold text-lg">
+                  {pricing.label} - {Number.parseInt(pricing.amount).toLocaleString()} {currency}
+                </h4>
+                <Badge color="secondary">
+                  {pricing.installments?.length || 0} échéance{pricing.installments?.length !== 1 ? 's' : ''}
+                </Badge>
               </div>
-              <div className="bg-blue-50 p-3 rounded-md text-center">
-                <p className="text-sm text-blue-600">Montant réparti</p>
-                <p className="text-lg font-bold text-blue-700">{totalDistributedAmount.toLocaleString()} FCFA</p>
-              </div>
-              <div className="bg-orange-50 p-3 rounded-md text-center">
-                <p className="text-sm text-orange-600">Reste à répartir</p>
-                <p className="text-lg font-bold text-orange-700">
-                  {(studentPaidAmount - totalDistributedAmount).toLocaleString()} FCFA
-                </p>
-              </div>
-            </div>
-          )}
 
-          {totalDue > 0 && (
-            <div className="bg-gray-50 p-3 rounded-md">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Total des frais de réinscription:</span> {totalDue.toLocaleString()} FCFA
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              {pricing.installments && pricing.installments.length > 0 ? (
+                <div className="space-y-6">
+                  <Separator />
 
-      {/* Payment Distribution */}
-      {studentPaidAmount > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <CreditCard className="w-5 h-5" />
-              <span>Répartition du paiement</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {availablePricing.map((pricing) => (
-              <div key={pricing.id} className="border rounded-lg p-4">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="font-semibold">{pricing.label}</h4>
-                  <Badge variant="outline">{Number.parseInt(pricing.amount).toLocaleString()} FCFA</Badge>
-                </div>
-
-                {pricing.installments && pricing.installments.length > 0 ? (
-                  <div className="space-y-3">
-                    {pricing.installments.map((installment) => (
-                      <div key={installment.id} className="border rounded-md p-3 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Checkbox
-                              checked={selectedInstallments.includes(installment.id)}
-                              onCheckedChange={() => handleInstallmentToggle(installment.id)}
-                            />
-                            <div>
-                              <p className="font-medium">{installment.status}</p>
-                              <p className="text-sm text-gray-600">
-                                {Number.parseInt(installment.amount_due).toLocaleString()} FCFA - Échéance:{" "}
-                                {new Date(installment.due_date).toLocaleDateString("fr-FR")}
-                              </p>
-                            </div>
+                  {pricing.installments.map((installment) => (
+                    <motion.div
+                      key={installment.id}
+                      whileHover={{ y: -2 }}
+                      className="border rounded-md p-4 space-y-4"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Checkbox
+                          id={`installment-${installment.id}`}
+                          checked={selectedInstallments.includes(installment.id)}
+                          onCheckedChange={() => handleInstallmentToggle(installment.id)}
+                          className="h-5 w-5"
+                        />
+                        <Label htmlFor={`installment-${installment.id}`} className="flex-1 cursor-pointer">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{installment.status}</span>
+                            <span className="text-primary font-semibold">
+                              {Number.parseInt(installment.amount_due).toLocaleString()} {currency}
+                            </span>
                           </div>
-                        </div>
+                          <p className="text-sm text-muted-foreground">
+                            Échéance: {new Date(installment.due_date).toLocaleDateString("fr-FR")}
+                          </p>
+                        </Label>
+                      </div>
 
-                        {selectedInstallments.includes(installment.id) && (
-                          <div className="ml-6 space-y-3 bg-gray-50 p-3 rounded">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Montant à payer</Label>
-                                <Input
-                                  type="number"
-                                  value={installmentAmounts[installment.id] || ''}
-                                  onChange={(e) =>
-                                    handleAmountChange(installment.id, e.target.value)
-                                  }
-                                  max={Math.min(
-                                    Number.parseInt(installment.amount_due),
-                                    studentPaidAmount -
-                                    totalDistributedAmount +
-                                    (installmentAmounts[installment.id] || 0),
-                                  )}
-                                  placeholder="Montant"
-                                />
-                              </div>
+                      {selectedInstallments.includes(installment.id) && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="ml-8 space-y-6"
+                        >
+                          <div className="space-y-2">
+                            <Label>Montant à verser</Label>
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                pattern="[0-9 ]*"
+                                value={installmentAmounts[installment.id] ? installmentAmounts[installment.id].toLocaleString('fr-FR').replace(/,/g, ' ') : ''}
+                                onChange={e => {
+                                  const raw = e.target.value.replace(/\D/g, '');
+                                  handleAmountChange(installment.id, raw ? Number(raw) : '');
+                                }}
+                                max={Number(installment.amount_due) || 0}
+                                min={0}
+                                className="h-10 no-spinner"
+                                autoComplete="off"
+                                style={{ MozAppearance: 'textfield' }}
+                                placeholder={`Montant (${currency})`}
+                              />
+                              <span className="text-gray-500 text-sm">{currency}</span>
+                            </div>
+                            <Progress
+                              value={
+                                ((installmentAmounts[installment.id] || 0) /
+                                Number.parseInt(installment.amount_due)) *
+                                100
+                              }
+                              className="h-2"
+                            />
+                          </div>
 
-                              <div className="space-y-2">
-                                <Label>Méthode de paiement</Label>
+                          <div className="space-y-3">
+                            <Label>Méthodes de paiement</Label>
+                            {(paymentMethods[installment.id] || []).map((method, index) => (
+                              <motion.div
+                                key={index}
+                                layout
+                                className="flex gap-3 items-center"
+                              >
                                 <Select
-                                  value={(
-                                    paymentMethods[installment.id]?.[0]?.id || methodPayment[2].id
-                                  ).toString()}
+                                  value={method.id.toString()}
                                   onValueChange={(value) =>
-                                    updatePaymentMethod(installment.id, 0, "id", Number.parseInt(value))
+                                    updatePaymentMethod(installment.id, index, "id", Number.parseInt(value))
                                   }
                                 >
                                   <SelectTrigger>
@@ -307,49 +385,183 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                                     ))}
                                   </SelectContent>
                                 </Select>
-                              </div>
-                            </div>
+                                <Input
+                                  type="text"
+                                  placeholder="Montant"
+                                  inputMode="numeric"
+                                  pattern="[0-9 ]*"
+                                  value={method.amount ? method.amount.toLocaleString('fr-FR').replace(/,/g, ' ') : ''}
+                                  onChange={e => {
+                                    const raw = e.target.value.replace(/\D/g, '');
+                                    updatePaymentMethod(
+                                      installment.id,
+                                      index,
+                                      "amount",
+                                      raw ? Number(raw) : 0
+                                    );
+                                  }}
+                                  className="w-32 h-10 no-spinner"
+                                  autoComplete="off"
+                                  style={{ MozAppearance: 'textfield' }}
+                                />
+                                {(paymentMethods[installment.id] || []).length > 1 && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => removePaymentMethod(installment.id, index)}
+                                    className="h-10"
+                                  >
+                                    Supprimer
+                                  </Button>
+                                )}
+                              </motion.div>
+                            ))}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addPaymentMethod(installment.id)}
+                              className="h-10"
+                            >
+                              Ajouter une méthode
+                            </Button>
 
                             {!validatePaymentMethods(installment.id) && (
-                              <Alert color="destructive">
+                              <Alert color="destructive" className="mt-2">
                                 <AlertTriangle className="h-4 w-4" />
                                 <AlertDescription>
-                                  Le montant de la méthode de paiement ne correspond pas au montant à payer
+                                  La somme des méthodes ne correspond pas au montant à verser
                                 </AlertDescription>
                               </Alert>
                             )}
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">Aucune échéance définie pour cette tarification</p>
-                )}
-              </div>
-            ))}
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Aucune échéance définie</p>
+              )}
+            </motion.div>
+          ))}
 
-            {totalDistributedAmount > studentPaidAmount && (
-              <Alert color="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Le montant total réparti ({totalDistributedAmount.toLocaleString()} FCFA) dépasse le montant versé par
-                  l'élève ({studentPaidAmount.toLocaleString()} FCFA)
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
+          {totalDistributedAmount > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-skyblue-50 dark:bg-skyblue-900/20 p-6 rounded-lg border border-skyblue-200 dark:border-skyblue-800"
+            >
+              <h4 className="font-semibold text-lg mb-4">Récapitulatif</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Total à payer</p>
+                  <p className="text-xl font-bold text-primary">
+                    {totalDistributedAmount.toLocaleString()} {currency}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Montant donné</p>
+                  <p className="text-xl font-bold">
+                    {studentPaidAmount.toLocaleString()} {currency}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
+                  <p className="text-xl font-bold">
+                    {Math.max(studentPaidAmount - totalDistributedAmount, 0).toLocaleString()} {currency}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
+
+      {studentPaidAmount < totalDistributedAmount ? (
+        <motion.div
+          className="flex flex-col items-center pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="w-full flex justify-between">
+            <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
+              Précédent
+            </Button>
+            <div className="flex-1 flex justify-center">
+              <Button onClick={handleNext} className="h-10 px-6" disabled={
+                !!globalError ||
+                Object.values(installmentErrors).some((err) => !!err) ||
+                studentPaidAmount < totalDistributedAmount
+              }>
+                Suivant
+              </Button>
+            </div>
+          </div>
+          <p className="text-xs text-red-600 mt-4 text-center">Le montant donné doit être au moins égal au total à payer pour pouvoir continuer.</p>
+        </motion.div>
+      ) : (
+        <motion.div
+          className="flex justify-between pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
+            Précédent
+          </Button>
+          <Button onClick={handleNext} className="h-10 px-6" disabled={
+            !!globalError ||
+            Object.values(installmentErrors).some((err) => !!err) ||
+            studentPaidAmount < totalDistributedAmount
+          }>
+            Suivant
+          </Button>
+        </motion.div>
       )}
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious}>
-          Précédent
-        </Button>
-        <Button onClick={handleNext} disabled={studentPaidAmount === 0 || selectedInstallments.length === 0}>
-          Suivant
-        </Button>
-      </div>
-    </div>
+      <Dialog open={openConfirmModal} onOpenChange={setOpenConfirmModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold">Montant insuffisant</DialogTitle>
+            <DialogDescription>
+              Le montant donné est inférieur au montant total à payer. Voulez-vous vraiment continuer ?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label>Détails du paiement</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total à payer</p>
+                  <p className="font-medium">{totalDistributedAmount.toLocaleString()} {currency}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Montant donné</p>
+                  <p className="font-medium text-destructive">
+                    {studentPaidAmount.toLocaleString()} {currency}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Separator />
+            <div className="text-center">
+              <p className="font-semibold">
+                Différence: {(totalDistributedAmount - studentPaidAmount).toLocaleString()} {currency}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" color="destructive" onClick={() => setOpenConfirmModal(false)}>
+              Annuler
+            </Button>
+            <Button color="indigodye" onClick={handleConfirmPayment}>
+              Confirmer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   )
 }

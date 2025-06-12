@@ -132,15 +132,17 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
     const allowedTypes = [
       "application/pdf",
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "image/jpeg",
+      "image/jpg",
+      "image/gif",
+      "image/svg+xml",
     ]
 
     if (!allowedTypes.includes(file.type)) {
-      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, JPG, PNG, DOC ou DOCX`)
+      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, DOC, DOCX, TXT, JPEG, GIF ou SVG`)
       setSelectedFile(null)
       return false
     }
@@ -296,7 +298,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               <div className="text-sm text-skyblue space-y-1">
                 <p>• Ajoutez les documents nécessaires pour l'inscription</p>
                 <p>• Taille maximale par fichier: 5 Mo</p>
-                <p>• Formats acceptés: PDF, JPG, PNG, DOC, DOCX</p>
+                <p>• Formats acceptés: PDF, DOC, DOCX, TXT, JPEG, GIF, SVG</p>
                 {/* <p>• Les fichiers sont sauvegardés localement en cas de rechargement</p> */}
                 {/* <p className="font-medium">• État de la base de données: {dbStatus}</p> */}
               </div>
@@ -334,8 +336,8 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                   <p>Ajoutez ici tous les documents nécessaires pour compléter l'inscription.</p>
                   <p className="mt-2 font-medium">Formats acceptés:</p>
                   <ul className="list-disc pl-5 text-sm">
-                    <li>Documents: PDF, DOC, DOCX</li>
-                    <li>Images: JPG, PNG</li>
+                    <li>Documents: PDF, DOC, DOCX, TXT</li>
+                    <li>Images: JPEG, GIF, SVG</li>
                   </ul>
                   <p className="mt-2 text-sm">Taille maximale: 5 Mo</p>
                 </TooltipContent>
@@ -389,7 +391,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     id="document-file"
                     type="file"
                     onChange={handleFileSelect}
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg,.gif,.svg"
                     className="hidden"
                   />
                   <label htmlFor="document-file" className="cursor-pointer">

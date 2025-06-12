@@ -98,15 +98,17 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
     const allowedTypes = [
       "application/pdf",
-      "image/jpeg",
-      "image/jpg",
-      "image/png",
       "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "text/plain",
+      "image/jpeg",
+      "image/jpg",
+      "image/gif",
+      "image/svg+xml",
     ]
 
     if (!allowedTypes.includes(file.type)) {
-      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, JPG, PNG, DOC ou DOCX`)
+      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, DOC, DOCX, TXT, JPEG, GIF ou SVG`)
       setSelectedFile(null)
       return
     }

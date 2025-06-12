@@ -13,11 +13,11 @@ export async function PUT(request: NextRequest, response: any) {
     demoBoards[index] = payloadItem;
 
     return NextResponse.json(
-      { message: "Item updated successfully" },
+      { data: { message: "Item updated successfully" } },
       { status: 200 }
     );
   } else {
-    return NextResponse.json({ message: "Item not found" }, { status: 404 });
+    return NextResponse.json({ data: { message: "Item not found" } }, { status: 404 });
   }
 }
 
@@ -30,10 +30,10 @@ export async function DELETE(request: NextRequest, response: any) {
     // Remove the item from the array
     demoBoards.splice(index, 1);
     return NextResponse.json(
-      { message: "Item deleted successfully" },
+      { data: { message: "Item deleted successfully" } },
       { status: 200 }
     );
   } else {
-    return NextResponse.json({ message: "Item not found" }, { status: 404 });
+    return NextResponse.json({ data: { message: "Item not found" } }, { status: 404 });
   }
 }

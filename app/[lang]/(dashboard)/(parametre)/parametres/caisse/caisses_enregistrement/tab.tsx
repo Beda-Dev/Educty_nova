@@ -85,8 +85,9 @@ export default function CashRegisterTable({ data }: Props) {
       const response = await fetch(`/api/cashRegister?id=${id}`, {
         method: "DELETE",
       });
+      const result = await response.json();
 
-      if (!response.ok) throw new Error("Erreur lors de la suppression");
+      if (!response.ok) throw new Error(result.data?.message || "Erreur lors de la suppression");
 
       const updatedCashRegisters = await fetchCashRegister();
       setCashRegisters(updatedCashRegisters);

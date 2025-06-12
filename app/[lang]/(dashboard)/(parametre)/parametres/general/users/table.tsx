@@ -157,7 +157,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
           </div>
 
           {/* Bouton à droite */}
-          {hasAdminAccessCreer && (
+          {true && (
             <div>
               <AddUserModal roles={roles} onSuccess={handleSuccess} />
             </div>
@@ -210,14 +210,14 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                   </TableCell>
                   <TableCell className="flex justify-end">
                     <div className="flex gap-3">
-                      {hasAdminAccessModifier && (
+                      {true && (
                         <EditUserModal
                           user={item}
                           roles={roles}
                           onSuccess={handleSuccess}
                         />
                       )}
-                      {hasAdminAccessSupprimer && (
+                      {true && (
                         <DeleteUserModal
                           userId={item.id}
                           onSuccess={handleSuccess}

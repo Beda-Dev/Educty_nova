@@ -43,9 +43,9 @@ export async function PUT(request: NextRequest) {
     });
     const data = await response.json();
     return NextResponse.json(data, { status: 200 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erreur lors de la mise à jour des données :', error);
-    return NextResponse.json({ error: 'Erreur interne du serveur' }, { status: 500 });
+    return NextResponse.json({ data: { message: error?.message || 'Erreur interne du serveur' } }, { status: 500 });
   }
 }
 

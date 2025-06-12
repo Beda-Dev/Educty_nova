@@ -149,8 +149,9 @@ const FeesTypePage = ({ data }: Props) => {
       const response = await fetch(`/api/feeType?id=${id}`, {
         method: "DELETE",
       });
+      const result = await response.json();
 
-      if (!response.ok) throw new Error("Échec de la suppression");
+      if (!response.ok) throw new Error(result.data?.message || "Échec de la suppression");
 
       const updatedFeeTypes = await fetchFeeType();
       setFeeTypes(updatedFeeTypes);
@@ -158,7 +159,7 @@ const FeesTypePage = ({ data }: Props) => {
       toast.success("Type de frais supprimé avec succès");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
+        error instanceof Error ? error.message : String(error)
       );
     } finally {
       setIsSubmitting(false);
