@@ -174,7 +174,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
       selectedValidator
         ? validations.some(
             (v) =>
-              v.expense_id === expense.id && v.user?.name === selectedValidator
+              expense?.validation_expense_id === v.id && v.user?.name === selectedValidator
           )
         : true
     )
@@ -182,7 +182,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
       selectedStatus
         ? validations.some(
             (v) =>
-              v.expense_id === expense.id &&
+              expense.validation_expense_id === v.id &&
               v.validation_status === selectedStatus
           )
         : true
@@ -355,7 +355,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {validations
-                              .filter((v) => v.expense_id === expense.id)
+                              .filter((v) => v.id === expense?.validation_expense_id)
                               .map((v) => (
                                 <Badge
                                   key={v.id}
@@ -371,7 +371,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {validations
-                              .filter((v) => v.expense_id === expense.id)
+                              .filter((v) => v.id === expense?.validation_expense_id)
                               .map((v) => (
                                 <Badge
                                   key={v.id}
