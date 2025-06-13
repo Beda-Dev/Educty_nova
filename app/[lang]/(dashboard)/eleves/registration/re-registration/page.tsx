@@ -19,7 +19,6 @@ import { Search, User, AlertTriangle } from "lucide-react";
 import { useSchoolStore } from "@/store/index";
 
 export default function ReinscriptionPage() {
-  const [photo, setPhoto] = useState<File | null>(null);
   const {
     currentStep,
     setCurrentStep,
@@ -155,7 +154,7 @@ export default function ReinscriptionPage() {
         <ReinscriptionStepper currentStep={currentStep} />
 
         <div className="mt-8">
-          {currentStep === 1 && <Step1PersonalInfo onNext={handleNext} onPhotoChange={setPhoto} />}
+          {currentStep === 1 && <Step1PersonalInfo onNext={handleNext} />}
           {currentStep === 2 && (
             <Step2SchoolInfo onNext={handleNext} onPrevious={handlePrevious} />
           )}
@@ -169,7 +168,6 @@ export default function ReinscriptionPage() {
             <Step5Confirmation
               onPrevious={handlePrevious}
               onComplete={handleComplete}
-              photo={photo}
             />
           )}
         </div>

@@ -35,10 +35,9 @@ const formatDate = (date: Date): string => (
 interface Step5Props {
   onPrevious: () => void
   onComplete: () => void
-  photo?: File | null
 }
 
-export function Step5Confirmation({ onPrevious, onComplete, photo }: Step5Props) {
+export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [restoredPhotoFile, setRestoredPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 

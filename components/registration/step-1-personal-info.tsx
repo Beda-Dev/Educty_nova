@@ -23,10 +23,10 @@ import { isMatriculeUnique } from "@/lib/fonction"
 
 interface Step1Props {
   onNext: () => void
-  onPhotoChange?: (file: File | null) => void
+  
 }
 
-export function Step1PersonalInfo({ onNext, onPhotoChange }: Step1Props) {
+export function Step1PersonalInfo({ onNext }: Step1Props) {
   const { assignmentTypes, tutors, students } =
     useSchoolStore()
 
@@ -88,9 +88,6 @@ export function Step1PersonalInfo({ onNext, onPhotoChange }: Step1Props) {
       // Mettre à jour l'état local
       setPhotoFile(file)
 
-      if (onPhotoChange) {
-        onPhotoChange(file);
-      }
       // Créer l'URL de prévisualisation avant de mettre à jour le store
       const previewUrl = URL.createObjectURL(file)
       setPreviewImage(previewUrl)
@@ -412,9 +409,6 @@ export function Step1PersonalInfo({ onNext, onPhotoChange }: Step1Props) {
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePhoto(null);
-                          if (onPhotoChange) {
-                            onPhotoChange(null);
-                          }
                         }}
                         className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
                         title="Supprimer la photo"
