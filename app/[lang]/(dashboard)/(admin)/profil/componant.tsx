@@ -201,7 +201,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-start gap-4 pb-3">
             <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+              <AvatarFallback className="text-lg bg-gradient-to-br from-skyblue to-skyblue/80 text-skyblue-foreground">
                 {getInitials(user?.name)}
               </AvatarFallback>
             </Avatar>
@@ -221,7 +221,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
                   user.roles.map((role) => (
                     <Badge 
                       key={role.id} 
-                      className="bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground hover:from-primary/80 hover:to-primary/60 transition-colors"
+                      className="bg-gradient-to-r from-primary/90 to-primary/70 text-skyblue-foreground hover:from-primary/80 hover:to-primary/60 transition-colors"
                     >
                       {role.name}
                     </Badge>
@@ -383,7 +383,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
                                           whileHover={{ x: 5 }}
                                           className="flex items-center gap-2 p-2 hover:bg-muted/50 rounded transition-colors cursor-default"
                                         >
-                                          <CheckCircle2 className="h-4 w-4 text-primary" />
+                                          <CheckCircle2 className="h-4 w-4 text-skyblue" />
                                           <span className="text-sm capitalize truncate">
                                             {permission.name.replace(/_/g, " ")}
                                           </span>
@@ -478,7 +478,7 @@ export function UserDetails({ user, isLoading = false }: UserDetailsProps) {
                                     className="justify-start text-left truncate w-full hover:bg-primary/5 transition-colors"
                                     title={permission.name}
                                   >
-                                    <CheckCircle2 className="h-3 w-3 mr-2 text-primary" />
+                                    <CheckCircle2 className="h-3 w-3 mr-2 text-skyblue" />
                                     <span className="truncate capitalize">
                                       {permission.name.replace(/_/g, " ")}
                                     </span>

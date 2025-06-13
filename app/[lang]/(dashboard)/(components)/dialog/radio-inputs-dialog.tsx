@@ -21,7 +21,7 @@ const RadioInputsDialog = () => {
               <Label htmlFor="job_1" className="w-full">
                 <div className="flex items-center">
                   <div className="grow flex flex-col gap-1">
-                    <h3 className="text-sm font-semibold text-default-950 group-hover:text-primary">UX/UI Design Course</h3>
+                    <h3 className="text-sm font-semibold text-default-950 group-hover:text-skyblue">UX/UI Design Course</h3>
                     <span className="text-xs text-default-600">DashTail</span>
                     <span className="text-xs text-default-600">20 seats available</span>
                   </div>
@@ -36,7 +36,7 @@ const RadioInputsDialog = () => {
               <Label htmlFor="job_2" className="w-full">
                 <div className="flex items-center">
                   <div className="grow flex flex-col gap-1">
-                    <h3 className="text-sm font-semibold text-default-950 group-hover:text-primary">PHP/Laravel Course</h3>
+                    <h3 className="text-sm font-semibold text-default-950 group-hover:text-skyblue">PHP/Laravel Course</h3>
                     <span className="text-xs text-default-600">DashTail</span>
                     <span className="text-xs text-default-600">20 seats available</span>
                   </div>
@@ -51,7 +51,7 @@ const RadioInputsDialog = () => {
               <Label htmlFor="job-3" className="w-full">
                 <div className="flex items-center">
                   <div className="grow flex flex-col gap-1">
-                    <h3 className="text-sm font-semibold text-default-950 group-hover:text-primary">Digital Marketing Course</h3>
+                    <h3 className="text-sm font-semibold text-default-950 group-hover:text-skyblue">Digital Marketing Course</h3>
                     <span className="text-xs text-default-600">DashTail</span>
                     <span className="text-xs text-default-600">20 seats available</span>
                   </div>

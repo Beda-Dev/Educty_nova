@@ -18,7 +18,7 @@ const ColorTable = () => {
             <TableRow>
               {
                 columns.map((column: ColumnProps) => (
-                  <TableHead key={column.key} className="text-primary">
+                  <TableHead key={column.key} className="text-skyblue">
                     {column.label}
                   </TableHead>
                 ))
@@ -28,11 +28,11 @@ const ColorTable = () => {
           <TableBody>
             {users.slice(0, 5).map((item: UserProps) => (
               <TableRow key={item.id}>
-                <TableCell className="text-primary">{item.id}</TableCell>
-                <TableCell className="text-primary">{item.name}</TableCell>
-                <TableCell className="text-primary">{item.email}</TableCell>
-                <TableCell className="text-primary">{item.age}</TableCell>
-                <TableCell className="text-primary">{item.point}</TableCell>
+                <TableCell className="text-skyblue">{item.id}</TableCell>
+                <TableCell className="text-skyblue">{item.name}</TableCell>
+                <TableCell className="text-skyblue">{item.email}</TableCell>
+                <TableCell className="text-skyblue">{item.age}</TableCell>
+                <TableCell className="text-skyblue">{item.point}</TableCell>
               </TableRow>
             ))}
           </TableBody>

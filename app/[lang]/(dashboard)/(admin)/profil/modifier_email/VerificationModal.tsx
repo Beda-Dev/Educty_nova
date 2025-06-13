@@ -263,7 +263,7 @@ export function VerificationModal({
           <div className="text-center text-sm text-default-500">
             Vous n'avez pas reçu de code?{" "}
             <button 
-              className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+              className="text-skyblue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
               onClick={() => setShowResendModal(true)}
               disabled={isResending}
             >

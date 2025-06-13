@@ -5,7 +5,7 @@ const AvatarsLetter = () => {
   return (
     <>
       <Avatar>
-        <AvatarFallback className=" bg-primary text-primary-foreground">
+        <AvatarFallback className=" bg-primary text-skyblue-foreground">
           PR
         </AvatarFallback>
       </Avatar>

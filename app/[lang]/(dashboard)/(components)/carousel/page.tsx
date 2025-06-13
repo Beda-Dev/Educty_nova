@@ -251,7 +251,7 @@ const CarouselPage = () => {
                         src={slider1}
                         alt="image"
                       />
-                      <span className="absolute top-2 bg-default-400 w-10 h-10 p-2 left-2 rounded-full text-primary-foreground flex items-center justify-center  ">
+                      <span className="absolute top-2 bg-default-400 w-10 h-10 p-2 left-2 rounded-full text-skyblue-foreground flex items-center justify-center  ">
                         {index + 1}
                       </span>
                     </div>

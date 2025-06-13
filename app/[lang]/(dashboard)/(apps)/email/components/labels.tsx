@@ -28,10 +28,10 @@ const Labels = ({ items, isCollapsed }: { items: any; isCollapsed: boolean }) =>
                 side="right"
                 className="flex items-center gap-4 capitalize"
               >
-                <div className="flex-1 text-sm font-medium text-primary-foreground capitalize">
+                <div className="flex-1 text-sm font-medium text-skyblue-foreground capitalize">
                   {item.label}
                 </div>
-                <div className="flex-none text-sm font-medium text-primary-foreground">
+                <div className="flex-none text-sm font-medium text-skyblue-foreground">
                   {item.total}
                 </div>
               </TooltipContent>

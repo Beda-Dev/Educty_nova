@@ -34,7 +34,7 @@ const Dependency = () => {
         <Button
           type="button"
           onClick={togglePopover}
-          className="text-sm font-medium text-primary hover:underline cursor-pointer bg-transparent hover:bg-transparent p-0"
+          className="text-sm font-medium text-skyblue hover:underline cursor-pointer bg-transparent hover:bg-transparent p-0"
         >Set</Button>
       }
       open={open}

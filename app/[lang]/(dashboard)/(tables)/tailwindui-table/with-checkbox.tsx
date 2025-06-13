@@ -73,7 +73,7 @@ const WithCheckbox = () => {
             <TableCell>{item.email}</TableCell>
             <TableCell className="capitalize">{item.role}</TableCell>
             <TableCell>
-              <Button className=" p-0 h-auto hover:bg-transparent bg-transparent text-primary hover:text-primary/80  hover:underline">
+              <Button className=" p-0 h-auto hover:bg-transparent bg-transparent text-skyblue hover:text-skyblue/80  hover:underline">
                 Edit
               </Button>
             </TableCell>

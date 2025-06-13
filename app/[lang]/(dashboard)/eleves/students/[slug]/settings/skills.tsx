@@ -25,7 +25,7 @@ const Skills = () => {
           }
         </div>
         <Button
-          className="mt-5 w-full text-primary font-semibold text-xs hover:bg-primary hover:text-primary-foreground"
+          className="mt-5 w-full text-skyblue font-semibold text-xs hover:bg-primary hover:text-skyblue-foreground"
           color="secondary"
         >
           <Plus className="w-[18px] h-[18px] me-1" />

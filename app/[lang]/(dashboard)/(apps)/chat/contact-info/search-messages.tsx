@@ -35,7 +35,7 @@ const SearchMessages = ({ handleSetIsOpenSearch }: {
           <Button
             type="button"
             size="icon"
-            className="rounded-full bg-default-500 text-primary-foreground hover:bg-default-700 absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
+            className="rounded-full bg-default-500 text-skyblue-foreground hover:bg-default-700 absolute top-1/2 right-2 -translate-y-1/2 h-8 w-8"
             onClick={handleClearValues}
           >
             <Icon icon="lucide:x" className="text-lg" />
@@ -49,7 +49,7 @@ const SearchMessages = ({ handleSetIsOpenSearch }: {
         className="rounded-full bg-default-300"
         disabled
       >
-        <Icon icon="mdi:chevron-down" className="text-xl text-primary-foreground" />
+        <Icon icon="mdi:chevron-down" className="text-xl text-skyblue-foreground" />
       </Button>
       <Button
         type="button"
@@ -57,11 +57,11 @@ const SearchMessages = ({ handleSetIsOpenSearch }: {
         className="rounded-full bg-default-300"
         disabled
       >
-        <Icon icon="mdi:chevron-up" className="text-xl text-primary-foreground" />
+        <Icon icon="mdi:chevron-up" className="text-xl text-skyblue-foreground" />
       </Button>
       <Button
         type="button"
-        className="bg-default-200 text-default-900 hover:bg-default-600 hover:text-primary-foreground"
+        className="bg-default-200 text-default-900 hover:bg-default-600 hover:text-skyblue-foreground"
         onClick={handleSetIsOpenSearch}
       >
         Close

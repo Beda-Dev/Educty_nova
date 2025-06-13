@@ -26,9 +26,9 @@ const SingleMenuItem: React.FC<SingleMenuItemProps> = ({
         {!collapsed || hovered ? (
           <div
             className={cn(
-              "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-primary-foreground",
+              "flex  gap-3 group  text-default-700 dark:text-default-950  font-medium  text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-skyblue-foreground",
               {
-                "bg-skyblue   text-primary-foreground ": isActive,
+                "bg-skyblue   text-skyblue-foreground ": isActive,
               }
             )}
           >
@@ -44,7 +44,7 @@ const SingleMenuItem: React.FC<SingleMenuItemProps> = ({
               className={cn(
                 "h-12 w-12 mx-auto rounded-md  transition-all duration-300 inline-flex flex-col items-center justify-center  relative  ",
                 {
-                  "bg-skyblue  text-primary-foreground ": isActive,
+                  "bg-skyblue  text-skyblue-foreground ": isActive,
                   " text-default-600   ": !isActive,
                 }
               )}

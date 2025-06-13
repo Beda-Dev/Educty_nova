@@ -28,7 +28,7 @@ const AffixPage = () => {
       <div className="grid  xl:grid-cols-2 grid-cols-1 gap-5">
         <Card title="Default Affix">
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-            The <code className="text-primary">offsetTop</code> props of Affix
+            The <code className="text-skyblue">offsetTop</code> props of Affix
             component set the minimal offset and setTop function add extra 10px
             onClick. .
           </p>
@@ -40,7 +40,7 @@ const AffixPage = () => {
         </Card>
         <Card title="Fixed Affix">
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-            The <code className="text-primary">offsetTop and onChange</code>{" "}
+            The <code className="text-skyblue">offsetTop and onChange</code>{" "}
             props of Affix component set the offset 120px .
           </p>
           <Affix offsetTop={120} target={myElementRef}>
@@ -49,7 +49,7 @@ const AffixPage = () => {
         </Card>
         <Card title="Example">
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-            The <code className="text-primary">offsetTop and target</code> props
+            The <code className="text-skyblue">offsetTop and target</code> props
             of Affix component set the offset at fixed place.
           </p>
           <div style={containerStyle} ref={(el: any) => setContainer(el)}>

@@ -21,7 +21,7 @@ const ReportsCard = () => {
       name: "Total Project",
       count: "1206",
       rate: "8.2",
-      icon: <Docs className="w-6 h-6 text-primary" />,
+      icon: <Docs className="w-6 h-6 text-skyblue" />,
       color: "primary"
     },
     {

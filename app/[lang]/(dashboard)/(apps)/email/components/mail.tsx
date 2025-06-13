@@ -397,7 +397,7 @@ const Mail = ({
                             <TabsList className="bg-transparent gap-2 lg:gap-6 w-full justify-start pl-6 lg:pl-0">
                               <TabsTrigger
                                 value="private"
-                                className="capitalize  data-[state=active]:shadow-none pl-0   data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+                                className="capitalize  data-[state=active]:shadow-none pl-0   data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
                               before:left-1/2 before:-bottom-[5px] before:h-[2px] w-fit md:min-w-[126px]
                                 before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                               >
@@ -409,7 +409,7 @@ const Mail = ({
                               </TabsTrigger>
                               <TabsTrigger
                                 value="social"
-                                className="capitalize  data-[state=active]:shadow-none pl-0 data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+                                className="capitalize  data-[state=active]:shadow-none pl-0 data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
                               before:left-1/2 before:-bottom-[5px] before:h-[2px]  w-fit md:min-w-[126px]
                                 before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                               >
@@ -421,7 +421,7 @@ const Mail = ({
                               </TabsTrigger>
                               <TabsTrigger
                                 value="promotions"
-                                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+                                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
                               before:left-1/2 before:-bottom-[5px] before:h-[2px]  w-fit md:min-w-[126px]
                                 before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                               >

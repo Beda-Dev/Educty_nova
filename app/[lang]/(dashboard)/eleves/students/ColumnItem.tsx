@@ -39,7 +39,7 @@ export const ColumnItem = ({
         type="checkbox"
         checked={enabled}
         onChange={() => onToggle(id)}
-        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+        className="h-4 w-4 rounded border-gray-300 text-skyblue focus:ring-primary"
       />
       <span className="flex-1">{label}</span>
       <button

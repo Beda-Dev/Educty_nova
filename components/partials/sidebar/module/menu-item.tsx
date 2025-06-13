@@ -17,7 +17,7 @@ function NavLink({ childItem, locationName, trans }: {
       className={cn(
         "flex  font-medium  text-sm capitalize px-[10px] py-3 gap-3 rounded-md cursor-pointer",
         {
-          "bg-primary text-primary-foreground": isLocationMatch(
+          "bg-primary text-skyblue-foreground": isLocationMatch(
             href,
             locationName
           ),
@@ -58,7 +58,7 @@ const MenuItem = ({
       {childItem?.nested ? (
         <div
           className={cn("flex items-center gap-3 px-[10px] py-3 rounded-md ", {
-            "bg-primary  text-primary-foreground": nestedIndex === index,
+            "bg-primary  text-skyblue-foreground": nestedIndex === index,
             "  text-default-600": nestedIndex !== index,
           })}
         >
@@ -80,7 +80,7 @@ const MenuItem = ({
               className={cn(
                 "flex-none transition-all duration-200 text-default-500 ",
                 {
-                  " transform rotate-90   text-primary-foreground":
+                  " transform rotate-90   text-skyblue-foreground":
                     nestedIndex === index,
                 }
               )}

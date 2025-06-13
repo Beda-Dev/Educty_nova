@@ -122,7 +122,7 @@ export function TutorEditModal({ tutor, isNew = false }: TutorEditModalProps) {
         >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <User2 className="w-5 h-5 text-primary" />
+              <User2 className="w-5 h-5 text-skyblue" />
               <span>{isNew ? "Nouveau tuteur" : "Modifier le tuteur"}</span>
             </DialogTitle>
             <DialogDescription>

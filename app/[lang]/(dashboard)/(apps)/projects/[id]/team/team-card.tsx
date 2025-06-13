@@ -21,7 +21,7 @@ const TeamCard = ({ item }: { item: Member }) => {
           {name}
         </div>
         <div className="text-center text-sm  text-default-600">
-          {designation} at <span className="text-primary">{company}</span>
+          {designation} at <span className="text-skyblue">{company}</span>
         </div>
         <div className="flex justify-center gap-4 mt-4">
           <Button

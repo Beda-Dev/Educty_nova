@@ -30,14 +30,14 @@ const DialogBackdrop = () => {
           <Tabs defaultValue="link" className="w-full">
             <TabsList className=" bg-transparent p-0 border-b-2 w-full rounded-none justify-start">
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150
                  before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="code"
               >
                 Embed code
               </TabsTrigger>
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 
                 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="link"
               >
@@ -117,7 +117,7 @@ const DialogBackdrop = () => {
           <Tabs defaultValue="link" className=" w-full">
             <TabsList className="bg-transparent p-0 border-b-2 w-full rounded-none justify-start">
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 
                 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2
                  before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="code"
@@ -125,7 +125,7 @@ const DialogBackdrop = () => {
                 Embed code
               </TabsTrigger>
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 
                 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2
                 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="link"
@@ -206,14 +206,14 @@ const DialogBackdrop = () => {
           <Tabs defaultValue="link" className=" w-full">
             <TabsList className=" bg-transparent p-0 border-b-2 w-full rounded-none justify-start">
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 
                 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="code"
               >
                 Embed code
               </TabsTrigger>
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150
                  before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="link"
               >
@@ -293,14 +293,14 @@ const DialogBackdrop = () => {
           <Tabs defaultValue="link" className=" w-full">
             <TabsList className=" bg-transparent p-0 border-b-2 w-full rounded-none justify-start">
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 
+                className="capitalize  data-[state=active]:shadow-none pl-0  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 
                 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="code"
               >
                 Embed code
               </TabsTrigger>
               <TabsTrigger
-                className="capitalize  data-[state=active]:shadow-none pl-0 data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 
+                className="capitalize  data-[state=active]:shadow-none pl-0 data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 
                 before:transition-all before:duration-150 relative before:absolute before:left-1/2 before:-bottom-[2px] before:h-[2px] before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                 value="link"
               >

@@ -85,7 +85,7 @@ const ThemeChange = () => {
                         )}
                       >
                         {isActive && (
-                          <Check className="h-4 w-4 text-primary-foreground" />
+                          <Check className="h-4 w-4 text-skyblue-foreground" />
                         )}
                       </div>
                     </div>

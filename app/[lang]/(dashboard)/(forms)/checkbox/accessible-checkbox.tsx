@@ -26,7 +26,7 @@ const AccessibleCheckbox = () => {
         >
           <span
             className={cn("text-default-600", {
-              "text-primary": isSelectedCb1,
+              "text-skyblue": isSelectedCb1,
             })}
           >
             Travelling

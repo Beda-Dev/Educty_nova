@@ -124,7 +124,7 @@ const Transaction = () => {
                 <span className='text-xs font-medium text-default-600'>{item.customerId}</span>
               </div>
             </div>
-            <span className='text-sm font-medium text-primary-500'>${item.amount}</span>
+            <span className='text-sm font-medium text-skyblue-500'>${item.amount}</span>
           </li>
         ))
       }

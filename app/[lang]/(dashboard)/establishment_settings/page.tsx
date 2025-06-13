@@ -273,7 +273,7 @@ export default function SettingsPage() {
             <Card className="overflow-hidden">
                 <CardHeader className="border-b">
                     <div className="flex items-center gap-3">
-                        <Building2 className="h-8 w-8 text-primary" />
+                        <Building2 className="h-8 w-8 text-skyblue" />
                         <div>
                             <CardTitle className="text-2xl">Paramètres de l'établissement</CardTitle>
                             <CardDescription>Configurez les informations de votre établissement scolaire</CardDescription>

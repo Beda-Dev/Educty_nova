@@ -70,14 +70,14 @@ const SingleFileCard = ({ item }: { item: File }) => {
           })}
         >
           <p
-            className={cn("text-base font-medium text-default-800 dark:text-primary-foreground truncate", {
+            className={cn("text-base font-medium text-default-800 dark:text-skyblue-foreground truncate", {
               "text-default-50": item?.ext == "png",
             })}
           >
             {item?.heading}
           </p>
           <p
-            className={cn("text-sm font-normal text-default-600 dark:text-primary-foreground", {
+            className={cn("text-sm font-normal text-default-600 dark:text-skyblue-foreground", {
               "text-default-50": item?.ext == "png",
             })}
           >

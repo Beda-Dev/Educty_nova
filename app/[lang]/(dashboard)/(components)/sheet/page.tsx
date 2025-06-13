@@ -27,13 +27,13 @@ const SheetPage = () => {
     <div className=" space-y-5">
       <Card title="Basic Sheet" code={basicSheet}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Sheet</code> component wraps the.{" "}
-          <code className="text-primary">
+          The <code className="text-skyblue"> Sheet</code> component wraps the.{" "}
+          <code className="text-skyblue">
             SheetTrigger, SheetContent, SheetHeader, SheetTitle,
             SheetDescription , SheetFooter, SheetClose
           </code>{" "}
           component to make sheet and wrap it as necessary to make sheet close.{" "}
-          <code className="text-primary">side</code> props helps to identify
+          <code className="text-skyblue">side</code> props helps to identify
           from where the sheet will come from.
         </p>
         <div className="flex flex-wrap gap-5">

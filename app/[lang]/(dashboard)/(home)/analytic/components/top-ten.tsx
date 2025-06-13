@@ -109,7 +109,7 @@ const TopTen = () => {
                 <div className="flex items-center gap-1.5">
                   <div className="text-base font-medium text-default-600"> {item.total}</div>
                   <div className="h-5 w-5 rounded-full bg-primary bg-opacity-10  justify-center items-center hidden md:flex">
-                    <Eye className="w-2.5 h-2.5 text-primary" />
+                    <Eye className="w-2.5 h-2.5 text-skyblue" />
                   </div>
                 </div>
               </div>

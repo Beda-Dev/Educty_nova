@@ -74,7 +74,7 @@ const SelectionOperation = () => {
                   <Button
                     size="icon"
                     color="secondary"
-                    className=" h-7 rounded-full bg-transparent w-7 data-[state=open]:bg-primary data-[state=open]:text-primary-foreground  "
+                    className=" h-7 rounded-full bg-transparent w-7 data-[state=open]:bg-primary data-[state=open]:text-skyblue-foreground  "
                   >
                     <Icon icon="heroicons:chevron-down" className=" h-4 w-4 " />
                   </Button>

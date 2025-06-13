@@ -97,7 +97,7 @@ export function DataTableFacetedFilter({ column, title, options }: {
                       className={cn(
                         "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
                         isSelected
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-primary text-skyblue-foreground"
                           : "opacity-50 [&_svg]:invisible"
                       )}
                     >

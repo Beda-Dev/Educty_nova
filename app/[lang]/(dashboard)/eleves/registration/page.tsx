@@ -80,7 +80,7 @@ export default function HomePage() {
             <Card className="hover:shadow-xl transition-all duration-300 border border-transparent hover:border-primary/20 h-full">
               <CardHeader className="text-center pb-4">
                 <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
-                  <UserPlus className="w-10 h-10 text-primary" />
+                  <UserPlus className="w-10 h-10 text-skyblue" />
                 </div>
                 <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-white">
                   Nouvelle Inscription
@@ -92,15 +92,15 @@ export default function HomePage() {
               <CardContent className="text-center pt-0">
                 <div className="space-y-3 mb-8">
                   <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                    <ShieldCheck className="w-4 h-4 text-primary" />
+                    <ShieldCheck className="w-4 h-4 text-skyblue" />
                     <span>Informations personnelles et tuteurs</span>
                   </div>
                   <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                    <BookOpen className="w-4 h-4 text-primary" />
+                    <BookOpen className="w-4 h-4 text-skyblue" />
                     <span>Choix de la classe et tarification</span>
                   </div>
                   <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4 text-primary" />
+                    <Clock className="w-4 h-4 text-skyblue" />
                     <span>Gestion des paiements par échéances</span>
                   </div>
                 </div>

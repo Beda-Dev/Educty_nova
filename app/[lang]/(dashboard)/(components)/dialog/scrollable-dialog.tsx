@@ -30,7 +30,7 @@ const ScrollableDialog = () => {
                   alt=""
                 />
               </div>
-              <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground mt-5">
+              <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground mt-5">
                 The most wonderful sea beach in the world
               </h3>
               <div className="mt-4 space-y-6">

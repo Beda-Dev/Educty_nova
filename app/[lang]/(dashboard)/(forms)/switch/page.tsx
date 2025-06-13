@@ -43,21 +43,21 @@ const SwitchPage = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card title="Default Switch" code={defaultSwitch}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          No<code className="text-primary"> props </code> are required for our
+          No<code className="text-skyblue"> props </code> are required for our
           default style.
         </p>
         <DefaultSwitch />
       </Card>
       <Card title="Switch With Label" code={switchWithLabel}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use<code className="text-primary"> Label component </code> for the
+          Use<code className="text-skyblue"> Label component </code> for the
           switch label.
         </p>
         <SwitchWithLabel />
       </Card>
       <Card title="Disabled Switch" code={disabledSwitch}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use the<code className="text-primary"> disabled </code> attribute to
+          Use the<code className="text-skyblue"> disabled </code> attribute to
           disabled the switch.
         </p>
         <DisabledSwitch />
@@ -66,7 +66,7 @@ const SwitchPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The size prop is used to change the switch sizes. <br />
           Our available sizes are{" "}
-          <code className="text-primary">
+          <code className="text-skyblue">
             small (sm), medium (md) and large (lg)
           </code>{" "}
           .
@@ -76,8 +76,8 @@ const SwitchPage = () => {
       <Card title="Switch With Icon" code={switchWithIcon}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           {" "}
-          Use the <code className="text-primary">startContent</code> and{" "}
-          <code className="text-primary">endContent</code> properties to display
+          Use the <code className="text-skyblue">startContent</code> and{" "}
+          <code className="text-skyblue">endContent</code> properties to display
           the icon.
         </p>
         <SwitchWithIcon />
@@ -85,7 +85,7 @@ const SwitchPage = () => {
       <Card title="Switch With Thumb Icon" code={switchWithThumbIcon}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           {" "}
-          Use the <code className="text-primary">thumbIcon</code> property to
+          Use the <code className="text-skyblue">thumbIcon</code> property to
           display the icon.
         </p>
         <SwitchWithThumbIcon />
@@ -94,7 +94,7 @@ const SwitchPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The color prop is used to change the switch color. <br />
           Our available colors are{" "}
-          <code className="text-primary">
+          <code className="text-skyblue">
             primary, indfo, warning, success, destructive
           </code>{" "}
           .
@@ -103,14 +103,14 @@ const SwitchPage = () => {
       </Card>
       <Card title="Thumb Size" code={thumbSize}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use the <code className="text-primary">thumbSize</code> class to
+          Use the <code className="text-skyblue">thumbSize</code> class to
           adjust the size of the thumb.
         </p>
         <ThumbSize />
       </Card>
       <Card title="Controlled Switch" code={controlledSwitch}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use the <code className="text-primary">handleCheckedChange</code>{" "}
+          Use the <code className="text-skyblue">handleCheckedChange</code>{" "}
           method to capture the switch value.
         </p>
         <ControlledSwtich />
@@ -118,7 +118,7 @@ const SwitchPage = () => {
       <Card title="Switch with Badge" code={switchWithBadge}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Use{" "}
-          <code className="text-primary">
+          <code className="text-skyblue">
             startContent="On" and endContent="Off"
           </code>{" "}
           as label text for the switch. You can customize the "On" and "Off"

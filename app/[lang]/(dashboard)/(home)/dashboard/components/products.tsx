@@ -116,7 +116,7 @@ const Products = () => {
                     <Image src={item.image} alt="product image" className="w-full h-full object-cover rounded-md" priority={true} />
                   </div>
                   <div className="flex-1">
-                    <Link href={item.link} className="text-sm font-medium text-default-800 hover:text-primary">  {item.title}  </Link>
+                    <Link href={item.link} className="text-sm font-medium text-default-800 hover:text-skyblue">  {item.title}  </Link>
                     <div className="text-xs text-default-400">Item {item.sku}</div>
                   </div>
                   <div className="flex-none text-sm font-medium text-default-700">${item.price}</div>

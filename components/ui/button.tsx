@@ -9,8 +9,8 @@ const buttonVariants = cva(
   {
     variants: {
       color: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
-        primary: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default: "bg-primary text-skyblue-foreground hover:bg-primary/80",
+        primary: "bg-primary text-skyblue-foreground hover:bg-primary/80",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/80",
         success: "bg-success text-success-foreground hover:bg-success/80",
@@ -30,9 +30,9 @@ const buttonVariants = cva(
       },
       variant: {
         outline:
-          "border border-current  bg-transparent hover:text-primary-foreground",
-        soft: " bg-opacity-10  hover:text-primary-foreground",
-        ghost: "bg-transparent text-current hover:text-primary-foreground",
+          "border border-current  bg-transparent hover:text-skyblue-foreground",
+        soft: " bg-opacity-10  hover:text-skyblue-foreground",
+        ghost: "bg-transparent text-current hover:text-skyblue-foreground",
       },
       size: {
         default: "h-10 px-4 py-[10px]",
@@ -84,12 +84,12 @@ const buttonVariants = cva(
         variant: "outline",
         color: "default",
         className:
-          "text-primary  hover:text-primary-foreground hover:border-primary hover:bg-primary",
+          "text-skyblue  hover:text-skyblue-foreground hover:border-primary hover:bg-primary",
       },
       {
         variant: "outline",
         color: "primary",
-        className: "text-primary  hover:text-primary-foreground",
+        className: "text-skyblue  hover:text-skyblue-foreground",
       },
       {
         variant: "soft",
@@ -120,12 +120,12 @@ const buttonVariants = cva(
       {
         variant: "soft",
         color: "default",
-        className: "text-primary",
+        className: "text-skyblue",
       },
       {
         variant: "ghost",
         color: "default",
-        className: " text-primary  ",
+        className: " text-skyblue  ",
       },
       {
         variant: "ghost",

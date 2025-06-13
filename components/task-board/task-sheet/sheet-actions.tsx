@@ -37,7 +37,7 @@ const SheetActions = ({ task, taskId }: {
             <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
               <Icon
                 icon="heroicons:user-plus"
-                className="text-primary w-3.5 h-3.5"
+                className="text-skyblue w-3.5 h-3.5"
               />
             </div>
             <span className="text-sm font-medium text-default-900">
@@ -69,7 +69,7 @@ const SheetActions = ({ task, taskId }: {
                 ))}
               </AvatarGroup>
             )}
-            <AssignMembers icon={<Plus className="w-3 h-3 text-primary" />} />
+            <AssignMembers icon={<Plus className="w-3 h-3 text-skyblue" />} />
           </div>
         </div>
         <div>
@@ -77,7 +77,7 @@ const SheetActions = ({ task, taskId }: {
             <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
               <Icon
                 icon="heroicons:scale"
-                className="text-primary w-3.5 h-3.5"
+                className="text-skyblue w-3.5 h-3.5"
               />
             </div>
             <span className="text-sm font-medium text-default-900">
@@ -90,7 +90,7 @@ const SheetActions = ({ task, taskId }: {
         <div>
           <div className="flex items-center gap-1 mb-2">
             <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
-              <List className="text-primary w-3.5 h-3.5" />
+              <List className="text-skyblue w-3.5 h-3.5" />
             </div>
             <span className="text-sm font-medium text-default-900">List</span>
           </div>
@@ -103,7 +103,7 @@ const SheetActions = ({ task, taskId }: {
             <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
               <Icon
                 icon="heroicons:calendar"
-                className="text-primary w-3.5 h-3.5"
+                className="text-skyblue w-3.5 h-3.5"
               />
             </div>
             <span className="text-sm font-medium text-default-900">Date</span>
@@ -114,7 +114,7 @@ const SheetActions = ({ task, taskId }: {
         <div>
           <div className="flex items-center gap-1 mb-1">
             <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
-              <Check className="text-primary w-3.5 h-3.5" />
+              <Check className="text-skyblue w-3.5 h-3.5" />
             </div>
             <span className="text-sm font-medium text-default-900">
               Dependency
@@ -125,7 +125,7 @@ const SheetActions = ({ task, taskId }: {
         <div>
           <div className="flex items-center gap-1 mb-3">
             <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
-              <Hash className="text-primary w-3.5 h-3.5" />
+              <Hash className="text-skyblue w-3.5 h-3.5" />
             </div>
             <span className="text-sm font-medium text-default-900">
               Story Points

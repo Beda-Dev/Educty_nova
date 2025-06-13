@@ -65,7 +65,7 @@ const MessageHeader = ({
                 size="icon"
                 className="bg-transparent rounded-full hover:bg-default-50"
               >
-                <span className="text-xl text-primary">
+                <span className="text-xl text-skyblue">
                   <Icon icon="solar:phone-linear" />
                 </span>
               </Button>
@@ -85,7 +85,7 @@ const MessageHeader = ({
                 size="icon"
                 className="bg-transparent rounded-full hover:bg-default-50"
               >
-                <span className="text-xl text-primary">
+                <span className="text-xl text-skyblue">
                   <Icon icon="mdi:video-outline" />
                 </span>
               </Button>
@@ -106,12 +106,12 @@ const MessageHeader = ({
                 className={cn(
                   "bg-transparent hover:bg-default-50 rounded-full",
                   {
-                    "text-primary": !showInfo,
+                    "text-skyblue": !showInfo,
                   }
                 )}
                 onClick={handleShowInfo}
               >
-                <span className="text-xl text-primary ">
+                <span className="text-xl text-skyblue ">
                   {showInfo ? (
                     <Icon icon="material-symbols:info" />
                   ) : (

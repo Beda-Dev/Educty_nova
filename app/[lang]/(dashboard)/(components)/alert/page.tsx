@@ -30,21 +30,21 @@ const AlertPage = () => {
     <div className="  space-y-5">
       <Card title="Color Alert" code={colorAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">color</code> props of alert change
+          The <code className="text-skyblue">color</code> props of alert change
           the color.
         </p>
         <ColorAlert />
       </Card>
       <Card title="Outline Alert" code={outlineAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant="outline"</code> props of
+          The <code className="text-skyblue">variant="outline"</code> props of
           alert change the outline of alert.
         </p>
         <OutlineAlert />
       </Card>
       <Card title="Soft Alert" code={softAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> variant="soft"</code> props of
+          The <code className="text-skyblue"> variant="soft"</code> props of
           alert change to soft background of alert .
         </p>
 
@@ -52,14 +52,14 @@ const AlertPage = () => {
       </Card>
       <Card title="Alert With Link" code={linkAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The alert<code className="text-primary">link</code> will direct user
+          The alert<code className="text-skyblue">link</code> will direct user
           to new page .
         </p>
         <LinkAlert />
       </Card>
       <Card title="Dismissible Color Alerts" code={disableAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The alert <code className="text-primary">dismissible</code> props
+          The alert <code className="text-skyblue">dismissible</code> props
           remove the alert .
         </p>
         <DisableAlert />
@@ -67,7 +67,7 @@ const AlertPage = () => {
       <Card title="Dismissible Outline Alerts" code={dismissibleOutlineAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The alert{" "}
-          <code className="text-primary">
+          <code className="text-skyblue">
             dismissible and variant="outline"
           </code>{" "}
           props remove the alert .
@@ -77,21 +77,21 @@ const AlertPage = () => {
       <Card title="Dismissible Soft Alerts" code={dismissibleSoftColor}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The alert{" "}
-          <code className="text-primary">dismissible and variant="soft"</code>{" "}
+          <code className="text-skyblue">dismissible and variant="soft"</code>{" "}
           props remove the alert .
         </p>
         <DismissibleSoftColor />
       </Card>
       <Card title="Dismissible Soft Alerts With Icon" code={disableSoftIcon}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The alert <code className="text-primary">dismissible and Icon</code>{" "}
+          The alert <code className="text-skyblue">dismissible and Icon</code>{" "}
           props component to add design and remove the alert .
         </p>
         <DisableSoftIcon />
       </Card>
       <Card title="Bordered Alert" code={borderAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The alert <code className="text-primary">dismissible and Border</code>{" "}
+          The alert <code className="text-skyblue">dismissible and Border</code>{" "}
           props component to add design and remove the alert .
         </p>
         <BorderAlert />
@@ -99,7 +99,7 @@ const AlertPage = () => {
       <Card title="Alerts With Heading" code={headingAlert}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The alert{" "}
-          <code className="text-primary">dismissible and Large heading</code>{" "}
+          <code className="text-skyblue">dismissible and Large heading</code>{" "}
           props component to add design and remove the alert .
         </p>
         <HeadingAlert />
@@ -107,7 +107,7 @@ const AlertPage = () => {
       <Card title="Alert Headings With Icon" code={headingAlertIcon}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The alert{" "}
-          <code className="text-primary">
+          <code className="text-skyblue">
             dismissible and Large heading With Icon
           </code>{" "}
           props component to add design and remove the alert .

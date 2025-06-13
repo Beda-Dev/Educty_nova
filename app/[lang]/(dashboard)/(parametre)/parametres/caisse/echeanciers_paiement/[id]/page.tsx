@@ -271,7 +271,7 @@ export default function LevelInstallement({
         </Button>
         <h1 className="text-3xl font-bold">
           Échéanciers de paiements -{" "}
-          <span className="text-primary">{levelInfo?.label || "Niveau"}</span>
+          <span className="text-skyblue">{levelInfo?.label || "Niveau"}</span>
         </h1>
       </motion.div>
 
@@ -313,7 +313,7 @@ export default function LevelInstallement({
                     <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
                       <CardTitle className="flex items-center gap-2">
                         <span className="bg-primary/10 p-2 rounded-lg">
-                          <FileSpreadsheet className="h-5 w-5 text-primary" />
+                          <FileSpreadsheet className="h-5 w-5 text-skyblue" />
                         </span>
                         Résumé des frais - {assignmentType}
                       </CardTitle>
@@ -337,7 +337,7 @@ export default function LevelInstallement({
                                     <div className="font-medium">
                                       {feeType.label}
                                     </div>
-                                    <div className="text-xl font-bold text-primary">
+                                    <div className="text-xl font-bold text-skyblue">
                                       {pricing
                                         ? formatCurrency(Number(pricing.amount))
                                         : 0}
@@ -354,7 +354,7 @@ export default function LevelInstallement({
 
                       <div className="flex justify-between items-center bg-muted/30 p-4 rounded-lg">
                         <div className="text-lg font-medium">Montant total</div>
-                        <div className="text-2xl font-bold text-primary">
+                        <div className="text-2xl font-bold text-skyblue">
                           {formatCurrency(
                             calculateTotalByAssignmentType(assignmentType)
                           )}

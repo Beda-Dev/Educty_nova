@@ -329,7 +329,7 @@ export default function CloseSessionPage({ params }: Props) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  <FileText className="h-6 w-6 text-primary" />
+                  <FileText className="h-6 w-6 text-skyblue" />
                   Fermer la session de caisse
                 </CardTitle>
                 <CardDescription>Remplissez les informations pour fermer la session</CardDescription>

@@ -30,73 +30,73 @@ const TextAreaPage = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card title="Basic Textarea" code={basicTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          No <span className="text-primary">props</span> are required when using
+          No <span className="text-skyblue">props</span> are required when using
           the default style.
         </p>
         <BasicTextarea />
       </Card>
       <Card title="Disabled Textarea" code={disabledTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use <span className="text-primary">disabled</span> attribute to
+          Use <span className="text-skyblue">disabled</span> attribute to
           disable textarea.
         </p>
         <DisabledTextarea />
       </Card>
       <Card title="Readonly Textarea" code={readonlyTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Apply <span className="text-primary">the readonly attribute</span> to
+          Apply <span className="text-skyblue">the readonly attribute</span> to
           make the textarea non-editable.
         </p>
         <ReadonlyTextarea />
       </Card>
       <Card title="Label Textarea" code={labelTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use <span className="text-primary">Label</span> components for our
+          Use <span className="text-skyblue">Label</span> components for our
           label style
         </p>
         <LabelTextarea />
       </Card>
       <Card title="Required Textarea" code={requiredTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use <span className="text-primary">required</span> attribute to
+          Use <span className="text-skyblue">required</span> attribute to
           required textarea.
         </p>
         <RequiredTextarea />
       </Card>
       <Card title="Textarea with description" code={textareaWithDescription}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use the <span className="text-primary">description</span> below the
+          Use the <span className="text-skyblue">description</span> below the
           textarea field.
         </p>
         <TextareaWithDescription />
       </Card>
       <Card title="Displayed Rows" code={displayedRows}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use the <span className="text-primary">rows</span> prop in the
+          Use the <span className="text-skyblue">rows</span> prop in the
           textarea field to add extra row in the field.
         </p>
         <DisplayedRows />
       </Card>
       <Card title="Colors" code={colorsTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <span className="text-primary">color</span> prop is used to change
+          The <span className="text-skyblue">color</span> prop is used to change
           the textarea color. <br />
           Our available colors are{" "}
-          <span className="text-primary">
+          <span className="text-skyblue">
             default, primary, info, warning, success, destructive
           </span>{" "}
           . <br />
-          Use <span className="text-primary">variant="flat"</span> prop to flat
+          Use <span className="text-skyblue">variant="flat"</span> prop to flat
           style.
         </p>
         <ColorsTextarea />
       </Card>
       <Card title="Variant" code={variantTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <span className="text-primary">variant</span> property is employed
+          The <span className="text-skyblue">variant</span> property is employed
           to modify the appearance of the textarea. <br />
           Our available variant values are{" "}
-          <span className="text-primary">
+          <span className="text-skyblue">
             flat,underlined, filled, faded, borderedfaded, bgboredered, ghost
           </span>{" "}
           . <br />
@@ -105,10 +105,10 @@ const TextAreaPage = () => {
       </Card>
       <Card title="Radius" code={radiusTextarea}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <span className="text-primary">radius</span> prop is used to set
+          The <span className="text-skyblue">radius</span> prop is used to set
           the radius of an textarea field. <br />
           Our available radius prop values are{" "}
-          <span className="text-primary">sm,md,lg,xl</span> .
+          <span className="text-skyblue">sm,md,lg,xl</span> .
         </p>
         <RadiusTextarea />
       </Card>

@@ -23,9 +23,10 @@ import { isMatriculeUnique } from "@/lib/fonction"
 
 interface Step1Props {
   onNext: () => void
+  onPhotoChange?: (file: File | null) => void
 }
 
-export function Step1PersonalInfo({ onNext }: Step1Props) {
+export function Step1PersonalInfo({ onNext, onPhotoChange }: Step1Props) {
   const { assignmentTypes, tutors, students } =
     useSchoolStore()
 
@@ -74,6 +75,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
     try {
       // Validation du fichier
+
       if (file.size > 3 * 1024 * 1024) {
         throw new Error("Le fichier ne doit pas dépasser 3 Mo")
       }
@@ -85,6 +87,10 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
       // Mettre à jour l'état local
       setPhotoFile(file)
+
+      if (onPhotoChange) {
+        onPhotoChange(file);
+      }
       // Créer l'URL de prévisualisation avant de mettre à jour le store
       const previewUrl = URL.createObjectURL(file)
       setPreviewImage(previewUrl)
@@ -112,7 +118,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       // Convertir les données stockées vers le format du formulaire
       const convertedData: StudentFormData = {
         ...studentData,
-        photo: studentData.photo?.file ?? null,
+        photo: studentData.photo ?? null,
       }
       setFormData(convertedData)
 
@@ -246,7 +252,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
         <Card className="border-primary/20 shadow-sm hover:shadow-md transition-shadow h-fit">
           <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
             <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5 text-primary" />
+              <User className="w-5 h-5 text-skyblue" />
               <span>Informations personnelles de l'élève</span>
             </CardTitle>
           </CardHeader>
@@ -406,6 +412,9 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         onClick={(e) => {
                           e.stopPropagation();
                           handlePhoto(null);
+                          if (onPhotoChange) {
+                            onPhotoChange(null);
+                          }
                         }}
                         className="absolute -top-3 -right-3 opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
                         title="Supprimer la photo"
@@ -448,7 +457,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
           <Card className="border-primary/20 shadow-sm hover:shadow-md transition-shadow h-fit">
             <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
               <CardTitle className="flex items-center gap-2">
-                <User2 className="w-5 h-5 text-primary" />
+                <User2 className="w-5 h-5 text-skyblue" />
                 <span>Informations sur les parents/tuteurs</span>
               </CardTitle>
             </CardHeader>
@@ -576,7 +585,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <User className="w-5 h-5 text-primary" />
+                          <User className="w-5 h-5 text-skyblue" />
                           <div>
                             <span className="font-medium">
                               {tutor.name} {tutor.first_name}

@@ -9,7 +9,7 @@ const IconVariants = () => {
       <Tabs defaultValue="account" className=" inline-block">
         <TabsList className=" border bg-background  ">
           <TabsTrigger
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="data-[state=active]:bg-primary data-[state=active]:text-skyblue-foreground"
             value="account"
           >
             <Icon icon="ph:house-line" className="h-5 w-5  mr-2 " />
@@ -17,14 +17,14 @@ const IconVariants = () => {
           </TabsTrigger>
           <TabsTrigger
             value="password"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="data-[state=active]:bg-primary data-[state=active]:text-skyblue-foreground"
           >
             <Icon icon="ph:house-line" className="h-5 w-5  mr-2 " />
             Password
           </TabsTrigger>
           <TabsTrigger
             value="profile"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="data-[state=active]:bg-primary data-[state=active]:text-skyblue-foreground"
           >
             <Icon icon="ph:user-circle" className="h-5 w-5  mr-2 " />
             Profile

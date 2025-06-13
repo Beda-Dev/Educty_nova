@@ -1,4 +1,4 @@
-import React from 'react'
+import React  from 'react'
 import TarificationPage from "./creation"
 
 function PricingCreating() {

@@ -50,7 +50,7 @@ const ReportsArea = () => {
           <CardHeader className="flex-col-reverse sm:flex-row flex-wrap gap-2  border-none mb-0 pb-0">
             <span className="text-sm font-medium text-default-900 flex-1">{item.name}</span>
             <span className={cn("flex-none h-9 w-9 flex justify-center items-center bg-default-100 rounded-full", {
-              "bg-primary bg-opacity-10 text-primary": item.color === "primary",
+              "bg-primary bg-opacity-10 text-skyblue": item.color === "primary",
               "bg-info bg-opacity-10 text-info": item.color === "info",
               "bg-warning bg-opacity-10 text-warning": item.color === "warning",
               "bg-destructive bg-opacity-10 text-destructive": item.color === "destructive",

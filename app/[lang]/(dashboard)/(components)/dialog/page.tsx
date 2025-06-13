@@ -44,9 +44,9 @@ const DialogPage = () => {
       <Card title="Sizes" code={sizesDialog}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           {" "}
-          The <span className="text-primary">size</span> prop is used to change
+          The <span className="text-skyblue">size</span> prop is used to change
           the modal size. Our available sizes are{" "}
-          <span className="text-primary">
+          <span className="text-skyblue">
             xs,sm,md,lg,xl,2xl,3xl,4xl,5xl and full
           </span>
         </p>
@@ -55,9 +55,9 @@ const DialogPage = () => {
       <Card title="Colors" code={colorsDialog}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           {" "}
-          The color <span className="text-primary">size</span> prop is used to
+          The color <span className="text-skyblue">size</span> prop is used to
           change the modal size. Our available sizes are{" "}
-          <span className="text-primary">
+          <span className="text-skyblue">
             xs,sm,md,lg,xl,2xl,3xl,4xl,5xl and full
           </span>
         </p>
@@ -76,7 +76,7 @@ const DialogPage = () => {
       <Card title="Placement" code={dialogPlacement}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Easily change position using custom css in <span className="text-primary">Dialog Content</span> component.
+            Easily change position using custom css in <span className="text-skyblue">Dialog Content</span> component.
           </p>
         </div>
         <DialogPlacement />
@@ -84,7 +84,7 @@ const DialogPage = () => {
       <Card title="Overflow Scroll" code={scrollableDialog}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Create Scrollable Dialog using our <span className="text-primary">ScrollArea Component</span>.
+            Create Scrollable Dialog using our <span className="text-skyblue">ScrollArea Component</span>.
           </p>
         </div>
         <div className="flex flex-wrap  gap-x-5 gap-y-4 ">
@@ -94,7 +94,7 @@ const DialogPage = () => {
       <Card title="Form" code={formModal}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Use <span className="text-primary">form</span> in modal.
+            Use <span className="text-skyblue">form</span> in modal.
           </p>
         </div>
         <div className="flex flex-wrap  gap-x-5 gap-y-4 ">
@@ -104,7 +104,7 @@ const DialogPage = () => {
       <Card title="Backdrop" code={backdropDialog}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Create beautiful backdrop design with our <span className="text-primary">overlayClass</span>
+            Create beautiful backdrop design with our <span className="text-skyblue">overlayClass</span>
           </p>
         </div>
         <DialogBackdrop />
@@ -112,7 +112,7 @@ const DialogPage = () => {
       <Card title="Multi Step Slider" code={multiStepSlider}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Use Slider in our dialog for creating multistep  <span className="text-primary">slider</span>
+            Use Slider in our dialog for creating multistep  <span className="text-skyblue">slider</span>
           </p>
         </div>
         <MultiStepSliderDialog />
@@ -120,7 +120,7 @@ const DialogPage = () => {
       <Card title="Auto Destroyable Modal" code={autoDistroyAble}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Auto Destroyable dialog will close after  <span className="text-primary">5s</span>
+            Auto Destroyable dialog will close after  <span className="text-skyblue">5s</span>
           </p>
         </div>
         <DialogAutoDestroyable />
@@ -128,7 +128,7 @@ const DialogPage = () => {
       <Card title="Counter Modal" code={counterDialog}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Use  state for changing <span className="text-primary">state. </span>
+            Use  state for changing <span className="text-skyblue">state. </span>
           </p>
         </div>
         <CounterDialog />
@@ -136,7 +136,7 @@ const DialogPage = () => {
       <Card title="Modal With Radio Inputs" code={withRadioInput}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Use  <span className="text-primary">RadioGroup and RadioGroupItem</span> component to use radio input.
+            Use  <span className="text-skyblue">RadioGroup and RadioGroupItem</span> component to use radio input.
           </p>
         </div>
         <RadioInputsDialog />
@@ -144,7 +144,7 @@ const DialogPage = () => {
       <Card title="Dialog With Timeline" code={withTimeline}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            You can use timeline component in <span className="text-primary">dialog component</span>.
+            You can use timeline component in <span className="text-skyblue">dialog component</span>.
           </p>
         </div>
         <DialogWithTimeline />
@@ -152,7 +152,7 @@ const DialogPage = () => {
       <Card title="Dialog With Progressbar" code={withProgressBar}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            You can use  <span className="text-primary">progressbar</span> in dialog component.
+            You can use  <span className="text-skyblue">progressbar</span> in dialog component.
           </p>
         </div>
         <DialogWithProgressbar />
@@ -161,7 +161,7 @@ const DialogPage = () => {
       <Card title="Toggle Between Modal" code={toggleDialog}>
         <div className="mb-4">
           <p className="text-sm text-default-500 ">
-            Use simple condition for  <span className="text-primary">toggle</span>  modal
+            Use simple condition for  <span className="text-skyblue">toggle</span>  modal
           </p>
         </div>
         <ToggleDialog />

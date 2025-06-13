@@ -62,7 +62,7 @@ const CheckBoxPage = () => {
       <div className=" grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card title="Default Checkbox" code={defaultCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-            <code className="text-primary">Checkbox</code> component are use to
+            <code className="text-skyblue">Checkbox</code> component are use to
             reserve and show radio button with label in it.
           </p>
           <DefaultCheckbox />
@@ -70,7 +70,7 @@ const CheckBoxPage = () => {
         <Card title="Disabled Checkbox" code={disabledCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Checkbox component with
-            <code className="text-primary"> disabled </code>props makes checkbox
+            <code className="text-skyblue"> disabled </code>props makes checkbox
             component disabled.
           </p>
           <DisabledCheckbox />
@@ -79,7 +79,7 @@ const CheckBoxPage = () => {
       <Card title="Sizes Checkbox" code={sizeCheckbox}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Checkbox component with
-          <code className="text-primary"> size </code> props with different
+          <code className="text-skyblue"> size </code> props with different
           value makes checkbox size different.
         </p>
         <SizeCheckbox />
@@ -88,7 +88,7 @@ const CheckBoxPage = () => {
         <Card title="Filled Checkbox" code={filledCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Checkbox component with
-            <code className="text-primary"> variant </code> props for filled
+            <code className="text-skyblue"> variant </code> props for filled
             value checkbox component will be filled with shadow.
           </p>
           <FilledCheckbox />
@@ -96,7 +96,7 @@ const CheckBoxPage = () => {
         <Card title="Circle Checkbox" code={circleCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Checkbox component with
-            <code className="text-primary"> radius="xl" </code> props value
+            <code className="text-skyblue"> radius="xl" </code> props value
             checkbox component will be circled.
           </p>
           <CircleCheckbox />
@@ -104,7 +104,7 @@ const CheckBoxPage = () => {
         <Card title="Outlined Checkbox" code={outlineCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Checkbox component with
-            <code className="text-primary"> variant </code> props for outline
+            <code className="text-skyblue"> variant </code> props for outline
             value checkbox component will be filled with white background and
             checked with color.
           </p>
@@ -113,7 +113,7 @@ const CheckBoxPage = () => {
         <Card title="Outlined Filled Checkbox" code={outlineFilledCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Checkbox component with
-            <code className="text-primary"> variant </code> props for
+            <code className="text-skyblue"> variant </code> props for
             outline-filled value checkbox component will be filled with white
             background and checked with color and unchecked checkbox background
             will be shadowed.
@@ -123,9 +123,9 @@ const CheckBoxPage = () => {
         <Card title="Outlined Circle Checkbox" code={outlineCircleCheckbox}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Checkbox component with
-            <code className="text-primary"> variant </code> props for
+            <code className="text-skyblue"> variant </code> props for
             outline-filled value checkbox component will be filled with white
-            background and <code className="text-primary"> radius="xl" </code>{" "}
+            background and <code className="text-skyblue"> radius="xl" </code>{" "}
             props value checkbox component will be circled.
           </p>
           <OutlineCircleCheckbox />
@@ -133,8 +133,8 @@ const CheckBoxPage = () => {
         <Card title="Checkbox Right" code={checkboxRight}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             By alternating the place of{" "}
-            <code className="text-primary">Label</code> and
-            <code className="text-primary">Checkbox</code> checkbox can be take
+            <code className="text-skyblue">Label</code> and
+            <code className="text-skyblue">Checkbox</code> checkbox can be take
             right.
           </p>
           <CheckboxRight />
@@ -143,16 +143,16 @@ const CheckBoxPage = () => {
       <Card title="Colors Checkbox" code={colorsCheckbox}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Checkbox component with
-          <code className="text-primary"> color </code> props for checkbox
+          <code className="text-skyblue"> color </code> props for checkbox
           component will be filled with different background.
         </p>
         <ColorsCheckbox />
       </Card>
       <Card title="Colors Outline Checkbox" code={colorOutlineCheckbox}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Checkbox component with <code className="text-primary"> color </code>{" "}
+          Checkbox component with <code className="text-skyblue"> color </code>{" "}
           props and
-          <code className="text-primary"> variant </code> props for outline
+          <code className="text-skyblue"> variant </code> props for outline
           value checkbox component will be filled with white background and
           checked with color.
         </p>
@@ -161,7 +161,7 @@ const CheckBoxPage = () => {
       <Card title="Radius Checkbox" code={radiusCheckbox}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Checkbox component with
-          <code className="text-primary"> radius </code> props with different
+          <code className="text-skyblue"> radius </code> props with different
           value checkbox component will be circled differently.
         </p>
         <RadiusCheckbox />
@@ -169,7 +169,7 @@ const CheckBoxPage = () => {
       <Card title="Icons Checkbox" code={iconsCheckbox}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Checkbox component with
-          <code className="text-primary"> icon </code> props with value
+          <code className="text-skyblue"> icon </code> props with value
           component for icon in checkbox component will be replaced with icon.
         </p>
         <IconsCheckbox />
@@ -201,7 +201,7 @@ const CheckBoxPage = () => {
           <Card title="Line Through Checkbox" code={lineThroughCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
               Checkbox component with
-              <code className="text-primary"> lineThrough </code> props will
+              <code className="text-skyblue"> lineThrough </code> props will
               make a line on label when it is checked.
             </p>
             <LineThroughCheckbox />
@@ -210,9 +210,9 @@ const CheckBoxPage = () => {
         <div className="col-span-2 lg:col-span-1">
           <Card title="Label Slot Checkbox" code={labelSlotCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Label</code> component can be
+              <code className="text-skyblue">Label</code> component can be
               passed in
-              <code className="text-primary">Checkbox</code> component as a slot
+              <code className="text-skyblue">Checkbox</code> component as a slot
               and customize it.
             </p>
             <LabelSlotCheckbox />
@@ -222,7 +222,7 @@ const CheckBoxPage = () => {
         <div className="col-span-2 lg:col-span-1">
           <Card title="Horizontal Checkbox" code={horizontalCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component can
+              <code className="text-skyblue">Checkbox</code> component can
               placed horizontally.
             </p>
             <HorizontalCheckbox />
@@ -232,7 +232,7 @@ const CheckBoxPage = () => {
         <div className="col-span-2 lg:col-span-1">
           <Card title="Accessible Checkbox" code={accessibleCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component wrap in
+              <code className="text-skyblue">Checkbox</code> component wrap in
               different tag and show label color and checkbox color accordingly
               with dynamic css class.
             </p>
@@ -243,7 +243,7 @@ const CheckBoxPage = () => {
         <div className="col-span-2 lg:col-span-1">
           <Card title="Vertical Checkbox" code={verticalCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component can
+              <code className="text-skyblue">Checkbox</code> component can
               placed vertically.
             </p>
             <VerticalCheckbox />
@@ -253,7 +253,7 @@ const CheckBoxPage = () => {
         <div className="col-span-2 lg:col-span-1">
           <Card title="Custom Implement Checkbox" code={customImplementation}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              When the <code className="text-primary">checkbox</code> is checked
+              When the <code className="text-skyblue">checkbox</code> is checked
               the component will active.
             </p>
             <div className=" space-y-5">
@@ -264,9 +264,9 @@ const CheckBoxPage = () => {
         <div className="col-span-2 lg:col-span-1">
           <Card title="Checkbox With Background" code={checkboxWithBackground}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component change
+              <code className="text-skyblue">Checkbox</code> component change
               background by checking the value with
-              <code className="text-primary"> onCheckedChange</code>.
+              <code className="text-skyblue"> onCheckedChange</code>.
             </p>
             <CheckboxWithBackground />
           </Card>
@@ -275,8 +275,8 @@ const CheckBoxPage = () => {
           <Card title="Label Placement" code={labelPlacement}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
               By alternating the place of{" "}
-              <code className="text-primary">Label</code> and
-              <code className="text-primary"> Checkbox</code> component can be
+              <code className="text-skyblue">Label</code> and
+              <code className="text-skyblue"> Checkbox</code> component can be
               positioned anywhere by using css class.
             </p>
             <LabelPlacement />
@@ -286,9 +286,9 @@ const CheckBoxPage = () => {
         <div className="col-span-2">
           <Card title="Custom Style Checkbox" code={customStyledCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component change
+              <code className="text-skyblue">Checkbox</code> component change
               outline and status by checking the value with
-              <code className="text-primary"> onCheckedChange</code> and styled
+              <code className="text-skyblue"> onCheckedChange</code> and styled
               it as a profile.
             </p>
             <CustomStyledCheckbox />
@@ -298,11 +298,11 @@ const CheckBoxPage = () => {
         <div className="col-span-2">
           <Card title="Grouped Label Checkbox" code={groupedLabelCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component change
+              <code className="text-skyblue">Checkbox</code> component change
               value and status with
-              <code className="text-primary"> onCheckedChange</code> of group
+              <code className="text-skyblue"> onCheckedChange</code> of group
               component as a single tile wrapped by
-              <code className="text-primary"> Label</code> with dynamic css
+              <code className="text-skyblue"> Label</code> with dynamic css
               class.
             </p>
             <GroupedLabelCheckbox />
@@ -312,11 +312,11 @@ const CheckBoxPage = () => {
         <div className="col-span-2">
           <Card title="Checkbox Cards" code={checkboxCards}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component change
+              <code className="text-skyblue">Checkbox</code> component change
               value and status with
-              <code className="text-primary"> onCheckedChange</code> of group
+              <code className="text-skyblue"> onCheckedChange</code> of group
               component as a single tile wrapped by
-              <code className="text-primary"> Label</code> with dynamic css
+              <code className="text-skyblue"> Label</code> with dynamic css
               class.
             </p>
             <CheckboxCards />
@@ -325,7 +325,7 @@ const CheckBoxPage = () => {
         <div className="col-span-2">
           <Card title="Bulk Select Checkbox" code={bulkSelectCheckbox}>
             <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-              <code className="text-primary">Checkbox</code> component are use
+              <code className="text-skyblue">Checkbox</code> component are use
               to reserve and show radio button with label in it and here is
               bunch of those together.
             </p>

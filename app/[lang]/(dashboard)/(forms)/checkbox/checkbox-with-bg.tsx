@@ -12,7 +12,7 @@ const CheckboxWithBackground = () => {
       <Label htmlFor="cbbg1" className={cn("bg-default-100 dark:bg-default-200  h-10 px-2 rounded-md w-full flex justify-between items-center", {
         "bg-primary": checked1
       })}>
-        <span className={cn("text-default-600", { "text-primary-foreground": checked1 })}>I'm number one.</span>
+        <span className={cn("text-default-600", { "text-skyblue-foreground": checked1 })}>I'm number one.</span>
 
         <Checkbox id="cbbg1" color="success" defaultChecked onCheckedChange={() => setChecked1(!checked1)}
         />
@@ -20,7 +20,7 @@ const CheckboxWithBackground = () => {
       <Label htmlFor="cbbg2" className={cn("bg-default-100 dark:bg-default-200  h-10 px-2 rounded-md w-full flex justify-between items-center", {
         "bg-primary": checked2
       })}>
-        <span className={cn("text-default-600", { "text-primary-foreground": checked2 })}>I'm number two.</span>
+        <span className={cn("text-default-600", { "text-skyblue-foreground": checked2 })}>I'm number two.</span>
 
         <Checkbox id="cbbg2" color="success" onCheckedChange={() => setChecked2(!checked2)}
         />

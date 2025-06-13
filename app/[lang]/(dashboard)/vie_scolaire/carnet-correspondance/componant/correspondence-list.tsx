@@ -183,7 +183,7 @@ export default function CorrespondenceList({ entries }: CorrespondenceListProps)
                       <span>Par {entry.auteur}</span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-primary">
+                  <Button variant="ghost" size="sm" className="text-skyblue">
                     Voir les détails
                   </Button>
                 </CardFooter>

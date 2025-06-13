@@ -269,7 +269,7 @@ return (
       variants={fadeIn}
       className="flex items-center gap-4"
     >
-      <GraduationCap className="h-8 w-8 text-primary" />
+      <GraduationCap className="h-8 w-8 text-skyblue" />
       <h1 className="text-3xl font-bold tracking-tight">Gestion des Notes Scolaires</h1>
     </motion.div>
 
@@ -284,7 +284,7 @@ return (
         <Card className="hover:shadow-md transition-shadow border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <School className="h-5 w-5 text-primary" />
+              <School className="h-5 w-5 text-skyblue" />
               Sélection de la classe
             </CardTitle>
           </CardHeader>
@@ -320,7 +320,7 @@ return (
         <Card className="hover:shadow-md transition-shadow border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Book className="h-5 w-5 text-primary" />
+              <Book className="h-5 w-5 text-skyblue" />
               Sélection du devoir
             </CardTitle>
           </CardHeader>
@@ -390,7 +390,7 @@ return (
                       <span className="font-semibold ml-2">Date:</span> {new Date(devoirActuel.date).toLocaleDateString()}
                     </p>
                     <p className="text-sm text-muted-foreground">{devoirActuel.description}</p>
-                    <p className="text-sm font-medium text-primary mt-1">
+                    <p className="text-sm font-medium text-skyblue mt-1">
                       Moyenne de la classe: {calculerMoyenneClasse()}/20
                     </p>
                   </motion.div>

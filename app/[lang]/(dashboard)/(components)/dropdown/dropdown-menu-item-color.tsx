@@ -25,25 +25,25 @@ const DropdownMenuCheckboxItemColor = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-[196px] " align="start">
-          <DropdownMenuLabel className="text-primary">
+          <DropdownMenuLabel className="text-skyblue">
             My Account
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
             <DropdownMenuCheckboxItem checked={showStatusBar1}
-              onCheckedChange={setShowStatusBar1} className=" focus:bg-primary/10 focus:text-primary cursor-pointer data-[state=checked]:text-primary">
+              onCheckedChange={setShowStatusBar1} className=" focus:bg-primary/10 focus:text-skyblue cursor-pointer data-[state=checked]:text-skyblue">
               Profile
             </DropdownMenuCheckboxItem>
 
           <DropdownMenuCheckboxItem checked={showStatusBar2}
-            onCheckedChange={setShowStatusBar2} className=" focus:bg-primary/10 focus:text-primary cursor-pointer data-[state=checked]:text-primary">
+            onCheckedChange={setShowStatusBar2} className=" focus:bg-primary/10 focus:text-skyblue cursor-pointer data-[state=checked]:text-skyblue">
             Billing
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={showStatusBar3}
-            onCheckedChange={setShowStatusBar3} className=" focus:bg-primary/10 focus:text-primary cursor-pointer data-[state=checked]:text-primary">
+            onCheckedChange={setShowStatusBar3} className=" focus:bg-primary/10 focus:text-skyblue cursor-pointer data-[state=checked]:text-skyblue">
             Team
           </DropdownMenuCheckboxItem>
           <DropdownMenuCheckboxItem checked={showStatusBar4}
-            onCheckedChange={setShowStatusBar4} className=" focus:bg-primary/10 focus:text-primary cursor-pointer data-[state=checked]:text-primary">
+            onCheckedChange={setShowStatusBar4} className=" focus:bg-primary/10 focus:text-skyblue cursor-pointer data-[state=checked]:text-skyblue">
             Subscription
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>

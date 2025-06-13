@@ -53,7 +53,7 @@ const FooterStyle = () => {
               )}
             >
               {footerType === value && (
-                <Check className="h-3 w-3 text-primary-foreground" />
+                <Check className="h-3 w-3 text-skyblue-foreground" />
               )}
             </div>
             <span className="text-sm text-default-500 capitalize">{value}</span>

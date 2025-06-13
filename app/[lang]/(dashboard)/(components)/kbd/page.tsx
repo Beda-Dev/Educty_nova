@@ -20,17 +20,17 @@ const KbdPage = () => {
     <div className=" space-y-5">
       <Card title="Default Kbd" code={defaultKbd}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Keyboard key <code className="text-primary">Kbd </code> is a component
+          Keyboard key <code className="text-skyblue">Kbd </code> is a component
           to display which key or combination of keys performs a given action
         </p>
         <DefaultKbd />
       </Card>
       <Card title="Keys Kbd" code={keysKbd}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Keyboard key <code className="text-primary">Kbd </code> is a component
+          Keyboard key <code className="text-skyblue">Kbd </code> is a component
           to display which key or combination of keys performs a given action by
           showing keyboard in different..Each command{" "}
-          <code className="text-primary">key </code> attribute that describes
+          <code className="text-skyblue">key </code> attribute that describes
           the action that the key performs.
         </p>
         <div className="space-y-5">
@@ -39,7 +39,7 @@ const KbdPage = () => {
       </Card>
       <Card title="Sizes Kbd" code={sizeKbd}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Keyboard key <code className="text-primary">size </code> prop make
+          In Keyboard key <code className="text-skyblue">size </code> prop make
           different size of the kbd keys.
         </p>
         <div className="space-y-5">

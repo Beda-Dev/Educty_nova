@@ -75,7 +75,7 @@ const IconPage = () => {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="border-default-200 text-default-600 hover:bg-background hover:text-primary"
+                  className="border-default-200 text-default-600 hover:bg-background hover:text-skyblue"
                 >
                   <Icon icon={item.name} className="h-5 w-5" />
                 </Button>

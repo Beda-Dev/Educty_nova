@@ -72,7 +72,7 @@ const columns: ColumnDef<DataType>[] = [
     accessorKey: "id",
     header: "Action",
     cell: ({ row }) => (
-      <Link href="#" className="text-primary hover:underline">Details</Link>
+      <Link href="#" className="text-skyblue hover:underline">Details</Link>
     )
   }
 ];
@@ -167,7 +167,7 @@ const TopPage = () => {
       <div className="flex flex-wrap gap-2  justify-center mt-4">
         <Button
           size="icon"
-          className="h-7 w-7 bg-default-100 text-default-600 hover:text-primary-foreground"
+          className="h-7 w-7 bg-default-100 text-default-600 hover:text-skyblue-foreground"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -179,8 +179,8 @@ const TopPage = () => {
               <Button
                 onClick={() => table.setPageIndex(pageIndex)}
                 aria-current="page"
-                className={cn("h-7 w-7 bg-default-100 text-default-600 p-0 hover:bg-opacity-70 hover:text-primary-foreground", {
-                  "bg-primary text-primary-foreground": pageIndex === table.getState().pagination.pageIndex
+                className={cn("h-7 w-7 bg-default-100 text-default-600 p-0 hover:bg-opacity-70 hover:text-skyblue-foreground", {
+                  "bg-primary text-skyblue-foreground": pageIndex === table.getState().pagination.pageIndex
                 })}
               >
                 {page + 1}
@@ -191,7 +191,7 @@ const TopPage = () => {
 
         <Button
           size="icon"
-          className="h-7 w-7 bg-default-100 text-default-600 hover:text-primary-foreground"
+          className="h-7 w-7 bg-default-100 text-default-600 hover:text-skyblue-foreground"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -34,10 +35,13 @@ const formatDate = (date: Date): string => (
 interface Step5Props {
   onPrevious: () => void
   onComplete: () => void
+  photo?: File | null
 }
 
-export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
-  
+export function Step5Confirmation({ onPrevious, onComplete, photo }: Step5Props) {
+  const [restoredPhotoFile, setRestoredPhotoFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
 
   const {
     documentTypes,
@@ -110,6 +114,31 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
   useEffect(() => {
     console.log("[DEBUG Step5] studentData au montage:", studentData);
+
+    // Restauration automatique de la photo depuis IndexedDB si besoin
+    const restorePhoto = async () => {
+      if (studentData?.photo?.file) {
+        setRestoredPhotoFile(studentData.photo.file);
+        // setPreviewUrl(URL.createObjectURL(studentData.photo.file));
+      } else if (studentData?.photo?.stored) {
+        const file = await getFileFromPath(studentData.photo);
+        if (file) {
+          setRestoredPhotoFile(file);
+          // setPreviewUrl(URL.createObjectURL(file));
+        } else {
+          setRestoredPhotoFile(null);
+          setPreviewUrl(null);
+        }
+      } else {
+        setRestoredPhotoFile(null);
+        setPreviewUrl(null);
+      }
+    };
+    restorePhoto();
+    // Nettoyage de l'URL de preview
+    return () => {
+      // if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
   }, [studentData]);
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -119,22 +148,21 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     setIsSubmitting(true)
     setSubmitError("")
 
-      // Restaurer d'abord les fichiers
-  try {
-    await restoreFilesFromIndexedDB();
-  } catch (error) {
-    console.error("Erreur lors de la restauration des fichiers:", error);
-    setSubmitError("Erreur lors de la restauration des fichiers. Veuillez réessayer.");
-    setIsSubmitting(false);
-    return;
-  }
+    // Restaurer d'abord les fichiers
+    try {
+      await restoreFilesFromIndexedDB();
+    } catch (error) {
+      console.error("Erreur lors de la restauration des fichiers:", error);
+      setSubmitError("Erreur lors de la restauration des fichiers. Veuillez réessayer.");
+      setIsSubmitting(false);
+      return;
+    }
 
     // Vérifier que la photo est présente
     if (studentData?.photo) {
       const photoFile = await getFileFromPath(studentData.photo);
       if (!photoFile) {
-        setSubmitError("Impossible de récupérer la photo de l'élève. Veuillez la réimporter.");
-        setIsSubmitting(false);
+        console.error("Impossible de récupérer la photo de l'élève. Veuillez la réimporter.");
         return;
       }
     }
@@ -172,25 +200,26 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         studentFormData.append("first_name", studentData.first_name)
         studentFormData.append("birth_date", studentData.birth_date)
         studentFormData.append("status", studentData.status)
+        // if (photo) {
+        //   console.log("Photo ajoutée:", photo.name)
+        //   studentFormData.append("photo", photo)
+        // }else{
+        //   console.log("pas de photo" , photo )
+        // }
         studentFormData.append("sexe", studentData.sexe)
 
-        console.log("[DEBUG] studentData.photo:", studentData.photo);
         if (studentData.photo) {
-  console.log("[DEBUG] Passing to getFileFromPath:", studentData.photo);
-  const photoFile = await getFileFromPath(studentData.photo);
-  console.log("[DEBUG] Result from getFileFromPath:", photoFile);
-  if (photoFile) {
-    studentFormData.append("photo", photoFile);
-    console.log("[DEBUG] Photo added to FormData:", photoFile.name, photoFile.size);
-  } else {
-    setSubmitError("Impossible de retrouver la photo de l'élève. Merci de la réimporter avant de confirmer l'inscription.");
-    setIsSubmitting(false);
-    return;
-  }
-}
+          console.log("[DEBUG] Passing to getFileFromPath:", studentData.photo);
+          const photoFile = await getFileFromPath(studentData.photo);
+          console.log("[DEBUG] Result from getFileFromPath:", photoFile);
+          if (photoFile) {
+            studentFormData.append("photo", photoFile);
+            console.log("[DEBUG] Photo added to FormData:", photoFile.name, photoFile.size);
+          }
+        }
       }
 
-      const studentResponse = await fetch("/api/students", {
+      const studentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student`, {
         method: "POST",
         body: studentFormData,
       })
@@ -206,7 +235,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       // Step 2: Create new tutors if any
       const createdTutorIds: number[] = []
       for (const tutor of newTutors) {
-        const tutorResponse = await fetch("/api/tutor", {
+        const tutorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(tutor),
@@ -245,7 +274,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
       // Step 4: Create registration
       if (registrationData) {
-        const registrationResponse = await fetch("/api/registration", {
+        const registrationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registration`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -260,7 +289,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       }
 
       for (const payment of payments) {
-        const transactionResponse = await fetch("/api/transaction", {
+        const transactionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/transaction`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -285,7 +314,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           transaction_id: transaction.id.toString(),
         });
 
-        const paymentRes = await fetch("/api/payment", {
+        const paymentRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payment`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(paymentPayload),
@@ -314,7 +343,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           console.log("FormData prepared with file:", file.name)
 
           try {
-            const docResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ocument`, {
+            const docResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`, {
               method: "POST",
               body: docFormData,
             })
@@ -423,9 +452,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                     { label: "Sexe", value: studentData.sexe },
                     { label: "Statut", value: studentData.status, badge: true },
                     {
-                      label: "Photo", value: studentData.photo ? "Photo ajoutée" : "Aucune photo",
-                      badge: true,
-                      extra: studentData.photo?.stored?.isRestored && "(restaurée automatiquement)"
+                      label: "Photo", value: restoredPhotoFile ? "Photo ajoutée" : "Aucune photo", badge: true
                     }
                   ].map((item, index) => (
                     <div key={index} className="flex items-center space-x-3">
@@ -440,7 +467,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                       <span className="text-gray-600">{item.label}:</span>
                       {item.badge ? (
                         <Badge variant="outline" className="bg-indigodye/10 text-indigodye">
-                          {item.value} {item.extra && <span className="text-xs ml-1">{item.extra}</span>}
+                          {item.value}
                         </Badge>
                       ) : (
                         <span className="font-medium text-tyrian">{item.value}</span>
@@ -450,6 +477,22 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                 </div>
               )}
             </motion.section>
+
+            {restoredPhotoFile && (
+              <div className="mt-4 flex flex-col items-center">
+                <h4 className="text-sm font-medium mb-2">Photo de l'élève</h4>
+                <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-skyblue-200">
+                  <Image
+                    src={URL.createObjectURL(restoredPhotoFile)}
+                    alt="Photo de l'élève"
+                    width={128}
+                    height={128}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+            )}
 
             <Separator className="bg-gray-200" />
 
@@ -682,6 +725,30 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
             </motion.section>
 
             <Separator className="bg-gray-200" />
+
+            {/* Photo Preview
+            {photo && (
+              <motion.section
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45 }}
+                className="mb-6"
+              >
+                <div className="flex items-center space-x-2 mb-4">
+                  <User className="w-5 h-5 text-bittersweet" />
+                  <h4 className="font-semibold text-lg text-tyrian">
+                    Photo de l'élève
+                  </h4>
+                </div>
+                <div className="flex items-center justify-center">
+                  <img
+                    src={URL.createObjectURL(photo)}
+                    alt="Prévisualisation photo"
+                    className="rounded-lg shadow-md max-h-48"
+                  />
+                </div>
+              </motion.section>
+            )} */}
 
             {/* Documents Information */}
             <motion.section

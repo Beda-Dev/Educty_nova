@@ -125,7 +125,7 @@ export default function GestionNotesEleve() {
         className="flex items-center gap-4"
       >
         <div className="p-3 rounded-lg bg-primary/10">
-          <GraduationCap className="h-8 w-8 text-primary" />
+          <GraduationCap className="h-8 w-8 text-skyblue" />
         </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Bulletin de Notes</h1>
@@ -150,7 +150,7 @@ export default function GestionNotesEleve() {
           <Card className="border-primary/20 transition-all">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <User className="h-5 w-5 text-primary" />
+                <User className="h-5 w-5 text-skyblue" />
                 Élève
               </CardTitle>
             </CardHeader>
@@ -183,7 +183,7 @@ export default function GestionNotesEleve() {
           <Card className="border-primary/20 transition-all">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Calendar className="h-5 w-5 text-primary" />
+                <Calendar className="h-5 w-5 text-skyblue" />
                 Période
               </CardTitle>
             </CardHeader>
@@ -215,7 +215,7 @@ export default function GestionNotesEleve() {
           <Card className="border-primary/20 transition-all">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
-                <BookOpen className="h-5 w-5 text-primary" />
+                <BookOpen className="h-5 w-5 text-skyblue" />
                 Matière
               </CardTitle>
             </CardHeader>
@@ -260,7 +260,7 @@ export default function GestionNotesEleve() {
           <div className="flex flex-col md:flex-row justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-3 rounded-full">
-                <User className="h-8 w-8 text-primary" />
+                <User className="h-8 w-8 text-skyblue" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold">
@@ -271,7 +271,7 @@ export default function GestionNotesEleve() {
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-3 rounded-full">
-                <GraduationCap className="h-8 w-8 text-primary" />
+                <GraduationCap className="h-8 w-8 text-skyblue" />
               </div>
               <div>
                 <h3 className="text-xl font-semibold">{classeEleve.nom}</h3>
@@ -280,11 +280,11 @@ export default function GestionNotesEleve() {
             </div>
             <div className="flex items-center gap-4">
               <div className="bg-primary/10 p-3 rounded-full">
-                <BookOpen className="h-8 w-8 text-primary" />
+                <BookOpen className="h-8 w-8 text-skyblue" />
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-sm font-medium">Moyenne générale</span>
-                <span className="text-3xl font-bold text-primary">
+                <span className="text-3xl font-bold text-skyblue">
                   {calculerMoyenneGenerale(trimestreSelectionne)?.toFixed(2) ?? "N/A"}
                   <span className="text-xl text-muted-foreground">/20</span>
                 </span>
@@ -303,7 +303,7 @@ export default function GestionNotesEleve() {
                 key={trimestre.id}
                 value={trimestre.id}
                 onClick={() => trimestreSelectionne !== trimestre.id && setTrimestreSelectionne(trimestre.id)}
-                className="text-sm py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                className="text-sm py-3 data-[state=active]:bg-primary/10 data-[state=active]:text-skyblue"
               >
                 {trimestre.nom}
               </TabsTrigger>
@@ -325,7 +325,7 @@ export default function GestionNotesEleve() {
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="bg-primary/10 p-2 rounded-lg">
-                        <Calendar className="h-5 w-5 text-primary" />
+                        <Calendar className="h-5 w-5 text-skyblue" />
                       </div>
                       <div>
                         <CardTitle>{trimestre.nom}</CardTitle>
@@ -337,7 +337,7 @@ export default function GestionNotesEleve() {
                     <div className="flex items-center gap-4">
                       <div className="flex flex-col items-end">
                         <span className="text-sm text-muted-foreground">Moyenne du trimestre</span>
-                        <span className="text-2xl font-bold text-primary">
+                        <span className="text-2xl font-bold text-skyblue">
                           {calculerMoyenneGenerale(trimestre.id)?.toFixed(2) ?? "N/A"}
                           <span className="text-lg text-muted-foreground">/20</span>
                         </span>
@@ -392,7 +392,7 @@ export default function GestionNotesEleve() {
                           <CardHeader className="flex flex-row items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="bg-primary/10 p-2 rounded-lg">
-                                <BookOpen className="h-5 w-5 text-primary" />
+                                <BookOpen className="h-5 w-5 text-skyblue" />
                               </div>
                               <div>
                                 <CardTitle>{matiere.nom}</CardTitle>

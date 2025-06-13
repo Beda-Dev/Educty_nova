@@ -25,19 +25,19 @@ const ColorVariants = () => {
           <TabsList className=" rounded-full">
             <TabsTrigger
               value="account"
-              className=" rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground "
+              className=" rounded-full data-[state=active]:bg-primary data-[state=active]:text-skyblue-foreground "
             >
               Account
             </TabsTrigger>
             <TabsTrigger
               value="password"
-              className=" rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground "
+              className=" rounded-full data-[state=active]:bg-primary data-[state=active]:text-skyblue-foreground "
             >
               Password
             </TabsTrigger>
             <TabsTrigger
               value="profile"
-              className=" rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground "
+              className=" rounded-full data-[state=active]:bg-primary data-[state=active]:text-skyblue-foreground "
             >
               Profile
             </TabsTrigger>

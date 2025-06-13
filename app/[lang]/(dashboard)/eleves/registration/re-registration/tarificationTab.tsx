@@ -151,7 +151,7 @@ const TarificationTable: React.FC<Props> = ({
                       <div className="font-medium">{fee.label}</div>
                     </TableCell>
                     <TableCell className="text-right font-medium tabular-nums">
-                      <span className="text-primary">
+                      <span className="text-skyblue">
                         {fee.amount.toLocaleString("fr-FR")} FCFA
                       </span>
                     </TableCell>
@@ -163,7 +163,7 @@ const TarificationTable: React.FC<Props> = ({
           
           <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
             <span className="font-medium">Total à payer :</span>
-            <span className="text-xl font-bold text-primary">
+            <span className="text-xl font-bold text-skyblue">
               {totalAmount.toLocaleString("fr-FR")} FCFA
             </span>
           </div>

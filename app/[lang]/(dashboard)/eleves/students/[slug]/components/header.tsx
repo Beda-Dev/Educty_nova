@@ -103,7 +103,7 @@ const Header = ({ eleve }: HeaderProps) => {
             </div>
             <div>
               {/* Afficher le nom et le prénom de l'étudiant */}
-              <div className="text-xl lg:text-2xl font-semibold text-primary-foreground mb-1">
+              <div className="text-xl lg:text-2xl font-semibold text-skyblue-foreground mb-1">
                 {eleve.name} {eleve.first_name}
               </div>
               {/* Afficher le statut de l'étudiant */}
@@ -156,9 +156,9 @@ const Header = ({ eleve }: HeaderProps) => {
                 key={`user-profile-link-${index}`}
                 href={item.link}
                 className={cn(
-                  "text-sm font-semibold text-default-500 hover:text-primary relative lg:before:absolute before:-bottom-4 before:left-0 before:w-full lg:before:h-[1px] before:bg-transparent",
+                  "text-sm font-semibold text-default-500 hover:text-skyblue relative lg:before:absolute before:-bottom-4 before:left-0 before:w-full lg:before:h-[1px] before:bg-transparent",
                   {
-                    "text-primary lg:before:bg-primary":
+                    "text-skyblue lg:before:bg-primary":
                       location === item.link,
                   }
                 )}

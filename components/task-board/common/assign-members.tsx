@@ -47,7 +47,7 @@ const AssignMembers = ({ icon }: { icon?: React.ReactNode }) => {
         >
           {
             icon ? icon :
-              <UserPlus className="w-3 h-3 text-primary" />
+              <UserPlus className="w-3 h-3 text-skyblue" />
           }
         </button>
       }

@@ -107,7 +107,7 @@ const ResponsiveDrawer = () => {
               <Icon icon="uil:bars" />
             </span>
           </button>
-          <h2 className="text-lg font-medium text-primary-foreground"> Responsive Drawer</h2>
+          <h2 className="text-lg font-medium text-skyblue-foreground"> Responsive Drawer</h2>
         </div>
         <div className="h-[320px] overflow-y-auto px-4 pt-4">
           <p className="text-sm text-default-500 ">

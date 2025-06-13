@@ -8,7 +8,7 @@ const MenuTypeBreadcrumb = () => {
     <Breadcrumbs
       className="gap-2"
       separator={null}
-      itemClasses="border px-4 py-1  rounded-md data-[state=active]:border-primary data-[state=active]:text-primary-foreground data-[state=active]:bg-primary "
+      itemClasses="border px-4 py-1  rounded-md data-[state=active]:border-primary data-[state=active]:text-skyblue-foreground data-[state=active]:bg-primary "
     >
       <BreadcrumbItem
         key="home"

@@ -67,7 +67,7 @@ const VerticalHeader: React.FC<VerticalHeaderProps> = ({ handleOpenSearch }) => 
   let searchButtonContent = null;
 
   const MainLogo = (
-    <Link href="/dashboard" className=" text-primary ">
+    <Link href="/dashboard" className=" text-skyblue ">
       <LogoComponent1 width={28} height={28} />
     </Link>
   );

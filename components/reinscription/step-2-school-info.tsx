@@ -187,7 +187,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
       </Card>
 
       {/* Pricing Preview */}
-      {availablePricing.length > 0 && (
+      {Array.isArray(availablePricing) && availablePricing.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Frais à payer</CardTitle>
@@ -200,7 +200,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
                     <h4 className="font-semibold">{pricing.label}</h4>
                     <span className="text-lg font-bold">{Number.parseInt(pricing.amount).toLocaleString()} FCFA</span>
                   </div>
-                  {pricing.installments && pricing.installments.length > 0 && (
+                  {Array.isArray(pricing.installments) && pricing.installments.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-sm text-gray-600">
                         {pricing.installments.length === 1 ? "Paiement unique" : "Paiement par échéances"}:

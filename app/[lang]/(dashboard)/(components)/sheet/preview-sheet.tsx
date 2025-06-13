@@ -15,7 +15,7 @@ export default function PreviewSheet() {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" className="text-primary">
+        <Button variant="ghost" className="text-skyblue">
           View Profile
         </Button>
       </SheetTrigger>

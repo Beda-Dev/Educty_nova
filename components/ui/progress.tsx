@@ -38,7 +38,7 @@ const progressVariants = cva(
 const circleVariants = cva("[&_[path-color]]:text-default-200 ", {
   variants: {
     color: {
-      primary: "[&_[bar-color]]:text-primary [&_[text-color]]:fill-primary",
+      primary: "[&_[bar-color]]:text-skyblue [&_[text-color]]:fill-primary",
       dark: "[&_[bar-color]]:text-foreground  [&_[text-color]]:fill-foreground",
       destructive:
         "[&_[bar-color]]:text-destructive [&_[text-color]]:fill-destructive",
@@ -135,7 +135,7 @@ const Progress = React.forwardRef<
           }}
         >
           {showValue && (
-            <span className=" text-right pr-1 text-[10px]  text-primary-foreground block w-full">
+            <span className=" text-right pr-1 text-[10px]  text-skyblue-foreground block w-full">
               {value}%
             </span>
           )}

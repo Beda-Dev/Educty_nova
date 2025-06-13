@@ -208,7 +208,7 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
               <Button
                 variant="outline"
                 size="sm"
-                className="text-primary-600 border-primary-300 "
+                className="text-skyblue-600 border-primary-300 "
                 onClick={() =>
                   router.push(`/paiement/${data.registration_number}`)
                 }
@@ -230,12 +230,12 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
               <div className="relative pt-1">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary-600 bg-primary-100">
+                    <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-skyblue-600 bg-primary-100">
                       Progression
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-semibold inline-block text-primary-600">
+                    <span className="text-xs font-semibold inline-block text-skyblue-600">
                       {Math.min(paymentProgress, 100)}%
                     </span>
                   </div>

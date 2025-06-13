@@ -29,7 +29,7 @@ export function DataTablePagination<TData>({ table }: { table: Table<TData> }) {
             onClick={() => table.setPageIndex(pageIdx)}
             size="icon"
             className={cn("h-7 w-7 p-0 font-medium bg-default-100 dark:bg-default-50 dark:hover:bg-default-200 text-default-600 rounded-md hover:bg-default-200", {
-              "bg-primary text-primary-foreground": table.getState().pagination.pageIndex === pageIdx,
+              "bg-primary text-skyblue-foreground": table.getState().pagination.pageIndex === pageIdx,
             })}
           >
             {page + 1}

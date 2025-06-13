@@ -19,7 +19,7 @@ const UserMeta = () => {
             <Label
               htmlFor="avatar"
             >
-              <Icon className="w-5 h-5 text-primary-foreground" icon="heroicons:pencil-square" />
+              <Icon className="w-5 h-5 text-skyblue-foreground" icon="heroicons:pencil-square" />
             </Label>
           </Button>
           <Input type="file" className="hidden" id="avatar" />

@@ -328,7 +328,7 @@ export default function EntrepotsPage() {
                             transition={{ duration: 0.2 }}
                           >
                             <TableCell>
-                              <Boxes className="h-5 w-5 text-primary" />
+                              <Boxes className="h-5 w-5 text-skyblue" />
                             </TableCell>
                             <TableCell className="font-medium">
                               <div className="flex items-center gap-2">

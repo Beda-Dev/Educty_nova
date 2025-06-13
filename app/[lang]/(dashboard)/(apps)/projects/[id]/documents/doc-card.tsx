@@ -28,7 +28,7 @@ const DocCard = ({ item }: { item: Document }) => {
                 <div>
                   <Icon
                     icon="simple-icons:googledocs"
-                    className="text-primary/80 w-4 h-4"
+                    className="text-skyblue/80 w-4 h-4"
                   />
                 </div>
                 <div className="text-sm font-medium text-default-600 truncate">

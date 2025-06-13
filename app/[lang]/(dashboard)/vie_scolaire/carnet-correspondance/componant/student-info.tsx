@@ -48,7 +48,7 @@ export default function StudentInfo({ student }: StudentInfoProps) {
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2 text-primary">
+            <h3 className="font-medium flex items-center gap-2 text-skyblue">
               <User className="h-5 w-5" />
               <span>Informations personnelles</span>
             </h3>
@@ -84,7 +84,7 @@ export default function StudentInfo({ student }: StudentInfoProps) {
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-medium flex items-center gap-2 text-primary">
+            <h3 className="font-medium flex items-center gap-2 text-skyblue">
               <MapPin className="h-5 w-5" />
               <span>Informations scolaires</span>
             </h3>

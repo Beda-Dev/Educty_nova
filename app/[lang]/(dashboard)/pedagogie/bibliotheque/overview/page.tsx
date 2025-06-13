@@ -28,7 +28,7 @@ export default function Home() {
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-2"
         >
-          <Library className="h-6 w-6 text-primary" />
+          <Library className="h-6 w-6 text-skyblue" />
           <span className="text-lg font-semibold">BiblioGestion</span>
           <Badge color="skyblue" className="ml-2">Beta</Badge>
         </motion.div>

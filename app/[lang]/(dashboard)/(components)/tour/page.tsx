@@ -47,9 +47,9 @@ const UiTour = () => {
                 {" "}
                 <p className="text-sm text-default-400 dark:text-default-600  mb-4">
                   The{" "}
-                  <code className="text-primary">steps and tourOptions</code>{" "}
+                  <code className="text-skyblue">steps and tourOptions</code>{" "}
                   props passes data in{" "}
-                  <code className="text-primary">ShepherdTour</code> component
+                  <code className="text-skyblue">ShepherdTour</code> component
                   to navigate the tour.
                 </p>
               </CardContent>
@@ -102,7 +102,7 @@ const UiTour = () => {
                           <div className="flex items-center justify-center bg-accent dark:bg-default-200 rounded-full overflow-hidden w-20 h-20">
                             <Icon
                               icon="heroicons:pencil-square"
-                              className=" h-6 w-6 text-primary"
+                              className=" h-6 w-6 text-skyblue"
                             />
                           </div>
                         </div>
@@ -123,7 +123,7 @@ const UiTour = () => {
                           >
                             <Icon
                               icon="heroicons:user-plus"
-                              className=" h-6 w-6 text-primary"
+                              className=" h-6 w-6 text-skyblue"
                             />
                           </div>
                         </div>
@@ -144,7 +144,7 @@ const UiTour = () => {
                           <div className="flex items-center justify-center bg-accent dark:bg-default-200  rounded-full overflow-hidden w-20 h-20">
                             <Icon
                               icon="heroicons:document-arrow-down"
-                              className=" h-6 w-6 text-primary"
+                              className=" h-6 w-6 text-skyblue"
                             />
                           </div>
                         </div>

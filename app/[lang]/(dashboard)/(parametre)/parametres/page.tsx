@@ -127,7 +127,7 @@ export default function Page() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
-              <Settings className="w-8 h-8 text-primary" />
+              <Settings className="w-8 h-8 text-skyblue" />
             </div>
             <div>
               <h1

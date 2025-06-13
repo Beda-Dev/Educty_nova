@@ -34,7 +34,8 @@ import {
   RegistrationFormData,
   PaymentFormData,
   DocumentFormData,
-  Period
+  Period, 
+  Demand
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -234,6 +235,9 @@ interface SchoolStore {
   periods: Period[];
   setPeriods: (data: Period[]) => void;
 
+  demands: Demand[];
+  setDemands: (data: Demand[]) => void;
+
   // Registration store data
   currentStep: number;
   setCurrentStep: (step: number) => void;
@@ -374,6 +378,9 @@ export const useSchoolStore = create<SchoolStore>()(
 
       periods: [],
       setPeriods: (data: Period[]) => set({ periods: data }),
+
+      demands: [],
+      setDemands: (data: Demand[]) => set({ demands: data }),
 
       // Registration store implementation
       currentStep: 1,

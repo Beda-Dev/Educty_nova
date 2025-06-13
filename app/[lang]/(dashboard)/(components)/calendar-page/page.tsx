@@ -15,9 +15,9 @@ const CalendarPage = () => {
     <div className=" space-y-5">
       <Card title="Calendar">
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> mode</code> prop demonstrate
+          The <code className="text-skyblue"> mode</code> prop demonstrate
           single calender.{" "}
-          <code className="text-primary"> selected and onSelect</code> props
+          <code className="text-skyblue"> selected and onSelect</code> props
           deliver the selected date and which date anyone want sto choose.
         </p>
         <Calendar

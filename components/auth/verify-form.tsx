@@ -169,7 +169,7 @@ const VerfiyForm = () => {
   return (
     <div className="w-full md:w-[480px] py-5">
       <Link href="/dashboard" className="inline-block">
-        <LogoComponent1 width={40} height={40} className="2xl:h-14 2xl:w-14 text-primary" />
+        <LogoComponent1 width={40} height={40} className="2xl:h-14 2xl:w-14 text-skyblue" />
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Vérification à deux facteurs
@@ -235,7 +235,7 @@ const VerfiyForm = () => {
       <div className="mt-4 text-center text-sm text-default-500">
         Vous n'avez pas reçu de code?{" "}
         <button 
-          className="text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+          className="text-skyblue hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
           onClick={() => setShowResendModal(true)}
           disabled={isResending}
         >

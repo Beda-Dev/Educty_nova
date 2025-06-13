@@ -185,7 +185,7 @@ export default function ListePresence() {
                 <TabsContent key={jour} value={jour}>
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">
-                      <BookOpen className="inline mr-2 h-5 w-5 text-primary" />
+                      <BookOpen className="inline mr-2 h-5 w-5 text-skyblue" />
                       Emploi du temps - {classes.find((c) => c.id === classeSelectionnee)?.nom} - {jour}
                     </h2>
                     <Badge variant="outline" className="text-sm">
@@ -218,7 +218,7 @@ export default function ListePresence() {
                               <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 pb-2">
                                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                                   <CardTitle className="flex items-center gap-2">
-                                    <BookOpen className="h-5 w-5 text-primary" />
+                                    <BookOpen className="h-5 w-5 text-skyblue" />
                                     {coursItem.nom}
                                   </CardTitle>
                                   <div className="flex items-center gap-4">

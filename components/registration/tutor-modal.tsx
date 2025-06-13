@@ -175,7 +175,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <User2 className="w-5 h-5 text-primary" />
+            <User2 className="w-5 h-5 text-skyblue" />
             <span>Nouveau tuteur</span>
           </DialogTitle>
           <DialogDescription>

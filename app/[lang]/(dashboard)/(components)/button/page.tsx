@@ -42,7 +42,7 @@ const ButtonPage = () => {
     <div className=" space-y-5">
       <Card title="Default Buttons" code={defaultButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change the background colo of the Button.
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -51,7 +51,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Size Button" code={sizeButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">size</code> prop is used to change
+          The <code className="text-skyblue">size</code> prop is used to change
           the button sizes
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -60,7 +60,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Outline Buttons" code={outlineButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> variant="outline" </code> prop is
+          The <code className="text-skyblue"> variant="outline" </code> prop is
           used to for Outline Button
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -71,7 +71,7 @@ const ButtonPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           You can use direct <span className=" font-medium">TawlindCss</span>{" "}
           className{" "}
-          <code className="text-primary">shadow-md, shadow-sm, shadow-xs</code>{" "}
+          <code className="text-skyblue">shadow-md, shadow-sm, shadow-xs</code>{" "}
           for shadow
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -81,7 +81,7 @@ const ButtonPage = () => {
       <Card title="Rounded" code={roundedButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           You can use direct <span className=" font-medium">TawlindCss</span>{" "}
-          className <code className="text-primary">rounded-full</code> for or
+          className <code className="text-skyblue">rounded-full</code> for or
           any other's className
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -91,7 +91,7 @@ const ButtonPage = () => {
       <Card title="Rounded Outline Buttons" code={roundedOutline}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           You can use direct <span className=" font-medium">TawlindCss</span>{" "}
-          className <code className="text-primary">rounded-full</code> for or
+          className <code className="text-skyblue">rounded-full</code> for or
           any other's className
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -100,7 +100,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Soft Buttons" code={softButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant='soft'</code> prop is used
+          The <code className="text-skyblue">variant='soft'</code> prop is used
           to change for soft color
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -109,7 +109,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Ghost Buttons" code={ghostButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant='ghost'</code> prop is used
+          The <code className="text-skyblue">variant='ghost'</code> prop is used
           to change for soft color
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -118,7 +118,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Disabled" code={disabledButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">disabled</code> prop disables any
+          The <code className="text-skyblue">disabled</code> prop disables any
           action of the button
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -127,7 +127,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Icon Buttons" code={iconButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">size='icon'</code> props design
+          The <code className="text-skyblue">size='icon'</code> props design
           size of the button as icon
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -136,7 +136,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Loading" code={loaderButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">Loader</code> component design the
+          The <code className="text-skyblue">Loader</code> component design the
           button as loading button
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -145,7 +145,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Block Buttons" code={blockButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">full width</code> design the button
+          The <code className="text-skyblue">full width</code> design the button
           as block button.
         </p>
 
@@ -173,7 +173,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Social Buttons" code={socialButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">size='icon'</code> props design the
+          The <code className="text-skyblue">size='icon'</code> props design the
           button with icon
         </p>
         <div className="grid  xl:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-5">
@@ -182,7 +182,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Social Icon Buttons" code={socialIconButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">size='icon'</code> props design
+          The <code className="text-skyblue">size='icon'</code> props design
           size of the button as icon
         </p>
         <div className="grid grid-cols-1 lg:grid-cols-3  gap-5  xl:divide-x rtl:divide-x-reverse divide-card-foreground/20">
@@ -191,7 +191,7 @@ const ButtonPage = () => {
       </Card>
       <Card title="Buttons Toggle Status" code={toggleButton}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">Toggle</code> component design the
+          The <code className="text-skyblue">Toggle</code> component design the
           button works toggle
         </p>
         <ToggleButton />

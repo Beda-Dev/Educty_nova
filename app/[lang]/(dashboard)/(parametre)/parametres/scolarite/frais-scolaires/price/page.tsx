@@ -231,7 +231,7 @@ export default function TarificationPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-primary">Échéancier de Paiement Validé</h1>
+            <h1 className="text-3xl font-bold text-skyblue">Échéancier de Paiement Validé</h1>
             <Button variant="outline" onClick={retourModification}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Retour à la modification
             </Button>
@@ -327,7 +327,7 @@ export default function TarificationPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold text-primary mb-6">Définir une tarification</h1>
+        <h1 className="text-3xl font-bold text-skyblue mb-6">Définir une tarification</h1>
 
         <Card className="shadow-lg mb-8">
           <CardHeader

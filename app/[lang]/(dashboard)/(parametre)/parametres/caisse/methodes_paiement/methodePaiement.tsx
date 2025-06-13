@@ -197,7 +197,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              {/* <CreditCard className="h-5 w-5 text-primary" /> */}
+              {/* <CreditCard className="h-5 w-5 text-skyblue" /> */}
               <CardTitle>Méthodes de paiement</CardTitle>
             </div>
             <Badge variant="outline">

@@ -50,14 +50,14 @@ const RadioInputPage = () => {
     <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
       <Card title="Basic Radio Button" code={basicRadio}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          No <span className="text-primary">Props</span> are required for the
+          No <span className="text-skyblue">Props</span> are required for the
           default radio input.{" "}
         </p>
         <BasicRadio />
       </Card>
       <Card title="Disabled Radio Button" code={disabledRadio}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Use the <span className="text-primary">disabled</span> attribute to
+          Use the <span className="text-skyblue">disabled</span> attribute to
           deactivate the radio input.
         </p>
         <DisabledRadio />
@@ -66,7 +66,7 @@ const RadioInputPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The size prop is used to change the input radio sizes. Our available
           sizes are{" "}
-          <span className="text-primary">
+          <span className="text-skyblue">
             extra-small(xs), small (sm), medium (md), large (lg), and
             extra-large (xl)
           </span>
@@ -91,9 +91,9 @@ const RadioInputPage = () => {
       </Card>
       <Card title="Colors Radio Button" code={colorsRadio}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <span className="text-primary">color</span> prop is used to change
+          The <span className="text-skyblue">color</span> prop is used to change
           the input color. Our available colors are{" "}
-          <span className="text-primary">
+          <span className="text-skyblue">
             default, primary, info, warning, success, destructive
           </span>
           .
@@ -102,8 +102,8 @@ const RadioInputPage = () => {
       </Card>
       <Card title="Controlled Radio Button" code={controlledRadio}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          Pass the <span className="text-primary">handleSelect</span> method
-          through the <span className="text-primary">onValueChange</span> props
+          Pass the <span className="text-skyblue">handleSelect</span> method
+          through the <span className="text-skyblue">onValueChange</span> props
           to collect radio input data.
         </p>
         <ControlledRadio />
@@ -112,16 +112,16 @@ const RadioInputPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           {" "}
           Set a default checked value in the radio input by passing it to the{" "}
-          <span className="text-primary">defaultValue props</span>
-          on the <span className="text-primary">RadioGroup component</span>.
+          <span className="text-skyblue">defaultValue props</span>
+          on the <span className="text-skyblue">RadioGroup component</span>.
         </p>
         <DefaultRadioGroup />
       </Card>
       <Card title="Disabled Radio Group" code={disabledRadioGroup}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Disable the selection by passing the{" "}
-          <span className="text-primary">disabled props</span> to the{" "}
-          <span className="text-primary">RadioGroup</span> component.
+          <span className="text-skyblue">disabled props</span> to the{" "}
+          <span className="text-skyblue">RadioGroup</span> component.
         </p>
         <DisabledRadioGroup />
       </Card>
@@ -135,8 +135,8 @@ const RadioInputPage = () => {
       <Card title="Vertical Radio Group" code={horizontalRadioGroup}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           To vertically align the radio input, include{" "}
-          <span className="text-primary">flex-col</span> in the{" "}
-          <span className="text-primary">className prop</span> of the RadioGroup
+          <span className="text-skyblue">flex-col</span> in the{" "}
+          <span className="text-skyblue">className prop</span> of the RadioGroup
           component.
         </p>
         <VerticalRadioGroup />
@@ -156,7 +156,7 @@ const RadioInputPage = () => {
       <Card title="Icons Radio Button" code={iconInRadio}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           To show icon in radio button we can use{" "}
-          <code className="text-primary">icon </code> prop that passes different
+          <code className="text-skyblue">icon </code> prop that passes different
           icon to show in radio button.
         </p>
         <IconInRadio />
@@ -164,7 +164,7 @@ const RadioInputPage = () => {
       <Card title="Label Slot Radio Button" code={labelSlot}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Label slot for radio button can be use alternative of RadioButton
-          Wrapper and use <code className="text-primary">Label </code> component
+          Wrapper and use <code className="text-skyblue">Label </code> component
           to show label with the component and customize it on label.
         </p>
         <LabelSlot />
@@ -175,9 +175,9 @@ const RadioInputPage = () => {
       >
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Custom component for radio button{" "}
-          <code className="text-primary">RadioGroup </code> component wrap the
+          <code className="text-skyblue">RadioGroup </code> component wrap the
           label with the
-          <code className="text-primary"> RadioGroupItem </code> to separate
+          <code className="text-skyblue"> RadioGroupItem </code> to separate
           different item to select.
         </p>
         <CustomImplementation />
@@ -185,9 +185,9 @@ const RadioInputPage = () => {
       <Card title="Accessible Radio Button " code={accessibleRadio}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Accessible button for radio button{" "}
-          <code className="text-primary">RadioGroup </code> component wrap the
+          <code className="text-skyblue">RadioGroup </code> component wrap the
           label with the
-          <code className="text-primary"> RadioGroupItem </code> to separate
+          <code className="text-skyblue"> RadioGroupItem </code> to separate
           different item to select and use dynamic class to show selected item.
         </p>
         <AccessibleRadio />
@@ -195,9 +195,9 @@ const RadioInputPage = () => {
       <Card title="Radio Button With Background" code={radioWithBackground}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           Background radio for radio button{" "}
-          <code className="text-primary">RadioGroup </code> component wrap the
+          <code className="text-skyblue">RadioGroup </code> component wrap the
           label with the
-          <code className="text-primary"> RadioGroupItem </code> to separate
+          <code className="text-skyblue"> RadioGroupItem </code> to separate
           different item to select and use dynamic class to show different
           background.
         </p>
@@ -207,9 +207,9 @@ const RadioInputPage = () => {
         <Card title="Custom Style Radio Button" code={customStyledRadio}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Custom style for radio button{" "}
-            <code className="text-primary">RadioGroup </code> component wrap the
+            <code className="text-skyblue">RadioGroup </code> component wrap the
             label with the
-            <code className="text-primary"> RadioGroupItem </code> to separate
+            <code className="text-skyblue"> RadioGroupItem </code> to separate
             different item to select and use dynamic class to show different
             item as profile.
           </p>
@@ -223,9 +223,9 @@ const RadioInputPage = () => {
         >
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Group Styled component for radio button{" "}
-            <code className="text-primary">RadioGroup </code> component wrap the
+            <code className="text-skyblue">RadioGroup </code> component wrap the
             label with the
-            <code className="text-primary"> RadioGroupItem </code> to separate
+            <code className="text-skyblue"> RadioGroupItem </code> to separate
             different item to select and use dynamic class to show different
             item as different item.
           </p>
@@ -236,9 +236,9 @@ const RadioInputPage = () => {
         <Card title="Radio Cards" code={radioCards}>
           <p className="text-sm text-default-400 dark:text-default-600  mb-4">
             Card Styled component for radio button{" "}
-            <code className="text-primary">RadioGroup </code> component wrap the
+            <code className="text-skyblue">RadioGroup </code> component wrap the
             label with the
-            <code className="text-primary"> RadioGroupItem </code> to separate
+            <code className="text-skyblue"> RadioGroupItem </code> to separate
             different item to select and use dynamic class to show different
             item as different item.
           </p>

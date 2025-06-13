@@ -16,7 +16,7 @@ const WelcomeBlock = () => {
   return (
     <div className="w-full h-full bg-primary rounded-md  flex p-6 relative " >
       <div className="flex-1 ">
-        <div className="text-lg md:text-2xl font-semibold text-primary-foreground mb-6">
+        <div className="text-lg md:text-2xl font-semibold text-skyblue-foreground mb-6">
           Welcome Back <br />
           Prantik!
         </div>
@@ -29,8 +29,8 @@ const WelcomeBlock = () => {
                 className="flex items-center w-full max-w-[130px] p-3 rounded bg-primary-foreground/10 shadow backdrop-blur-sm"
               >
                 <div className="flex-1">
-                  <div className="text-xs font-semibold text-primary-foreground/80">{item.title}</div>
-                  <div className="text-lg font-semibold text-primary-foreground">{item.total}</div>
+                  <div className="text-xs font-semibold text-skyblue-foreground/80">{item.title}</div>
+                  <div className="text-lg font-semibold text-skyblue-foreground">{item.total}</div>
                 </div>
               </div>
             ))

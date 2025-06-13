@@ -39,7 +39,7 @@ const CountryMap = () => {
           </div>
           <Link
             href="/dashboard"
-            className="text-xs font-medium text-primary hover:underline"
+            className="text-xs font-medium text-skyblue hover:underline"
           >
             See All
           </Link>

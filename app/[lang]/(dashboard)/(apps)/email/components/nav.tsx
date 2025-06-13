@@ -31,7 +31,7 @@ export function Nav({ links, isCollapsed, handleSidebar }: NavProps) {
                     className={cn(
                       "w-[18px] h-[18px] mb-2 flex-none text-default-600",
                       {
-                        "text-primary": false,
+                        "text-skyblue": false,
                       }
                     )}
                   />
@@ -60,17 +60,17 @@ export function Nav({ links, isCollapsed, handleSidebar }: NavProps) {
                 <Icon
                   icon={link.icon}
                   className={cn(
-                    "w-4 h-4 flex-none group-hover/item:text-primary-600 text-default-600 ease-in-out duration-150",
+                    "w-4 h-4 flex-none group-hover/item:text-skyblue-600 text-default-600 ease-in-out duration-150",
                     {
-                      "text-primary": false,
+                      "text-skyblue": false,
                     }
                   )}
                 />
                 <span
                   className={cn(
-                    "flex-1 capitalize text-sm font-medium group-hover/item:text-primary-600 text-default-600 ease-in-out duration-150",
+                    "flex-1 capitalize text-sm font-medium group-hover/item:text-skyblue-600 text-default-600 ease-in-out duration-150",
                     {
-                      "text-primary": false,
+                      "text-skyblue": false,
                     }
                   )}
                 >
@@ -80,9 +80,9 @@ export function Nav({ links, isCollapsed, handleSidebar }: NavProps) {
               {link.label && (
                 <span
                   className={cn(
-                    "flex-1 text-end text-sm font-medium group-hover/item:text-primary-600 text-default-600 ease-in-out duration-150",
+                    "flex-1 text-end text-sm font-medium group-hover/item:text-skyblue-600 text-default-600 ease-in-out duration-150",
                     {
-                      "text-primary": false,
+                      "text-skyblue": false,
                     }
                   )}
                 >

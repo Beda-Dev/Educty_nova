@@ -41,7 +41,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -80,7 +80,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -120,7 +120,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -160,7 +160,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -200,7 +200,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -240,7 +240,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -282,7 +282,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -322,7 +322,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -362,7 +362,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">
@@ -402,7 +402,7 @@ const DialogPlacement = () => {
                 className=" h-2 w-2  p-0  absolute top-[2px] right-[8px]"
               ></Badge>
             </div>
-            <h3 className="text-lg font-semibold text-default-950 dark:text-primary-foreground">
+            <h3 className="text-lg font-semibold text-default-950 dark:text-skyblue-foreground">
               Jenyyfer Nolan
             </h3>
             <span className="text-sm text-default-500  mt-1 block">

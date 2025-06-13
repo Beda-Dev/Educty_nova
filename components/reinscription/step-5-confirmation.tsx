@@ -1,19 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useReinscriptionStore } from "@/hooks/use-reinscription-store"
-import { CheckCircle, AlertTriangle, Loader2 } from "lucide-react"
 import { useSchoolStore } from "@/store/index"
-
-interface Step5Props {
-  onPrevious: () => void
-  onComplete: () => void
-}
+import { CheckCircle, AlertTriangle, Loader2, CreditCard, Calendar, Info, Hash, User, BookOpen, FileText, Shield } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 const padTo2Digits = (num: number): string => num.toString().padStart(2, '0')
 
@@ -31,6 +29,10 @@ const formatDate = (date: Date): string => (
   ].join(':')
 )
 
+interface Step5Props {
+  onPrevious: () => void
+  onComplete: () => void
+}
 
 export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const {
@@ -39,7 +41,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     existingTutors,
     newTutors,
     registrationData,
-    availablePricing,
     payments,
     newDocuments,
     paidAmount,
@@ -48,16 +49,41 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     getFileSize,
   } = useReinscriptionStore()
 
-  const { userOnline, cashRegisterSessionCurrent } = useSchoolStore()
+  const { 
+    userOnline, 
+    cashRegisterSessionCurrent,
+    methodPayment,
+    classes,
+    academicYears,
+    pricing,
+    installements,
+  } = useSchoolStore()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const transactionIds: number[] = []
+
+  useEffect(() => {
+    // Restaurer la photo si elle existe dans les modifications
+    const restorePhoto = async () => {
+      if (studentModifications?.photo) {
+        const file = await getFileFromPath(studentModifications.photo)
+        if (file) {
+          setPreviewUrl(URL.createObjectURL(file))
+        }
+      }
+    }
+    restorePhoto()
+
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [studentModifications?.photo])
 
   const rollbackCreatedEntities = async (createdEntities: any) => {
     const results: Record<string, any> = {};
     try {
-      // Helper pour suppression parallèle et rapport
       const deleteEntities = async (label: string, ids: any[], endpoint: string) => {
         if (!Array.isArray(ids) || ids.length === 0) return;
         const uniqueIds = Array.from(new Set(ids));
@@ -116,17 +142,16 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         for (const [key, value] of Object.entries(studentModifications)) {
           if (value !== null && value !== undefined) {
             if (key === "photo" && value && typeof value === "object" && ("file" in value || "stored" in value)) {
-  // Get the actual File object from IndexedDB
-  const file = await getFileFromPath(value as any)
-  if (file) {
-    studentFormData.append(key, file)
-    console.log("Photo added to FormData:", file.name, file.size)
-  } else {
-    setSubmitError("Impossible de retrouver la photo de l'élève. Merci de la réimporter avant de confirmer la réinscription.");
-    setIsSubmitting(false);
-    return;
-  }
-} else {
+              const file = await getFileFromPath(value as any)
+              if (file) {
+                studentFormData.append(key, file)
+                console.log("Photo added to FormData:", file.name, file.size)
+              } else {
+                setSubmitError("Impossible de retrouver la photo de l'élève. Merci de la réimporter avant de confirmer la réinscription.");
+                setIsSubmitting(false);
+                return;
+              }
+            } else {
               studentFormData.append(key, value.toString())
             }
           }
@@ -261,9 +286,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         docFormData.append("student_id", selectedStudent.id.toString())
         docFormData.append("label", doc.label)
 
-        // Get the actual File object from IndexedDB
         const file = await getFileFromPath(doc.path)
-        // console.log("Photo file retrieved", file ? `${file.name} (${file.size} bytes)` : "null")
 
         if (file && file.size > 0) {
           docFormData.append("path", file)
@@ -275,19 +298,14 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
               body: docFormData,
             })
 
-            // Vérifier si la réponse est OK
             if (!docResponse.ok) {
-              // Essayer de lire le corps de la réponse pour plus d'informations
               let errorText
               try {
-                // Essayer de lire comme JSON d'abord
                 const errorJson = await docResponse.json()
                 errorText = JSON.stringify(errorJson)
               } catch (jsonError) {
-                // Si ce n'est pas du JSON, lire comme texte
                 try {
                   errorText = await docResponse.text()
-                  // Limiter la taille du texte d'erreur pour éviter de surcharger la console
                   if (errorText.length > 500) {
                     errorText = errorText.substring(0, 500) + "... [texte tronqué]"
                   }
@@ -302,20 +320,12 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
               )
             }
 
-            // Essayer de lire la réponse JSON avec gestion d'erreur
-            let createdDocument
-            try {
-              createdDocument = await docResponse.json()
-            } catch (jsonError) {
-              console.error("Failed to parse JSON response:", jsonError)
-              throw new Error(`Erreur lors de la lecture de la réponse du serveur pour "${doc.label}"`)
-            }
-
-            createdEntities.documents.push(createdDocument.id)
+            const createdDocument = await docResponse.json()
             console.log("Document uploaded successfully:", createdDocument.id)
+            createdEntities.documents.push(createdDocument.id)
           } catch (error) {
             console.error("Error during document upload:", error)
-            throw error // Rethrow to be caught by the outer try/catch
+            throw error
           }
         } else {
           console.error("Failed to get valid file for document:", doc.label, "File is null or empty")
@@ -328,217 +338,504 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     } catch (error) {
       console.error("Erreur lors de la réinscription:", error)
       setSubmitError(error instanceof Error ? error.message : "Une erreur inattendue s'est produite")
-
-      // Rollback created entities
       await rollbackCreatedEntities(createdEntities)
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes"
+    const k = 1024
+    const sizes = ["Bytes", "KB", "MB", "GB"]
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+  }
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <CheckCircle className="w-5 h-5 text-green-600" />
-            <span>Confirmation et récapitulatif de la réinscription</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Student Information */}
-          {selectedStudent && (
-            <div>
-              <h4 className="font-semibold mb-3">Informations de l'élève</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Nom:</span>
-                  <span className="ml-2 font-medium">{selectedStudent.name}</span>
-                  {studentModifications?.name && (
-                    <span className="ml-2 text-blue-600">→ {studentModifications.name}</span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-gray-600">Prénom:</span>
-                  <span className="ml-2 font-medium">{selectedStudent.first_name}</span>
-                  {studentModifications?.first_name && (
-                    <span className="ml-2 text-blue-600">→ {studentModifications.first_name}</span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-gray-600">Matricule:</span>
-                  <span className="ml-2 font-medium">{selectedStudent.registration_number}</span>
-                  {studentModifications?.registration_number && (
-                    <span className="ml-2 text-blue-600">→ {studentModifications.registration_number}</span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-gray-600">Date de naissance:</span>
-                  <span className="ml-2 font-medium">
-                    {new Date(selectedStudent.birth_date).toLocaleDateString("fr-FR")}
-                  </span>
-                  {studentModifications?.birth_date && (
-                    <span className="ml-2 text-blue-600">
-                      → {new Date(studentModifications.birth_date).toLocaleDateString("fr-FR")}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-gray-600">Sexe:</span>
-                  <span className="ml-2 font-medium">{selectedStudent.sexe}</span>
-                  {studentModifications?.sexe && (
-                    <span className="ml-2 text-blue-600">→ {studentModifications.sexe}</span>
-                  )}
-                </div>
-                <div>
-                  <span className="text-gray-600">Statut:</span>
-                  <Badge color="skyblue">{selectedStudent.status}</Badge>
-                  {studentModifications?.status && (
-                    <Badge variant="outline" className="ml-2">
-                      → {studentModifications.status}
-                    </Badge>
-                  )}
-                </div>
-                {studentModifications?.photo && (
-                  <div className="md:col-span-2">
-                    <span className="text-gray-600">Photo:</span>
-                    {/* <Badge variant="outline" className="ml-2">
-                      Nouvelle photo ajoutée
-                      {studentModifications.photo.stored?.isRestored && " (restaurée automatiquement)"}
-                    </Badge> */}
-                  </div>
-                )}
+    <TooltipProvider>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="space-y-6"
+      >
+        <Card className="border-0 shadow-lg bg-white/95 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.6 }}
+              >
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              </motion.div>
+              <span className="text-2xl font-bold text-tyrian">Confirmation et récapitulatif de la réinscription</span>
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-8">
+            {/* Student Information */}
+            <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="flex items-center space-x-2 mb-4">
+                <User className="w-5 h-5 text-skyblue" />
+                <h4 className="font-semibold text-lg text-tyrian">Informations de l'élève</h4>
               </div>
-            </div>
-          )}
 
-          <Separator />
-
-          {/* Tutors Information */}
-          <div>
-            <h4 className="font-semibold mb-3">Tuteurs</h4>
-            <div className="space-y-2">
-              {existingTutors.map((tutor) => (
-                <div key={tutor.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span>
-                    {tutor.name} {tutor.first_name} - {tutor.phone_number}
-                  </span>
-                  <div className="flex space-x-2">
-                    {tutor.is_tutor_legal && <Badge>Tuteur légal</Badge>}
-                    {tutor.isModified && <Badge variant="outline">Modifié</Badge>}
-                  </div>
-                </div>
-              ))}
-              {newTutors.map((tutor, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-blue-50 rounded">
-                  <span>
-                    {tutor.name} {tutor.first_name} - {tutor.phone_number}
-                  </span>
-                  <div className="flex space-x-2">
-                    <Badge variant="outline">Nouveau</Badge>
-                    {tutor.is_tutor_legal && <Badge>Tuteur légal</Badge>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Registration Information */}
-          {registrationData && (
-            <div>
-              <h4 className="font-semibold mb-3">Informations de réinscription</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600">Nouvelle classe:</span>
-                  <span className="ml-2 font-medium">ID {registrationData.class_id}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Année académique:</span>
-                  <span className="ml-2 font-medium">ID {registrationData.academic_year_id}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Date de réinscription:</span>
-                  <span className="ml-2 font-medium">
-                    {new Date(registrationData.registration_date).toLocaleDateString("fr-FR")}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <Separator />
-
-          {/* Payment Information */}
-          <div>
-            <h4 className="font-semibold mb-3">Paiements</h4>
-            <div className="space-y-2">
-              {payments.map((payment, index) => (
-                <div key={index} className="p-3 border rounded">
-                  <div className="flex justify-between items-center mb-2">
-                    <span>Échéance ID: {payment.installment_id}</span>
-                    <span className="font-medium">{payment.amount.toLocaleString()} FCFA</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Méthodes: {payment.methods.map((m) => `${m.montant} FCFA`).join(", ")}
-                  </div>
-                </div>
-              ))}
-              <div className="bg-green-50 p-3 rounded">
-                <span className="font-semibold">Total versé: {paidAmount.toLocaleString()} FCFA</span>
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Documents Information */}
-          <div>
-            <h4 className="font-semibold mb-3">Documents ({newDocuments.length} nouveaux)</h4>
-            {newDocuments.length > 0 ? (
-              <div className="space-y-2">
-                {newDocuments.map((doc, index) => (
-                  <div key={index} className="flex justify-between items-center p-2 bg-blue-50 rounded">
-                    <span>{doc.label}</span>
-                    <div className="flex space-x-2">
-                      <span className="text-sm text-gray-500">{getFileSize(doc.path)} bytes</span>
-                      <Badge variant="outline">
-                        Nouveau{doc.path.stored?.isRestored && " (restauré automatiquement)"}
-                      </Badge>
+              {selectedStudent && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-whitesmoke/50 rounded-lg">
+                  {[
+                    { 
+                      label: "Nom", 
+                      value: studentModifications?.name ? (
+                        <span>
+                          {selectedStudent.name} <span className="text-blue-600">→ {studentModifications.name}</span>
+                        </span>
+                      ) : selectedStudent.name,
+                      icon: <User className="w-4 h-4" /> 
+                    },
+                    { 
+                      label: "Prénom", 
+                      value: studentModifications?.first_name ? (
+                        <span>
+                          {selectedStudent.first_name} <span className="text-blue-600">→ {studentModifications.first_name}</span>
+                        </span>
+                      ) : selectedStudent.first_name
+                    },
+                    { 
+                      label: "Matricule", 
+                      value: studentModifications?.registration_number ? (
+                        <span>
+                          {selectedStudent.registration_number} <span className="text-blue-600">→ {studentModifications.registration_number}</span>
+                        </span>
+                      ) : selectedStudent.registration_number,
+                      icon: <Hash className="w-4 h-4" /> 
+                    },
+                    { 
+                      label: "Date de naissance", 
+                      value: studentModifications?.birth_date ? (
+                        <span>
+                          {new Date(selectedStudent.birth_date).toLocaleDateString("fr-FR")} <span className="text-blue-600">→ {new Date(studentModifications.birth_date).toLocaleDateString("fr-FR")}</span>
+                        </span>
+                      ) : new Date(selectedStudent.birth_date).toLocaleDateString("fr-FR"),
+                      icon: <Calendar className="w-4 h-4" /> 
+                    },
+                    { 
+                      label: "Sexe", 
+                      value: studentModifications?.sexe ? (
+                        <span>
+                          {selectedStudent.sexe} <span className="text-blue-600">→ {studentModifications.sexe}</span>
+                        </span>
+                      ) : selectedStudent.sexe
+                    },
+                    { 
+                      label: "Statut", 
+                      value: studentModifications?.status ? (
+                        <span>
+                          <Badge variant="outline" className="bg-indigodye/10 text-indigodye">
+                            {selectedStudent.status}
+                          </Badge>
+                          <Badge variant="outline" className="ml-2 bg-blue-100 text-blue-600">
+                            → {studentModifications.status}
+                          </Badge>
+                        </span>
+                      ) : (
+                        <Badge variant="outline" className="bg-indigodye/10 text-indigodye">
+                          {selectedStudent.status}
+                        </Badge>
+                      ),
+                      badge: true
+                    },
+                    {
+                      label: "Photo", 
+                      value: studentModifications?.photo ? (
+                        <Badge variant="outline" className="bg-blue-100 text-blue-600">
+                          Nouvelle photo ajoutée
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-indigodye/10 text-indigodye">
+                          Photo existante
+                        </Badge>
+                      ),
+                      badge: true
+                    }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      {item.icon && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="text-skyblue">{item.icon}</div>
+                          </TooltipTrigger>
+                          <TooltipContent>{item.label}</TooltipContent>
+                        </Tooltip>
+                      )}
+                      <span className="text-gray-600">{item.label}:</span>
+                      {item.badge ? (
+                        <div>{item.value}</div>
+                      ) : (
+                        <span className="font-medium text-tyrian">{item.value}</span>
+                      )}
                     </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Photo Preview */}
+              {previewUrl && (
+                <div className="mt-4 flex flex-col items-center">
+                  <h4 className="text-sm font-medium mb-2">Nouvelle photo de l'élève</h4>
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-blue-200">
+                    <Image
+                      src={previewUrl}
+                      alt="Nouvelle photo de l'élève"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                ))}
+                </div>
+              )}
+            </motion.section>
+
+            <Separator className="bg-gray-200" />
+
+            {/* Tutors Information */}
+            <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center space-x-2 mb-4">
+                <Shield className="w-5 h-5 text-bittersweet" />
+                <h4 className="font-semibold text-lg text-tyrian">Tuteurs</h4>
               </div>
-            ) : (
-              <p className="text-gray-500">Aucun nouveau document ajouté</p>
+
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {[...existingTutors, ...newTutors].map((tutor, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`p-4 rounded-lg ${
+                        index >= existingTutors.length ? 'bg-skybue' : 
+                        (tutor as any).isModified ? 'bg-tyriant-50' : 'bg-gray-50'
+                      } border border-gray-200`}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <User className="w-4 h-4 text-gray-500" />
+                            <span className="font-medium">{tutor.name} {tutor.first_name}</span>
+                            {index >= existingTutors.length && (
+                              <Badge className="bg-blue-100 text-blue-600">Nouveau</Badge>
+                            )}
+                            {(tutor as any).isModified && index < existingTutors.length && (
+                              <Badge className="bg-yellow-100 text-yellow-600">Modifié</Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600 ml-6">{tutor.type_tutor}</div>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <Info className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm">{tutor.phone_number}</span>
+                        </div>
+
+                        <div className="flex justify-end">
+                          {tutor.is_tutor_legal && (
+                            <Badge className="bg-indigodye text-white">
+                              Tuteur légal
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </motion.section>
+
+            <Separator className="bg-gray-200" />
+
+            {/* Registration Information */}
+            {registrationData && (
+              <motion.section
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <div className="flex items-center space-x-2 mb-4">
+                  <BookOpen className="w-5 h-5 text-indigodye" />
+                  <h4 className="font-semibold text-lg text-tyrian">Informations scolaires</h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-whitesmoke/50 rounded-lg">
+                  {[
+                    {
+                      label: "Classe",
+                      value: classes.find(c => c.id === registrationData.class_id)?.label || `ID ${registrationData.class_id}`,
+                      icon: <BookOpen className="w-4 h-4" />
+                    },
+                    {
+                      label: "Année académique",
+                      value: academicYears.find(a => a.id === registrationData.academic_year_id)?.label || `ID ${registrationData.academic_year_id}`,
+                      icon: <Calendar className="w-4 h-4" />
+                    },
+                    {
+                      label: "Date de réinscription",
+                      value: new Date(registrationData.registration_date).toLocaleDateString("fr-FR"),
+                      icon: <Calendar className="w-4 h-4" />
+                    }
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-indigodye">{item.icon}</div>
+                        </TooltipTrigger>
+                        <TooltipContent>{item.label}</TooltipContent>
+                      </Tooltip>
+                      <span className="text-gray-600">{item.label}:</span>
+                      <span className="font-medium text-tyrian">{item.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.section>
             )}
-          </div>
 
-          {submitError && (
-            <Alert color="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{submitError}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+            <Separator className="bg-gray-200" />
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious} disabled={isSubmitting}>
-          Précédent
-        </Button>
-        <Button onClick={handleConfirm} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Réinscription en cours...
-            </>
-          ) : (
-            "Confirmer la réinscription"
-          )}
-        </Button>
-      </div>
-    </div>
+            {/* Payment Information */}
+            <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <div className="flex items-center space-x-2 mb-4">
+                <CreditCard className="w-5 h-5 text-emerald-600" />
+                <h4 className="font-semibold text-lg text-tyrian">Paiements</h4>
+              </div>
+
+              <div className="space-y-4">
+                <AnimatePresence>
+                  {payments.map((payment, index) => {
+                    const installment = installements.find(i => i && String(i.id) === String(payment.installment_id))
+                    const feeType = pricing.find(p => p?.installments?.some(i => Number(i.id) === Number(payment.installment_id)))?.fee_type?.label
+
+                    const formatDate = (dateString: string | number | Date) => {
+                      if (!dateString) return 'Date non définie'
+                      return new Date(dateString).toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })
+                    }
+
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="p-5 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-all"
+                      >
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <h4 className="font-semibold text-lg text-tyrian">
+                                {feeType || `Échéance ID: ${payment.installment_id}`}
+                              </h4>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Info className="w-4 h-4 text-gray-400 hover:text-indigodye" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-[300px]">
+                                  <p>Détails du paiement pour {feeType || 'ce type de frais'}</p>
+                                  {installment?.due_date && (
+                                    <p>Échéance: {formatDate(new Date(installment.due_date))}</p>
+                                  )}
+                                </TooltipContent>
+                              </Tooltip>
+                            </div>
+
+                            {installment?.due_date && (
+                              <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
+                                <Calendar className="w-4 h-4" />
+                                <span>Échéance: {formatDate(new Date(installment.due_date))}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-skyblue">
+                              {payment.amount.toLocaleString()} FCFA
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Montant total
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center space-x-2 text-sm font-medium text-gray-700">
+                            <CreditCard className="w-4 h-4" />
+                            <span>Méthodes de paiement ({payment.methods.length})</span>
+                          </div>
+
+                          <div className="grid gap-2">
+                            {payment.methods.map((method, methodIndex) => {
+                              const paymentMethod = methodPayment.find(mp => mp.id === method.id)
+                              const percentage = (Number(method.montant) / payment.amount) * 100
+
+                              return (
+                                <motion.div
+                                  key={methodIndex}
+                                  whileHover={{ scale: 1.01 }}
+                                  className="flex items-center justify-between p-3 bg-whitesmoke rounded-md"
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-2 h-2 rounded-full bg-skyblue"></div>
+                                    <span className="font-medium">
+                                      {paymentMethod?.name || 'Méthode inconnue'}
+                                    </span>
+                                  </div>
+
+                                  <div className="text-right">
+                                    <div className="font-semibold">
+                                      {Number(method.montant).toLocaleString()} FCFA
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {percentage.toFixed(1)}%
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </AnimatePresence>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  className="p-4 bg-emerald-50 rounded-lg border border-emerald-200 mt-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-emerald-800">Total versé</span>
+                    <span className="text-xl font-bold text-emerald-600">
+                      {paidAmount.toLocaleString()} FCFA
+                    </span>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.section>
+
+            <Separator className="bg-gray-200" />
+
+            {/* Documents Information */}
+            <motion.section
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <div className="flex items-center space-x-2 mb-4">
+                <FileText className="w-5 h-5 text-bittersweet" />
+                <h4 className="font-semibold text-lg text-tyrian">
+                  Documents et pièces justificatives
+                  <span className="ml-2 text-gray-500">({newDocuments.length} nouveaux)</span>
+                </h4>
+              </div>
+
+              {newDocuments.length > 0 ? (
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {newDocuments.map((doc, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex justify-between items-center p-3 bg-blue-50 rounded-lg hover:bg-blue-100"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <FileText className="w-4 h-4 text-indigodye" />
+                          <span className="truncate max-w-xs">{doc.label}</span>
+                        </div>
+                        <div className="flex space-x-2">
+                          <span className="text-sm text-gray-500">
+                            {formatFileSize(getFileSize(doc.path))}
+                          </span>
+                          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-600">
+                            Nouveau
+                          </Badge>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-6 text-gray-400 border-2 border-dashed rounded-lg"
+                >
+                  <FileText className="w-10 h-10 mx-auto mb-2" />
+                  <p>Aucun nouveau document ajouté</p>
+                </motion.div>
+              )}
+            </motion.section>
+
+            {submitError && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Alert color="destructive" className="border-bittersweet/20 bg-bittersweet/10">
+                  <AlertTriangle className="h-4 w-4 text-bittersweet" />
+                  <AlertDescription color="destructive" className="text-bittersweet">
+                    {submitError}
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
+
+        <motion.div
+          className="flex justify-between pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Button
+            variant="outline"
+            onClick={onPrevious}
+            disabled={isSubmitting}
+          >
+            Précédent
+          </Button>
+
+          <Button
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            color="indigodye"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Réinscription en cours...
+              </>
+            ) : (
+              "Confirmer la réinscription"
+            )}
+          </Button>
+        </motion.div>
+      </motion.div>
+    </TooltipProvider>
   )
 }

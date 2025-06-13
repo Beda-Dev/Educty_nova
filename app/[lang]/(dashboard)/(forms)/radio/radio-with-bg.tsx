@@ -22,8 +22,8 @@ const RadioWithBackground = () => {
           )}
 
         >
-          <span className={cn("font-base text-default-800", { "text-primary-foreground": selected === "rwb_1" })}>I'm Number one.</span>
-          <RadioGroupItem value="rwb_1" id="rwb_1" className="data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary-foreground"></RadioGroupItem>
+          <span className={cn("font-base text-default-800", { "text-skyblue-foreground": selected === "rwb_1" })}>I'm Number one.</span>
+          <RadioGroupItem value="rwb_1" id="rwb_1" className="data-[state=checked]:text-skyblue-foreground data-[state=checked]:border-primary-foreground"></RadioGroupItem>
 
         </Label>
         <Label
@@ -32,8 +32,8 @@ const RadioWithBackground = () => {
             { "bg-primary dark:bg-primary": selected === "rwb_2" }
           )}
         >
-          <span className={cn("font-base text-default-800", { "text-primary-foreground": selected === "rwb_2" })}>I'm Number two.</span>
-          <RadioGroupItem value="rwb_2" id="rwb_2" className="data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary-foreground"></RadioGroupItem>
+          <span className={cn("font-base text-default-800", { "text-skyblue-foreground": selected === "rwb_2" })}>I'm Number two.</span>
+          <RadioGroupItem value="rwb_2" id="rwb_2" className="data-[state=checked]:text-skyblue-foreground data-[state=checked]:border-primary-foreground"></RadioGroupItem>
 
         </Label>
 

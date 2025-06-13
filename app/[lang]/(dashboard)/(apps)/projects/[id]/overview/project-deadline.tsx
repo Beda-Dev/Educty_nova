@@ -21,16 +21,16 @@ const ProjectDeadline = () => {
   return (
     <Card className="h-full w-full bg-primary  pt-8 pb-1 relative overflow-hidden">
       <CardContent>
-        <div className="text-4xl text-center font-semibold text-primary-foreground">
+        <div className="text-4xl text-center font-semibold text-skyblue-foreground">
           Project Deadline
         </div>
         <div className="grid grid-cols-2 gap-8 mt-10">
           {data.map((item, index) => (
             <div key={`project-overview-${index}`} className="text-center">
-              <div className="text-6xl font-semibold text-primary-foreground mb-1">
+              <div className="text-6xl font-semibold text-skyblue-foreground mb-1">
                 {item.value}
               </div>
-              <div className="text-3xl font-medium text-primary-foreground/60 ">
+              <div className="text-3xl font-medium text-skyblue-foreground/60 ">
                 {item.label}
               </div>
             </div>

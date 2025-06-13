@@ -345,7 +345,7 @@ const menuItems: MenuCategory = {
           title: "Validation dépenses",
           icon: <CheckCircle className="w-6 h-6" />,
           path: "/decaissement/validation",
-        },
+        }
       ],
     },
     {
@@ -363,6 +363,12 @@ const menuItems: MenuCategory = {
         }
       ]
     },
+    {
+      id: "demandes",
+      title: "Demandes de décaissement",
+      icon: <FileText className="w-6 h-6" />,
+      path: "/caisse_comptabilite/demandes",
+    }
   ],
   pedagogie: [
     {

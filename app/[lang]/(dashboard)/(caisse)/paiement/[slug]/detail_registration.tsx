@@ -256,7 +256,7 @@ const PaymentDetail = ({ registration, studentData }: dataProps) => {
                   <div className="text-lg font-medium text-gray-500">
                     Reçu de paiement
                   </div>
-                  <div className="text-2xl font-bold text-primary-600">
+                  <div className="text-2xl font-bold text-skyblue-600">
                     # {generationNumero(registration.id.toString(), registration.created_at, "encaissement")}
                   </div>
                   <div className="mt-2 text-sm text-gray-500">

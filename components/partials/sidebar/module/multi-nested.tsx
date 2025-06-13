@@ -34,9 +34,9 @@ const MultiNestedMenus = ({
                 <div>
                   <div
                     className={cn(
-                      "pl-2  text-sm font-normal capitalize hover:text-primary gap-2 flex items-center group ",
+                      "pl-2  text-sm font-normal capitalize hover:text-skyblue gap-2 flex items-center group ",
                       {
-                        "text-primary": isLocationMatch(
+                        "text-skyblue": isLocationMatch(
                           item.href,
                           locationName
                         ),

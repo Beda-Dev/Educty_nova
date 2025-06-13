@@ -47,7 +47,7 @@ const ModernStepForm = () => {
       title: "You submitted the following values:",
       description: (
         <div className="mt-2 w-[340px] rounded-md bg-slate-950 p-4 top-0 right-0">
-          <p className="text-primary-foreground">Done</p>
+          <p className="text-skyblue-foreground">Done</p>
         </div>
       ),
     });

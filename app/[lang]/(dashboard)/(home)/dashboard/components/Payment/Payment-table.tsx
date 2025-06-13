@@ -186,7 +186,7 @@ const PaymentTable = ({ data }: PaymentTableProps) => {
             onClick={() => table.setPageIndex(pageIdx)}
             key={`orders-table-${pageIdx}`}
             className={cn("w-7 h-7 p-0 bg-default-100 hover:bg-default-200 text-default-600", {
-              "bg-primary text-primary-foreground": pageIdx === table.getState().pagination.pageIndex
+              "bg-primary text-skyblue-foreground": pageIdx === table.getState().pagination.pageIndex
             })}
           >
             {page + 1}

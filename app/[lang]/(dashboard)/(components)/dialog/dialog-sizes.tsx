@@ -25,7 +25,7 @@ const DialogSizes = () => {
 
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -66,7 +66,7 @@ const DialogSizes = () => {
 
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -106,7 +106,7 @@ const DialogSizes = () => {
           </DialogHeader>
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -146,7 +146,7 @@ const DialogSizes = () => {
           </DialogHeader>
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -186,7 +186,7 @@ const DialogSizes = () => {
           </DialogHeader>
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -227,7 +227,7 @@ const DialogSizes = () => {
 
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -268,7 +268,7 @@ const DialogSizes = () => {
 
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -308,7 +308,7 @@ const DialogSizes = () => {
           </DialogHeader>
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -348,7 +348,7 @@ const DialogSizes = () => {
           </DialogHeader>
           <div className="text-sm text-default-500  space-y-4">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>
@@ -388,7 +388,7 @@ const DialogSizes = () => {
           </DialogHeader>
           <div className="text-sm text-default-500  space-y-4 h-screen overflow-y-auto">
             <p>
-              <span className="text-primary font-medium">France</span> is the
+              <span className="text-skyblue font-medium">France</span> is the
               most visited country in the world with 117,109,000 international
               tourists, thanks to its rich history and iconic landmarks.
             </p>

@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
 const stepVariants = cva(
-  " flex   break-words [&_[step-box]]:font-medium  [&_[step-box=disable]]:text-foreground/70 [&_[step-box=completed]]:text-primary-foreground [&_[step-box=current]]:text-primary [&_[step-box=current]]:bg-background  ",
+  " flex   break-words [&_[step-box]]:font-medium  [&_[step-box=disable]]:text-foreground/70 [&_[step-box=completed]]:text-skyblue-foreground [&_[step-box=current]]:text-skyblue [&_[step-box=current]]:bg-background  ",
   {
     variants: {
       variant: {

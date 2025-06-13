@@ -62,7 +62,7 @@ const InvalidButton = () => {
                 />
               </FormControl>
 
-              <FormMessage className="bg-destructive/90 text-primary-foreground text-[10px] inline-flex justify-center items-center font-base h-[22px] px-2 rounded-sm " />
+              <FormMessage className="bg-destructive/90 text-skyblue-foreground text-[10px] inline-flex justify-center items-center font-base h-[22px] px-2 rounded-sm " />
             </FormItem>
           )}
         />

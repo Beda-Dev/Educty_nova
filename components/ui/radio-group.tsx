@@ -11,7 +11,7 @@ const radioVariants = cva(
     variants: {
       color: {
         primary:
-          "data-[state=checked]:border-primary data-[state=checked]:text-primary",
+          "data-[state=checked]:border-primary data-[state=checked]:text-skyblue",
         info: "data-[state=checked]:border-info data-[state=checked]:text-info",
         warning:
           "data-[state=checked]:border-warning data-[state=checked]:text-warning",

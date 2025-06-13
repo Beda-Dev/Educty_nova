@@ -47,7 +47,7 @@ const ProfileInfo = () => {
             </div>
             <Link
               href="/dashboard"
-              className="text-xs text-default-600 hover:text-primary"
+              className="text-xs text-default-600 hover:text-skyblue"
             >
               {userOnline?.roles?.[0]?.name ?? "Membre"}
             </Link>

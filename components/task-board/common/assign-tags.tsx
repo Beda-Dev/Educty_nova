@@ -123,7 +123,7 @@ const AssignTags = ({ task, taskId }: {
               className="h-5 w-5 rounded-full bg-default-100 hover:bg-default-200"
               size="icon"
             >
-              <Plus className="w-3 h-3 text-primary" />
+              <Plus className="w-3 h-3 text-skyblue" />
             </Button>
           </div>
         }
@@ -165,7 +165,7 @@ const AssignTags = ({ task, taskId }: {
                       className={`w-10 h-10 p-0 flex flex-wrap justify-center items-center rounded cursor-pointer bg-${item}`}
                     >
                       {newTagColor === item && (
-                        <Check className="w-5 h-5 text-primary-foreground" />
+                        <Check className="w-5 h-5 text-skyblue-foreground" />
                       )}
                       <input
                         type="radio"
@@ -199,7 +199,7 @@ const AssignTags = ({ task, taskId }: {
                     value={newtag.value}
                     onSelect={() => handleSelect(newtag.value)}
                     className={cn(
-                      " bg-primary  text-primary-foreground mb-1  aria-selected:text-primary-foreground",
+                      " bg-primary  text-skyblue-foreground mb-1  aria-selected:text-skyblue-foreground",
                       {
                         "bg-destructive aria-selected:bg-destructive":
                           newtag.value === "development",

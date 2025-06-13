@@ -25,7 +25,7 @@ const BadgePage = () => {
     <div className=" space-y-5">
       <Card title="Default badges" code={defaultBadge}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant="secondary"</code> prop is
+          The <code className="text-skyblue">variant="secondary"</code> prop is
           used to change color of badge
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -34,7 +34,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Outline badges" code={outlineBadge}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant="outline"</code> prop is
+          The <code className="text-skyblue">variant="outline"</code> prop is
           used to change outline of badge
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -43,7 +43,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Soft badges" code={softBadge}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant="soft"</code> prop is used
+          The <code className="text-skyblue">variant="soft"</code> prop is used
           to change background of badge
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -52,7 +52,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Badges With Icon" code={badgesWithIcon}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">Icon</code> component is used to
+          The <code className="text-skyblue">Icon</code> component is used to
           change Icon of badge
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -61,7 +61,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Styled badges" code={badgesStyle}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">Avatar</code> component is used to
+          The <code className="text-skyblue">Avatar</code> component is used to
           change the design of badge
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -70,7 +70,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Dot badges" code={dotStyleBadge}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">badge and avatar</code> component
+          The <code className="text-skyblue">badge and avatar</code> component
           is used to change the design of badge and the badge is dot.
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -79,7 +79,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Badges Position" code={badgeAlignment}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">badge </code> component different
+          The <code className="text-skyblue">badge </code> component different
           position is used to change the design of badge .
         </p>
         <div className="flex flex-wrap gap-3 lg:gap-5">
@@ -88,7 +88,7 @@ const BadgePage = () => {
       </Card>
       <Card title="Advance Badge Options" code={badgeVisibility}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">visibility</code> of badge depend
+          The <code className="text-skyblue">visibility</code> of badge depend
           on button that can show and hide the badge and increment and decrement
           button helps to perform.
         </p>

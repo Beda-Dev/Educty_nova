@@ -9,7 +9,7 @@ const alertVariants = cva(
   {
     variants: {
       color: {
-        default: "bg-primary text-primary-foreground",
+        default: "bg-primary text-skyblue-foreground",
         secondary: "bg-secondary  text-secondary-foreground",
         success: "bg-success text-success-foreground",
         info: "bg-info text-info-foreground",
@@ -87,7 +87,7 @@ const alertVariants = cva(
       {
         variant: "soft",
         color: "default",
-        className: "text-primary",
+        className: "text-skyblue",
       },
       {
         variant: "soft",

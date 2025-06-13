@@ -258,7 +258,7 @@ export default function UserSelect({
                                 )}
                               </div>
                               {selectedUser?.id === user.id && (
-                                <Check className="ml-2 h-4 w-4 text-primary flex-shrink-0" />
+                                <Check className="ml-2 h-4 w-4 text-skyblue flex-shrink-0" />
                               )}
                             </div>
                           </CommandItem>

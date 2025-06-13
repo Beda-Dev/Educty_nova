@@ -57,7 +57,7 @@ const ContactList = ({ contact, openChat, selectedChatId }: {
         </span>
         <span
           className={cn(
-            "h-[14px] w-[14px] flex items-center justify-center bg-default-400 rounded-full text-primary-foreground text-[10px] font-medium",
+            "h-[14px] w-[14px] flex items-center justify-center bg-default-400 rounded-full text-skyblue-foreground text-[10px] font-medium",
             {
               "bg-primary/70": unreadmessage > 0,
             }

@@ -63,7 +63,7 @@ const BlogCard = () => {
             <div className="h-[220px] lg:h-[292px] rounded-md before:rounded-md relative before:absolute before:top-0 before:left-0 before:w-full before:h-full group-hover:before:bg-default-900 group-hover:before:bg-opacity-30">
               <Image src={item.image} alt="image text" className="w-full h-full object-cover rounded-md" priority={true} />
               <span
-                className="absolute bottom-2 left-3 text-base transition-all duration-300  text-primary-foreground opacity-0 invisible group-hover:opacity-100 group-hover:visible  group-hover:bottom-4  ">
+                className="absolute bottom-2 left-3 text-base transition-all duration-300  text-skyblue-foreground opacity-0 invisible group-hover:opacity-100 group-hover:visible  group-hover:bottom-4  ">
                 {item.title}
               </span>
             </div>
@@ -72,7 +72,7 @@ const BlogCard = () => {
                 <span className="text-sm font-medium text-default-500">by</span> {" "}
                 <Link
                   href={item.authLink}
-                  className="text-sm font-medium text-default-900 hover:text-primary"
+                  className="text-sm font-medium text-default-900 hover:text-skyblue"
                 >
                   {item.name}
                 </Link>

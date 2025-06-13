@@ -42,7 +42,7 @@ export default function MainMenu({ trans }: { trans: any }) {
                 asChild
                 className=" flex items-center"
               >
-                <div className=" flex items-center  py-4 cursor-pointer group data-[state=open]:text-primary">
+                <div className=" flex items-center  py-4 cursor-pointer group data-[state=open]:text-skyblue">
                   <item.icon className="h-5 w-5 mr-2" />
                   <span className="text-sm font-medium text-default-700">
                     {translate(item.title, trans)}
@@ -87,7 +87,7 @@ export default function MainMenu({ trans }: { trans: any }) {
                           <TabsTrigger
                             key={`tab-${index}`}
                             value={tab.title}
-                            className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+                            className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
                             before:left-1/2 before:-bottom-[30px] before:h-[2px] px-0
                             before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                           >
@@ -175,7 +175,7 @@ const ListItem = React.forwardRef<HTMLAnchorElement, any>(
       <Link
         href={props.href}
         className={cn(
-          " select-none   text-sm  text-default-700 rounded-md flex  items-center gap-2 mb-4 last:mb-0  leading-none no-underline outline-none transition-colors  hover:text-primary  focus:text-primary",
+          " select-none   text-sm  text-default-700 rounded-md flex  items-center gap-2 mb-4 last:mb-0  leading-none no-underline outline-none transition-colors  hover:text-skyblue  focus:text-skyblue",
           className
         )}
         {...props}

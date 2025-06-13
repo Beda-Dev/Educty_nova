@@ -68,7 +68,7 @@ const SubtaskDetailsSheet = ({ open, onClose }: {
               <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
                 <Icon
                   icon="heroicons:user-plus"
-                  className="text-primary w-3.5 h-3.5"
+                  className="text-skyblue w-3.5 h-3.5"
                 />
               </div>
               <span className="text-sm font-medium text-default-900">
@@ -107,7 +107,7 @@ const SubtaskDetailsSheet = ({ open, onClose }: {
                 </Avatar>
               </AvatarGroup>
               {/* add new member */}
-              <AssignMembers icon={<Plus className="w-4 h-4 text-primary" />} />
+              <AssignMembers icon={<Plus className="w-4 h-4 text-skyblue" />} />
             </div>
           </div>
           {/* assigned members end */}
@@ -117,7 +117,7 @@ const SubtaskDetailsSheet = ({ open, onClose }: {
               <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
                 <Icon
                   icon="heroicons:scale"
-                  className="text-primary w-3.5 h-3.5"
+                  className="text-skyblue w-3.5 h-3.5"
                 />
               </div>
               <span className="text-sm font-medium text-default-900">
@@ -135,7 +135,7 @@ const SubtaskDetailsSheet = ({ open, onClose }: {
               <div className="bg-default-100 h-6 w-6 rounded-full grid place-content-center">
                 <Icon
                   icon="heroicons:calendar"
-                  className="text-primary w-3.5 h-3.5"
+                  className="text-skyblue w-3.5 h-3.5"
                 />
               </div>
               <span className="text-sm font-medium text-default-900">Date</span>

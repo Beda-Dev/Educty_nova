@@ -5,7 +5,7 @@ const AvatarsTonal = () => {
   return (
     <>
       <Avatar>
-        <AvatarFallback className=" bg-primary/10 text-primary">
+        <AvatarFallback className=" bg-primary/10 text-skyblue">
           PR
         </AvatarFallback>
       </Avatar>

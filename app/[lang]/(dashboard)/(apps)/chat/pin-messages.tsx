@@ -29,7 +29,7 @@ const PinnedMessages = ({ pinnedMessages, handleUnpinMessage }: {
               </p>
               <Dialog>
                 <DialogTrigger asChild>
-                  <span className="text-xs font-medium text-primary cursor-pointer inline-block mb-1 hover:underline">
+                  <span className="text-xs font-medium text-skyblue cursor-pointer inline-block mb-1 hover:underline">
                     See All
                   </span>
                 </DialogTrigger>

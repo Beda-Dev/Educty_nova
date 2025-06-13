@@ -671,4 +671,29 @@ export const fetchPeriods = async (opts: RequestInit = {}) => {
     }
   }
 };
+
+export const fetchDemands = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/demand`, opts);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des demandes :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log(
+          "demandes récupérées depuis localStorage : ",
+          parsedData.state.demands
+        );
+        return parsedData.state.demands || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+  
   

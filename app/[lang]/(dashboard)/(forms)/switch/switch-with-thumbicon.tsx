@@ -40,7 +40,7 @@ const SwitchWithThumbIcon = () => {
         onCheckedChange={() => setSelected1(!selected1)}
         thumbIcon={
           selected1 ? (
-            <ThumbsUp className="text-primary stroke-primary w-3 h-3 " />
+            <ThumbsUp className="text-skyblue stroke-primary w-3 h-3 " />
           ) : (
             <ThumbsDown className=" stroke-background w-3 h-3" />
           )

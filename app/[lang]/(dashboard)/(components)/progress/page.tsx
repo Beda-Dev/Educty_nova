@@ -37,7 +37,7 @@ const ProgressPage = () => {
     <div className="space-y-5">
       <Card title="Default Progress Bar" code={defaultProgress}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">Progress</code> component shows the
+          <code className="text-skyblue">Progress</code> component shows the
           progressbar to show the default component and use.
         </p>
         <div className="w-full md:w-3/5 ">
@@ -46,7 +46,7 @@ const ProgressPage = () => {
       </Card>
       <Card title="Default Circle Progress Bar" code={defaultCircleProgressbar}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">CircularProgress</code> component shows
+          <code className="text-skyblue">CircularProgress</code> component shows
           the progressbar in a circular way to show the component and use .
         </p>
         <div className="flex">
@@ -55,7 +55,7 @@ const ProgressPage = () => {
       </Card>
       <Card title="Sizes Progressbar" code={defaultSizeProgress}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Progress component <code className="text-primary">size</code> props
+          In Progress component <code className="text-skyblue">size</code> props
           shows different size to show and resize the component in linier
           progress.
         </p>
@@ -66,7 +66,7 @@ const ProgressPage = () => {
       <Card title="Circle Sizes" code={circleProgressbarSize}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           In CircularProgress component{" "}
-          <code className="text-primary">size</code> props shows different size
+          <code className="text-skyblue">size</code> props shows different size
           to show and resize the component in circular progress.
         </p>
         <div className="flex flex-wrap flex-row-reverse justify-end items-center  w-full md:w-3/5">
@@ -75,7 +75,7 @@ const ProgressPage = () => {
       </Card>
       <Card title="Colors Progress" code={colorProgress}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Progress component <code className="text-primary">variant</code>{" "}
+          In Progress component <code className="text-skyblue">variant</code>{" "}
           props shows different color component in linier progress.
         </p>
         <div className="w-full ">
@@ -85,7 +85,7 @@ const ProgressPage = () => {
       <Card title="Circle Color Progress" code={circleColorProgress}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           In CircularProgress component{" "}
-          <code className="text-primary">variant</code> props shows different
+          <code className="text-skyblue">variant</code> props shows different
           color component in circular progress.
         </p>
         <div className="flex flex-wrap gap-4">
@@ -94,7 +94,7 @@ const ProgressPage = () => {
       </Card>
       <Card title="Striped"  code={strippedProgressbar}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Progress component <code className="text-primary">isStripe</code>{" "}
+          In Progress component <code className="text-skyblue">isStripe</code>{" "}
           props shows striped in linier progress.
         </p>
         <div className="space-y-5 w-full md:w-3/5">
@@ -103,7 +103,7 @@ const ProgressPage = () => {
       </Card>
       <Card title="With Label" code={withLabelProgressbar}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Progress component <code className="text-primary">Label</code>{" "}
+          In Progress component <code className="text-skyblue">Label</code>{" "}
           component used with Progress component to show label for Progress.
         </p>
         <div className="space-y-4 w-full md:w-3/5">
@@ -112,7 +112,7 @@ const ProgressPage = () => {
       </Card>
       <Card title="Animate Striped" code={animateStripedProgressbar}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Stripes component <code className="text-primary">isAnimate</code>{" "}
+          In Stripes component <code className="text-skyblue">isAnimate</code>{" "}
           props shows in striped animation in linier progress.
         </p>
         <div className="space-y-5 w-full md:w-3/5">
@@ -121,9 +121,9 @@ const ProgressPage = () => {
       </Card>
       <Card title="With Value" code={widthValue}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          In Progress component <code className="text-primary">value</code> prop
+          In Progress component <code className="text-skyblue">value</code> prop
           to show filled empty space in progress and circular progress according
-          to value and <code className="text-primary">showValue</code> prop to
+          to value and <code className="text-skyblue">showValue</code> prop to
           show value in progressbar and circular progress component.
         </p>
         <div className="space-y-4 w-full md:w-3/5">
@@ -145,7 +145,7 @@ const ProgressPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           In Custom Text Progress component we can demonstrate different text in
           circular progress component using{" "}
-          <code className="text-primary">customContent</code> prop so that we
+          <code className="text-skyblue">customContent</code> prop so that we
           can show different data.
         </p>
         <div className="flex space-x-4 w-full md:w-3/5">
@@ -156,7 +156,7 @@ const ProgressPage = () => {
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           In Custom Content Progress component we can demonstrate different text
           and data circular and linier progress component using
-          <code className="text-primary">interval</code> how can we show growing
+          <code className="text-skyblue">interval</code> how can we show growing
           value over time in different interval time.
         </p>
         <div className="space-y-5 w-full md:w-3/5">
@@ -166,7 +166,7 @@ const ProgressPage = () => {
       <Card title="Loading" code={loadingProgressbar}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           This is a circular progress component using static value and
-          <code className="text-primary">loading </code> prop to show a loading
+          <code className="text-skyblue">loading </code> prop to show a loading
           circle.
         </p>
         <div className="flex space-x-4 w-full md:w-3/5">

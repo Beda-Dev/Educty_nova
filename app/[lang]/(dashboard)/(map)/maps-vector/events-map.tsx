@@ -43,9 +43,9 @@ const EventVMap = ({ height = 350 }: { height?: number }) => {
                 <VectorMap  {...world} layerProps={layerProps} className="h-full w-full object-cover dashtail-codeVmapInfo" />
             </div>
             <div className="text-center">
-                <p className="text-sm font-medium text-card-foreground">Hovered: {hovered && <strong className="text-primary">{hovered}</strong>}</p>
-                <p className="text-sm font-medium text-card-foreground">Focused: {focused && <strong className="text-primary">{focused}</strong>}</p>
-                <p className="text-sm font-medium text-card-foreground">Clicked: {clicked && <strong className="text-primary">{clicked}</strong>}</p>
+                <p className="text-sm font-medium text-card-foreground">Hovered: {hovered && <strong className="text-skyblue">{hovered}</strong>}</p>
+                <p className="text-sm font-medium text-card-foreground">Focused: {focused && <strong className="text-skyblue">{focused}</strong>}</p>
+                <p className="text-sm font-medium text-card-foreground">Clicked: {clicked && <strong className="text-skyblue">{clicked}</strong>}</p>
             </div>
         </div>
     )

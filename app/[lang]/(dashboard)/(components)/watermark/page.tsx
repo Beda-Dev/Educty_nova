@@ -7,7 +7,7 @@ const WaterMarkPage = () => {
     <div className=" space-y-5">
       <Card title="Basic Watermark" >
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">text</code> props change the
+          The <code className="text-skyblue">text</code> props change the
           watermark by changing the text value.
         </p>
         <Watermark text="DashTail">
@@ -22,7 +22,7 @@ const WaterMarkPage = () => {
       </Card>
       <Card title="Multi Line Watermark">
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">multiline</code> props change the
+          The <code className="text-skyblue">multiline</code> props change the
           watermark from one line to different line.
         </p>
         <Watermark gutter={60} multiline text={`DashTail\nCodeshaper`}>
@@ -37,7 +37,7 @@ const WaterMarkPage = () => {
       </Card>
       <Card title="Image Watermark">
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">image</code> props change the
+          The <code className="text-skyblue">image</code> props change the
           watermark text or image .
         </p>
         <Watermark text="image backgroun" image="/images/watermark/codeshaperlogo.png">
@@ -53,7 +53,7 @@ const WaterMarkPage = () => {
       <Card title="Multi Functional Watermark">
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
           The{" "}
-          <code className="text-primary">
+          <code className="text-skyblue">
             text, textColor, gutter, opacity, rotate, textSize,
           </code>{" "}
           props change the watermark text size color rotation, textSize and

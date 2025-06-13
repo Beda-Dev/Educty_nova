@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowDownCircle, ArrowUpCircle, Wallet, Clock } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, Clock, FileText } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
@@ -62,6 +62,14 @@ export default function CaissePage() {
       icon: <Clock className="w-6 h-6" />,
       path: "/caisse_comptabilite/session_caisse",
       color: itemColors[2]
+    },
+    {
+      id: "demandes de decaissement",
+      title: "Demandes de décaissement",
+      description: "Gestion des demandes de décaissement",
+      icon: <FileText className="w-6 h-6" />,
+      path: "/caisse_comptabilite/demandes",
+      color: itemColors[3]
     }
   ];
 
@@ -90,7 +98,7 @@ export default function CaissePage() {
     hover: {
       scale: 1.05,
       boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: "easeOut"
       },
@@ -105,14 +113,14 @@ export default function CaissePage() {
       <Card className="h-full border-none shadow-lg dark:shadow-none dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-full bg-primary/10">
-              <Wallet className="w-8 h-8 text-primary" />
+            <div className="p-3 rounded-full bg-skyblue/10">
+              <Wallet className="w-8 h-8 text-skyblue" />
             </div>
             <div>
               <h1
-  className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-  style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
->
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
+              >
                 Gestion de Caisse
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -159,7 +167,7 @@ export default function CaissePage() {
                           {item.description}
                         </p>
                       </div>
-                      <motion.div 
+                      <motion.div
                         className="absolute bottom-4 right-4 text-sm font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

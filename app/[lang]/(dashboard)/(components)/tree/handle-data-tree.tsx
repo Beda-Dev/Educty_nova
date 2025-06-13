@@ -243,7 +243,7 @@ const HandleDataTree = () => {
       <Tree
         data={treeData}
         onSelect={handleSelect}
-        className="data-[open=true]:bg-primary data-[open=true]:text-primary-foreground"
+        className="data-[open=true]:bg-primary data-[open=true]:text-skyblue-foreground"
       />
     </div>
   );

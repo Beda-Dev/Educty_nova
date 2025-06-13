@@ -31,10 +31,10 @@ function Calendar({ className, classNames, showOutsideDays = true, ...props }: C
 
         // first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md
 
-        day: "w-full h-10 rounded  p-0 font-normal aria-selected:opacity-100 bg-transparent text-current hover:text-primary",
+        day: "w-full h-10 rounded  p-0 font-normal aria-selected:opacity-100 bg-transparent text-current hover:text-skyblue",
 
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-skyblue hover:text-black focus:bg-skyblue focus:text-black",
+          "bg-primary text-skyblue-foreground hover:bg-skyblue hover:text-black focus:bg-skyblue focus:text-black",
         day_today: "bg-accent text-accent-foreground",
         day_outside: "text-muted-foreground opacity-50",
         day_disabled: "text-muted-foreground opacity-50",

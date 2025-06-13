@@ -63,7 +63,7 @@ const ValidateInputWithIcon = () => {
                   />
                 </>
               </FormControl>
-              <div className="inline-flex items-center gap-1 bg-destructive px-2 text-primary-foreground rounded-md">
+              <div className="inline-flex items-center gap-1 bg-destructive px-2 text-skyblue-foreground rounded-md">
                 {form.formState.errors.username && (
                   <Icon icon="material-symbols:info-outline" />
                 )}

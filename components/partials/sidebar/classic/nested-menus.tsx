@@ -43,9 +43,9 @@ const NestedSubMenu: React.FC<NestedSubMenuProps> = ({
             <Link href={subItem.href}>
               <div
                 className={cn(
-                  "flex items-center gap-3 text-default-700 dark:text-default-950  font-medium text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-primary-foreground",
+                  "flex items-center gap-3 text-default-700 dark:text-default-950  font-medium text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-skyblue-foreground",
                   {
-                    "bg-skyblue text-primary-foreground ": isActive,
+                    "bg-skyblue text-skyblue-foreground ": isActive,
                   }
                 )}
               >
@@ -63,9 +63,9 @@ const NestedSubMenu: React.FC<NestedSubMenuProps> = ({
                     <Link href={multiItem.href}>
                       <div
                         className={cn(
-                          "flex items-center gap-3 text-default-700 dark:text-default-950  font-medium text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-primary-foreground",
+                          "flex items-center gap-3 text-default-700 dark:text-default-950  font-medium text-sm capitalize px-[10px] py-3 rounded cursor-pointer hover:bg-skyblue hover:text-skyblue-foreground",
                           {
-                            "bg-skyblue text-primary-foreground ": isActive,
+                            "bg-skyblue text-skyblue-foreground ": isActive,
                           }
                         )}
                       >

@@ -28,7 +28,7 @@ const CollapsedHoverMenu = ({ item, menuTitle, trans }: {
     <>
       {item?.child ? (
         <ul className="space-y-2 relative before:absolute before:left-4 before:top-0  before:h-[calc(100%-5px)]  before:w-[2px] before:bg-primary/20 before:rounded">
-          <li className=" text-primary-foreground bg-primary font-medium px-3 py-3 rounded  relative flex items-center gap-3 ">
+          <li className=" text-skyblue-foreground bg-primary font-medium px-3 py-3 rounded  relative flex items-center gap-3 ">
             <item.icon className="h-5 w-5 " />
             {menuTitle}
           </li>

@@ -11,9 +11,9 @@ const breadcrumbItemsVariants = cva(
     variants: {
       color: {
         default:
-          "text-default-600 hover:default-600/80 data-[state=active]:text-primary aria-[current=page]:text-primary",
+          "text-default-600 hover:default-600/80 data-[state=active]:text-skyblue aria-[current=page]:text-skyblue",
         primary:
-          "text-primary/80 hover:text-primary/60 data-[state=active]:text-primary aria-[current=page]:text-primary",
+          "text-skyblue/80 hover:text-skyblue/60 data-[state=active]:text-skyblue aria-[current=page]:text-skyblue",
         success:
           "text-success/80 hover:text-success/60 data-[state=active]:text-success aria-[current=page]:text-success",
         info: "text-info/80 hover:text-info/60 data-[state=active]:text-info aria-[current=page]:text-info",

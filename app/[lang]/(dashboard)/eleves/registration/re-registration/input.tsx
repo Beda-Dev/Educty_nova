@@ -249,7 +249,7 @@ export default function FileManager({
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
             >
-              <Loader2 className="w-12 h-12 text-primary" />
+              <Loader2 className="w-12 h-12 text-skyblue" />
             </motion.div>
           </motion.div>
         )}
@@ -377,7 +377,7 @@ export default function FileManager({
                 <div className="p-4 flex flex-col h-full">
                   <div className="flex items-start space-x-3">
                     <div className="bg-primary/10 p-2 rounded-lg">
-                      <FileText className="w-5 h-5 text-primary" />
+                      <FileText className="w-5 h-5 text-skyblue" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium truncate">{doc.label}</h4>

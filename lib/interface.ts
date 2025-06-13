@@ -380,7 +380,7 @@ export interface Tutor {
 export interface ValidationExpense {
   id: number;
   user_id: number;
-  expense_id: number;
+  demand_id: number;
   validation_date: string;
   comment: string;
   validation_order: number;
@@ -388,7 +388,7 @@ export interface ValidationExpense {
   created_at: string;
   updated_at: string;
   user?: User;
-  expense?: Expense;
+  demand?: Demand;
 }
 
 export interface Transaction {
@@ -420,8 +420,8 @@ export interface Setting {
   longitude?: string | number | null; // plus précis que string pour les coordonnées
   latitude?: string | number | null; // plus précis que string pour les coordonnées
   expense_approval_level?: number; // niveau de validation des depenses dans select
-  primary_validator?: string | null; // validateur principal
-  currency?: string | null; // devise FCFA par defaut dans un select
+  primary_validator?: string | null; 
+  currency?: string | null; 
 }
 
 export interface Matter {
@@ -445,6 +445,17 @@ export interface Period {
   label: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface Demand {
+  id: number;
+  applicant_id: number;
+  pattern: string;
+  amount: number;
+  status: 'en attente' | 'validée' | 'approuvée' | 'refusé'; // tu peux ajuster si d'autres statuts existent
+  created_at: string;
+  updated_at: string;
+  applicant: UserSingle;
 }
 
 

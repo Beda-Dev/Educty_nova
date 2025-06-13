@@ -86,7 +86,7 @@ export default function ExportModal({
       <DialogContent className="max-w-md sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <FileSpreadsheet className="w-6 h-6 text-primary" />
+            <FileSpreadsheet className="w-6 h-6 text-skyblue" />
             <div>
               <DialogTitle>Configuration de l'export</DialogTitle>
               <DialogDescription>

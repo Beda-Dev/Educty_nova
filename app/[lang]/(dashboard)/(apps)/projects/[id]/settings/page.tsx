@@ -35,7 +35,7 @@ const Settings = () => {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Label htmlFor="changeProjectLogo" className="absolute -top-2 -right-2 w-6 h-6 bg-primary-500 text-primary-foreground rounded-full grid place-content-center">
+                    <Label htmlFor="changeProjectLogo" className="absolute -top-2 -right-2 w-6 h-6 bg-primary-500 text-skyblue-foreground rounded-full grid place-content-center">
                       <>
                         <Pencil className="w-3 h-3" />
                         <Input type="file" id="changeProjectLogo" className="hidden" />

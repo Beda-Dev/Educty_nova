@@ -240,7 +240,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
       </Card>
 
       {/* Pricing Preview */}
-      {availablePricing.length > 0 && (
+      {Array.isArray(availablePricing) && availablePricing.length > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -260,11 +260,11 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h4 className="font-semibold text-lg">{pricing.label}</h4>
-                      <span className="text-xl font-bold text-primary">
+                      <span className="text-xl font-bold text-skyblue">
                         {Number.parseInt(pricing.amount).toLocaleString()} FCFA
                       </span>
                     </div>
-                    {pricing.installments && pricing.installments.length > 0 && (
+                    {Array.isArray(pricing.installments) && pricing.installments.length > 0 && (
                       <div className="space-y-4">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-gray-600">

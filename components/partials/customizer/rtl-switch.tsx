@@ -35,7 +35,7 @@ const RtlSwitcher = () => {
           className={cn(
             "border  flex  w-full text-center  text-default-400 items-center justify-center py-[14px]  px-10 rounded relative",
             {
-              "text-primary border-primary": !isRtl,
+              "text-skyblue border-primary": !isRtl,
             }
           )}
           onClick={() => handleDirectionChange(false)}
@@ -46,7 +46,7 @@ const RtlSwitcher = () => {
           className={cn(
             "border  flex  w-full text-center items-center justify-center py-[14px]  px-10 rounded relative",
             {
-              "text-primary border-primary": isRtl,
+              "text-skyblue border-primary": isRtl,
             }
           )}
           onClick={() => handleDirectionChange(true)}

@@ -157,7 +157,7 @@ const ViewFiles = () => {
               size="icon"
               variant="outline"
               className={cn("hover:bg-transparent  ", {
-                "hover:border-primary hover:text-primary": fileView === "grid",
+                "hover:border-primary hover:text-skyblue": fileView === "grid",
                 "hover:border-muted-foreground hover:text-muted-foreground":
                   fileView !== "grid",
               })}
@@ -171,7 +171,7 @@ const ViewFiles = () => {
               size="icon"
               variant="outline"
               className={cn("hover:bg-transparent  ", {
-                "hover:border-primary hover:text-primary": fileView === "list",
+                "hover:border-primary hover:text-skyblue": fileView === "list",
                 "hover:border-muted-foreground hover:text-muted-foreground":
                   fileView !== "list",
               })}

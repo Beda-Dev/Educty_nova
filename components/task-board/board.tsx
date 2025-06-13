@@ -108,7 +108,7 @@ const taskBoard = ({
             <Button
               type="button"
               size="icon"
-              className="w-5 h-5 bg-transparent text-primary/80 border border-default-200 rounded-sm hover:bg-transparent"
+              className="w-5 h-5 bg-transparent text-skyblue/80 border border-default-200 rounded-sm hover:bg-transparent"
             >
               <UserPlus className="w-3 h-3" />
             </Button>
@@ -155,8 +155,8 @@ const taskBoard = ({
               className="flex justify-center items-center gap-1 w-full bg-transparent hover:bg-transparent"
               onClick={taskHandler}
             >
-              <Plus className="w-5 h-5 text-primary" />
-              <span className="text-xs font-semibold text-primary">
+              <Plus className="w-5 h-5 text-skyblue" />
+              <span className="text-xs font-semibold text-skyblue">
                 Add Task
               </span>
             </Button>

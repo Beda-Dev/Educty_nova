@@ -83,7 +83,7 @@ const MailDisplay = ({ mail }: any) => {
                 className="h-6 w-6 bg-default-100 rounded absolute top-4 right-4 flex justify-center items-center"
                 download={true}
               >
-                <Download className="w-3.5 h-3.5 text-primary" />
+                <Download className="w-3.5 h-3.5 text-skyblue" />
               </Link>
             </div>
           ))}

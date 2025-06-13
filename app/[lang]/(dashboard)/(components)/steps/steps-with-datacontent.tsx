@@ -41,7 +41,7 @@ const StepsWithDataContent = () => {
   return (
     <div className="max-w-5xl">
       <p className="text-sm text-default-500 ">
-        The <span className="text-primary">default</span> Keyboard Key is used
+        The <span className="text-skyblue">default</span> Keyboard Key is used
         to change the background color of the alert.
       </p>
 

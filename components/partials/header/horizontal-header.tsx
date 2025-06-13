@@ -8,7 +8,7 @@ const horizontalHeader: React.FC<{ handleOpenSearch: () => void }> = ({ handleOp
       <div>
         <Link
           href="/dashboard"
-          className=" text-primary flex items-center gap-2"
+          className=" text-skyblue flex items-center gap-2"
         >
           <LogoComponent1 width={28} height={28} />
           <span className=" text-xl font-semibold lg:inline-block hidden">

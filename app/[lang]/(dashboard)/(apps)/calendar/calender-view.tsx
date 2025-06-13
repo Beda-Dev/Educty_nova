@@ -143,7 +143,7 @@ const CalendarView = ({ events, categories }: CalendarViewProps) => {
           <CardContent className="p-0 ">
             <CardHeader className="border-none mb-2 pt-5">
               <Button onClick={handleDateClick}>
-                <Plus className="w-4 h-4 text-primary-foreground ltr:mr-1 rtl:ml-1" />
+                <Plus className="w-4 h-4 text-skyblue-foreground ltr:mr-1 rtl:ml-1" />
                 Add Event
               </Button>
             </CardHeader>

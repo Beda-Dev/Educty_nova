@@ -81,6 +81,8 @@ interface RegistrationStore {
   reset: () => void
 }
 
+import { createJSONStorage } from "zustand/middleware"
+
 export const useRegistrationStore = create<RegistrationStore>()(
   persist(
     (set, get) => ({

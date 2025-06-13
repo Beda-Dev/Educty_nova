@@ -34,7 +34,7 @@ const DropdownPage = () => {
     <div className=" space-y-5">
       <Card title="Default Dropdown" code={defaultDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change the background color of the Button.
         </p>
         <div className=" flex flex-wrap gap-5">
@@ -43,7 +43,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Soft Dropdown" code={softDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant='soft'</code> prop is used
+          The <code className="text-skyblue">variant='soft'</code> prop is used
           to change for soft color
         </p>
         <div className=" flex flex-wrap gap-5">
@@ -52,7 +52,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Outline Dropdown" code={outlineDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant='outline'</code> prop is
+          The <code className="text-skyblue">variant='outline'</code> prop is
           used to change for soft color
         </p>
         <div className=" flex flex-wrap gap-5">
@@ -61,7 +61,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Size Dropdown" code={sizeDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">size</code> prop is used to change
+          The <code className="text-skyblue">size</code> prop is used to change
           for size of button
         </p>
         <div className=" flex flex-wrap gap-5">
@@ -70,7 +70,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Split Dropdown" code={splitDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change for split of button
         </p>
         <div className=" flex flex-wrap gap-5">
@@ -79,7 +79,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Outline Split Dropdown" code={outlineSplitDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> variant="outline"</code> prop is
+          The <code className="text-skyblue"> variant="outline"</code> prop is
           used to change for outline color
         </p>
         <div className=" flex flex-wrap gap-5">
@@ -89,7 +89,7 @@ const DropdownPage = () => {
 
       <Card title="Alignment Options" code={alignmentOptions}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">align</code> prop is used to change
+          The <code className="text-skyblue">align</code> prop is used to change
           for align button tooltip
         </p>
         <div className=" flex flex-wrap gap-5 ">
@@ -98,7 +98,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Dropdown Menu Color Item" code={dropdownMenuItemColor}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change for color
         </p>
         <div className=" flex flex-wrap gap-5 ">
@@ -107,7 +107,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Dropdown Menu With Icon" code={dropdownMenuWithIcon}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change for color
         </p>
         <div className=" flex flex-wrap gap-5 ">
@@ -116,7 +116,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Dropdown Menu With  Content" code={dropdownMenuContent}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change for color
         </p>
         <div className=" flex flex-wrap gap-5 ">
@@ -125,7 +125,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Dropdown Menu With Shortcut" code={dropdownMenuWithShortcut}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change for color
         </p>
         <div className=" flex flex-wrap gap-5 ">
@@ -137,7 +137,7 @@ const DropdownPage = () => {
         code={dropdownMenuWithDescription}
       >
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">variant</code> prop is used to
+          The <code className="text-skyblue">variant</code> prop is used to
           change for color
         </p>
         <div className=" flex flex-wrap gap-5 ">
@@ -146,7 +146,7 @@ const DropdownPage = () => {
       </Card>
       <Card title="Custom Dropdown Items Style" code={customDropdown}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">button as image</code> change the
+          The <code className="text-skyblue">button as image</code> change the
           appearance of dropdown button.
         </p>
         <div className=" flex flex-wrap gap-5 ">

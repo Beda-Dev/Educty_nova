@@ -53,16 +53,16 @@ const MyProfileHeader = ({ profile }: { profile: ProfileUserType }) => {
             >
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary">
+              <DropdownMenuItem className="focus:bg-primary/10 focus:text-skyblue">
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary">
+              <DropdownMenuItem className="focus:bg-primary/10 focus:text-skyblue">
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary">
+              <DropdownMenuItem className="focus:bg-primary/10 focus:text-skyblue">
                 Team
               </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary">
+              <DropdownMenuItem className="focus:bg-primary/10 focus:text-skyblue">
                 Subscription
               </DropdownMenuItem>
             </DropdownMenuContent>

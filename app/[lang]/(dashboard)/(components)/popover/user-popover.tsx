@@ -29,7 +29,7 @@ const UserPopover = () => {
               </div>
               <Link
                 href="/dashboard"
-                className="text-sm text-default-500  hover:text-primary"
+                className="text-sm text-default-500  hover:text-skyblue"
               >
                 @johndoe
               </Link>
@@ -41,7 +41,7 @@ const UserPopover = () => {
         </div>
         <div className="mt-5 text-sm text-default-600 ">
           Web designer and developer at{" "}
-          <Link href="#" className="underline text-primary">
+          <Link href="#" className="underline text-skyblue">
             Example Company
           </Link>
           , creating innovative experiences for users.

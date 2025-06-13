@@ -73,7 +73,7 @@ const LeftSideSheet = () => {
                 <span className="text-lg font-bold text-default-800  block mt-5">
                   Jone Doe
                 </span>
-                <Link href="#" className="text-base font-medium text-primary block">
+                <Link href="#" className="text-base font-medium text-skyblue block">
                   @sakil
                 </Link>
               </div>

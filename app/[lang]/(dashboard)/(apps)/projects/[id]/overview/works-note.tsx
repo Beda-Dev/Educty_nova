@@ -59,7 +59,7 @@ const WorksNote = () => {
                   <div className="text-xs text-default-500 mb-1.5">{item.date}</div>
                   <div className="text-sm font-medium text-default-800 mb-[2px]">{item.task}</div>
                   <div className="text-xs text-default-600">Lead By
-                    <span className="font-medium text-primary/90 ml-1">{item.host}</span>
+                    <span className="font-medium text-skyblue/90 ml-1">{item.host}</span>
                   </div>
                 </div>
                 <Button

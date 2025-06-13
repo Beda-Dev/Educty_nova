@@ -91,7 +91,7 @@ const CommingSoonPage = () => {
             <li key={`nav-item-${index}`}>
               <Link
                 href={item.link}
-                className="text-base font-medium text-default-600 hover:text-primary"
+                className="text-base font-medium text-default-600 hover:text-skyblue"
               >
                 {item.label}
               </Link>

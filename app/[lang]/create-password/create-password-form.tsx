@@ -188,7 +188,7 @@ const FormulaireNouveauMotDePasse = () => {
       </form>
       <div className="mt-6 text-center text-base text-default-600">
         Pas maintenant ? Retournez à la{" "}
-        <Link href="/" className="text-primary">
+        <Link href="/" className="text-skyblue">
           page de connexion
         </Link>
       </div>

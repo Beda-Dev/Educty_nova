@@ -28,7 +28,7 @@ const AccordionTrigger = ({ children, value, activeItem, setActiveItem }: Accord
             " h-4 w-4  inline-flex items-center justify-center rounded border border-slate-300 dark:border-slate-500",
             {
               "": !isOpen,
-              "bg-primary text-primary-foreground": isOpen,
+              "bg-primary text-skyblue-foreground": isOpen,
             }
           )}
         >

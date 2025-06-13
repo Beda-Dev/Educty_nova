@@ -17,7 +17,7 @@ import { curveCardinal } from "d3-shape";
 const CustomTooltip = ({ active, payload }:any) => {
   if (active && payload && payload.length > 0) {
     return (
-      <div className="bg-slate-900 text-primary-foreground p-3 rounded-md gap-2">
+      <div className="bg-slate-900 text-skyblue-foreground p-3 rounded-md gap-2">
         <span>{`${payload[0].name}`}</span>
         <span>:</span>
         <span>{`${payload[0].value}%`}</span>

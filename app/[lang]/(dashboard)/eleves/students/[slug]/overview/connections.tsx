@@ -83,14 +83,14 @@ const Connections = () => {
                 <Button
                   size="icon"
                   className="h-8 w-8 bg-default-100 dark:bg-default-50 dark:hover:bg-default-50 hover:bg-default-100 rounded">
-                  <UserPlus className="flex-none h-5 w-5 text-primary" />
+                  <UserPlus className="flex-none h-5 w-5 text-skyblue" />
                 </Button>
               </div>
             ))
           }
         </div>
         <div className="flex justify-center">
-          <Link href="/" className="text-sm font-semibold text-primary">View All Connections</Link>
+          <Link href="/" className="text-sm font-semibold text-skyblue">View All Connections</Link>
         </div>
       </CardContent>
     </Card>

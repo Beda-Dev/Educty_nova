@@ -108,7 +108,7 @@ const Teams = () => {
           }
         </div>
         <div className="flex justify-center">
-          <Link href="/" className="text-sm font-semibold text-primary">View All Connections</Link>
+          <Link href="/" className="text-sm font-semibold text-skyblue">View All Connections</Link>
         </div>
       </CardContent>
     </Card>

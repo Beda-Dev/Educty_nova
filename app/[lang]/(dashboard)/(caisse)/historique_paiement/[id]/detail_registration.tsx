@@ -144,7 +144,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
                   <div className="text-lg font-medium text-gray-500">
                     Reçu de paiement
                   </div>
-                  <div className="text-2xl font-bold text-primary-600">
+                  <div className="text-2xl font-bold text-skyblue-600">
                     # {generationNumero(payment.id.toString(), payment.created_at, "encaissement")}
                   </div>
                   <div className="mt-2 text-sm text-gray-500">
@@ -260,7 +260,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
                   <div className="text-lg font-medium text-gray-500">
                     Reçu de paiement
                   </div>
-                  <div className="text-2xl font-bold text-primary-600">
+                  <div className="text-2xl font-bold text-skyblue-600">
                     #{payment.id}
                   </div>
                   <div className="mt-2 text-sm text-gray-500">

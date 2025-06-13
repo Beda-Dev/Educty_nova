@@ -25,9 +25,9 @@ const MultiMenuHandler = ({
         "text-sm flex gap-3  rounded items-center transition-all duration-150 cursor-pointer  relative before:absolute  before: top-0 before:-left-5 before:w-[3px] before:h-0 before:transition-all before:duration-200",
         className,
         {
-          " text-primary  before:bg-primary   before:h-full ":
+          " text-skyblue  before:bg-primary   before:h-full ":
             activeMultiMenu === subIndex,
-          " text-default-700 hover:text-primary": activeMultiMenu !== subIndex,
+          " text-default-700 hover:text-skyblue": activeMultiMenu !== subIndex,
         }
       )}
     >

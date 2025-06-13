@@ -60,13 +60,13 @@ const TaskSidebar = ({ contacts }: { contacts: ContactType[] }) => {
             <Icon
               icon={item.icon}
               className={cn(
-                "w-4 h-4 text-default-600 group-hover:text-primary",
+                "w-4 h-4 text-default-600 group-hover:text-skyblue",
                 ""
               )}
             />
             <span
               className={cn(
-                "text-sm font-medium text-default-600 group-hover:text-primary",
+                "text-sm font-medium text-default-600 group-hover:text-skyblue",
                 ""
               )}
             >

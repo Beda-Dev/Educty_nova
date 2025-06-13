@@ -49,7 +49,7 @@ const About = () => {
                 key={`about-${index}`}
                 className="flex items-center gap-2">
                 <div
-                  className="bg-default-100 dark:bg-default-50 text-primary h-10 w-10 grid place-content-center rounded">
+                  className="bg-default-100 dark:bg-default-50 text-skyblue h-10 w-10 grid place-content-center rounded">
                   <item.icon className="w-6 h-6" />
                 </div>
                 <div>

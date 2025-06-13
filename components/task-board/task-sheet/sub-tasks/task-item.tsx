@@ -123,7 +123,7 @@ const TaskItem = ({ subtask, handlerSubSheet }: {
                   <Button
                     type="button"
                     size="icon"
-                    className="h-6 w-6 bg-default-100 text-primary rounded-full hover:bg-default-100 relative"
+                    className="h-6 w-6 bg-default-100 text-skyblue rounded-full hover:bg-default-100 relative"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Icon

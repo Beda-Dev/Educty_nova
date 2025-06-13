@@ -92,7 +92,7 @@ const UserTable = () => {
                     <Button
                       size="icon"
                       color="secondary"
-                      className=" h-7 rounded-full bg-transparent w-7 data-[state=open]:bg-primary data-[state=open]:text-primary-foreground  "
+                      className=" h-7 rounded-full bg-transparent w-7 data-[state=open]:bg-primary data-[state=open]:text-skyblue-foreground  "
                     >
                       <Icon
                         icon="heroicons:ellipsis-horizontal"

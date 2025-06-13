@@ -15,6 +15,7 @@ import { useRegistrationStore } from "@/hooks/use-registration-store"
 import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function InscriptionPage() {
+  const { studentData } = useRegistrationStore();
   const { setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations } = useSchoolStore()
   const { currentStep, setCurrentStep, reset } = useRegistrationStore()
 
@@ -85,7 +86,13 @@ export default function InscriptionPage() {
           {currentStep === 2 && <Step2SchoolInfo onNext={handleNext} onPrevious={handlePrevious} />}
           {currentStep === 3 && <Step3Pricing onNext={handleNext} onPrevious={handlePrevious} />}
           {currentStep === 4 && <Step4Documents onNext={handleNext} onPrevious={handlePrevious} />}
-          {currentStep === 5 && <Step5Confirmation onPrevious={handlePrevious} onComplete={handleComplete} />}
+          {currentStep === 5 && (
+            <Step5Confirmation
+              onPrevious={handlePrevious}
+              onComplete={handleComplete}
+              photo={studentData?.photo ?? null}
+            />
+          )}
         </div>
       </CardContent>
     </Card>

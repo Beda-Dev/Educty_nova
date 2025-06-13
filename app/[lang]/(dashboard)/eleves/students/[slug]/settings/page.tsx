@@ -38,7 +38,7 @@ const Settings = () => {
             {
               tabs.map((tab, index) => (
                 <TabsTrigger
-                  className="capitalize px-0  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+                  className="capitalize px-0  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
            before:left-1/2 before:-bottom-[11px] before:h-[2px]
              before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
                   value={tab.value}

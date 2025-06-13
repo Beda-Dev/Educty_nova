@@ -50,7 +50,7 @@ const ValidateWithTooltip = () => {
         />
         {errors.username && (
           <div className="mt-1">
-            <span className="text-xs bg-destructive text-primary-foreground px-2 py-1 rounded-sm">
+            <span className="text-xs bg-destructive text-skyblue-foreground px-2 py-1 rounded-sm">
               {errors.username.message}
             </span>
           </div>
@@ -76,7 +76,7 @@ const ValidateWithTooltip = () => {
 
         {errors.password && (
           <div className="mt-1">
-            <span className="text-xs bg-destructive text-primary-foreground px-2 py-1 rounded-sm">
+            <span className="text-xs bg-destructive text-skyblue-foreground px-2 py-1 rounded-sm">
               {errors.password.message}
             </span>
           </div>

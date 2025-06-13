@@ -20,8 +20,8 @@ const TabsPage = () => {
     <div className=" space-y-5">
       <Card title="Basic Tabs" code={basicTabs}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Tabs</code> component wraps the.{" "}
-          <code className="text-primary">
+          The <code className="text-skyblue"> Tabs</code> component wraps the.{" "}
+          <code className="text-skyblue">
             {" "}
             TabsList, TabsTrigger, TabsContent
           </code>{" "}
@@ -31,20 +31,20 @@ const TabsPage = () => {
       </Card>
       <Card title="Disabled Tabs" code={disabledTabs}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Tabs</code> component wraps the.{" "}
-          <code className="text-primary">
+          The <code className="text-skyblue"> Tabs</code> component wraps the.{" "}
+          <code className="text-skyblue">
             {" "}
             TabsList, TabsTrigger, TabsContent
           </code>{" "}
           component to change tabs and wrap it as necessary component.{" "}
-          <code className="text-primary">disabled </code>props in TabsTrigger
+          <code className="text-skyblue">disabled </code>props in TabsTrigger
           component makes the tab disabled.
         </p>
         <DisabledTabs />
       </Card>
       <Card title="Sizes Tabs" code={sizesTabs}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Size </code> can be change by
+          The <code className="text-skyblue"> Size </code> can be change by
           changing padding and font size of TabsTrigger component.
         </p>
         <div className=" space-y-5">
@@ -53,7 +53,7 @@ const TabsPage = () => {
       </Card>
       <Card title="Rounded Tabs" code={roundedTabs}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Rounded </code> can be change by
+          The <code className="text-skyblue"> Rounded </code> can be change by
           changing tailwind class rounded rounded-lg and rounded-xl in
           TabsTrigger component.
         </p>
@@ -63,22 +63,22 @@ const TabsPage = () => {
       </Card>
       <Card title="Color  Variants" code={colorVariants}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> color</code> can be change by
-          changing tailwind class data-[state=active]:text-primary-foreground in
+          The <code className="text-skyblue"> color</code> can be change by
+          changing tailwind class data-[state=active]:text-skyblue-foreground in
           TabsTrigger component.
         </p>
         <ColorVariants />
       </Card>
       <Card title="Style Variants" code={styleVariants}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Style</code> can be change by
+          The <code className="text-skyblue"> Style</code> can be change by
           changing tailwind class in TabsTrigger and TabsList component.
         </p>
         <StyleVariants />
       </Card>
       <Card title="Icon Variants" code={iconVariants}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary"> Icon</code> can be change by
+          The <code className="text-skyblue"> Icon</code> can be change by
           changing Icon component in TabsTrigger and TabsList component and
           tailwind class .
         </p>

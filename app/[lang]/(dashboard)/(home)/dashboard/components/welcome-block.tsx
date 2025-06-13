@@ -30,7 +30,7 @@ const WelcomeBlock = () => {
         />
         <div className="grid grid-cols-12 gap-6 px-6 py-2 items-center relative">
           <div className="col-span-12 lg:col-span-8">
-            <div className="text-3xl font-semibold text-default-900"> Welcome Back <span className="text-primary">Prantik!</span> </div>
+            <div className="text-3xl font-semibold text-default-900"> Welcome Back <span className="text-skyblue">Prantik!</span> </div>
             <div className="text-3xl font-semibold text-default-900">Check Dashboard</div>
             <div className="mt-4 text-base text-default-600">You have earned 54% more than last month
               which is great thing.</div>

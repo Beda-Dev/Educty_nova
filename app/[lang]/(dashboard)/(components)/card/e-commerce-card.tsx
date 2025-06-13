@@ -224,18 +224,18 @@ const ECommerceCard = () => {
                 <div className="flex-1 h-10 flex border border-1 border-primary delay-150 ease-in-out  ltr:divide-x-[1px] rtl:divide-x-reverse text-sm font-normal divide-primary rounded">
                   <button
                     type="button"
-                    className="flex-none px-4 text-primary hover:bg-primary hover:text-primary-300  disabled:cursor-not-allowed disabled:opacity-50 "
+                    className="flex-none px-4 text-skyblue hover:bg-primary hover:text-skyblue-300  disabled:cursor-not-allowed disabled:opacity-50 "
                     onClick={() => setCount(prevCount => prevCount - 1)}
                   >
                     <Icon icon="eva:minus-fill" />
                   </button>
 
-                  <div className="flex-1 text-base py-2 flex items-center min-w-[45px] justify-center text-primary font-medium">
+                  <div className="flex-1 text-base py-2 flex items-center min-w-[45px] justify-center text-skyblue font-medium">
                     {count}
                   </div>
                   <button
                     type="button"
-                    className="flex-none px-4 text-primary hover:bg-primary hover:text-primary-300  disabled:cursor-not-allowed disabled:opacity-50 "
+                    className="flex-none px-4 text-skyblue hover:bg-primary hover:text-skyblue-300  disabled:cursor-not-allowed disabled:opacity-50 "
                     onClick={() => setCount(prevCount => prevCount + 1)}
                   >
                     <Icon icon="eva:plus-fill" />
@@ -394,17 +394,17 @@ const ECommerceCard = () => {
                 <div className="flex-1 h-10 flex border border-1 border-primary delay-150 ease-in-out  ltr:divide-x-[1px] rtl:divide-x-reverse text-sm font-normal divide-primary rounded">
                   <button
                     type="button"
-                    className="flex-none px-4 text-primary hover:bg-primary hover:text-primary-300  disabled:cursor-not-allowed disabled:opacity-50 "
+                    className="flex-none px-4 text-skyblue hover:bg-primary hover:text-skyblue-300  disabled:cursor-not-allowed disabled:opacity-50 "
                   >
                     <Icon icon="eva:minus-fill" />
                   </button>
 
-                  <div className="flex-1 text-base py-2 flex items-center min-w-[45px] justify-center text-primary font-medium">
+                  <div className="flex-1 text-base py-2 flex items-center min-w-[45px] justify-center text-skyblue font-medium">
                     5
                   </div>
                   <button
                     type="button"
-                    className="flex-none px-4 text-primary hover:bg-primary hover:text-primary-300  disabled:cursor-not-allowed disabled:opacity-50 "
+                    className="flex-none px-4 text-skyblue hover:bg-primary hover:text-skyblue-300  disabled:cursor-not-allowed disabled:opacity-50 "
                   >
                     <Icon icon="eva:plus-fill" />
                   </button>
@@ -492,17 +492,17 @@ const ECommerceCard = () => {
                   <div className="flex-1 h-10 flex border border-1 border-primary delay-150 ease-in-out  divide-x-[1px] rtl:divide-x-reverse text-sm font-normal divide-primary rounded">
                     <button
                       type="button"
-                      className="flex-none px-4 text-primary hover:bg-primary hover:text-primary-300  disabled:cursor-not-allowed disabled:opacity-50 "
+                      className="flex-none px-4 text-skyblue hover:bg-primary hover:text-skyblue-300  disabled:cursor-not-allowed disabled:opacity-50 "
                     >
                       <Icon icon="eva:minus-fill" />
                     </button>
 
-                    <div className="flex-1 text-base py-2 flex items-center min-w-[45px] justify-center text-primary font-medium">
+                    <div className="flex-1 text-base py-2 flex items-center min-w-[45px] justify-center text-skyblue font-medium">
                       5
                     </div>
                     <button
                       type="button"
-                      className="flex-none px-4 text-primary hover:bg-primary hover:text-primary-300  disabled:cursor-not-allowed disabled:opacity-50 "
+                      className="flex-none px-4 text-skyblue hover:bg-primary hover:text-skyblue-300  disabled:cursor-not-allowed disabled:opacity-50 "
                     >
                       <Icon icon="eva:plus-fill" />
                     </button>

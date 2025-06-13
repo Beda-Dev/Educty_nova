@@ -147,8 +147,16 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
     }))
   }
 
+  // Vérifie que les méthodes de paiement sont valides et complètes pour une échéance donnée
   const validatePaymentMethods = (installmentId: number): boolean => {
     const methods = paymentMethods[installmentId] || []
+    if (methods.length === 0) return false // aucune méthode
+
+    // toutes les méthodes doivent avoir un id valide et un montant positif
+    for (const m of methods) {
+      if (!m.id || m.amount <= 0 || Number.isNaN(m.amount)) return false
+    }
+
     const totalMethodAmount = methods.reduce((sum, method) => sum + method.amount, 0)
     const installmentAmount = installmentAmounts[installmentId] || 0
     return totalMethodAmount === installmentAmount
@@ -178,7 +186,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
 
     for (const installmentId of selectedInstallments) {
       if (!validatePaymentMethods(installmentId)) {
-        toast.error(`La répartition des méthodes de paiement pour l'échéance ${installmentId} ne correspond pas au montant`, {
+        toast.error(`Veuillez choisir des méthodes de paiement valides pour l'échéance ${installmentId}`, {
           position: "top-center",
         })
         return
@@ -313,7 +321,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                         <Label htmlFor={`installment-${installment.id}`} className="flex-1 cursor-pointer">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">{installment.status}</span>
-                            <span className="text-primary font-semibold">
+                            <span className="text-skyblue font-semibold">
                               {Number.parseInt(installment.amount_due).toLocaleString()} {currency}
                             </span>
                           </div>
@@ -456,7 +464,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total à payer</p>
-                  <p className="text-xl font-bold text-primary">
+                  <p className="text-xl font-bold text-skyblue">
                     {totalDistributedAmount.toLocaleString()} {currency}
                   </p>
                 </div>

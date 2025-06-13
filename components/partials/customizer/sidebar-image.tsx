@@ -75,7 +75,7 @@ const SidebarImage = () => {
             {sidebarBg === file && (
               <Icon
                 icon="heroicons:check-circle-20-solid"
-                className=" text-primary-foreground  absolute  top-1/2  left-1/2 -translate-x-1/2 -translate-y-1/2"
+                className=" text-skyblue-foreground  absolute  top-1/2  left-1/2 -translate-x-1/2 -translate-y-1/2"
               />
             )}
           </button>

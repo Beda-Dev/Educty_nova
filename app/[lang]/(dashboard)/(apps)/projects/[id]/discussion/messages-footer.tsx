@@ -65,7 +65,7 @@ const MessageFooter = () => {
                         <span className="h-6 w-6 rounded-full bg-primary ">
                           <Icon
                             icon="mdi:plus"
-                            className="text-2xl text-primary-foreground "
+                            className="text-2xl text-skyblue-foreground "
                           />
                         </span>
                       </Button>
@@ -75,7 +75,7 @@ const MessageFooter = () => {
                       align="start"
                       className="bg-default-800 py-2"
                     >
-                      <p className="text-xs  text-primary-foreground ">
+                      <p className="text-xs  text-skyblue-foreground ">
                         Open More Actions
                       </p>
                       <TooltipArrow className="fill-default-800" />
@@ -93,7 +93,7 @@ const MessageFooter = () => {
                 <div className="flex items-center gap-1">
                   <Icon
                     icon="material-symbols:mic"
-                    className="text-xl text-primary"
+                    className="text-xl text-skyblue"
                   />
                   <span className="text-sm font-medium text-default-900">
                     Send a voice clip
@@ -106,7 +106,7 @@ const MessageFooter = () => {
                     <Label htmlFor="attachement" className="flex items-center">
                       <Icon
                         icon="tabler:file-filled"
-                        className="text-xl text-primary "
+                        className="text-xl text-skyblue "
                       />
                       <Input type="file" className="hidden" id="attachement" />
                       <span className="text-sm font-medium text-defualt-900 inline-block ml-1">
@@ -118,7 +118,7 @@ const MessageFooter = () => {
                     <div className="flex items-center gap-1">
                       <Icon
                         icon="fluent:sticker-12-filled"
-                        className="text-xl text-primary"
+                        className="text-xl text-skyblue"
                       />
                       <span className="text-sm font-medium text-defualt-900 inline-block ml-1">
                         Choose a sticker
@@ -139,7 +139,7 @@ const MessageFooter = () => {
                         <span className="h-10 w-10 rounded-full hover:bg-default-50 flex justify-center items-center ">
                           <Icon
                             icon="tabler:file-filled"
-                            className="text-2xl text-primary/80 "
+                            className="text-2xl text-skyblue/80 "
                           />
                         </span>
                         <Input
@@ -153,7 +153,7 @@ const MessageFooter = () => {
                       className="bg-default-800 py-2"
                       align="start"
                     >
-                      <p className="text-xs  text-primary-foreground ">
+                      <p className="text-xs  text-skyblue-foreground ">
                         Attach a file
                       </p>
                       <TooltipArrow className="fill-default-800" />
@@ -172,7 +172,7 @@ const MessageFooter = () => {
                       >
                         <Icon
                           icon="fluent:sticker-12-filled"
-                          className="text-2xl text-primary/80"
+                          className="text-2xl text-skyblue/80"
                         />
                       </Button>
                     </TooltipTrigger>
@@ -180,7 +180,7 @@ const MessageFooter = () => {
                       align="start"
                       className="bg-default-800 py-2"
                     >
-                      <p className="text-xs  text-primary-foreground ">
+                      <p className="text-xs  text-skyblue-foreground ">
                         Choose a sticker
                       </p>
                       <TooltipArrow className="fill-default-800" />
@@ -216,7 +216,7 @@ const MessageFooter = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <span className=" absolute ltr:right-12 rtl:left-12 bottom-1 h-8 w-8 rounded-full bg-default-200 ">
-                    <Annoyed className="w-6 h-6 text-primary" />
+                    <Annoyed className="w-6 h-6 text-skyblue" />
                   </span>
                 </PopoverTrigger>
                 <PopoverContent side="top" align="end">
@@ -231,7 +231,7 @@ const MessageFooter = () => {
                 type="submit"
                 className="rounded-full bg-default-100 hover:bg-default-100 h-[42px] w-[42px] p-0 self-end"
               >
-                <SendHorizontal className="w-5 h-8 text-primary rtl:rotate-180" />
+                <SendHorizontal className="w-5 h-8 text-skyblue rtl:rotate-180" />
               </Button>
             </div>
           </form>

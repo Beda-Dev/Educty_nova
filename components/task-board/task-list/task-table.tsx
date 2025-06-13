@@ -373,7 +373,7 @@ const TaskTable = ({ data, boards, onUpdateTask, boardID2 }: TaskTableProps) => 
                   >
                     <Icon
                       icon="heroicons:user-plus"
-                      className="w-5 h-5 text-primary"
+                      className="w-5 h-5 text-skyblue"
                     />
                   </Button>
                 </PopoverTrigger>
@@ -502,7 +502,7 @@ const TaskTable = ({ data, boards, onUpdateTask, boardID2 }: TaskTableProps) => 
                 <Button
 
                   variant="soft"
-                  className="text-sm font-medium text-primary h-6 bg-transparent hover:bg-transparent hover:text-primary"
+                  className="text-sm font-medium text-skyblue h-6 bg-transparent hover:bg-transparent hover:text-skyblue"
                 >
                   Add...
                 </Button>
@@ -653,14 +653,14 @@ const TaskTable = ({ data, boards, onUpdateTask, boardID2 }: TaskTableProps) => 
               >
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="flex items-center">
-                    <Plus className="w-4 h-4 text-primary" />
+                    <Plus className="w-4 h-4 text-skyblue" />
                     <input
                       type="text"
                       {...register("title")}
                       placeholder="  Add a task"
 
                       className={cn(
-                        "text-sm font-medium text-default-900 focus:outline-none pl-2 placeholder:text-primary",
+                        "text-sm font-medium text-default-900 focus:outline-none pl-2 placeholder:text-skyblue",
                         {
                           " placeholder:text-destructive  text-destructive ":
                             errors.title,

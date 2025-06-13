@@ -24,7 +24,7 @@ const Inbox = () => {
           size="icon"
           className="relative md:h-9 md:w-9 h-8 w-8 hover:bg-default-100 dark:hover:bg-default-200 
           data-[state=open]:bg-default-100  dark:data-[state=open]:bg-default-200 
-           hover:text-primary text-default-500 dark:text-default-800  rounded-full "
+           hover:text-skyblue text-default-500 dark:text-default-800  rounded-full "
         >
           <Envelope className="h-5 w-5 " />
           <Badge className="w-4 h-4 p-0 text-xs  font-medium  items-center justify-center absolute left-[calc(100%-18px)] bottom-[calc(100%-16px)] ring-2 ring-primary-foreground">

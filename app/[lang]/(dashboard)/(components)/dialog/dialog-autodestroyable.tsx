@@ -43,7 +43,7 @@ const DialogAutoDestroyable = () => {
                 <RadioGroupItem value="1" id="basic" />
               </div>
               <div className="mt-1">
-                <h3 className="text-base font-semibold text-default-950 dark:text-primary-foreground">
+                <h3 className="text-base font-semibold text-default-950 dark:text-skyblue-foreground">
                   $40/User
                 </h3>
                 <p className="text-[10px] text-default-500">
@@ -52,31 +52,31 @@ const DialogAutoDestroyable = () => {
               </div>
               <ul className="mt-3 space-y-[6px]">
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>32+ Pages</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>Basic Report</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>UI Components</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>Customer Support</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>Lifetime Code Support</span>
@@ -91,7 +91,7 @@ const DialogAutoDestroyable = () => {
                 <RadioGroupItem value="2" id="standard" />
               </div>
               <div className="mt-1">
-                <h3 className="text-base font-semibold text-default-950 dark:text-primary-foreground">
+                <h3 className="text-base font-semibold text-default-950 dark:text-skyblue-foreground">
                   $40/User
                 </h3>
                 <p className="text-[10px] text-default-500">
@@ -100,31 +100,31 @@ const DialogAutoDestroyable = () => {
               </div>
               <ul className="mt-3 space-y-[6px]">
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>32+ Pages</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>Basic Report</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>UI Components</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>Customer Support</span>
                 </li>
                 <li className="flex items-center gap-[6px]">
-                  <span className="text-primary text-xl">
+                  <span className="text-skyblue text-xl">
                     <Icon icon="ri:checkbox-circle-line" />
                   </span>
                   <span>Lifetime Code Support</span>

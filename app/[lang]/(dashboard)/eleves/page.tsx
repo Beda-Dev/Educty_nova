@@ -129,7 +129,7 @@ export default function GestionElevesPage() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
-              <UserCheck className="w-8 h-8 text-primary" />
+              <UserCheck className="w-8 h-8 text-skyblue" />
             </div>
             <div>
               <h1

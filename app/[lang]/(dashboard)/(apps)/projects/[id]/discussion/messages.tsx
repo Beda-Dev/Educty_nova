@@ -28,7 +28,7 @@ const Messages = ({ messages }: { messages: Message[] }) => {
                       </Button>
                     </div>
                     <div className="whitespace-pre-wrap break-all">
-                      <div className="bg-primary/70 text-primary-foreground  text-sm  py-2 px-3 rounded-2xl  flex-1  ">
+                      <div className="bg-primary/70 text-skyblue-foreground  text-sm  py-2 px-3 rounded-2xl  flex-1  ">
                         {item.messages?.map((message, index) => (
                           <span key={`group-chat-message-${index}`}>
                             {message}

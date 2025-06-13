@@ -23,7 +23,7 @@ const ThemeButton = () => {
           size="icon"
           className="relative md:h-9 md:w-9 h-8 w-8 hover:bg-default-100 dark:hover:bg-default-200 
           data-[state=open]:bg-default-100  dark:data-[state=open]:bg-default-200 
-           hover:text-primary text-default-500 dark:text-default-800  rounded-full 
+           hover:text-skyblue text-default-500 dark:text-default-800  rounded-full 
             "
         >
           <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -36,7 +36,7 @@ const ThemeButton = () => {
           className={cn(
             "p-2 font-medium text-sm text-default-600 cursor-pointer mb-[2px] ",
             {
-              "bg-primary text-primary-foreground": theme === "light",
+              "bg-primary text-skyblue-foreground": theme === "light",
             }
           )}
         >
@@ -51,9 +51,9 @@ const ThemeButton = () => {
         <DropdownMenuItem
           onClick={() => setTheme("dark")}
           className={cn(
-            "p-2 font-medium text-sm text-default-600 hover:bg-primary hover:text-primary-foreground  dark:hover:bg-background cursor-pointer mb-[2px]",
+            "p-2 font-medium text-sm text-default-600 hover:bg-primary hover:text-skyblue-foreground  dark:hover:bg-background cursor-pointer mb-[2px]",
             {
-              "bg-primary text-primary-foreground": theme === "dark",
+              "bg-primary text-skyblue-foreground": theme === "dark",
             }
           )}
         >

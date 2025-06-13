@@ -105,7 +105,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ student, anneeAcademic }) => {
           {userInfo.map((item, index) => (
             <li key={`user-info-${index}`} className="flex items-center">
               <div className="flex-none 2xl:w-56 flex items-center gap-1.5">
-                <span>{<item.icon className="w-4 h-4 text-primary" />}</span>
+                <span>{<item.icon className="w-4 h-4 text-skyblue" />}</span>
                 <span className="text-sm font-medium text-default-800">
                   {item.label}:
                 </span>
@@ -124,7 +124,7 @@ const UserInfo: React.FC<UserInfoProps> = ({ student, anneeAcademic }) => {
           {student.documents?.length > 0 ? (
             student.documents.map((document, index) => (
               <div key={`document-${index}`} className="flex items-center gap-2">
-                <span className="w-4 h-4 text-primary">📄</span>
+                <span className="w-4 h-4 text-skyblue">📄</span>
                 <div className="text-sm font-medium text-default-800">
                   {document.label || "Document sans nom"}
                   <span className="font-normal ml-2">

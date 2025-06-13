@@ -67,7 +67,7 @@ const CommentFooter = ({ taskId }: {
                 type="submit"
                 className="rounded-full bg-default-100 hover:bg-default-100 h-[42px] w-[42px] p-0 self-end"
               >
-                <SendHorizontal className="w-5 h-8 text-primary" />
+                <SendHorizontal className="w-5 h-8 text-skyblue" />
               </Button>
             </div>
           </form>

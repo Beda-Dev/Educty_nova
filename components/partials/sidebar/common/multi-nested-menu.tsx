@@ -25,9 +25,9 @@ const MultiNestedMenu = ({ subItem, subIndex, activeMultiMenu, trans }: {
               <Link href={item.href}>
                 <span
                   className={cn(
-                    "text-sm flex gap-3  items-center transition-all duration-150 capitalize hover:text-primary",
+                    "text-sm flex gap-3  items-center transition-all duration-150 capitalize hover:text-skyblue",
                     {
-                      " text-primary  ": isLocationMatch(
+                      " text-skyblue  ": isLocationMatch(
                         item.href,
                         locationName
                       ),

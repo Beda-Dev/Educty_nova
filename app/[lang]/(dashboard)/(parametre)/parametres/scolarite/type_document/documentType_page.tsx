@@ -205,7 +205,7 @@ const DocumentTypeComponant = ({ data }: Props) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <Icon icon="heroicons:document-text" className="h-5 w-5 text-primary" />
+            <Icon icon="heroicons:document-text" className="h-5 w-5 text-skyblue" />
             <CardTitle>Types de documents</CardTitle>
           </div>
           <Badge variant="outline">

@@ -26,7 +26,7 @@ const LinkButton = ({
           className={cn(
             "flex items-center justify-between w-full relative before:absolute  before: top-0 before:-left-[14px]  before:w-[2px] before:h-0 before:transition-all before:duration-200 ",
             {
-              "text-primary  rounded before:bg-primary   before:h-full":
+              "text-skyblue  rounded before:bg-primary   before:h-full":
                 multiIndex === index,
             }
           )}
@@ -36,7 +36,7 @@ const LinkButton = ({
             className={cn(
               "flex-none transition-all duration-200 text-default-500 ",
               {
-                " transform rotate-90  text-primary": multiIndex === index,
+                " transform rotate-90  text-skyblue": multiIndex === index,
               }
             )}
           >
@@ -47,11 +47,11 @@ const LinkButton = ({
         <Link
           href={item?.href}
           className={cn("", {
-            " text-primary    rounded": isLocationMatch(
+            " text-skyblue    rounded": isLocationMatch(
               item.href,
               locationName
             ),
-            " text-default-700 hover:text-primary ": !isLocationMatch(
+            " text-default-700 hover:text-skyblue ": !isLocationMatch(
               item.href,
               locationName
             ),

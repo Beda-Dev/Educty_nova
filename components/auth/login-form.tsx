@@ -57,7 +57,7 @@ const LogInForm = () => {
   return (
     <div className="w-full py-10">
       <Link href="/dashboard" className="inline-block">
-        <LogoComponent1 width={40} height={40} className="2xl:w-14 2xl:h-14 text-primary"/>
+        <LogoComponent1 width={40} height={40} className="2xl:w-14 2xl:h-14 text-skyblue"/>
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900">
         Hey, Hello 👋
@@ -141,7 +141,7 @@ const LogInForm = () => {
               Remember me
             </Label>
           </div>
-          <Link href="/auth/forgot" className="flex-none text-sm text-primary">
+          <Link href="/auth/forgot" className="flex-none text-sm text-skyblue">
             Forget Password?
           </Link>
         </div>
@@ -156,7 +156,7 @@ const LogInForm = () => {
       </form>
       <div className="mt-5 2xl:mt-8 text-center text-base text-default-600">
         Don't have an account?{" "}
-        <Link href="/auth/register" className="text-primary">
+        <Link href="/auth/register" className="text-skyblue">
           {" "}
           Sign Up{" "}
         </Link>

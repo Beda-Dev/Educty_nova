@@ -52,7 +52,7 @@ const SimpleTable = () => {
             <TableCell>{item.email}</TableCell>
             <TableCell><span className="capitalize font-medium">{item.role}</span></TableCell>
             <TableCell className="ltr:pr-5 rtl:pl-5">
-              <Button className="p-0 h-auto hover:bg-transparent bg-transparent text-primary hover:text-primary/80  hover:underline">
+              <Button className="p-0 h-auto hover:bg-transparent bg-transparent text-skyblue hover:text-skyblue/80  hover:underline">
                 Edit
               </Button>
             </TableCell>

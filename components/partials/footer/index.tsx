@@ -88,7 +88,7 @@ const FooterContent = () => {
       <p className="mb-0 text-xs md:text-sm">
         Made by{" "}
         <a
-          className="text-primary"
+          className="text-skyblue"
           target="__blank"
           href="https://digifaz.com/"
         >

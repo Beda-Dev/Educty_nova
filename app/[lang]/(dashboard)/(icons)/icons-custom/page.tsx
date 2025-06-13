@@ -254,7 +254,7 @@ const IconPage = () => {
                 <Button
                   size="icon"
                   variant="outline"
-                  className="border-default-200 hover:bg-background hover:text-primary"
+                  className="border-default-200 hover:bg-background hover:text-skyblue"
                 >
                   {item.icon && <item.icon className="w-6 h-6" />}
                 </Button>

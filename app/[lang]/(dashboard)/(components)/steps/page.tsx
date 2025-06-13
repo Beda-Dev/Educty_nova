@@ -32,9 +32,9 @@ const StepsPage = () => {
     <div className="space-y-5">
       <Card title="Default Steps" code={defaultSteps}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">Stepper</code> component wraps
+          The <code className="text-skyblue">Stepper</code> component wraps
           other steps component that holds the design and{" "}
-          <code className="text-primary">current</code> prop says which steps is
+          <code className="text-skyblue">current</code> prop says which steps is
           it in.
         </p>
         <div className="max-w-xl">
@@ -43,7 +43,7 @@ const StepsPage = () => {
       </Card>
       <Card title="With Line Space Steps" code={stepsWithLineSpace}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          When <code className="text-primary">gap</code> property uses in
+          When <code className="text-skyblue">gap</code> property uses in
           stepper component there will be a gap between the node and line.
         </p>
         <div className="max-w-xl">
@@ -52,9 +52,9 @@ const StepsPage = () => {
       </Card>
       <Card title="Clickable Steps" code={clickableStep}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          The <code className="text-primary">Stepper</code> component wraps
+          The <code className="text-skyblue">Stepper</code> component wraps
           other steps component that holds the design also{" "}
-          <code className="text-primary">current</code> prop says which steps is
+          <code className="text-skyblue">current</code> prop says which steps is
           in it and next and previous button helps the current steps to move
           forward and backward.
         </p>
@@ -64,7 +64,7 @@ const StepsPage = () => {
       </Card>
       <Card title="Sizes Steps" code={stepsSize}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">size</code> prop in stepper component
+          <code className="text-skyblue">size</code> prop in stepper component
           makes steps in different size like "sm" "md" "lg" and "xl".
         </p>
         <div className="space-y-4 max-w-xl">
@@ -74,14 +74,14 @@ const StepsPage = () => {
 
       <Card title="Vertical Steps" code={verticalSteps}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">direction</code> prop in stepper
+          <code className="text-skyblue">direction</code> prop in stepper
           component makes steps in 'vertical' or 'horizontal'.
         </p>
         <VSteps />
       </Card>
       <Card title="Vertical With Line Space" code={vStepsLineSpace}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">gap</code> prop in direction stepper
+          <code className="text-skyblue">gap</code> prop in direction stepper
           component makes steps in 'vertical' or 'horizontal' spaces between
           nodes and lines.
         </p>
@@ -89,18 +89,18 @@ const StepsPage = () => {
       </Card>
       <Card title="Vertical Steps With Content" code={vStepsWithContent}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">Collapsible</code> component in step
-          component using <code className="text-primary">open </code>prop to
-          open the <code className="text-primary">CollapsibleContent </code>
+          <code className="text-skyblue">Collapsible</code> component in step
+          component using <code className="text-skyblue">open </code>prop to
+          open the <code className="text-skyblue">CollapsibleContent </code>
           component to show the{" "}
-          <code className="text-primary">StepDescription </code> component data
+          <code className="text-skyblue">StepDescription </code> component data
           as conditioned.
         </p>
         <VStepsWithContent />
       </Card>
       <Card title="With Data Content" code={stepsWithDataContent}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-6">
-          <code className="text-primary">content</code> prop in stepper
+          <code className="text-skyblue">content</code> prop in stepper
           component makes content in 'right' or 'bottom' to show in different
           steps.
         </p>
@@ -108,12 +108,12 @@ const StepsPage = () => {
       </Card>
       <Card title="Content With Action Step" code={stepsWithAction}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">current</code> prop in activestep
+          <code className="text-skyblue">current</code> prop in activestep
           function stepper component makes content in 'right' or 'bottom' to
           show in different steps. The{" "}
-          <code className="text-primary">Stepper</code> component wraps other
+          <code className="text-skyblue">Stepper</code> component wraps other
           steps component that holds the design also{" "}
-          <code className="text-primary">current</code> prop says which steps is
+          <code className="text-skyblue">current</code> prop says which steps is
           in it and next and previous button helps the current steps to move
           forward and backward.
         </p>
@@ -121,7 +121,7 @@ const StepsPage = () => {
       </Card>
       <Card title="Alternative label" code={alterNativeLabel}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">alternativeLabel</code> prop in stepper
+          <code className="text-skyblue">alternativeLabel</code> prop in stepper
           component makes content in bottom center with a extra description to
           show with steps number.
         </p>
@@ -129,8 +129,8 @@ const StepsPage = () => {
       </Card>
       <Card title="Alternative label Gap" code={alternativeLabelStepGap}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary">alternativeLabel</code> prop with
-          <code className="text-primary"> gap </code> prop in stepper component
+          <code className="text-skyblue">alternativeLabel</code> prop with
+          <code className="text-skyblue"> gap </code> prop in stepper component
           makes content in bottom center with a extra description to show with
           steps number and make a space between node and line.
         </p>
@@ -138,7 +138,7 @@ const StepsPage = () => {
       </Card>
       <Card title="Error Alert Step" code={errorAlertSteps}>
         <p className="text-sm text-default-400 dark:text-default-600  mb-4">
-          <code className="text-primary"> status </code> prop in stepper
+          <code className="text-skyblue"> status </code> prop in stepper
           component with value 'error' makes label and node with destructive
           color and hold it there.
         </p>

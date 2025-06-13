@@ -81,7 +81,7 @@ const MultiStepSliderDialog = () => {
           <div className="flex justify-between items-center">
             <button
               type="button"
-              className="prev text-sm font-medium text-primary flex items-center gap-1 cursor-pointer" >
+              className="prev text-sm font-medium text-skyblue flex items-center gap-1 cursor-pointer" >
               <span>
                 <Icon icon="line-md:chevron-small-double-left" />
               </span>
@@ -89,7 +89,7 @@ const MultiStepSliderDialog = () => {
             </button>
             <button
               type="button"
-              className="next text-sm font-medium text-primary flex items-center gap-1"
+              className="next text-sm font-medium text-skyblue flex items-center gap-1"
             >
               Next
               <span>

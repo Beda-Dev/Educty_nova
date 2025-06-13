@@ -15,7 +15,7 @@ const SocialIconButton = () => {
         </Button>
         <Button
           size="icon"
-          className=" rounded-full bg-[#1877F2]  text-primary-foreground hover:bg-[#1877F2]/90"
+          className=" rounded-full bg-[#1877F2]  text-skyblue-foreground hover:bg-[#1877F2]/90"
           variant="outline"
         >
           <Icon icon="ic:round-facebook" className="w-6 h-6   " />
@@ -25,7 +25,7 @@ const SocialIconButton = () => {
         </Button>
         <Button
           size="icon"
-          className=" rounded-full bg-[#1DA1F2]  text-primary-foreground hover:bg-[#1DA1F2]/90"
+          className=" rounded-full bg-[#1DA1F2]  text-skyblue-foreground hover:bg-[#1DA1F2]/90"
           variant="outline"
         >
           <Icon icon="mdi:twitter" className="w-6 h-6   " />

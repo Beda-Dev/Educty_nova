@@ -25,7 +25,7 @@ const DialogColors = () => {
             </DialogHeader>
             <div className="text-sm text-default-500  space-y-4">
               <p>
-                <span className="text-primary font-medium">Bangkok.</span> This
+                <span className="text-skyblue font-medium">Bangkok.</span> This
                 famous busy city in Thailand ranks as the top-visited city in
                 the world. Bangkok welcomed 21.2 million visitors! Imagine 21
                 million people flocking to one city, crazy! The review puts
@@ -59,7 +59,7 @@ const DialogColors = () => {
             </DialogHeader>
             <div className="text-sm text-default-500  space-y-4">
               <p>
-                <span className="text-primary font-medium">Bangkok.</span> This
+                <span className="text-skyblue font-medium">Bangkok.</span> This
                 famous busy city in Thailand ranks as the top-visited city in
                 the world. Bangkok welcomed 21.2 million visitors! Imagine 21
                 million people flocking to one city, crazy! The review puts
@@ -229,7 +229,7 @@ const DialogColors = () => {
             </DialogHeader>
             <div className="text-sm text-default-500  space-y-4">
               <p>
-                <span className="text-default-950 dark:text-primary-foreground font-medium">
+                <span className="text-default-950 dark:text-skyblue-foreground font-medium">
                   Bangkok.
                 </span>
                 This famous busy city in Thailand ranks as the top-visited city

@@ -43,9 +43,9 @@ const ChatBox = ({ onClose }: { onClose: () => void }) => {
               className=" h-2 w-2  p-0  items-center justify-center absolute ltr:left-[calc(100%-8px)] rtl:right-[calc(100%-8px)] top-[calc(100%-8px)]"
             ></Badge>
           </div>
-          <div className="text-base font-medium text-primary-foreground relative truncate w-[50px] md:w-fit">
+          <div className="text-base font-medium text-skyblue-foreground relative truncate w-[50px] md:w-fit">
             Jenifer Jenny
-            <ChevronDown className="h-3.5 w-3.5 text-primary-foreground absolute rtl:-left-4 ltr:-right-4 top-1" />
+            <ChevronDown className="h-3.5 w-3.5 text-skyblue-foreground absolute rtl:-left-4 ltr:-right-4 top-1" />
           </div>
         </div>
 
@@ -129,7 +129,7 @@ const ChatBox = ({ onClose }: { onClose: () => void }) => {
                       </span>
                     </div>
                     <div className="whitespace-pre-wrap break-all">
-                      <div className="bg-primary/70 text-primary-foreground  text-sm  py-2 px-3 rounded-2xl  flex-1  ">
+                      <div className="bg-primary/70 text-skyblue-foreground  text-sm  py-2 px-3 rounded-2xl  flex-1  ">
                         Can I get details of my last transaction I made last
                         month?
                       </div>
@@ -184,7 +184,7 @@ const ChatBox = ({ onClose }: { onClose: () => void }) => {
                   type="button"
                   className="rounded-full bg-default-100 hover:bg-default-100 h-[42px] w-[42px] p-0 self-end"
                 >
-                  <SendHorizontal className="w-5 h-8 text-primary rtl:rotate-180" />
+                  <SendHorizontal className="w-5 h-8 text-skyblue rtl:rotate-180" />
                 </Button>
               </div>
             </form>

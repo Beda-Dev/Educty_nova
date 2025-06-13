@@ -33,7 +33,7 @@ const LinkCard = () => {
           <div className="p-4">
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center"
+              className="text-skyblue inline-flex font-medium font-sm items-center"
             >
               Read More
               <Icon icon="heroicons:chevron-down" className=" h-4 w-4 ml-2 " />
@@ -63,13 +63,13 @@ const LinkCard = () => {
           <div className="p-4 border-t border-t-default-200 space-x-6 rtl:space-x-reverse">
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center underline"
+              className="text-skyblue inline-flex font-medium font-sm items-center underline"
             >
               Read More
             </Link>
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center underline"
+              className="text-skyblue inline-flex font-medium font-sm items-center underline"
             >
               Another Link
             </Link>

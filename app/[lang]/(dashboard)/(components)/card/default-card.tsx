@@ -77,7 +77,7 @@ const DefaultCard = () => {
               Lorem ipsum dolor sit amet, consec teturars in adipiscing elit,
               sed do eiusmod temporally also incididun ut sed do eiusmod sed do
               eiusmod temporally also...
-              <Link href="#" className="text-primary font-medium"> Read More</Link>
+              <Link href="#" className="text-skyblue font-medium"> Read More</Link>
             </p>
           </div>
         </CardContent>

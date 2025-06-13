@@ -17,14 +17,14 @@ const TeamHeader = () => {
           size="icon"
           className="bg-transparent hover:bg-transparent border border-primary/70 p-0 h-9 w-9"
         >
-          <LayoutGrid className="w-5 h-5 text-primary" />
+          <LayoutGrid className="w-5 h-5 text-skyblue" />
         </Button>
         <Button
           type="button"
           size="icon"
           className="bg-transparent hover:bg-transparent border border-default-300 p-0 h-9 w-9"
         >
-          <Icon icon="heroicons:list-bullet" className="w-6 h-6 text-primary" />
+          <Icon icon="heroicons:list-bullet" className="w-6 h-6 text-skyblue" />
         </Button>
         <div className="relative">
           <Search className="w-4 h-4 absolute top-1/2 -translate-y-1/2 ltr:left-2 rtl:right-2 text-default-400" />

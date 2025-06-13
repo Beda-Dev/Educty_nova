@@ -214,7 +214,7 @@ export default function CashRegisterSessionsPage({
         <Card className="border-none shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-6 w-6 text-primary" />
+              <CalendarIcon className="h-6 w-6 text-skyblue" />
               <CardTitle className="text-2xl font-semibold">
                 Sessions de caisse
               </CardTitle>

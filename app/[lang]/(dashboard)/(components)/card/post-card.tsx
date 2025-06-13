@@ -34,13 +34,13 @@ const PostCard = () => {
           <div className="space-x-6 rtl:space-x-reverse">
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center underline"
+              className="text-skyblue inline-flex font-medium font-sm items-center underline"
             >
               Read More
             </Link>
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center underline"
+              className="text-skyblue inline-flex font-medium font-sm items-center underline"
             >
               Another Link
             </Link>
@@ -72,13 +72,13 @@ const PostCard = () => {
           <div className="space-x-6 rtl:space-x-reverse">
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center underline"
+              className="text-skyblue inline-flex font-medium font-sm items-center underline"
             >
               Read More
             </Link>
             <Link
               href="#"
-              className="text-primary inline-flex font-medium font-sm items-center underline"
+              className="text-skyblue inline-flex font-medium font-sm items-center underline"
             >
               Another Link
             </Link>

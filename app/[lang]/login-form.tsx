@@ -112,8 +112,8 @@ const LogInForm = () => {
   // if (!users?.length || !roles?.length || !permissions?.length) {
   //   return (
   //     <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-background">
-  //       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-  //       <span className="text-primary">Chargement des données...</span>
+  //       <Loader2 className="h-8 w-8 animate-spin text-skyblue" />
+  //       <span className="text-skyblue">Chargement des données...</span>
   //     </div>
   //   );
   // }
@@ -214,7 +214,7 @@ const LogInForm = () => {
         <div className="mt-5  mb-6 flex flex-wrap gap-2 bg-whitesmoke">
           <Link
             href="/forgot"
-            className="flex-none text-sm text-primary bg-whitesmoke"
+            className="flex-none text-sm text-skyblue bg-whitesmoke"
           >
             Mot de passe oublié ?
           </Link>

@@ -247,7 +247,7 @@ export default function Home() {
           </div>
         </div>
         <div>
-          <Badge variant="outline" className="bg-primary/10 text-primary">
+          <Badge variant="outline" className="bg-primary/10 text-skyblue">
             {students.length} élèves
           </Badge>
         </div>

@@ -147,7 +147,7 @@ const CustomDropdown = () => {
               </div>
               <Link
                 href="/dashboard"
-                className="text-xs text-default-600 hover:text-primary"
+                className="text-xs text-default-600 hover:text-skyblue"
               >
                 @uxuidesigner
               </Link>
@@ -296,7 +296,7 @@ const CustomDropdown = () => {
               </div>
               <Link
                 href="/dashboard"
-                className="text-xs text-default-600 hover:text-primary"
+                className="text-xs text-default-600 hover:text-skyblue"
               >
                 @uxuidesigner
               </Link>
@@ -424,7 +424,7 @@ const CustomDropdown = () => {
               <AvatarImage src={avatar4.src} />
               <AvatarFallback>MA</AvatarFallback>
             </Avatar>
-            <div className="flex-none text-zinc-600 dark:text-primary-foreground text-sm font-normal items-center lg:flex hidden overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="flex-none text-zinc-600 dark:text-skyblue-foreground text-sm font-normal items-center lg:flex hidden overflow-hidden text-ellipsis whitespace-nowrap">
               <span className="overflow-hidden text-ellipsis whitespace-nowrap w-[85px] block">
                 <span className="block overflow-hidden text-ellipsis">
                   Mottasin Leemon
@@ -498,7 +498,7 @@ const CustomDropdown = () => {
               <AvatarFallback>MA</AvatarFallback>
             </Avatar>
 
-            <div className="flex-none text-zinc-600 dark:text-primary-foreground text-sm font-normal items-center lg:flex hidden overflow-hidden text-ellipsis whitespace-nowrap">
+            <div className="flex-none text-zinc-600 dark:text-skyblue-foreground text-sm font-normal items-center lg:flex hidden overflow-hidden text-ellipsis whitespace-nowrap">
               <span className="overflow-hidden text-ellipsis whitespace-nowrap w-[85px] block">
                 Iftekhar Alam
               </span>

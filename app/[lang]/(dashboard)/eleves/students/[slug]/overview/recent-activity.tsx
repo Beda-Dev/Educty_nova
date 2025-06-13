@@ -241,7 +241,7 @@ const RecentActivity = () => {
         
         </Timeline>
         <div className="flex justify-center">
-          <Link href="/" className="text-sm font-semibold text-primary">View All Activity</Link>
+          <Link href="/" className="text-sm font-semibold text-skyblue">View All Activity</Link>
         </div>
       </CardContent>
     </Card>

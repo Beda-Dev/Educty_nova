@@ -27,7 +27,7 @@ const StyleVariants = () => {
         <Tabs defaultValue="account" className=" inline-block">
           <TabsList className=" bg-transparent p-0 border-b-2  rounded-none">
             <TabsTrigger
-              className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+              className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
          before:left-1/2 before:-bottom-[5px] before:h-[2px]
            before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
               value="Account"
@@ -35,7 +35,7 @@ const StyleVariants = () => {
               Account
             </TabsTrigger>
             <TabsTrigger
-              className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+              className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
          before:left-1/2 before:-bottom-[5px] before:h-[2px]
            before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
               value="password"
@@ -43,7 +43,7 @@ const StyleVariants = () => {
               Password
             </TabsTrigger>
             <TabsTrigger
-              className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-primary transition duration-150 before:transition-all before:duration-150 relative before:absolute
+              className="capitalize  data-[state=active]:shadow-none  data-[state=active]:bg-transparent data-[state=active]:text-skyblue transition duration-150 before:transition-all before:duration-150 relative before:absolute
          before:left-1/2 before:-bottom-[5px] before:h-[2px]
            before:-translate-x-1/2 before:w-0 data-[state=active]:before:bg-primary data-[state=active]:before:w-full"
               value="profile"

@@ -153,7 +153,7 @@ const ChangePassword = () => {
           <div className="mt-6 flex gap-5 justify-end">
             <Button color="secondary">Cancel</Button>
             <Button>
-              <Icon icon="heroicons:lock-closed" className="w-5 h-5 text-primary-foreground me-1" />
+              <Icon icon="heroicons:lock-closed" className="w-5 h-5 text-skyblue-foreground me-1" />
               Change Password
             </Button>
           </div>

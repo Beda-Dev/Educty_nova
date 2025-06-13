@@ -29,7 +29,7 @@ export function PaymentSchedule({ pricing }: PaymentScheduleProps) {
       <div className="flex justify-between items-start mb-8 border-b pb-6 print:flex print:justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-primary/10 p-1 rounded-lg">
-            <Building2 className="h-8 w-8 text-primary" />
+            <Building2 className="h-8 w-8 text-skyblue" />
           </div>
           <div>
             <h1 className="text-2xl font-bold">École Excellence</h1>

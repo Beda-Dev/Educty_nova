@@ -102,7 +102,7 @@ const ProjectsView = ({ projects }: ProjectsViewProps) => {
         </div>
         <div></div>
         <Button onClick={addProjectModal}>
-          <Plus className="w-4 h-4 text-primary-foreground mr-2" />
+          <Plus className="w-4 h-4 text-skyblue-foreground mr-2" />
           Add Project
         </Button>
       </Blank>
@@ -123,7 +123,7 @@ const ProjectsView = ({ projects }: ProjectsViewProps) => {
                 size="icon"
                 variant="outline"
                 className={cn("hover:bg-transparent  ", {
-                  "hover:border-primary hover:text-primary":
+                  "hover:border-primary hover:text-skyblue":
                     pageView === "grid",
                   "hover:border-muted-foreground hover:text-muted-foreground":
                     pageView !== "grid",
@@ -137,7 +137,7 @@ const ProjectsView = ({ projects }: ProjectsViewProps) => {
                 size="icon"
                 variant="outline"
                 className={cn("hover:bg-transparent  ", {
-                  "hover:border-primary hover:text-primary":
+                  "hover:border-primary hover:text-skyblue":
                     pageView === "list",
                   "hover:border-muted-foreground hover:text-muted-foreground":
                     pageView !== "list",

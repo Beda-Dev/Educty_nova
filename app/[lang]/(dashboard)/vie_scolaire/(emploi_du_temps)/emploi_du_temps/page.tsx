@@ -97,7 +97,7 @@ export default function EmploiDuTempsPage() {
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-full bg-primary/10">
-              <Clock className="w-8 h-8 text-primary" />
+              <Clock className="w-8 h-8 text-skyblue" />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">

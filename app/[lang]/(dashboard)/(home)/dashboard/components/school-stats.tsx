@@ -85,12 +85,12 @@ const SchoolStats = ({ registrations, classes, users }: StatsProps) => {
               {item.icon}
             </span>
           </div>
-          <span className="mt-3 text-lg text-default-800 dark:text-primary-foreground font-medium capitalize relative z-10">
+          <span className="mt-3 text-lg text-default-800 dark:text-skyblue-foreground font-medium capitalize relative z-10">
             {item.text}
           </span>
           <div className="flex items-center gap-1">
-            <span className="text-lg font-semibold text-default-900  dark:text-primary-foreground">{item.total}</span>
-            <Icon icon="heroicons:arrow-trending-up" className={`w-5 h-5 text-${item.color} dark:text-primary-foreground`} />
+            <span className="text-lg font-semibold text-default-900  dark:text-skyblue-foreground">{item.total}</span>
+            <Icon icon="heroicons:arrow-trending-up" className={`w-5 h-5 text-${item.color} dark:text-skyblue-foreground`} />
           </div>
         </div>
       ))}
