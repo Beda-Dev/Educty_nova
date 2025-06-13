@@ -79,10 +79,10 @@ const NotificationMessage = () => {
                   </Avatar>
                   <div className="flex-1">
                     <div className="text-sm font-medium text-default-900 mb-1">
-                      {validation.user?.name} - {validation.expense?.label}
+                      {validation.user?.name} - {validation.demand?.applicant?.name}
                     </div>
                     <div className="text-xs text-default-600 mb-1">
-                      Montant: {validation.expense?.amount} Fcfa
+                      Montant: {validation.demand?.amount} Fcfa
                     </div>
                     <div className="text-xs text-default-900">
                       {validation.comment}

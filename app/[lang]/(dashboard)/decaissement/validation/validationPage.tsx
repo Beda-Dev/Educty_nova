@@ -83,7 +83,7 @@ export default function ExpenseValidationsPage() {
   const filteredValidations = validationExpenses
     .filter((validation) => {
       const matchesSearch =
-        validation.expense?.label
+        validation.demand?.applicant?.name
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         validation.user?.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -316,13 +316,13 @@ export default function ExpenseValidationsPage() {
                           <TableCell className="text-xs">
                             {generationNumero(
                               validation.id,
-                              validation?.expense?.created_at ?? "",
+                              validation?.demand?.created_at ?? "",
                               "encaissement"
                             )}
                           </TableCell>
                           <TableCell>
                             <div className="font-medium">
-                              {validation.expense?.label}
+                              {validation.demand?.applicant?.name}
                             </div>
                             {validation.comment && (
                               <div className="text-sm text-muted-foreground mt-1">
@@ -331,8 +331,8 @@ export default function ExpenseValidationsPage() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {validation.expense?.amount
-                              ? formatAmount(validation.expense.amount)
+                            {validation.demand?.amount
+                              ? formatAmount(validation.demand.amount.toString())
                               : "N/A"}
                           </TableCell>
                           <TableCell>

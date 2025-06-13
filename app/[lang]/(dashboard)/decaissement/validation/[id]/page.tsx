@@ -63,7 +63,7 @@ const DetailSessionPage = ({ params }: Props) => {
     if (validation) {
       setCurrentValidation(validation);
       setTempStatus(validation.validation_status);
-      const expense = expenses.find((exp) => exp.id === validation.expense_id);
+      const expense = expenses.find((exp) => exp.validation_expense_id === validation.id);
       if (expense) {
         setCurrentExpense(expense);
         const transaction = transactions.find(
