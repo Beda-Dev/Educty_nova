@@ -90,7 +90,6 @@ export default function InscriptionPage() {
             <Step5Confirmation
               onPrevious={handlePrevious}
               onComplete={handleComplete}
-              photo={studentData?.photo ?? null}
             />
           )}
         </div>
