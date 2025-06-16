@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import CustomSelect from "../common/CustomSelect"
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from "react-hot-toast"
 import type { Tutor, TutorFormData } from "@/lib/interface"
@@ -214,28 +214,19 @@ export function TutorEditModal({ tutor, isNew = false }: TutorEditModalProps) {
 
             <div className="space-y-2">
               <Label>Sexe</Label>
-              <Select
+              <CustomSelect
+                options={[
+                  { label: (
+                    <span className="flex items-center gap-2"><Mars className="w-4 h-4 text-blue-500" /><span>Masculin</span></span>
+                  ), value: 'Homme' },
+                  { label: (
+                    <span className="flex items-center gap-2"><Venus className="w-4 h-4 text-pink-500" /><span>Féminin</span></span>
+                  ), value: 'Femme' },
+                ]}
                 value={formData.sexe}
-                onValueChange={(value) => setFormData({ ...formData, sexe: value, type_tutor: "" })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le sexe" />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <SelectItem value="Homme">
-                    <div className="flex items-center gap-2">
-                      <Mars className="w-4 h-4 text-blue-500" />
-                      <span>Masculin</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Femme">
-                    <div className="flex items-center gap-2">
-                      <Venus className="w-4 h-4 text-pink-500" />
-                      <span>Féminin</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={(val) => setFormData({ ...formData, sexe: val as string, type_tutor: '' })}
+                placeholder="Sélectionner le sexe"
+              />
             </div>
 
             {formData.sexe && (
@@ -247,21 +238,13 @@ export function TutorEditModal({ tutor, isNew = false }: TutorEditModalProps) {
                 className="space-y-2"
               >
                 <Label>Type de tuteur</Label>
-                <Select
+                <CustomSelect
+                  options={getTutorTypeOptions(formData.sexe).map(type => ({ label: type, value: type }))}
                   value={formData.type_tutor}
-                  onValueChange={(value) => setFormData({ ...formData, type_tutor: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner le type" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    {getTutorTypeOptions(formData.sexe).map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(val) => setFormData({ ...formData, type_tutor: val as string })}
+                  placeholder="Sélectionner le type"
+                  disabled={!formData.sexe}
+                />
               </motion.div>
             )}
 

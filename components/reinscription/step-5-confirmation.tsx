@@ -157,7 +157,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           }
         }
 
-        const studentResponse = await fetch(`/api/students?id=${selectedStudent.id}`, {
+        const studentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${selectedStudent.id}`, {
           method: "PUT",
           body: studentFormData,
         })
@@ -169,7 +169,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
       // Step 2: Create new tutors
       for (const tutor of newTutors) {
-        const tutorResponse = await fetch("/api/tutor", {
+        const tutorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(tutor),
@@ -186,7 +186,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       // Step 3: Update existing tutors
       for (const tutor of existingTutors.filter((t) => t.isModified)) {
         const { isModified, ...tutorData } = tutor
-        const tutorResponse = await fetch(`/api/tutor?id=${tutor.id}`, {
+        const tutorResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor/${tutor.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(tutorData),
@@ -221,7 +221,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
       // Step 5: Create registration
       if (registrationData) {
-        const registrationResponse = await fetch("/api/registration", {
+        const registrationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registration`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -240,7 +240,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
       // Step 6: Create payments
       for (const payment of payments) {
-        const transactionResponse = await fetch("/api/transaction", {
+        const transactionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/transaction`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -259,7 +259,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         }
         transactionIds.push(transaction.id)
 
-        const paymentResponse = await fetch("/api/payment", {
+        const paymentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payment`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -293,7 +293,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           console.log("FormData prepared with file:", file.name)
 
           try {
-            const docResponse = await fetch("/api/document", {
+            const docResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`, {
               method: "POST",
               body: docFormData,
             })

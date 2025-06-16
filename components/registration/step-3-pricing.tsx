@@ -45,6 +45,59 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const currency = (settings && settings[0]?.currency) || 'FCFA';
   // Montant donné saisi manuellement
   const [givenAmount, setGivenAmount] = useState(0)
+
+  // Synchronisation des montants répartis et méthodes de paiement quand givenAmount change
+  useEffect(() => {
+    // Cas particulier : tout à zéro
+    if (givenAmount === 0) {
+      setInstallmentAmounts({});
+      setPaymentMethods({});
+      setInstallmentErrors({});
+      setGlobalError("");
+      return;
+    }
+    let total = 0;
+    let changed = false;
+    let adjustedIds: number[] = [];
+    const newInstallmentAmounts: Record<number, number> = {};
+    const newPaymentMethods: Record<number, Array<{ id: number; amount: number }>> = {};
+    const newInstallmentErrors: Record<number, string> = {};
+    selectedInstallments.forEach((id) => {
+      const prevRaw = installmentAmounts[id];
+      const prev = typeof prevRaw === 'string' ? Number(prevRaw) || 0 : prevRaw || 0;
+      let newVal = prev;
+      if (total + prev > givenAmount) {
+        newVal = Math.max(0, givenAmount - total);
+        changed = true;
+        adjustedIds.push(id);
+        total = givenAmount;
+      } else {
+        newVal = prev;
+        total += prev;
+      }
+      newInstallmentAmounts[id] = newVal;
+    
+      // Recalcule précisément l'erreur locale
+      if (newVal < 0) {
+        newInstallmentErrors[id] = "Montant négatif non autorisé.";
+      } else if (newVal === 0) {
+        newInstallmentErrors[id] = "Veuillez saisir un montant positif.";
+      } else {
+        newInstallmentErrors[id] = "";
+      }
+    });
+    if (changed) {
+      setInstallmentAmounts(newInstallmentAmounts);
+      toast("Certaines répartitions ont été ajustées car le montant total a été réduit.", { position: "top-center", icon: "⚠️" });
+    }
+    // Nettoie les erreurs globales si la somme devient correcte
+    if (total <= givenAmount && globalError) {
+      setGlobalError("");
+    }
+    // Réinitialise ou met à jour précisément les erreurs locales
+    setInstallmentErrors(newInstallmentErrors);
+  }, [givenAmount]);
+
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(methodPayment[0]?.id || 0)
   const [openConfirmModal, setOpenConfirmModal] = useState(false)
   // Gestion des erreurs locales par échéance
@@ -190,6 +243,13 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
       return
     }
 
+    if (givenAmount < totalPaidAmount) {
+      toast.error("Le montant donné doit être au moins égal au total à payer pour pouvoir continuer.", {
+        position: "top-center",
+      })
+      return;
+    }
+
     if (totalPaidAmount > givenAmount) {
       toast.error("La somme répartie ne peut pas dépasser le montant donné.", {
         position: "top-center",
@@ -197,10 +257,6 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
       return;
     }
 
-    if (givenAmount < totalPaidAmount) {
-      setOpenConfirmModal(true)
-      return
-    }
 
     for (const installmentId of selectedInstallments) {
       if (!validatePaymentMethods(installmentId)) {
@@ -510,7 +566,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="w-full flex justify-between">
+          <div className="flex justify-between">
             <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
               Précédent
             </Button>
@@ -524,7 +580,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
               </Button>
             </div>
           </div>
-          <p className="text-xs text-red-600 mt-4 text-center">Le montant donné doit être au moins égal au total à payer pour pouvoir continuer.</p>
+
         </motion.div>
       ) : (
         <motion.div

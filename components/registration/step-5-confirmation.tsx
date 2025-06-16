@@ -484,8 +484,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                   <Image
                     src={URL.createObjectURL(restoredPhotoFile)}
                     alt="Photo de l'élève"
-                    width={128}
-                    height={128}
                     fill
                     className="object-cover"
                   />

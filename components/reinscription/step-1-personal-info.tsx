@@ -584,7 +584,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         <User className="w-5 h-5 text-skyblue" />
                         <div>
                           <span className="font-medium">
-                            {tutor.name} {tutor.first_name}
+                            {tutor.name} {tutor.first_name}  - {tutor.phone_number} - {tutor.type_tutor} 
                           </span>
                           {tutor.is_tutor_legal && (
                             <Badge className="ml-2 bg-skyblue hover:bg-skyblue">
@@ -642,7 +642,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         <User className="w-5 h-5 text-skyblue" />
                         <div>
                           <span className="font-medium">
-                            {tutor.name} {tutor.first_name}
+                            {tutor.name} {tutor.first_name} - {tutor.phone_number} - {tutor.type_tutor}
                           </span>
                           {tutor.is_tutor_legal && (
                             <Badge className="ml-2 bg-primary hover:bg-primary">
@@ -666,10 +666,11 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                           </Label>
                         </div>
                         <Button
-                          variant="ghost"
+                          color="destructive"
+                          variant="outline"
                           size="sm"
                           onClick={() => removeNewTutor(index)}
-                          className="text-destructive hover:text-destructive"
+                          
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -695,7 +696,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
         >
           <Button
             onClick={handleNext}
-            className="px-6 py-3 text-lg font-medium"
+            className="px-6 py-3 font-medium"
           >
             Suivant
           </Button>

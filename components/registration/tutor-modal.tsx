@@ -5,30 +5,24 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger 
+  DialogTrigger
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select"
+import CustomSelect from "../common/CustomSelect"
 import { Checkbox } from "@/components/ui/checkbox"
-import { 
-  Tooltip, 
-  TooltipContent, 
-  TooltipProvider, 
-  TooltipTrigger 
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
 } from "@/components/ui/tooltip"
 import { Plus, User, User2, Phone, Venus, Mars, ShieldAlert, Info, X, Check, Edit } from "lucide-react"
 import type { TutorFormData } from "@/lib/interface"
@@ -56,21 +50,6 @@ type TutorFormValues = z.infer<typeof TutorFormSchema>
 
 
 
-const TutorTypeOptions = memo(({ sexe }: { sexe?: string }) => {
-  // Sécurisation : toujours retourner un fragment React
-  let types: string[] = ["Tuteur"];
-  if (sexe === "Homme") types = ["Père", "Tuteur"];
-  if (sexe === "Femme") types = ["Mère", "Tuteur"];
-  // Debug : vérifier les rendus
-  // console.log("TutorTypeOptions rendered", sexe, types);
-  return (
-    <>
-      {types.map(type => (
-        <SelectItem key={type} value={type}>{type}</SelectItem>
-      ))}
-    </>
-  );
-});
 
 const ErrorMessage = memo(({ message }: { message?: string }) => {
   if (!message) return null
@@ -88,7 +67,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
   const { addNewTutor, selectedTutors, newTutors } = useRegistrationStore()
   const {
     register,
-    handleSubmit, 
+    handleSubmit,
     watch,
     reset,
     trigger,
@@ -119,7 +98,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
   const tutorTypes = ["Père", "Mère", "Tuteur"];
   const typeTutorValue = watch("type_tutor");
 
-  
+
 
   // OPTIMISATION : handler mémoïsé
   const onSubmit = useCallback(async (data: TutorFormValues) => {
@@ -171,7 +150,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
           </span>
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -267,48 +246,43 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
 
           <div className="space-y-2">
             <Label>Sexe</Label>
-            <div className="relative w-full">
-  <select
-    value={sexe ?? ""}
-    onChange={e => {
-      setValue("sexe", e.target.value as "Homme" | "Femme");
-      console.log("[TutorModal] Sexe sélectionné:", e.target.value);
-    }}
-    className="block w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
-  >
-    <option value="">Sélectionner le sexe</option>
-    <option value="Homme">
-      ♂ Homme
-    </option>
-    <option value="Femme">
-      ♀ Femme
-    </option>
-  </select>
-  {/* Chevron icon for dropdown effect */}
-  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-  </span>
-</div>
+            <CustomSelect
+              options={[
+                {
+                  label: (
+                    <span className="flex items-center gap-2"><Mars className="w-4 h-4 text-blue-500" /><span>Masculin</span></span>
+                  ), value: 'Homme'
+                },
+                {
+                  label: (
+                    <span className="flex items-center gap-2"><Venus className="w-4 h-4 text-pink-500" /><span>Féminin</span></span>
+                  ), value: 'Femme'
+                },
+              ]}
+              value={sexe ?? ''}
+              onChange={(val) => {
+                setValue('sexe', val as 'Homme' | 'Femme');
+                console.log('[TutorModal] Sexe sélectionné:', val);
+              }}
+              placeholder="Sélectionner le sexe"
+            />
             <ErrorMessage message={errors.sexe?.message} />
           </div>
 
           <div className="space-y-2">
-  <Label>Type de tuteur</Label>
-  <select
-  value={typeTutorValue ?? ""}
-  onChange={e => {
-    setValue("type_tutor", e.target.value);
-    console.log("[TutorModal] type_tutor changé:", e.target.value);
-  }}
-  className="w-full border rounded p-2"
->
-  <option value="">Sélectionner le type</option>
-  <option value="Père">Père</option>
-  <option value="Mère">Mère</option>
-  <option value="Tuteur">Tuteur</option>
-</select>
-  <ErrorMessage message={errors.type_tutor?.message} />
-</div>
+            <Label>Type de tuteur</Label>
+            <CustomSelect
+              options={tutorTypes.map(type => ({ label: type, value: type }))}
+              value={typeTutorValue ?? ''}
+              onChange={(val) => {
+                setValue('type_tutor', val as string);
+                console.log('[TutorModal] type_tutor changé:', val);
+              }}
+              placeholder="Sélectionner le type"
+              disabled={!sexe}
+            />
+            <ErrorMessage message={errors.type_tutor?.message} />
+          </div>
 
           <div className="flex items-center space-x-2 pt-2">
             <Checkbox
@@ -343,8 +317,8 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
             >
               Annuler
             </Button>
-            <Button 
-            color="indigodye"
+            <Button
+              color="indigodye"
               type="submit"
               className="gap-2"
               disabled={isSubmitting}

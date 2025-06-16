@@ -493,7 +493,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                           className="p-2 hover:bg-accent cursor-pointer border-b"
                           onClick={() => handleTutorSelect(tutor)}
                         >
-                          {tutor.name} {tutor.first_name} - {tutor.phone_number}
+                          {tutor.name} {tutor.first_name} - {tutor.phone_number} - {tutor.type_tutor}
                         </motion.div>
                       ))
                     ) : (
@@ -554,7 +554,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                             variant="outline"
                             size="sm"
                             onClick={() => removeTutor(tutor.id)}
-                            className=""
+                            
                           >
                             <X className="w-4 h-4" />
                           </Button>
@@ -592,10 +592,11 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                           </div>
                         </div>
                         <Button
-                          variant="ghost"
+                          color="destructive"
+                          variant="outline"
                           size="sm"
                           onClick={() => removeNewTutor(index)}
-                          className="text-destructive hover:text-destructive"
+                          
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -617,7 +618,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
         >
           <Button
             onClick={handleNext}
-            className="px-6 py-3 text-lg font-medium"
+            className="px-6 py-3  font-medium"
           >
             Suivant
           </Button>

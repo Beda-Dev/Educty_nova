@@ -10,13 +10,14 @@ import { generatePDFfromRef } from "@/lib/utils"
 import { useRef, useState } from "react"
 import Image from "next/image"
 import { generationNumero } from "@/lib/fonction"
+import { TableauPaiement } from "@/components/common/tableauPaiement"
 
 interface ReinscriptionReceiptProps {
   onNewReinscription: () => void
 }
 
 export function ReinscriptionReceipt({ onNewReinscription }: ReinscriptionReceiptProps) {
-  const { selectedStudent, registrationData, payments, paidAmount } = useReinscriptionStore()
+  const { selectedStudent, registrationData, payments, paidAmount , availablePricing } = useReinscriptionStore()
   const { academicYearCurrent, settings, classes, registrations, installements, pricing } = useSchoolStore()
   const [isPrinting, setIsPrinting] = useState(false)
   const printRef = useRef<HTMLDivElement>(null)
@@ -134,50 +135,13 @@ export function ReinscriptionReceipt({ onNewReinscription }: ReinscriptionReceip
           {/* Payment Summary */}
           <div className="mb-4">
             <h3 className="text-sm font-semibold text-blue-800 mb-3">DÉTAIL DES PAIEMENTS</h3>
-            <div className="space-y-2 mb-4">
-              {payments.reduce((acc, payment) => {
-                const feeType = SearchFeeType(Number(payment.installment_id))
-                if (!feeType) return acc
-                
-                const existing = acc.find(item => item.feeType === feeType.fee_type.label)
-                if (existing) {
-                  existing.amount += Number(payment.amount)
-                  existing.count++
-                } else {
-                  acc.push({
-                    feeType: feeType.fee_type.label,
-                    amount: Number(payment.amount),
-                    count: 1
-                  })
-                }
-                return acc
-              }, [] as { feeType: string; amount: number; count: number }[])
-              .sort((a, b) => a.feeType.localeCompare(b.feeType))
-              .map((item, index) => (
-                <div key={index} className="flex justify-between items-center py-1">
-                  <span className="text-sm">
-                    {item.feeType} {item.count > 1 ? `(${item.count}x)` : ''}
-                  </span>
-                  <span className="text-sm font-medium">{item.amount.toLocaleString()} {schoolInfo.currency}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-2 text-sm bg-gray-50 p-3 rounded-lg">
-              <div className="flex justify-between py-1">
-                <span>Total à payer:</span>
-                <span className="font-medium">{totalPayer.toLocaleString()} {schoolInfo.currency}</span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span>Montant payé:</span>
-                <span className="font-medium text-green-600">{paidAmount.toLocaleString()} {schoolInfo.currency}</span>
-              </div>
-              <div className="flex justify-between py-1 font-semibold">
-                <span>Reste à payer:</span>
-                <span className={`${totalPayer - paidAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                  {(totalPayer - paidAmount).toLocaleString()} {schoolInfo.currency}
-                </span>
-              </div>
+            <div className="my-2">
+              <TableauPaiement
+                payments={payments}
+                availablePricing={availablePricing}
+                paidAmount={paidAmount}
+                settings={settings}
+              />
             </div>
           </div>
 

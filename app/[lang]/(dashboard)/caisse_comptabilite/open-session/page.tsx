@@ -1,20 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
-  CalendarIcon,
-  Loader2,
   ArrowLeft,
-  Euro,
+  Loader2,
   AlertTriangle,
+  CheckCircle2,
+  Calculator,
+  Wallet,
+  Banknote,
+  CreditCard,
+  FileText,
+  User as UserIcon,
+  Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -44,32 +48,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { toast } from "@/components/ui/use-toast";
-import { CashRegisterSession, CashRegister, User } from "@/lib/interface";
-import { useSchoolStore } from "@/store";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { useSchoolStore } from "@/store";
+import { CashRegisterSession, CashRegister, User } from "@/lib/interface";
+import { fetchCashRegisterSessions, fetchTransactions, fetchPayment } from "@/store/schoolservice"
 
 const formSchema = z.object({
   cash_register_id: z.string().min(1, "Veuillez sélectionner une caisse"),
   opening_amount: z.string().min(1, "Veuillez entrer un montant d'ouverture"),
+  comment: z.string().optional(),
 });
 
 export default function OpenCashRegisterSession() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastClosedSession, setLastClosedSession] = useState<CashRegisterSession | null>(null);
+  const [showAmountWarning, setShowAmountWarning] = useState(false);
   const {
     userOnline,
     cashRegisters,
     setCashRegisterSessionCurrent,
     cashRegisterCurrent,
     cashRegisterSessions,
+    setCashRegisterSessions
   } = useSchoolStore();
+
+  // Get last closed session by the current user
+  useEffect(() => {
+    if (userOnline && cashRegisterSessions.length > 0) {
+      const userSessions = cashRegisterSessions.filter(
+        (s) => s.user_id === userOnline.id && s.status === "closed"
+      );
+      if (userSessions.length > 0) {
+        const lastSession = userSessions.reduce((latest, session) => 
+          new Date(session.closing_date) > new Date(latest.closing_date) ? session : latest
+        );
+        setLastClosedSession(lastSession);
+      }
+    }
+  }, [userOnline, cashRegisterSessions]);
 
   const caissesDisponibles = useMemo(() => {
     const idsCaissesOccupees = new Set(
@@ -90,6 +110,41 @@ export default function OpenCashRegisterSession() {
     },
   });
 
+  // Watch opening amount changes to compare with last closed session
+  const openingAmount = form.watch("opening_amount");
+  useEffect(() => {
+    if (lastClosedSession && openingAmount) {
+      const currentAmount = parseAmount(openingAmount);
+      const lastAmount = parseFloat(lastClosedSession.closing_amount);
+      setShowAmountWarning(currentAmount !== lastAmount);
+    } else {
+      setShowAmountWarning(false);
+    }
+  }, [openingAmount, lastClosedSession]);
+
+  // Format amount with spaces as thousand separators
+  const formatAmount = (amount: number | string): string => {
+    try {
+      const num = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
+      if (isNaN(num)) return '0';
+      return num.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+    } catch {
+      return '0';
+    }
+  };
+
+  // Parse formatted amount back to number
+  const parseAmount = (formattedAmount: string): number => {
+    try {
+      return parseFloat(formattedAmount.replace(/\s/g, '')) || 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  // Get currency from settings
+  const currency = useSchoolStore.getState().settings?.[0]?.currency || 'FCFA';
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!userOnline) return;
 
@@ -97,20 +152,34 @@ export default function OpenCashRegisterSession() {
 
     try {
       const now = new Date();
-      // Formatage pour l'API (Y-m-d H:i:s)
-      const formattedDate = format(now, "yyyy-MM-dd HH:mm:ss");
+      // Format date for API (Y-m-d H:i:s)
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const formattedDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      // Validate amount
+      const openingAmount = parseAmount(values.opening_amount);
+      if (isNaN(openingAmount) || openingAmount <= 0) {
+        toast({
+          title: "Montant invalide",
+          description: "Veuillez entrer un montant d'ouverture valide.",
+          color: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
       const newSession = {
         user_id: userOnline.id,
         cash_register_id: Number(values.cash_register_id),
         opening_date: formattedDate,
-        closing_date: formattedDate, // Requis mais pas utilisé réellement
-        opening_amount: values.opening_amount,
-        closing_amount: "0", // Requis mais pas utilisé réellement
+        closing_date: formattedDate, // Required but not actually used
+        opening_amount: openingAmount.toString(),
+        closing_amount: "0", // Required but not actually used
         status: "open" as const,
+        comment: values.comment || undefined,
       };
 
-      const response = await fetch("/api/cashRegisterSession", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/cashRegisterSession`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -121,10 +190,8 @@ export default function OpenCashRegisterSession() {
       const data = await response.json();
       setCashRegisterSessionCurrent(data.session as CashRegisterSession);
 
-      console.log("Response:", data.message);
-
       if (!response.ok) {
-        throw new Error("Erreur lors de l'ouverture de la session");
+        throw new Error(data.message || "Erreur lors de l'ouverture de la session");
       }
 
       toast({
@@ -132,16 +199,24 @@ export default function OpenCashRegisterSession() {
         description: (
           <div className="mt-2">
             <p>
-              La caisse {values.cash_register_id} a été ouverte avec succès.
+              La caisse <span className="font-semibold">{caissesDisponibles.find(c => c.id === Number(values.cash_register_id))?.cash_register_number || values.cash_register_id}</span> a été ouverte avec succès.
             </p>
             <p className="font-semibold mt-1">
-              Montant: {formatFCFA(values.opening_amount)}
+              Montant : {formatAmount(openingAmount)} {currency}
             </p>
+            {values.comment && (
+              <p className="text-xs mt-1 text-muted-foreground">Commentaire : {values.comment}</p>
+            )}
           </div>
         ),
+        color: "success",
+        duration: 500
       });
 
-      // router.push("/caisse_comptabilite/session_caisse");
+      const update = await fetchCashRegisterSessions()
+      setCashRegisterSessions(update)
+
+      router.push("/caisse_comptabilite/session_caisse");
     } catch (error) {
       console.error(error);
       toast({
@@ -153,27 +228,6 @@ export default function OpenCashRegisterSession() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatFCFA = (value: string) => {
-    if (!value) return "";
-    const amount = Number(value) / 100;
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      currencyDisplay: "narrowSymbol",
-      minimumFractionDigits: 0,
-    })
-      .format(amount)
-      .replace("CFA", "FCFA");
-  };
-
-  const handleCurrencyChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    onChange: (value: string) => void
-  ) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-    onChange(value);
   };
 
   useEffect(() => {
@@ -199,116 +253,111 @@ export default function OpenCashRegisterSession() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto py-8 px-4"
-    >
+    <div className="container mx-auto py-8 px-4">
       <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1, duration: 0.5 }}
-        className="max-w-2xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-3xl mx-auto"
       >
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mb-4 flex items-center gap-2 text-muted-foreground hover:text-skyblue"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Retour
-        </Button>
-
-        <Card className="border-none shadow-lg rounded-xl overflow-hidden bg-gradient-to-br from-white to-gray-50">
-          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 p-6 border-b">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <CardTitle className="text-2xl font-bold text-gray-800">
-                Ouvrir une session de caisse
-              </CardTitle>
-              <CardDescription className="text-gray-600 mt-2">
-                Remplissez les informations pour ouvrir une nouvelle session
-              </CardDescription>
-            </motion.div>
+        <Card>
+          <CardHeader className="border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Wallet className="h-6 w-6 text-primary" />
+                  Ouvrir une session de caisse
+                </CardTitle>
+                <CardDescription>
+                  Remplissez les informations pour ouvrir une nouvelle session
+                </CardDescription>
+              </div>
+            </div>
           </CardHeader>
 
-          <CardContent className="p-6">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <div className="space-y-5">
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="p-4 rounded-lg bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200"
-                  >
-                    <h3 className="font-medium text-gray-700 mb-3">
-                      Utilisateur
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="text-gray-500">Nom:</div>
-                      <div className="font-medium">{userOnline.name}</div>
-                      <div className="text-gray-500">Email:</div>
-                      <div className="font-medium">{userOnline.email}</div>
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              {/* User information */}
+              <div className="p-5 rounded-lg bg-gray-50 dark:bg-gray-800 border">
+                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  <span>Utilisateur</span>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                        <UserIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Nom</p>
+                        <p className="font-medium">{userOnline.name}</p>
+                      </div>
                     </div>
-                  </motion.div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
+                        <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                        <p className="font-medium">{userOnline.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    <FormField
-                      control={form.control}
-                      name="cash_register_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">
-                            Caisses disponibles
-                          </FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger className="h-11">
-                                <SelectValue placeholder="Sélectionner une caisse" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {caissesDisponibles.map((register) => (
-                                <SelectItem
-                                  key={register.id}
-                                  value={register.id.toString()}
-                                  className="hover:bg-primary/5"
-                                >
-                                  Caisse {register.cash_register_number}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormDescription className="text-gray-500">
-                            Sélectionnez la caisse que vous souhaitez ouvrir
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Cash Register Selection */}
+                  <FormField
+                    control={form.control}
+                    name="cash_register_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Calculator className="h-4 w-4" />
+                          <span>Caisses disponibles</span>
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-11">
+                              <SelectValue placeholder="Sélectionner une caisse" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {caissesDisponibles.map((register) => (
+                              <SelectItem
+                                key={register.id}
+                                value={register.id.toString()}
+                                className="hover:bg-primary/5"
+                              >
+                                Caisse {register.cash_register_number}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Sélectionnez la caisse que vous souhaitez ouvrir
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
+                  {/* Opening Date */}
                   <div>
-                    <FormLabel className="text-gray-700">
-                      Date d'ouverture
+                    <FormLabel className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>Date d'ouverture</span>
                     </FormLabel>
                     <Input
-                      value={format(new Date(), "dd MMMM yyyy HH:mm", {
+                      value={format(new Date(), "dd MMMM yyyy 'à' HH'h'mm", {
                         locale: fr,
                       })}
                       disabled
@@ -316,104 +365,121 @@ export default function OpenCashRegisterSession() {
                     />
                   </div>
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <FormField
-                      control={form.control}
-                      name="opening_amount"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">
-                            Montant d'ouverture
-                          </FormLabel>
-                          <FormControl>
-                            <div>
-                              <div className="relative">
-                                <Input
-                                  placeholder="0"
-                                  inputMode="numeric"
-                                  onChange={(e) => {
-                                    const raw = e.target.value.replace(
-                                      /\D/g,
-                                      ""
-                                    );
-                                    field.onChange(raw);
-                                  }}
-                                  value={field.value}
-                                  className="pl-9 h-11 focus-visible:ring-primary/50 border-gray-300"
-                                />
-                              </div>
-                              {field.value && (
-                                <p className="text-sm text-gray-500 mt-1">
-                                  {formatFCFA(field.value)} (affiché)
-                                </p>
-                              )}
+                  {/* Opening Amount */}
+                  <FormField
+                    control={form.control}
+                    name="opening_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <Banknote className="h-4 w-4" />
+                          <span>Montant d'ouverture</span>
+                        </FormLabel>
+                        <FormControl>
+                          <div>
+                            <div className="relative">
+                              <Input
+                                placeholder={`0 ${currency}`}
+                                inputMode="numeric"
+                                autoComplete="off"
+                                onChange={(e) => {
+                                  let raw = e.target.value.replace(/\s/g, "").replace(/\D/g, "");
+                                  const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                                  field.onChange(formatted);
+                                }}
+                                value={field.value}
+                                className="h-11 focus-visible:ring-primary/50 border-gray-300 text-base"
+                              />
                             </div>
-                          </FormControl>
-                          <FormDescription className="text-gray-500">
-                            Entrez le montant d'ouverture de la caisse en FCFA
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </motion.div>
-                </div>
+                            {field.value && (
+                              <p className="text-sm text-gray-500 mt-1">
+                                {formatAmount(field.value)} {currency} (affiché)
+                              </p>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Entrez le montant d'ouverture de la caisse
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.7 }}
-                >
-                  <Button
-                    type="submit"
-                    className="w-full h-11 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-md hover:shadow-lg transition-all"
-                    disabled={isSubmitting}
-                  >
-                    <AnimatePresence mode="wait">
+                  {/* Warning if amount differs from last closed session */}
+                  {showAmountWarning && lastClosedSession && (
+                    <Alert color="warning">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Attention</AlertTitle>
+                      <AlertDescription>
+                        Le montant saisi ({formatAmount(openingAmount)} {currency}) est différent du montant de fermeture de votre dernière session ({formatAmount(lastClosedSession.closing_amount)} {currency}). Vérifiez que c'est bien intentionnel.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Comment */}
+                  <FormField
+                    control={form.control}
+                    name="comment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Commentaire (optionnel)
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Ajoutez un commentaire si nécessaire..."
+                            {...field}
+                            className="h-11"
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Vous pouvez ajouter une remarque sur cette session
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Separator />
+
+                  <div className="flex justify-between pt-2">
+                    <Button
+                      color="destructive"
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.back()}
+                      className="gap-2"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                      Annuler
+                    </Button>
+                    <Button
+                      color="indigodye"
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="gap-2"
+                    >
                       {isSubmitting ? (
-                        <motion.span
-                          key="loading"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="flex items-center justify-center"
-                        >
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
                           Ouverture en cours...
-                        </motion.span>
+                        </>
                       ) : (
-                        <motion.span
-                          key="default"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          Ouvrir la session de caisse
-                        </motion.span>
+                        <>
+                          <CheckCircle2 className="h-4 w-4" />
+                          Confirmer l'ouverture
+                        </>
                       )}
-                    </AnimatePresence>
-                  </Button>
-                </motion.div>
-              </form>
-            </Form>
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
           </CardContent>
-
-          <CardFooter className="p-6 border-t border-gray-200 flex justify-end">
-            <Button
-              color="destructive"
-              variant="outline"
-              onClick={() => router.back()}
-              className=""
-            >
-              Annuler
-            </Button>
-          </CardFooter>
         </Card>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

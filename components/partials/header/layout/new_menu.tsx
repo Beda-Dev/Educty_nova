@@ -360,6 +360,13 @@ const menuItems: MenuCategory = {
           icon: <Calendar className="w-6 h-6" />,
           path: "/caisse_comptabilite/close-session",
           hidden: true
+        },
+        {
+          id: "open_session",
+          title: "ouverture caisse",
+          icon: <Calendar className="w-6 h-6" />,
+          path: "/caisse_comptabilite/open-session",
+          hidden: true
         }
       ]
     },

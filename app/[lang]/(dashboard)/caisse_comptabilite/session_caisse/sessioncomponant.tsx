@@ -186,7 +186,7 @@ export default function CashRegisterSessionsPage({
   };
 
   const navigateToSessionDetails = (sessionId: number) => {
-    router.push(`/cash-register/sessions/${sessionId}`);
+    router.push(`/caisse_comptabilite/session_caisse/${sessionId}`);
   };
 
   const navigateToCloseSession = (sessionId: number) => {

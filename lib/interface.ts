@@ -323,6 +323,7 @@ export interface Expense {
   cash_register: CashRegister;
   transaction_id?: number;
   validation_expense_id?: number;
+  transaction?: Transaction;
 }
 
 export interface InterfaceOTP {
