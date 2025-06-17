@@ -81,11 +81,11 @@ export function ReinscriptionReceipt({ onNewReinscription }: ReinscriptionReceip
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
             <Image
-              src={schoolInfo.logo}
+              src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
-              width={56}
-              height={56}
-              className="object-contain"
+              width={80}
+              height={80}
+              className="school-logo"
             />
           ) : (
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">

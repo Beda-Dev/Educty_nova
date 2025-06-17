@@ -29,7 +29,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Icon } from "@iconify/react";
 import { cn } from "@/lib/utils";
 import DatePicker from "react-datepicker";
@@ -161,7 +167,12 @@ export function AdvancedDataTable({ data }: { data: Registration[] }) {
   
 
   return (
-    <Card title="Historique des inscriptions" className="p-4">
+    <Card className="p-4">
+      <CardTitle className="text-2xl font-semibold">
+        Historique des inscriptions
+      </CardTitle>
+      <CardContent>
+
       <div className="grid grid-cols-4 gap-4 mb-4">
         <Input
           placeholder="Rechercher..."
@@ -259,6 +270,7 @@ export function AdvancedDataTable({ data }: { data: Registration[] }) {
           </Button>
         </div>
       </div>
+      </CardContent>
     </Card>
   );
 }

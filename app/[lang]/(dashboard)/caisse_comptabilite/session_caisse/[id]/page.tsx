@@ -11,10 +11,10 @@ import { FileText, Link, ArrowLeft, Badge, Calculator, Calendar, Clock, Banknote
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
-import {generationNumero} from "@/lib/fonction"
+import { generationNumero } from "@/lib/fonction"
 
 interface Props {
-  params: { 
+  params: {
     id: string;
   };
 }
@@ -49,7 +49,7 @@ const DetailSessionPage = ({ params }: Props) => {
   // Récupération de la session
   useEffect(() => {
     if (!sessionId) return;
-    
+
     const session = cashRegisterSessions.find((s) => s.id === sessionId);
     if (session) {
       setSessionCurrent([session]);
@@ -113,8 +113,8 @@ const DetailSessionPage = ({ params }: Props) => {
 
     // Paiements
     payments
-      .filter((p) => 
-        p.transaction_id && 
+      .filter((p) =>
+        p.transaction_id &&
         transactions.some((t) => t.id === p.transaction_id && t.cash_register_session_id === sessionId)
       )
       .forEach((p) => {
@@ -127,13 +127,13 @@ const DetailSessionPage = ({ params }: Props) => {
           reference: `${generationNumero(p.id, p.created_at, "encaissement")}`,
           details: p,
         });
-      }); 
+      });
 
     // Dépenses
     expenses
-      ?.filter((e) => 
-        e.transaction_id && 
-        transactions.some((t) => t.id === e.transaction_id && t.cash_register_session_id === sessionId)
+      ?.filter((e) =>
+        e.transaction_id &&
+        transactions.some((t) => t.id === e.transaction_id && t.cash_register_session_id === sessionId && t.id === e.transaction_id)
       )
       .forEach((e) => {
         details.push({
@@ -153,15 +153,15 @@ const DetailSessionPage = ({ params }: Props) => {
   // Filtrage des transactions
   const filteredTransactions = useMemo(() => {
     let filtered = sessionTransactions;
-    
+
     if (activeTab !== "all") {
       filtered = filtered.filter((t) => t.type === activeTab);
     }
-    
+
     if (typeFilter !== "all") {
       filtered = filtered.filter((t) => t.type === typeFilter);
     }
-    
+
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -171,7 +171,7 @@ const DetailSessionPage = ({ params }: Props) => {
           t.amount?.toString().includes(term)
       );
     }
-    
+
     return filtered;
   }, [sessionTransactions, activeTab, typeFilter, searchTerm]);
 
@@ -187,11 +187,20 @@ const DetailSessionPage = ({ params }: Props) => {
 
   // Statistiques
   const statistics = useMemo(() => {
-    const encaissements = sessionTransactions.filter((t) => t.type === "encaissement");
-    const decaissements = sessionTransactions.filter((t) => t.type === "decaissement");
+    const encaissements = sessionTransactions.filter(
+      (t) =>
+        t.type === "encaissement" ||
+        payments.some((p) => p.transaction_id === t.id)
+    );
+
+    const decaissements = sessionTransactions.filter(
+      (t) =>
+        t.type === "decaissement" ||
+        expenses.some((e) => e.transaction_id === t.id)
+    );
     const totalEncaissements = encaissements.reduce((sum, t) => sum + t.amount, 0);
     const totalDecaissements = decaissements.reduce((sum, t) => sum + t.amount, 0);
-    
+
     return {
       totalTransactions: sessionTransactions.length,
       totalEncaissements,
@@ -269,7 +278,13 @@ const DetailSessionPage = ({ params }: Props) => {
             </div>
           </div>
           <Badge color={currentSession.status === "open" ? "default" : "secondary"} className="text-sm">
-            {currentSession.status === "open" ? "Ouverte" : "Fermée"}
+            {currentSession.status === "open" ? (
+              <span>
+                Ouverte <span className="ml-1 text-xs text-orange-500 font-semibold">(En cours)</span>
+              </span>
+            ) : (
+              "Fermée"
+            )}
           </Badge>
         </div>
 
@@ -298,7 +313,7 @@ const DetailSessionPage = ({ params }: Props) => {
                 <p className="font-semibold">
                   {currentSession.status === "closed" && currentSession.closing_date
                     ? formatDateTime(currentSession.closing_date)
-                    : "En cours"}
+                    : "-"}
                 </p>
               </div>
               <div className="space-y-2">
@@ -316,7 +331,7 @@ const DetailSessionPage = ({ params }: Props) => {
                 <p className="font-semibold">
                   {currentSession.status === "closed" && currentSession.closing_amount
                     ? formatAmount(currentSession.closing_amount)
-                    : "En cours"}
+                    : "-"}
                 </p>
               </div>
             </div>
@@ -410,7 +425,7 @@ const DetailSessionPage = ({ params }: Props) => {
                 </Select>
               </div>
             </div>
-            
+
             {/* Tableau des transactions */}
             <div className="border rounded-md">
               <Table>
@@ -429,9 +444,9 @@ const DetailSessionPage = ({ params }: Props) => {
                       <TableRow key={`${transaction.type}-${transaction.id}`}>
                         <TableCell>{formatDateTime(transaction.date)}</TableCell>
                         <TableCell>
-                          <Button 
+                          <Button
                             variant="outline"
-                            className="p-0 h-auto" 
+                            className="p-0 h-auto"
                             onClick={() => router.push(`/cash-register-sessions/${sessionId}/transactions/${transaction.id}`)}
                           >
                             <code className="text-xs bg-muted px-2 py-1 rounded hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors">
@@ -456,9 +471,8 @@ const DetailSessionPage = ({ params }: Props) => {
                           {transaction.description}
                         </TableCell>
                         <TableCell
-                          className={`text-right font-medium ${
-                            transaction.type === "encaissement" ? "text-green-600" : "text-red-600"
-                          }`}
+                          className={`text-right font-medium ${transaction.type === "encaissement" ? "text-green-600" : "text-red-600"
+                            }`}
                         >
                           {transaction.type === "encaissement" ? "+" : "-"}
                           {formatAmount(transaction.amount)}
@@ -475,7 +489,7 @@ const DetailSessionPage = ({ params }: Props) => {
                 </TableBody>
               </Table>
             </div>
-            
+
             {/* Pagination */}
             {filteredTransactions.length > ITEMS_PER_PAGE && (
               <div className="mt-4 flex justify-center">

@@ -49,8 +49,13 @@ const nextConfig = {
       },
       {
         protocol: "http",
-        hostname: "educty.digifaz.com", // Ajout du domaine pour les image du serveur
-        pathname: '/storage/photo/**',
+        hostname: "educty.digifaz.com",
+        pathname: '/storage/**',
+      },
+      {
+        protocol: "https",
+        hostname: "educty.digifaz.com",
+        pathname: '/storage/**',
       }
     ],
   },

@@ -27,7 +27,7 @@ const RecentInscription = ({ inscriptions, academicYear }: Props) => {
             <div className="h-10 w-10 rounded-md overflow-hidden bg-gray-200">
               {item.student.photo ? (
                 <Image
-                  src={typeof item.student.photo === 'string' ? item.student.photo : ''}
+                  src={typeof item.student.photo === 'string' ? `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${item.student.photo}` : ''}
                   alt={item.student.name}
                   width={40}
                   height={40}

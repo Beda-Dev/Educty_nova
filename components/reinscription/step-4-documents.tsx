@@ -186,34 +186,23 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   return (
     <div className="space-y-6">
       {/* Information Card */}
-      <Card className="border-blue-200 bg-blue-50">
+      <Card className="border-indigodye/20 bg-indigodye/5">
         <CardContent className="pt-6">
           <div className="flex items-start space-x-3">
-            <Info className="w-5 h-5 text-blue-600 mt-0.5" />
+            <Info className="w-5 h-5 text-indigodye mt-0.5" />
             <div className="space-y-2">
-              <h4 className="font-medium text-blue-900">Gestion des documents</h4>
-              <div className="text-sm text-blue-800 space-y-1">
-                <p>• Les documents existants sont conservés automatiquement</p>
-                <p>• Ajoutez uniquement les nouveaux documents ou mises à jour</p>
+              <h4 className="font-medium text-indigodye">Gestion des documents</h4>
+              <div className="text-sm text-skyblue space-y-1">
+                <p>• Ajoutez les documents nécessaires pour l'inscription</p>
                 <p>• Taille maximale par fichier: 5 Mo</p>
-                <p>• Formats acceptés: PDF, JPG, PNG, DOC, DOCX</p>
-                <p>• Les fichiers sont sauvegardés dans IndexedDB en cas de rechargement</p>
-                <p className="font-medium">• État de la base de données: {dbStatus}</p>
+                <p>• Formats acceptés: PDF, DOC, DOCX, TXT, JPEG, GIF, SVG</p>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* {hasRestoredDocuments && (
-        <Alert>
-          <RefreshCw className="h-4 w-4" />
-          <AlertDescription>
-            Certains documents ont été restaurés. Ils sont prêts à être utilisés.
-          </AlertDescription>
-        </Alert>
-      )} */}
-
+      {/* Documents existants */}
       <Card>
         <CardHeader>
           <CardTitle>Documents existants</CardTitle>
@@ -240,23 +229,30 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* Ajout de nouveaux documents (drag & drop + bouton) */}
+      <Card className="border-0 shadow-lg">
         <CardHeader>
-          <CardTitle>Ajouter de nouveaux documents</CardTitle>
+          <CardTitle className="text-2xl font-bold text-indigodye flex items-center">
+            Ajouter de nouveaux documents
+            <Info className="w-5 h-5 ml-2 text-skyblue hover:text-indigodye" />
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label>Type de document</Label>
+                <Label className="flex items-center text-indigodye">
+                  Type de document
+                  <span className="text-bittersweet ml-1">*</span>
+                </Label>
                 <Select
                   value={selectedDocType.toString()}
                   onValueChange={(value) => setSelectedDocType(Number.parseInt(value))}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner le type" />
+                  <SelectTrigger className="h-11" aria-required="true">
+                    <SelectValue placeholder="Sélectionner un type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent aria-required="true">
                     {documentTypes.map((docType) => (
                       <SelectItem key={docType.id} value={docType.id.toString()}>
                         {docType.name}
@@ -264,26 +260,51 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                     ))}
                   </SelectContent>
                 </Select>
+                {!selectedDocType && (
+                  <p className="text-red-500 text-sm mt-1">Ce champ est requis</p>
+                )}
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="document-file">Fichier (max 5 Mo)</Label>
-                <Input
-                  id="document-file"
-                  type="file"
-                  onChange={handleFileSelect}
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                />
+                <Label className="flex items-center text-indigodye">
+                  Fichier (max 5 Mo)
+                  <span className="text-bittersweet ml-1">*</span>
+                </Label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${fileError ? 'border-bittersweet' : 'border-gray-300 hover:border-gray-400'}`}
+                  onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+                  onDrop={e => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) handleFileSelect({ target: { files: [file] } } as any)
+                  }}
+                >
+                  <Input
+                    id="document-file"
+                    type="file"
+                    onChange={handleFileSelect}
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    className="hidden"
+                  />
+                  <label htmlFor="document-file" className="cursor-pointer">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Upload className="w-8 h-8 text-skyblue" />
+                      <p className="text-sm text-skyblue">
+                        Glissez-déposez ou cliquez pour sélectionner
+                      </p>
+                      <p className="text-xs text-skyblue/70">
+                        PDF, Word, images (max 5 Mo)
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
             </div>
-
             {fileError && (
-              <Alert color="destructive">
+              <Alert color="destructive" className="border-bittersweet">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>{fileError}</AlertDescription>
               </Alert>
             )}
-
             {selectedFile && !fileError && (
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="flex items-center justify-between">
@@ -299,11 +320,10 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               </div>
             )}
           </div>
-
-          {/* New Documents List */}
+          {/* Liste des nouveaux documents */}
           {newDocuments.length > 0 && (
             <div className="space-y-4">
-              <Label>Nouveaux documents ajoutés</Label>
+              <Label className="text-indigodye">Nouveaux documents ajoutés</Label>
               <div className="space-y-3">
                 {newDocuments.map((doc, index) => (
                   <div key={index} className="flex items-center justify-between p-3 border rounded-md">
@@ -312,9 +332,6 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                       <div>
                         <p className="font-medium">{doc.label}</p>
                         <p className="text-sm text-gray-500">{formatFileSize(getFileSize(doc.path))}</p>
-                        {/* {doc.path.stored?.isRestored && (
-                          <p className="text-xs text-blue-600">Restauré depuis IndexedDB</p>
-                        )} */}
                         {doc.path.stored?.fileId && (
                           <p className="text-xs text-gray-500">ID: {doc.path.stored.fileId.substring(0, 10)}...</p>
                         )}
@@ -328,7 +345,6 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               </div>
             </div>
           )}
-
           {newDocuments.length === 0 && (
             <div className="text-center py-8 text-gray-500">
               <Upload className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -336,18 +352,6 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               <p className="text-sm">Ajoutez de nouveaux documents si nécessaire</p>
             </div>
           )}
-
-          {/* <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              await fileStorage.listAllFiles()
-              checkIndexedDBStatus()
-            }}
-            className="mt-4"
-          >
-            Vérifier les fichiers stockés
-          </Button> */}
         </CardContent>
       </Card>
 

@@ -366,6 +366,19 @@
 }
 
 @import "partials/calendar.scss";
+
+/* Affichage optimal du logo à l'impression */
+@media print {
+  .school-logo {
+    width: 80px !important;
+    height: 80px !important;
+    object-fit: contain !important;
+    display: block !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+}
+
 @import "partials/react-slect";
 @import "partials/map";
 @import "partials/shepherd";

@@ -20,21 +20,20 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { userOnline , cashRegisterSessionCurrent } = useSchoolStore();
+  const { userOnline , cashRegisterSessionCurrent , settings } = useSchoolStore();
 
   // Trouver la dernière session ouverte
   const lastOpenSession = sessions
     .filter((session) => session.status === "open" && session.user.id === userOnline?.id)
     .sort((a, b) => new Date(b.opening_date).getTime() - new Date(a.opening_date).getTime())[0];
 
-  // Formater le montant en FCFA
-  const formatAmount = (amount: string) => {
-    return new Intl.NumberFormat("fr-FR", {
-      style: "currency",
-      currency: "XOF",
-      minimumFractionDigits: 0,
-    }).format(parseFloat(amount));
-  };
+  // Formater le montant avec des espaces et la devise dynamique
+  const formatAmount = (amount: string | number) => {
+    const currency = settings && settings.length > 0 && settings[0]?.currency ? settings[0].currency : 'FCFA';
+    const num = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
+    if (isNaN(num)) return `0 ${currency}`;
+    return `${num.toLocaleString('fr-FR').replace(/,/g, ' ')} ${currency}`;
+  }
 
   // Formater la date
   const formatDate = (dateString: string) => {
@@ -43,8 +42,8 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
 
   const handleNavigate = () => {
     setIsLoading(true);
-    // router.push(`/cash-registers/${cashRegisterSessionCurrent?.cash_register.id}`);
-    router.push("/caisse_comptabilite/session_caisse")
+    router.push(`/caisse_comptabilite/session_caisse/${cashRegisterSessionCurrent?.id}`)
+    setIsLoading(false)
   };
 
   if (!cashRegisterSessionCurrent) {

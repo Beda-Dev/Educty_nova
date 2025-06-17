@@ -6,15 +6,17 @@ import TableExpense from "./table";
 import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { Card } from "@/components/ui/card";
-import { fetchValidationExpenses, fetchExpenses } from "@/store/schoolservice";
+import { fetchValidationExpenses, fetchExpenses , fetchDemands } from "@/store/schoolservice";
 
 function ExpensePage() {
   const {
     expenses,
     validationExpenses,
+    demands,
     userOnline,
     setValidationExpenses,
     setExpenses,
+    setDemands,
   } = useSchoolStore();
 
   const permissionRequisVoir = ["voir depenses"];
@@ -32,6 +34,9 @@ function ExpensePage() {
         const fetchedValidationExpenses = await fetchValidationExpenses();
         // console.log("Fetched validation expenses:", fetchedValidationExpenses);
         setValidationExpenses(fetchedValidationExpenses);
+
+        const fetchedDemands = await fetchDemands();
+        setDemands(fetchedDemands);
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
       }
@@ -48,7 +53,7 @@ function ExpensePage() {
     );
   }
 
-  return <TableExpense expenses={expenses} validations={validationExpenses} />;
+  return <TableExpense expenses={expenses} validations={validationExpenses} demands={demands} />;
 }
 
 export default ExpensePage;

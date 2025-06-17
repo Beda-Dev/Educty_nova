@@ -46,12 +46,12 @@ export function TutorEditModal({ tutor, isNew = false }: TutorEditModalProps) {
   }, [tutor, isNew])
 
   const getTutorTypeOptions = (sexe: string) => {
-    if (sexe === "Homme") {
-      return ["Père", "Oncle", "Frère", "Grand-Père", "Autres"]
-    } else if (sexe === "Femme") {
-      return ["Mère", "Tante", "Soeur", "Grande-Mère", "Autres"]
+    if (sexe === "Masculin") {
+      return ["Père", "Tuteur"]
+    } else if (sexe === "Feminin") {
+      return ["Mère", "Tuteur"]
     }
-    return ["Autres"]
+    return ["Tuteur"]
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -218,73 +218,33 @@ export function TutorEditModal({ tutor, isNew = false }: TutorEditModalProps) {
                 options={[
                   { label: (
                     <span className="flex items-center gap-2"><Mars className="w-4 h-4 text-blue-500" /><span>Masculin</span></span>
-                  ), value: 'Homme' },
+                  ), value: 'Masculin' },
                   { label: (
                     <span className="flex items-center gap-2"><Venus className="w-4 h-4 text-pink-500" /><span>Féminin</span></span>
-                  ), value: 'Femme' },
+                  ), value: 'Feminin' },
                 ]}
                 value={formData.sexe}
-                onChange={(val) => setFormData({ ...formData, sexe: val as string, type_tutor: '' })}
+                onChange={(val) => setFormData({ ...formData, sexe: val as string })}
                 placeholder="Sélectionner le sexe"
               />
-            </div>
-
-            {formData.sexe && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-2"
-              >
-                <Label>Type de tuteur</Label>
-                <CustomSelect
-                  options={getTutorTypeOptions(formData.sexe).map(type => ({ label: type, value: type }))}
-                  value={formData.type_tutor}
-                  onChange={(val) => setFormData({ ...formData, type_tutor: val as string })}
-                  placeholder="Sélectionner le type"
-                  disabled={!formData.sexe}
-                />
-              </motion.div>
-            )}
-
-            <div className="flex items-center space-x-2 pt-2">
-              <Checkbox
-                id="is_tutor_legal"
-                checked={formData.is_tutor_legal}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_tutor_legal: checked as boolean })}
-              />
-              <div className="flex items-center gap-2">
-                <Label htmlFor="is_tutor_legal">Tuteur légal</Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <ShieldAlert className="w-4 h-4 text-yellow-500" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[300px]">
-                      <p>Le tuteur légal est responsable légal de l'élève. Un seul tuteur légal peut être désigné.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <div className="flex justify-around gap-2 pt-4">
+                <Button
+                  color="destructive"
+                  type="button"
+                  className="gap-2"
+                  onClick={() => setOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button
+                  color={isNew ? "indigodye" : "tyrian"}
+                  type="submit"
+                  className="gap-2"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>{isNew ? "Ajouter" : "Modifier"} le tuteur</span>
+                </Button>
               </div>
-            </div>
-
-            <div className="flex justify-around gap-2 pt-4">
-              <Button
-                type="button"
-                color="destructive"
-                onClick={() => setOpen(false)}
-              >
-                Annuler
-              </Button>
-              <Button 
-                color={isNew ? "indigodye" : "tyrian"}
-                type="submit"
-                className="gap-2"
-              >
-                <Check className="w-4 h-4" />
-                <span>{isNew ? "Ajouter" : "Modifier"} le tuteur</span>
-              </Button>
             </div>
           </form>
         </motion.div>

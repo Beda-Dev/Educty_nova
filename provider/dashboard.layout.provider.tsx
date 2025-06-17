@@ -13,8 +13,9 @@ import HeaderSearch from "@/components/header-search";
 import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
 import { useSchoolStore } from "@/store";
+import { CashRegisterSession } from '@/lib/interface'
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
-  const {userOnline} = useSchoolStore()
+  const { userOnline, cashRegisterSessions, setCashRegisterSessionCurrent } = useSchoolStore()
   const { collapsed, sidebarType, setCollapsed, subMenu } = useSidebar();
   const [open, setOpen] = React.useState(false);
   const { layout } = useThemeStore();
@@ -24,6 +25,14 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   const router = useRouter();
 
   React.useEffect(() => {
+    if (cashRegisterSessions && cashRegisterSessions.length > 0 && userOnline) {
+      const currentSession = cashRegisterSessions.find((session: CashRegisterSession) => session.user_id === userOnline.id && session.status === "open");
+      if (currentSession) {
+        setCashRegisterSessionCurrent(currentSession);
+      }else{
+        setCashRegisterSessionCurrent(null)
+      }
+    }
     if (userOnline === null) {
 
       //router.push("/");
@@ -66,7 +75,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
           </div>
         </div>
         <Footer handleOpenSearch={() => setOpen(true)} />
-        
+
       </>
     );
   }
@@ -94,7 +103,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
           </div>
         </div>
         <Footer handleOpenSearch={() => setOpen(true)} />
-        
+
       </>
     );
   }
@@ -129,7 +138,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
           </div>
         </div>
         <Footer handleOpenSearch={() => setOpen(true)} />
-        
+
       </>
     );
   }
@@ -162,7 +171,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
         </div>
       </div>
       <Footer handleOpenSearch={() => setOpen(true)} />
-      
+
     </>
   );
 };

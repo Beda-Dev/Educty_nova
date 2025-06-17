@@ -41,15 +41,11 @@ const TutorFormSchema = z.object({
     .min(10, "Le numéro doit contenir au moins 10 chiffres")
     .max(10, "Le numéro ne peut pas dépasser 15 chiffres")
     .regex(/^[0-9]+$/, "Le numéro ne doit contenir que des chiffres"),
-  sexe: z.enum(["Homme", "Femme"]),
-  type_tutor: z.string().min(1, "Veuillez sélectionner un type"),
+  sexe: z.enum(["Masculin", "Feminin"]),
   is_tutor_legal: z.boolean()
 })
 
 type TutorFormValues = z.infer<typeof TutorFormSchema>
-
-
-
 
 const ErrorMessage = memo(({ message }: { message?: string }) => {
   if (!message) return null
@@ -80,7 +76,6 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
       first_name: "",
       phone_number: "",
       sexe: undefined,
-      type_tutor: "",
       is_tutor_legal: false
     }
   })
@@ -94,11 +89,6 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
 
   const sexe = watch("sexe")
   const isTutorLegal = watch("is_tutor_legal")
-  // Nouvelle liste statique des types de tuteur
-  const tutorTypes = ["Père", "Mère", "Tuteur"];
-  const typeTutorValue = watch("type_tutor");
-
-
 
   // OPTIMISATION : handler mémoïsé
   const onSubmit = useCallback(async (data: TutorFormValues) => {
@@ -125,6 +115,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
         name: data.name.toUpperCase(),
         first_name: data.first_name.toUpperCase(),
         phone_number: data.phone_number.toUpperCase(),
+        type_tutor: ""
       })
 
       toast.success("Tuteur ajouté avec succès", {
@@ -251,61 +242,22 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
                 {
                   label: (
                     <span className="flex items-center gap-2"><Mars className="w-4 h-4 text-blue-500" /><span>Masculin</span></span>
-                  ), value: 'Homme'
+                  ), value: 'Masculin'
                 },
                 {
                   label: (
                     <span className="flex items-center gap-2"><Venus className="w-4 h-4 text-pink-500" /><span>Féminin</span></span>
-                  ), value: 'Femme'
+                  ), value: 'Feminin'
                 },
               ]}
               value={sexe ?? ''}
               onChange={(val) => {
-                setValue('sexe', val as 'Homme' | 'Femme');
+                setValue('sexe', val as 'Masculin' | 'Feminin');
                 console.log('[TutorModal] Sexe sélectionné:', val);
               }}
               placeholder="Sélectionner le sexe"
             />
             <ErrorMessage message={errors.sexe?.message} />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Type de tuteur</Label>
-            <CustomSelect
-              options={tutorTypes.map(type => ({ label: type, value: type }))}
-              value={typeTutorValue ?? ''}
-              onChange={(val) => {
-                setValue('type_tutor', val as string);
-                console.log('[TutorModal] type_tutor changé:', val);
-              }}
-              placeholder="Sélectionner le type"
-              disabled={!sexe}
-            />
-            <ErrorMessage message={errors.type_tutor?.message} />
-          </div>
-
-          <div className="flex items-center space-x-2 pt-2">
-            <Checkbox
-              id="is_tutor_legal"
-              checked={isTutorLegal}
-              onCheckedChange={(checked) => {
-                setValue("is_tutor_legal", checked as boolean)
-                trigger("is_tutor_legal")
-              }}
-            />
-            <div className="flex items-center gap-2">
-              <Label htmlFor="is_tutor_legal">Tuteur légal</Label>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <ShieldAlert className="w-4 h-4 text-yellow-500" />
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[300px]">
-                    <p>Le tuteur légal est responsable légal de l'élève. Un seul tuteur légal peut être désigné.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
           </div>
 
           <div className="flex justify-around gap-2 pt-4">

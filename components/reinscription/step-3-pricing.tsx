@@ -131,7 +131,7 @@ useEffect(() => {
         })
         setPaymentMethods({
           ...paymentMethods,
-          [installmentId]: [{ id: methodPayment[2].id, amount: Math.max(0, defaultAmount) }],
+          [installmentId]: [{ id: methodPayment[0].id, amount: Math.max(0, defaultAmount) }],
         })
       }
     }

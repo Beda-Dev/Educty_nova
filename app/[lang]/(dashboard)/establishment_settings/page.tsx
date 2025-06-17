@@ -114,7 +114,7 @@ export default function SettingsPage() {
                 })
             }
             if (currentSetting.establishment_logo) {
-                setPreviewUrl(currentSetting.establishment_logo)
+                setPreviewUrl(`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${currentSetting.establishment_logo}`)
             }
         }
     }, [settings, reset])

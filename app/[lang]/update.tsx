@@ -135,9 +135,7 @@ const DataFetcher = () => {
         setSettings(settings);
         setPermission(permissions);
         setCashRegisterSessions(sessions);
-        if(sessions){
 
-        }
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
       }

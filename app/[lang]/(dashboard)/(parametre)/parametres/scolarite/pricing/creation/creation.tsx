@@ -432,7 +432,7 @@ export default function TarificationPage() {
             <div className="hidden print:block space-y-2 border-b pb-4 mb-4">
               {settings[0]?.establishment_logo && (
                 <img 
-                  src={settings[0].establishment_logo} 
+                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${settings[0].establishment_logo}`} 
                   alt="Logo" 
                   className="h-16 mx-auto"
                 />

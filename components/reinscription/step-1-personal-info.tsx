@@ -240,6 +240,15 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       return
     }
 
+      // Vérifie que chaque tuteur a un type sélectionné
+      const allTutors = [...existingTutors, ...newTutors];
+      const missingType = allTutors.some(tutor => !tutor.type_tutor);
+
+      if (missingType) {
+        toast.error("Veuillez sélectionner un type pour chaque tuteur.");
+        return;
+      }
+
     if (fileError) {
       toast.error("Veuillez corriger l'erreur de fichier avant de continuer")
       return
@@ -426,18 +435,6 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Statut</Label>
-                <Select value={formData.status} onValueChange={(value) => handleStudentChange("status", value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="actif">Actif</SelectItem>
-                    <SelectItem value="inactif">Inactif</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             {/* Photo Upload Zone */}
@@ -552,7 +549,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                           className="p-2 hover:bg-accent cursor-pointer border-b"
                           onClick={() => handleTutorSelect(tutor)}
                         >
-                          {tutor.name} {tutor.first_name} - {tutor.phone_number}
+                          {tutor.name} {tutor.first_name} - {tutor.phone_number} {tutor.type_tutor}
                         </motion.div>
                       ))
                     ) : (
@@ -584,18 +581,29 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         <User className="w-5 h-5 text-skyblue" />
                         <div>
                           <span className="font-medium">
-                            {tutor.name} {tutor.first_name}  - {tutor.phone_number} - {tutor.type_tutor} 
+                            {tutor.name} {tutor.first_name} - {tutor.phone_number} {tutor.type_tutor}
                           </span>
                           {tutor.is_tutor_legal && (
-                            <Badge className="ml-2 bg-skyblue hover:bg-skyblue">
-                              Tuteur légal
-                            </Badge>
+                            <Badge color="skyblue" className="ml-2">Tuteur légal</Badge>
                           )}
-                          {tutor.isModified && (
-                            <Badge variant="outline" className="ml-2">
-                              Modifié
-                            </Badge>
-                          )}
+                          <div className="mt-1">
+                            <Label className="mr-2">Type de tuteur :</Label>
+                            <Select
+                              value={tutor.type_tutor}
+                              onValueChange={(val) => {
+                                setExistingTutors(existingTutors.map(t => t.id === tutor.id ? { ...t, type_tutor: val, isModified: true } : t));
+                              }}
+                            >
+                              <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(tutor.sexe === "Masculin" ? ["Père", "Tuteur"] : tutor.sexe === "Feminin" ? ["Mère", "Tuteur"] : ["Tuteur"]).map(opt => (
+                                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -605,18 +613,17 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                             checked={tutor.is_tutor_legal}
                             onCheckedChange={() => toggleTutorLegal(tutor.id)}
                           />
-                          <Label htmlFor={`legal-${tutor.id}`} className="text-sm cursor-pointer">
-                            Légal
-                          </Label>
+                          <Label htmlFor={`legal-${tutor.id}`} className="text-sm cursor-pointer">Légal</Label>
                         </div>
                         <TutorEditModal tutor={tutor} />
                         <Button
+                        color="destructive"
                           variant="ghost"
                           size="sm"
                           onClick={() => {
                             setExistingTutors(existingTutors.filter((t) => t.id !== tutor.id))
                           }}
-                          className="text-destructive hover:text-destructive"
+                          className=""
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -642,16 +649,30 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         <User className="w-5 h-5 text-skyblue" />
                         <div>
                           <span className="font-medium">
-                            {tutor.name} {tutor.first_name} - {tutor.phone_number} - {tutor.type_tutor}
+                            {tutor.name} {tutor.first_name} - {tutor.phone_number}
                           </span>
                           {tutor.is_tutor_legal && (
-                            <Badge className="ml-2 bg-primary hover:bg-primary">
-                              Tuteur légal
-                            </Badge>
+                            <Badge className="ml-2 bg-primary hover:bg-primary">Tuteur légal</Badge>
                           )}
-                          <Badge variant="outline" className="ml-2">
-                            Nouveau
-                          </Badge>
+                          <Badge variant="outline" className="ml-2">Nouveau</Badge>
+                          <div className="mt-1">
+                            <Label className="mr-2">Type de tuteur :</Label>
+                            <Select
+                              value={tutor.type_tutor}
+                              onValueChange={(val) => {
+                                setNewTutors(newTutors.map((t, i) => i === index ? { ...t, type_tutor: val } : t));
+                              }}
+                            >
+                              <SelectTrigger className="w-[120px]">
+                                <SelectValue placeholder="Type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {(tutor.sexe === "Masculin" ? ["Père", "Tuteur"] : tutor.sexe === "Feminin" ? ["Mère", "Tuteur"] : ["Tuteur"]).map(opt => (
+                                  <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -661,16 +682,13 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                             checked={tutor.is_tutor_legal}
                             onCheckedChange={() => toggleNewTutorLegal(index)}
                           />
-                          <Label htmlFor={`new-legal-${index}`} className="text-sm cursor-pointer">
-                            Légal
-                          </Label>
+                          <Label htmlFor={`new-legal-${index}`} className="text-sm cursor-pointer">Légal</Label>
                         </div>
                         <Button
                           color="destructive"
                           variant="outline"
                           size="sm"
                           onClick={() => removeNewTutor(index)}
-                          
                         >
                           <X className="w-4 h-4" />
                         </Button>

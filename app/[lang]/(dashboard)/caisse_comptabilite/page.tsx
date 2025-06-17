@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowDownCircle, ArrowUpCircle, Wallet, Clock, FileText } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, Clock, FileText , CheckCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
@@ -70,6 +70,22 @@ export default function CaissePage() {
       icon: <FileText className="w-6 h-6" />,
       path: "/caisse_comptabilite/demandes",
       color: itemColors[3]
+    },
+    {
+      id: "validation-decaissement",
+      title: "Validation des demandes de décaissement",
+      description: "Gestion de la validation des decaissement ",
+      icon: <CheckCircle className="w-6 h-6" />,
+      path: "/decaissement/validation",
+      color: itemColors[4]
+    },
+    {
+      id: "resumer_financié",
+      title: "resumer financier des eleve",
+      description: "Gestion de la validation des decaissement ",
+      icon: <CheckCircle className="w-6 h-6" />,
+      path: "/caisse_comptabilite/resume_financie",
+      color: itemColors[5]
     }
   ];
 
@@ -145,7 +161,7 @@ export default function CaissePage() {
                       whileHover="hover"
                       whileTap="tap"
                       className={cn(
-                        "p-6 rounded-xl border cursor-pointer transition-all",
+                        "p-6 rounded-xl border cursor-pointer transition-all h-full",
                         "flex flex-col items-start gap-4",
                         "bg-white dark:bg-gray-800/70",
                         "hover:shadow-md dark:hover:shadow-primary/10",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -15,16 +15,20 @@ import { Icon } from "@iconify/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "react-hot-toast";
-import ExpenseFormModal from "./modal";
-import { Expense, ValidationExpense } from "@/lib/interface";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Expense, ValidationExpense, Demand } from "@/lib/interface";
 import { useSchoolStore } from "@/store";
-import { fetchExpenses } from "@/store/schoolservice";
 import { useRouter } from "next/navigation";
 import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { format } from "date-fns";
 import { DatePickerInput } from "./datePicker";
-import { Pencil, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Pagination,
@@ -45,47 +49,33 @@ import {
 interface TableExpenseProps {
   expenses: Expense[];
   validations: ValidationExpense[];
+  demands: Demand[];
 }
 
-const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
-  const [collapsedRows, setCollapsedRows] = useState<number[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
-
+const TableExpense = ({ expenses, validations, demands }: TableExpenseProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCashRegister, setSelectedCashRegister] = useState<string>("");
   const [selectedValidator, setSelectedValidator] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [showDemandsModal, setShowDemandsModal] = useState(false);
+  const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null);
 
-  const { setExpenses, userOnline , settings} = useSchoolStore();
+  const { userOnline, settings } = useSchoolStore();
   const router = useRouter();
 
-  const permissionRequisCreer = ["creer depenses"];
-  const permissionRequisVoir = ["voir depenses"];
-  const permissionRequisModifier = ["modifier depenses"];
-
+  // Vérification des permissions
   const hasAdminAccessVoir = verificationPermission(
     { permissionNames: userOnline?.permissionNames || [] },
-    permissionRequisVoir
+    ["voir depenses"]
   );
   const hasAdminAccessCreer = verificationPermission(
     { permissionNames: userOnline?.permissionNames || [] },
-    permissionRequisCreer
-  );
-  const hasAdminAccessModifier = verificationPermission(
-    { permissionNames: userOnline?.permissionNames || [] },
-    permissionRequisModifier
+    ["creer depenses"]
   );
 
-  if (hasAdminAccessVoir === false) {
+  if (!hasAdminAccessVoir) {
     return (
       <Card>
         <ErrorPage />
@@ -93,100 +83,60 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
     );
   }
 
-  const update = async () => {
-    try {
-      const response = await fetchExpenses();
-      setExpenses(response);
-    } catch (error) {
-      toast.error("Erreur lors du chargement des dépenses");
-    }
-  };
-
-  const handleEdit = (expense: Expense) => {
-    setSelectedExpense(expense);
-    setIsModalOpen(true);
-  };
-
-  const handleCreate = () => {
-    router.push("/depense/addDepense");
-    // setSelectedExpense(null);
-    // setIsModalOpen(true);
-  };
-
-  const handleSubmit = async (formData: any) => {
-    setIsLoading(true);
-    try {
-      const url = selectedExpense
-        ? `/api/expense?id=${selectedExpense.id}`
-        : "/api/expense";
-      const method = selectedExpense ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok)
-        throw new Error(
-          selectedExpense ? "Échec de la mise à jour" : "Échec de la création"
-        );
-
-      await update();
-      toast.success(selectedExpense ? "Dépense mise à jour" : "Dépense créée");
-      setIsModalOpen(false);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Erreur inconnue");
-    } finally {
-      setIsLoading(false);
-      router.refresh();
-    }
-  };
-
+  // Formatage des montants avec devise
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat("fr-FR").format(amount) + " " + (settings[0].currency? settings[0].currency : "FCFA");
+    return new Intl.NumberFormat("fr-FR").format(amount) + " " + (settings[0]?.currency || "FCFA");
   };
 
-  const resetFilters = () => {
-    setDateRange([null, null]);
-    setSelectedCashRegister("");
-    setSelectedValidator("");
-    setSelectedStatus("");
-    setSearchTerm("");
-  };
+  // Filtrage des dépenses
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(expense => {
+      const matchesDate = !selectedDate || 
+        format(new Date(expense.expense_date), "yyyy-MM-dd") === 
+        format(selectedDate, "yyyy-MM-dd");
+      
+      const matchesSearch = expense.label.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCashRegister = selectedCashRegister ? 
+        expense.cash_register?.cash_register_number === selectedCashRegister : true;
+      
+      const matchesValidator = selectedValidator ? 
+        validations.some(v => 
+          expense?.validation_expense_id === v.id && 
+          v.user?.name === selectedValidator
+        ) : true;
+      
+      const matchesStatus = selectedStatus ? 
+        validations.some(v => 
+          expense.validation_expense_id === v.id && 
+          v.validation_status === selectedStatus
+        ) : true;
 
-  const filteredExpenses = expenses
-    .filter(
-      (expense) =>
-        !selectedDate ||
-        format(new Date(expense.expense_date), "yyyy-MM-dd") ===
-          format(selectedDate, "yyyy-MM-dd")
-    )
-    .filter((expense) =>
-      expense.label.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((expense) =>
-      selectedCashRegister
-        ? expense.cash_register.cash_register_number === selectedCashRegister
-        : true
-    )
-    .filter((expense) =>
-      selectedValidator
-        ? validations.some(
-            (v) =>
-              expense?.validation_expense_id === v.id && v.user?.name === selectedValidator
-          )
-        : true
-    )
-    .filter((expense) =>
-      selectedStatus
-        ? validations.some(
-            (v) =>
-              expense.validation_expense_id === v.id &&
-              v.validation_status === selectedStatus
-          )
-        : true
-    );
+      return matchesDate && matchesSearch && matchesCashRegister && 
+             matchesValidator && matchesStatus;
+    });
+  }, [expenses, selectedDate, searchTerm, selectedCashRegister, selectedValidator, selectedStatus, validations]);
+
+  // Filtrage des demandes approuvées avec leurs validateurs
+  const approvedDemandsWithValidators = useMemo(() => {
+    return demands
+      .filter(demand => demand.status === "approuvée")
+      .map(demand => {
+        const demandValidations = validations.filter(v => v.demand_id === demand.id);
+        const orderedValidations = [...demandValidations].sort((a, b) => a.validation_order - b.validation_order);
+
+        return {
+          ...demand,
+          validators: orderedValidations.map(v => ({
+            name: v.user?.name || "Inconnu",
+            status: v.validation_status,
+            date: v.validation_date,
+            order: v.validation_order
+          }))
+        };
+      });
+  }, [demands, validations]);
+
   // Pagination
   const ITEMS_PER_PAGE = 10;
   const totalPages = Math.ceil(filteredExpenses.length / ITEMS_PER_PAGE);
@@ -195,12 +145,31 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
+  const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+  const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+
+  const resetFilters = () => {
+    setSelectedDate(null);
+    setSelectedCashRegister("");
+    setSelectedValidator("");
+    setSelectedStatus("");
+    setSearchTerm("");
+    setCurrentPage(1);
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  const handleCreateExpense = () => {
+    if (approvedDemandsWithValidators.length > 0) {
+      setShowDemandsModal(true);
+    } else {
+      toast.error("Aucune demande de décaissement disponible.");
+    }
+  };
+
+
+  const handleDemandSelect = (demand: Demand) => {
+    setSelectedDemand(demand);
+    setShowDemandsModal(false);
+    router.push(`/depense/addDepense?demandId=${demand.id}`);
   };
 
   return (
@@ -212,25 +181,24 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
-            <CardTitle>Dépenses</CardTitle>
+            <CardTitle>Décaissements</CardTitle>
           </div>
           <Badge variant="outline">
-            {filteredExpenses.length}{" "}
-            {filteredExpenses.length > 1 ? "dépenses" : "dépense"}
+            {filteredExpenses.length} {filteredExpenses.length > 1 ? "décaissements" : "décaissement"}
           </Badge>
         </CardHeader>
 
         <CardContent>
           {hasAdminAccessCreer && (
-            <div className="flex justify-end mb-2">
-              <Button color="indigodye" onClick={handleCreate}>
+            <div className="flex justify-end my-2">
+              <Button color="indigodye" onClick={handleCreateExpense}>
                 <Icon icon="heroicons:plus" className="mr-2 h-4 w-4" />
-                Faire une dépense
+                Faire un décaissement
               </Button>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center mb-4">
             <Input
               placeholder="Rechercher..."
               className="w-[180px]"
@@ -240,6 +208,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 setCurrentPage(1);
               }}
             />
+            
             <Select
               value={selectedCashRegister}
               onValueChange={setSelectedCashRegister}
@@ -248,12 +217,14 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 <SelectValue placeholder="Caisse" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">caisses</SelectItem>
+                <SelectItem value="">Toutes caisses</SelectItem>
                 {Array.from(
                   new Set(
-                    expenses.map((e) => e.cash_register.cash_register_number)
+                    expenses
+                      .map(e => e.cash_register?.cash_register_number)
+                      .filter(Boolean) as string[]
                   )
-                ).map((num) => (
+                ).map(num => (
                   <SelectItem key={num} value={num}>
                     {num}
                   </SelectItem>
@@ -269,14 +240,14 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 <SelectValue placeholder="Validateur" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">validateurs</SelectItem>
+                <SelectItem value="">Tous validateurs</SelectItem>
                 {Array.from(
                   new Set(
                     validations
-                      .map((v) => v.user?.name)
-                      .filter((n): n is string => typeof n === "string")
+                      .map(v => v.user?.name)
+                      .filter(Boolean) as string[]
                   )
-                ).map((name) => (
+                ).map(name => (
                   <SelectItem key={name} value={name}>
                     {name}
                   </SelectItem>
@@ -289,7 +260,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 <SelectValue placeholder="Statut" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Tous les status</SelectItem>
+                <SelectItem value="">Tous statuts</SelectItem>
                 <SelectItem value="en attente">En attente</SelectItem>
                 <SelectItem value="validée">Validée</SelectItem>
                 <SelectItem value="rejetée">Rejetée</SelectItem>
@@ -304,6 +275,7 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
 
             <Button variant="outline" size="sm" onClick={resetFilters}>
               <RefreshCw className="h-4 w-4 mr-1" />
+              Réinitialiser
             </Button>
           </div>
 
@@ -314,132 +286,83 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
                 <TableHead>Montant</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Caisse</TableHead>
-                <TableHead>validation</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>date</TableHead>
-                {/* {hasAdminAccessModifier && <TableHead>Action</TableHead>} */}
+                <TableHead>Validation</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredExpenses.length > 0 ? (
+              {paginatedExpenses.length > 0 ? (
                 <AnimatePresence>
-                  {paginatedExpenses.map((expense) => (
-                    <Fragment key={expense.id}>
+                  {paginatedExpenses.map(expense => {
+                    const validation = validations.find(v => v.id === expense.validation_expense_id);
+                    
+                    return (
                       <motion.tr
+                        key={expense.id}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
                         transition={{ duration: 0.2 }}
                         className="border-t border-muted-foreground/20"
                       >
-                        <TableCell>
-                          <div className="flex items-center gap-4">
-                            <span>{expense.label}</span>
-                          </div>
-                        </TableCell>
-
-                        <TableCell>
-                          {formatAmount(Number(expense.amount))}
-                        </TableCell>
-
+                        <TableCell>{expense.label}</TableCell>
+                        <TableCell>{formatAmount(Number(expense.amount))}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="capitalize">
-                            {expense.expense_type.name}
+                            {expense.expense_type?.name || "Inconnu"}
                           </Badge>
                         </TableCell>
-
                         <TableCell>
-                          {expense.cash_register.cash_register_number}
+                          {expense.cash_register?.cash_register_number || "-"}
                         </TableCell>
-
                         <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {validations
-                              .filter((v) => v.id === expense?.validation_expense_id)
-                              .map((v) => (
-                                <Badge
-                                  key={v.id}
-                                  color="secondary"
-                                  className="text-xs"
-                                >
-                                  {v.user?.name || "Utilisateur inconnu"}
-                                </Badge>
-                              ))}
-                          </div>
+                          <Badge color="secondary" className="text-xs">
+                            {validation?.user?.name || "Non validé"}
+                          </Badge>
                         </TableCell>
-
                         <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {validations
-                              .filter((v) => v.id === expense?.validation_expense_id)
-                              .map((v) => (
-                                <Badge
-                                  key={v.id}
-                                  color={`${
-                                    v.validation_status === "validée"
-                                      ? "success"
-                                      : v.validation_status === "rejetée"
-                                      ? "destructive"
-                                      : "warning"
-                                  }`}
-                                  className="text-xs"
-                                >
-                                  {v.validation_status || "statut inconnu"}
-                                </Badge>
-                              ))}
-                          </div>
+                          <Badge
+                            color={
+                              validation?.validation_status === "validée" 
+                                ? "success" 
+                                : validation?.validation_status === "rejetée" 
+                                  ? "destructive" 
+                                  : "warning"
+                            }
+                            className="text-xs"
+                          >
+                            {validation?.validation_status || "En attente"}
+                          </Badge>
                         </TableCell>
-
                         <TableCell>
                           {format(new Date(expense.expense_date), "dd/MM/yyyy")}
                         </TableCell>
-
-                        {/* {hasAdminAccessModifier && (
-                          <TableCell className="flex justify-end">
-                            <Button
-                              color="tyrian"
-                              size="icon"
-                              onClick={() => handleEdit(expense)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        )} */}
                       </motion.tr>
-                    </Fragment>
-                  ))}
+                    );
+                  })}
                 </AnimatePresence>
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={hasAdminAccessModifier ? 5 : 4}
-                    className="text-center text-muted-foreground h-24"
-                  >
-                    {searchTerm || dateRange[0] || dateRange[1]
-                      ? "Aucune dépense ne correspond à votre recherche."
-                      : "Aucune dépense enregistrée."}
+                  <TableCell colSpan={7} className="text-center text-muted-foreground h-24">
+                    {searchTerm || selectedDate
+                      ? "Aucun décaissement ne correspond à votre recherche."
+                      : "Aucun décaissement enregistré."}
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
 
-          {filteredExpenses.length > ITEMS_PER_PAGE && (
+          {totalPages > 1 && (
             <div className="mt-4 flex justify-center">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={
-                        currentPage === 1 ? undefined : handlePreviousPage
-                      }
+                      onClick={handlePreviousPage}
                       aria-disabled={currentPage === 1}
-                      tabIndex={currentPage === 1 ? -1 : 0}
-                      className={
-                        currentPage === 1
-                          ? "pointer-events-none opacity-50"
-                          : ""
-                      }
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                     />
                   </PaginationItem>
 
@@ -456,16 +379,9 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={
-                        currentPage === totalPages ? undefined : handleNextPage
-                      }
+                      onClick={handleNextPage}
                       aria-disabled={currentPage === totalPages}
-                      tabIndex={currentPage === totalPages ? -1 : 0}
-                      className={
-                        currentPage === totalPages
-                          ? "pointer-events-none opacity-50 text-muted-foreground"
-                          : ""
-                      }
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                     />
                   </PaginationItem>
                 </PaginationContent>
@@ -475,13 +391,83 @@ const TableExpense = ({ expenses, validations }: TableExpenseProps) => {
         </CardContent>
       </Card>
 
-      <ExpenseFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSubmit}
-        expense={selectedExpense}
-        isLoading={isLoading}
-      />
+      {/* Modale pour les demandes de décaissement approuvées */}
+      <Dialog open={showDemandsModal} onOpenChange={setShowDemandsModal}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Demandes de décaissement approuvées</DialogTitle>
+          </DialogHeader>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Demandeur</TableHead>
+                <TableHead>Montant</TableHead>
+                <TableHead>Motif</TableHead>
+                <TableHead>Date demande</TableHead>
+                <TableHead>Validateurs (ordre de validation)</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {approvedDemandsWithValidators.length > 0 ? (
+                approvedDemandsWithValidators.map(demand => (
+                  <TableRow key={demand.id}>
+                    <TableCell>{demand.applicant?.name || "Inconnu"}</TableCell>
+                    <TableCell>{formatAmount(demand.amount)}</TableCell>
+                    <TableCell>{demand.pattern}</TableCell>
+                    <TableCell>
+                      {format(new Date(demand.created_at), "dd/MM/yyyy HH:mm")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        {demand.validators.map((validator, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {validator.order}. {validator.name}
+                            </Badge>
+                            <Badge
+                              color={
+                                validator.status === "validée" 
+                                  ? "success" 
+                                  : validator.status === "rejetée" 
+                                    ? "destructive" 
+                                    : "default"
+                              }
+                              className="text-xs"
+                            >
+                              {validator.status}
+                            </Badge>
+                            {validator.date && (
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(validator.date), "dd/MM HH:mm")}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleDemandSelect(demand)}
+                      >
+                        Sélectionner
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground h-24">
+                    Aucune demande approuvée disponible.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

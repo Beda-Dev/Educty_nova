@@ -191,7 +191,7 @@ export default function ExpenseValidationsPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-skyblue" />
-            <CardTitle>Validations des Dépenses</CardTitle>
+            <CardTitle>Validations des demandes de décaissement</CardTitle>
           </div>
           <Badge variant="outline">
             {filteredValidations.length}{" "}

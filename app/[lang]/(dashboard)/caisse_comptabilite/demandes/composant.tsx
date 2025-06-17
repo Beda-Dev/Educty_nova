@@ -342,8 +342,8 @@ export default function DisbursementRequestsPage() {
                 <SelectContent>
                   <SelectItem value="all">Tous</SelectItem>
                   <SelectItem value="en attente">En attente</SelectItem>
-                  <SelectItem value="approuvé">Approuvé</SelectItem>
-                  <SelectItem value="refusé">Refusé</SelectItem>
+                  <SelectItem value="approuvé">Approuvée</SelectItem>
+                  <SelectItem value="refusé">Refusée</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -385,10 +385,10 @@ export default function DisbursementRequestsPage() {
                       <TableCell>
                         <Badge 
                           color={getStatusBadgeVariant(request.status)} 
-                          className="flex items-center gap-1 capitalize"
-                        >
+                          className="capitalize"
+                        >{request.status} {" "}
                           {getStatusIcon(request.status)}
-                          {request.status}
+                          
                         </Badge>
                       </TableCell>
                     </TableRow>

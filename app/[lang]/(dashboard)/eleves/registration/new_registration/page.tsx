@@ -40,20 +40,14 @@ export default function InscriptionPage() {
   }
 
   const handleComplete = async () => {
-    try {
-      const response = await fetchRegistration()
-      setRegistration(response)
-      const responseStudents = await fetchStudents()
-      setStudents(responseStudents)
-      const responsePayments = await fetchPayment()
-      setPayments(responsePayments)
+    const response = await fetchRegistration()
+    setRegistration(response)
+    const responseStudents = await fetchStudents()
+    setStudents(responseStudents)
+    const responsePayments = await fetchPayment()
+    setPayments(responsePayments)
 
-      await updateStudentCountByClass(registrations, academicYearCurrent, classes);
-
-
-    } catch (error) {
-      console.error(error)
-    }
+    await updateStudentCountByClass(registrations, academicYearCurrent, classes);
     setShowReceipt(true)
   }
 

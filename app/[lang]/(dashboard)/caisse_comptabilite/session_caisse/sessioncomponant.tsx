@@ -70,13 +70,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CashRegisterSession } from "@/lib/interface";
 import { useSchoolStore } from "@/store";
 
-const formatCurrency = (amount: string) => {
-  const numericAmount = Number.parseInt(amount) / 100;
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "XOF",
-    minimumFractionDigits: 0,
-  }).format(numericAmount);
+const formatCurrency = (amount: string | number) => {
+  // On accepte string ou number pour compatibilité
+  const numericAmount = typeof amount === 'string' ? parseInt(amount, 10) : amount;
+  if (isNaN(numericAmount)) return '';
+  // Format avec espaces pour les milliers, pas de décimales
+  return numericAmount.toLocaleString('fr-FR');
 };
 
 const formatSessionDate = (dateString: string | null) => {
@@ -89,7 +88,7 @@ export default function CashRegisterSessionsPage({
 }: {
   data: CashRegisterSession[];
 }) {
-  const { userOnline, users, cashRegisters } = useSchoolStore();
+  const { userOnline, users, cashRegisters , settings } = useSchoolStore();
   const router = useRouter();
   const [sessions, setSessions] = useState<CashRegisterSession[]>(data);
   const [searchTerm, setSearchTerm] = useState("");
@@ -215,12 +214,14 @@ export default function CashRegisterSessionsPage({
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
               <CalendarIcon className="h-6 w-6 text-skyblue" />
-              <CardTitle className="text-2xl font-semibold">
-                Sessions de caisse
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Gestion et consultation des sessions de caisse
-              </p>
+              <div>
+                <CardTitle className="text-2xl font-semibold">
+                  Sessions de caisse
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gestion et consultation des sessions de caisse
+                </p>
+              </div>
             </div>
 
             <Badge variant="outline" className="text-sm">
@@ -436,27 +437,27 @@ export default function CashRegisterSessionsPage({
                               : formatSessionDate(session.closing_date)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {formatCurrency(session.opening_amount)}
+                            {formatCurrency(session.opening_amount)} {settings?.[0]?.currency || 'FCFA'}
                           </TableCell>
                           <TableCell className="text-right">
                             {session.status === "open"
                               ? "—"
-                              : formatCurrency(session.closing_amount)}
+                              : (
+                                <>
+                                  {formatCurrency(session.closing_amount)} {settings?.[0]?.currency || 'FCFA'}
+                                </>
+                              )}
                           </TableCell>
                           <TableCell>
                             <Badge
-                              color={
-                                session.status === "open"
-                                  ? "default"
-                                  : "secondary"
-                              }
+                              color={session.status === "open" ? "success" : "secondary"}
                               className={cn(
                                 "capitalize",
                                 session.status === "open" &&
-                                  "bg-green-500/20 text-green-600"
+                                  "bg-success"
                               )}
                             >
-                              {session.status === "open" ? "Ouvert" : "Fermé"}
+                              {session.status === "open" ? "Ouverte" : "Fermée"}
                             </Badge>
                           </TableCell>
                           <TableCell>
