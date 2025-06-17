@@ -79,29 +79,6 @@ export function PrintReceipt({ transaction, payments, student, trigger, onPrint 
                 Partager
               </Button>
             </div>
-            <ReactToPrint
-              trigger={() => (
-                <Button className="gap-2">
-                  <Printer className="h-4 w-4" />
-                  Imprimer
-                </Button>
-              )}
-              content={() => receiptRef.current}
-              documentTitle={`Reçu-${transaction.id}-${student.registration_number}`}
-              onAfterPrint={onPrint}
-              pageStyle={`
-                @page {
-                  size: A4;
-                  margin: 0;
-                }
-                @media print {
-                  body {
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                  }
-                }
-              `}
-            />
           </div>
         </DialogContent>
       </Dialog>
