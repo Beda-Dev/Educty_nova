@@ -314,11 +314,9 @@ export default function ExpenseValidationsPage() {
                           className="border-t border-muted-foreground/20"
                         >
                           <TableCell className="text-xs">
-                            {generationNumero(
-                              validation.id,
-                              validation?.demand?.created_at ?? "",
-                              "encaissement"
-                            )}
+                        
+                              {validation.id}
+
                           </TableCell>
                           <TableCell>
                             <div className="font-medium">

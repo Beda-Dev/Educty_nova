@@ -454,7 +454,7 @@ export interface Demand {
   applicant_id: number;
   pattern: string;
   amount: number;
-  status: 'en attente' | 'validée' | 'approuvée' | 'refusé'; // tu peux ajuster si d'autres statuts existent
+  status: 'en attente' | 'validée' | 'approuvée' | 'refusée'; 
   created_at: string;
   updated_at: string;
   applicant: UserSingle;

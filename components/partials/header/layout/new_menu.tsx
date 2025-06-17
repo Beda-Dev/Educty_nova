@@ -372,10 +372,17 @@ const menuItems: MenuCategory = {
     },
     {
       id: "validation-decaissement",
-      title: "Validation des demandes de décaissement",
+      title: "Validation des demandes",
       icon: <CheckCircle className="w-6 h-6" />,
       path: "/decaissement/validation",
-    }
+    },
+    {
+      id: "finance",
+      title: "Résumé financier",
+      icon: <DollarSign className="w-4 h-4" />,
+      path: "/caisse_comptabilite/resume_financie",
+
+    },
   ],
   pedagogie: [
     {
@@ -730,10 +737,10 @@ export default function DynamicMenu() {
                 )}
                 onClick={handleClick}
               >
-                <div className="flex items-center justify-center w-5 h-5">
+                <div className="flex items-center justify-center w-4 h-4">
                   {item.icon}
                 </div>
-                <span className="text-sm">{item.title}</span>
+                <span className="text-xs">{item.title}</span>
                 {hasVisibleChildren && (
                   <motion.div
                     animate={{ rotate: hoveredItem === item.id ? 180 : 0 }}

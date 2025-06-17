@@ -81,8 +81,8 @@ export default function CaissePage() {
     },
     {
       id: "resumer_financié",
-      title: "resumer financier des eleve",
-      description: "Gestion de la validation des decaissement ",
+      title: "Résumé financier des élèves",
+      description: "Gestion et visualisation des paiements des élèves",
       icon: <CheckCircle className="w-6 h-6" />,
       path: "/caisse_comptabilite/resume_financie",
       color: itemColors[5]
@@ -179,7 +179,7 @@ export default function CaissePage() {
                         <h3 className="font-bold text-lg text-gray-900 dark:text-white">
                           {item.title}
                         </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                        <p className="text-xs text-gray-600 dark:text-gray-300">
                           {item.description}
                         </p>
                       </div>
