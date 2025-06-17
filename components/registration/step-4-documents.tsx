@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect , useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -31,6 +31,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   const [dbStatus, setDbStatus] = useState<string>("Vérification de la base de données...")
   const [isLoading, setIsLoading] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Effet de surveillance des documents dans le store
   useEffect(() => {
@@ -106,28 +107,31 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    setFileError("")
+    const file = e.target.files?.[0];
+    setFileError("");
 
     if (!file) {
-      setSelectedFile(null)
-      return
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
 
-    validateFile(file)
+    validateFile(file);
   }
 
   const validateFile = (file: File) => {
     if (file.size === 0) {
-      setFileError("Le fichier est vide")
-      setSelectedFile(null)
-      return false
+      setFileError("Le fichier est vide");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return false;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setFileError("Le fichier ne doit pas dépasser 5 Mo")
-      setSelectedFile(null)
-      return false
+      setFileError("Le fichier ne doit pas dépasser 5 Mo");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return false;
     }
 
     const allowedTypes = [
@@ -139,16 +143,17 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       "image/jpg",
       "image/gif",
       "image/svg+xml",
-    ]
+    ];
 
     if (!allowedTypes.includes(file.type)) {
-      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, DOC, DOCX, TXT, JPEG, GIF ou SVG`)
-      setSelectedFile(null)
-      return false
+      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, DOC, DOCX, TXT, JPEG, GIF ou SVG`);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return false;
     }
 
-    setSelectedFile(file)
-    return true
+    setSelectedFile(file);
+    return true;
   }
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -169,8 +174,17 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
 
   const handleAddDocument = async () => {
     if (!selectedDocType || !selectedFile) {
-      setFileError("Veuillez sélectionner un type de document et un fichier")
-      return
+      setFileError("Veuillez sélectionner un type de document et un fichier");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null);
+      return;
+    }
+
+    if (fileError) {
+      setFileError("Veuillez corriger l'erreur de fichier avant de continuer");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null);
+      return;
     }
 
     if (!fileStorage) {
@@ -223,8 +237,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       setFileError("")
       
       // Reset file input
-      const fileInput = document.getElementById("document-file") as HTMLInputElement
-      if (fileInput) fileInput.value = ""
+      if (fileInputRef.current) fileInputRef.current.value = ""
 
       await checkIndexedDBStatus()
     } catch (error) {
@@ -387,11 +400,12 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                 >
-                  <Input
+                  <input
                     id="document-file"
                     type="file"
+                    ref={fileInputRef}
                     onChange={handleFileSelect}
-                    accept=".pdf,.doc,.docx,.txt,.jpeg,.jpg,.gif,.svg"
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     className="hidden"
                   />
                   <label htmlFor="document-file" className="cursor-pointer">

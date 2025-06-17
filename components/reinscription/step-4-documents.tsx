@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect , useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -23,7 +23,10 @@ interface Step4Props {
   onPrevious: () => void
 }
 
-export function Step4Documents({ onNext, onPrevious }: Step4Props) {
+export function Step4Documents({
+  onNext,
+  onPrevious,
+}: Step4Props) {
   const {
     selectedStudent,
     existingDocuments,
@@ -41,6 +44,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState("")
   const [dbStatus, setDbStatus] = useState<string>("Vérification de la base de données...")
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (selectedStudent?.documents) {
@@ -71,29 +75,32 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
     if (!fileStorage) {
       setFileError("Stockage local non disponible sur ce navigateur ou en SSR")
       toast.error("Stockage local non disponible sur ce navigateur ou en SSR")
-      return
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null);
+      return;
     }
-    const file = e.target.files?.[0]
-    setFileError("")
+    const file = e.target.files?.[0];
+    setFileError("");
 
     if (!file) {
-      setSelectedFile(null)
-      return
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
-
-    console.log("File selected:", file.name, file.size, file.type)
 
     // Validate file
     if (file.size === 0) {
-      setFileError("Le fichier est vide")
-      setSelectedFile(null)
-      return
+      setFileError("Le fichier est vide");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setFileError("Le fichier ne doit pas dépasser 5 Mo")
-      setSelectedFile(null)
-      return
+      setFileError("Le fichier ne doit pas dépasser 5 Mo");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
 
     const allowedTypes = [
@@ -105,33 +112,41 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       "image/jpg",
       "image/gif",
       "image/svg+xml",
-    ]
+    ];
 
     if (!allowedTypes.includes(file.type)) {
-      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, DOC, DOCX, TXT, JPEG, GIF ou SVG`)
-      setSelectedFile(null)
-      return
+      setFileError(`Format de fichier non supporté: ${file.type}. Utilisez PDF, DOC, DOCX, TXT, JPEG, GIF ou SVG`);
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
 
-    setSelectedFile(file)
+    setSelectedFile(file);
   }
 
   const handleAddDocument = async () => {
     if (!selectedDocType || !selectedFile) {
-      toast.error("Veuillez sélectionner un type de document et un fichier")
-      return
+      toast.error("Veuillez sélectionner un type de document et un fichier");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null);
+      return;
     }
 
     if (fileError) {
-      toast.error("Veuillez corriger l'erreur de fichier avant de continuer")
-      return
+      toast.error("Veuillez corriger l'erreur de fichier avant de continuer");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null);
+      return;
     }
 
     if (!fileStorage) {
-      setFileError("Stockage local non disponible sur ce navigateur ou en SSR")
-      toast.error("Stockage local non disponible sur ce navigateur ou en SSR")
-      return
+      setFileError("Stockage local non disponible sur ce navigateur ou en SSR");
+      toast.error("Stockage local non disponible sur ce navigateur ou en SSR");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null);
+      return;
     }
+    if (!selectedFile) return;
 
     const docType = documentTypes.find((dt) => dt.id === selectedDocType)
     if (!docType) return
@@ -140,15 +155,17 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
       console.log("Adding document:", selectedFile.name, selectedFile.size, selectedFile.type)
 
       // Vérifier à nouveau que le fichier est valide
-      if (selectedFile.size === 0) {
+      if (selectedFile && selectedFile.size === 0) {
         throw new Error("Le fichier est vide")
       }
 
+      if (!selectedFile) return;
+
       const newDocument: DocumentFormData = {
         document_type_id: selectedDocType,
-        student_id: selectedStudent?.id ?? 0,
         label: selectedFile.name,
-        path: selectedFile, // Store as native File object
+        path: selectedFile,
+        student_id: selectedStudent?.id || 0,
       }
 
       await addNewDocument(newDocument)
@@ -177,11 +194,10 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   }
 
   const getDocumentTypeName = (id: number): string => {
-    const docType = documentTypes.find((dt) => dt.id === id)
-    return docType?.name || "Type inconnu"
+    const docType = documentTypes.find((dt: DocumentType) => dt.id === id);
+    return docType?.name || "Type inconnu";
   }
 
-  const hasRestoredDocuments = newDocuments.some((doc) => doc.path.stored?.isRestored)
 
   return (
     <div className="space-y-6">
@@ -281,6 +297,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
                   <Input
                     id="document-file"
                     type="file"
+                    ref={fileInputRef}
                     onChange={handleFileSelect}
                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                     className="hidden"
@@ -309,8 +326,8 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium">{selectedFile.name}</p>
-                    <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)}</p>
+                    <p className="font-medium">{selectedFile?.name}</p>
+                    <p className="text-sm text-gray-500">{selectedFile ? formatFileSize(selectedFile.size) : ''}</p>
                   </div>
                   <Button color="indigodye" onClick={handleAddDocument} size="sm">
                     <Upload className="w-4 h-4 mr-2" />

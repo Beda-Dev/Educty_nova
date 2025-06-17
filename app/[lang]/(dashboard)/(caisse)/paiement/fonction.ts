@@ -8,6 +8,18 @@ import {
   } from "@/lib/interface";
 import { toast } from 'react-hot-toast';
 
+export function formatDateYMDHIS(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return (
+    date.getFullYear() +
+    '-' + pad(date.getMonth() + 1) +
+    '-' + pad(date.getDate()) +
+    ' ' + pad(date.getHours()) +
+    ':' + pad(date.getMinutes()) +
+    ':' + pad(date.getSeconds())
+  );
+}
+
 interface PaymentData {
   student_id: string;
   installment_id: string;

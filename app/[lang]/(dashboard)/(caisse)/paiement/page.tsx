@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dialog"
 import type { Student, Pricing, Installment, Payment, Transaction, Registration } from "@/lib/interface"
 import { fetchPayment, fetchStudents, fetchTransactions } from "@/store/schoolservice"
+import {formatDateYMDHIS} from './fonction'
 
 interface StudentFinancialData {
   student: Student
@@ -465,7 +466,7 @@ export default function PaymentManagementPage() {
           body: JSON.stringify({
             user_id: userOnline?.id || 0,
             cash_register_session_id: cashRegisterSessionCurrent.id,
-            transaction_date: new Date().toISOString().split("T")[0],
+            transaction_date: formatDateYMDHIS(new Date()),
             total_amount: installmentAmounts[installmentId].toString(),
             transaction_type: "encaissement",
           }),

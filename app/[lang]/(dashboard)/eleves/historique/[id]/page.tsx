@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useSchoolStore } from "@/store";
-import { Registration, Pricing } from "@/lib/interface";
+import { Registration, Pricing, Payment, Setting } from "@/lib/interface";
 import RegistrationFinal from "./detail_registration";
-import { findRegistrationById, getTarificationData } from "./fonction";
+import { findRegistrationById } from "./fonction";
 
 interface Props {
   params: {
@@ -13,9 +13,8 @@ interface Props {
 
 const Registrationview = ({ params }: Props) => {
   const { id } = params;
-  const { registrations, pricing } = useSchoolStore();
+  const { registrations, pricing , payments , settings } = useSchoolStore();
   const [data, setData] = useState<Registration | null>(null);
-  const [feeData, setFeeData] = useState<{ fees: { label: string; amount: number }[]; total: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,17 +30,8 @@ const Registrationview = ({ params }: Props) => {
         throw new Error("Inscription non trouvée");
       }
 
-      // Récupérer les données de tarification
-      const fees = getTarificationData(
-        pricing,
-        registration.classe.level_id,
-        registration.student.assignment_type_id,
-        registration.academic_year_id
-      );
-
       // Mettre à jour les états
       setData(registration);
-      setFeeData(fees);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur s'est produite");
     } finally {
@@ -63,11 +53,11 @@ const Registrationview = ({ params }: Props) => {
     return <div>Erreur : {error}</div>;
   }
 
-  if (!data || !feeData) {
+  if (!data || !payments || !settings) {
     return <div>Aucune donnée disponible</div>;
   }
 
-  return <RegistrationFinal registration={data} finance={feeData} />;
+  return <RegistrationFinal registration={data} payments={payments} settings={settings} />;
 };
 
 export default Registrationview;

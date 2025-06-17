@@ -298,7 +298,7 @@ export default function DisbursementRequestsPage() {
               />
               
               <DialogFooter>
-                <div className="flex justify-around gap-2">
+                <div className="flex justify-around gap-2 w-full">
                 <Button 
                  color="destructive"
                   type="button" 
