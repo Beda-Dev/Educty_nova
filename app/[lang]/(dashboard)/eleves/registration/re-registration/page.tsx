@@ -18,6 +18,7 @@ import type { Student } from "@/lib/interface";
 import { Search, User, AlertTriangle } from "lucide-react";
 import { useSchoolStore } from "@/store/index";
 import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment } from "@/store/schoolservice"
+import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function ReinscriptionPage() {
   const {
