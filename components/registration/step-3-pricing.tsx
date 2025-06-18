@@ -561,16 +561,15 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
 
       {givenAmount < totalPaidAmount ? (
         <motion.div
-          className="flex flex-col items-center pt-4"
+          className="flex justify-between pt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="flex justify-between">
+          
             <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
               Précédent
             </Button>
-            <div className="flex-1 flex justify-center">
               <Button onClick={handleNext} className="h-10 px-6" disabled={
                 !!globalError ||
                 Object.values(installmentErrors).some((err) => !!err) ||
@@ -578,8 +577,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
               }>
                 Suivant
               </Button>
-            </div>
-          </div>
+
 
         </motion.div>
       ) : (

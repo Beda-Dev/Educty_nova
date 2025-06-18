@@ -348,13 +348,13 @@ const menuItems: MenuCategory = {
       icon: <Clock className="w-6 h-6" />,
       path: "/caisse_comptabilite/session_caisse",
       children: [
-        {
-          id: "close_session",
-          title: "fermeture caisse",
-          icon: <Calendar className="w-6 h-6" />,
-          path: "/caisse_comptabilite/close-session",
-          hidden: true
-        },
+        // {
+        //   id: "close_session",
+        //   title: "fermeture caisse",
+        //   icon: <Calendar className="w-6 h-6" />,
+        //   path: "/caisse_comptabilite/close-session",
+        //   hidden: true
+        // },
         {
           id: "open_session",
           title: "ouverture caisse",

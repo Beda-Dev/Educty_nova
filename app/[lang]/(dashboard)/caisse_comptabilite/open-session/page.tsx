@@ -148,6 +148,15 @@ export default function OpenCashRegisterSession() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!userOnline) return;
 
+    if(cashRegisterCurrent){
+      toast({
+        title: "Session ouverte",
+        description: "Une session de caisse est deja ouverte.",
+        color: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
