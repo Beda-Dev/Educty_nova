@@ -101,15 +101,15 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
       .filter((demand) => demand.status === "approuvée")
       .map((demand) => {
         const demandValidations = validations.filter((v) => v.demand_id === demand.id)
-        const orderedValidations = [...demandValidations].sort((a, b) => a.validation_order - b.validation_order)
+        
 
         return {
           ...demand,
-          validators: orderedValidations.map((v) => ({
+          validators: demandValidations.map((v) => ({
             name: v.user?.name || "Inconnu",
             status: v.validation_status,
             date: v.validation_date,
-            order: v.validation_order,
+            
           })),
         }
       })
@@ -251,8 +251,8 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                   <SelectContent>
                     <SelectItem value="">Tous statuts</SelectItem>
                     <SelectItem value="en attente">En attente</SelectItem>
-                    <SelectItem value="validée">Validée</SelectItem>
-                    <SelectItem value="rejetée">Rejetée</SelectItem>
+                    <SelectItem value="approuvée">Approuvée</SelectItem>
+                    <SelectItem value="refusée">Refusée</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -325,7 +325,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                                 color={
                                   validation?.validation_status === "approuvée"
                                     ? "success"
-                                    : validation?.validation_status === "rejetée"
+                                    : validation?.validation_status === "refusée"
                                       ? "destructive"
                                       : "warning"
                                 }
@@ -497,13 +497,13 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                               {demand.validators.slice(0, 2).map((validator, index) => (
                                 <div key={index} className="flex items-center gap-2">
                                   <Badge variant="outline" className="text-xs">
-                                    {validator.order}. {validator.name}
+                                    {validator.name}
                                   </Badge>
                                   <Badge
                                     color={
                                       validator.status === "approuvée"
                                         ? "success"
-                                        : validator.status === "rejetée"
+                                        : validator.status === "refusée"
                                           ? "destructive"
                                           : "default"
                                     }
@@ -513,11 +513,6 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                                   </Badge>
                                 </div>
                               ))}
-                              {demand.validators.length > 2 && (
-                                <span className="text-xs text-muted-foreground">
-                                  +{demand.validators.length - 2} autres...
-                                </span>
-                              )}
                             </div>
                           </TableCell>
                           <TableCell>
