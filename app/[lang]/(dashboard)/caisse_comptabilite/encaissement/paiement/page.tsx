@@ -1231,7 +1231,7 @@ export default function PaymentManagementPage() {
         {/* Modal de confirmation de paiement réussi */}
         {/* Modal de confirmation de paiement réussi */}
         <Dialog open={openSuccessModal} onOpenChange={setOpenSuccessModal}>
-          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full h-full overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-500" />

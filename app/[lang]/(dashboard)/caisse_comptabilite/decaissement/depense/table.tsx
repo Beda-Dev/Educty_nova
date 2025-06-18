@@ -46,6 +46,8 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null)
   const [showDecaissementPage, setShowDecaissementPage] = useState(false)
   const [selectedValidationId, setSelectedValidationId] = useState<number | null>(null)
+  const [demandSearchTerm, setDemandSearchTerm] = useState("")
+  
 
   const { userOnline, settings } = useSchoolStore()
   const router = useRouter()
@@ -95,25 +97,66 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
     })
   }, [expenses, selectedDate, searchTerm, selectedCashRegister, selectedValidator, selectedStatus, validations])
 
-  // Filtrage des demandes approuvées avec leurs validateurs
-  const approvedDemandsWithValidators = useMemo(() => {
-    return demands
-      .filter((demand) => demand.status === "approuvée")
-      .map((demand) => {
-        const demandValidations = validations.filter((v) => v.demand_id === demand.id)
-        
 
-        return {
-          ...demand,
-          validators: demandValidations.map((v) => ({
-            name: v.user?.name || "Inconnu",
-            status: v.validation_status,
-            date: v.validation_date,
-            
-          })),
+
+  const approvedDemandsWithValidators = useMemo(() => {
+    // 1. Filtrer les validations approuvées et ayant une demande associée
+    const approvedValidations = validations.filter(v => 
+      v.validation_status === "approuvée" && 
+      v.demand_id && 
+      v.demand // Vérifier que la demande existe dans la validation
+    );
+  
+    // 2. Créer un tableau unique de demandes (éviter les doublons)
+    const uniqueDemands = new Map<number, {
+      demand: Demand;
+      validators: Array<{
+        name: string;
+        status: string;
+        date: string;
+      }>;
+      validationId: number;
+    }>();
+  
+    approvedValidations.forEach(validation => {
+      if (!validation.demand) return;
+  
+      const existing = uniqueDemands.get(validation.demand.id);
+      
+      if (existing) {
+        // Ajouter le validateur si pas déjà présent
+        if (!existing.validators.some(v => v.name === validation.user?.name)) {
+          existing.validators.push({
+            name: validation.user?.name || "Inconnu",
+            status: validation.validation_status,
+            date: validation.validation_date
+          });
         }
-      })
-  }, [demands, validations])
+      } else {
+        uniqueDemands.set(validation.demand.id, {
+          demand: validation.demand,
+          validators: [{
+            name: validation.user?.name || "Inconnu",
+            status: validation.validation_status,
+            date: validation.validation_date
+          }],
+          validationId: validation.id
+        });
+      }
+    });
+  
+    // 3. Convertir en tableau et appliquer le filtre de recherche
+    return Array.from(uniqueDemands.values())
+      .filter(item => {
+        if (!demandSearchTerm) return true;
+        const searchLower = demandSearchTerm.toLowerCase();
+        return (
+          item.demand.applicant?.name?.toLowerCase().includes(searchLower) ||
+          item.demand.pattern?.toLowerCase().includes(searchLower) ||
+          String(item.demand.amount).includes(demandSearchTerm)
+        );
+      });
+  }, [validations, demandSearchTerm]);
 
   // Pagination
   const ITEMS_PER_PAGE = 10
@@ -437,111 +480,110 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
 
           {/* Modale pour les demandes de décaissement approuvées */}
           <Dialog open={showDemandsModal} onOpenChange={setShowDemandsModal}>
-            <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Icon icon="heroicons:document-currency-dollar" className="h-5 w-5" />
-                  Sélectionner une demande de décaissement
-                </DialogTitle>
-              </DialogHeader>
+  <DialogContent className="w-full h-full overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle className="flex items-center gap-2">
+        <Icon icon="heroicons:document-currency-dollar" className="h-5 w-5" />
+        Demandes approuvées disponibles
+      </DialogTitle>
+    </DialogHeader>
 
-              <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800">
-                    <Icon icon="heroicons:information-circle" className="h-4 w-4 inline mr-1" />
-                    Sélectionnez une demande approuvée pour procéder au décaissement.
-                  </p>
-                </div>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <Input
+          placeholder="Rechercher par demandeur, motif ou montant..."
+          value={demandSearchTerm}
+          onChange={(e) => setDemandSearchTerm(e.target.value)}
+          className="flex-1"
+        />
+        <Badge variant="outline" className="self-center">
+          {approvedDemandsWithValidators.length} demande(s) trouvée(s)
+        </Badge>
+      </div>
 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Demandeur</TableHead>
-                      <TableHead>Montant</TableHead>
-                      <TableHead>Motif</TableHead>
-                      <TableHead>Date demande</TableHead>
-                      <TableHead>Validateurs</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {approvedDemandsWithValidators.length > 0 ? (
-                      approvedDemandsWithValidators.map((demand) => (
-                        <TableRow key={demand.id} className="hover:bg-gray-50">
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium">{demand.applicant?.name || "Inconnu"}</span>
-                              <span className="text-xs text-muted-foreground">ID: {demand.id}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className="font-medium">
-                              {formatAmount(demand.amount)}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="max-w-[200px] truncate" title={demand.pattern}>
-                              {demand.pattern}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="text-sm">{format(new Date(demand.created_at), "dd/MM/yyyy")}</span>
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(demand.created_at), "HH:mm")}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-1 max-w-[250px]">
-                              {demand.validators.slice(0, 2).map((validator, index) => (
-                                <div key={index} className="flex items-center gap-2">
-                                  <Badge variant="outline" className="text-xs">
-                                    {validator.name}
-                                  </Badge>
-                                  <Badge
-                                    color={
-                                      validator.status === "approuvée"
-                                        ? "success"
-                                        : validator.status === "refusée"
-                                          ? "destructive"
-                                          : "default"
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {validator.status}
-                                  </Badge>
-                                </div>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              onClick={() => handleDemandSelect(demand)}
-                              className="flex items-center gap-2"
-                            >
-                              <Icon icon="heroicons:arrow-right" className="h-4 w-4" />
-                              Sélectionner
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground h-24">
-                          <div className="flex flex-col items-center gap-2">
-                            <Icon icon="heroicons:exclamation-triangle" className="h-8 w-8 text-yellow-500" />
-                            <span>Aucune demande approuvée disponible.</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </DialogContent>
-          </Dialog>
+      <div className="border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader className="bg-gray-50">
+            <TableRow>
+              <TableHead className="w-[200px]">Demandeur</TableHead>
+              <TableHead className="text-right">Montant</TableHead>
+              <TableHead>Motif</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Validation</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {approvedDemandsWithValidators.length > 0 ? (
+              approvedDemandsWithValidators.map((item) => (
+                <TableRow key={item.demand.id} className="hover:bg-gray-50/50">
+                  <TableCell>
+                    <div className="font-medium">{item.demand.applicant?.name || "Inconnu"}</div>
+                    <div className="text-xs text-muted-foreground">Ref: {item.demand.id}</div>
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {formatAmount(item.demand.amount)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="line-clamp-2" title={item.demand.pattern}>
+                      {item.demand.pattern}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {format(new Date(item.demand.created_at), "dd/MM/yyyy")}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(new Date(item.demand.created_at), "HH:mm")}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      {item.validators.map((validator, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {validator.name}
+                          </Badge>
+                          <Badge
+                            color={validator.status === "approuvée" ? "success" : "destructive"}
+                            className="text-xs"
+                          >
+                            {validator.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      onClick={() => handleDemandSelect(item.demand)}
+                      className="gap-2"
+                    >
+                      Sélectionner
+                      <Icon icon="heroicons:arrow-right" className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center h-24">
+                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <Icon icon="heroicons:inbox" className="h-8 w-8" />
+                    {demandSearchTerm 
+                      ? "Aucune demande ne correspond à votre recherche"
+                      : "Aucune demande approuvée disponible"}
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
         </>
       )}
     </motion.div>
