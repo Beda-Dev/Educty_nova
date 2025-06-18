@@ -44,7 +44,7 @@ export default function CaissePage() {
       title: "Encaissement",
       description: "Gestion des entrées d'argent",
       icon: <ArrowDownCircle className="w-6 h-6" />,
-      path: "encaissement",
+      path: "/caisse_comptabilite/encaissement",
       color: itemColors[0]
     },
     {
@@ -52,7 +52,7 @@ export default function CaissePage() {
       title: "Décaissement",
       description: "Gestion des sorties d'argent",
       icon: <ArrowUpCircle className="w-6 h-6" />,
-      path: "decaissement",
+      path: "/caisse_comptabilite/decaissement",
       color: itemColors[1]
     },
     {
@@ -76,7 +76,7 @@ export default function CaissePage() {
       title: "Validation des demandes de décaissement",
       description: "Gestion de la validation des decaissement ",
       icon: <CheckCircle className="w-6 h-6" />,
-      path: "/decaissement/validation",
+      path: "/caisse_comptabilite/decaissement/validation",
       color: itemColors[4]
     },
     {
