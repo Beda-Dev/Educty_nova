@@ -138,7 +138,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
     } else {
       toast.error("Aucune demande de décaissement disponible.")
     }
-    onRefresh()
+    
   }
 
   const handleDemandSelect = (demand: Demand) => {
