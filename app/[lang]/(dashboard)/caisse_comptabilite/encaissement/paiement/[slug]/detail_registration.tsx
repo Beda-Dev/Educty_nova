@@ -19,7 +19,7 @@ import {
   Printer,
 } from "lucide-react";
 import { Payment, Registration, Student } from "@/lib/interface";
-import { DonneesEtudiantFusionnees } from "../../paiement/fonction";
+import { DonneesEtudiantFusionnees } from "../fonction";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { isRecentPayment } from "./fonction";
@@ -90,7 +90,7 @@ const PaymentDetail = ({ registration, studentData }: dataProps) => {
                 className="bg-primary hover:bg-primary/90 text-white"
                 onClick={() => {
                   toast.dismiss(t.id);
-                  router.push(`/historique_paiement/${payment.id}`);
+                  router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`);
                 }}
               >
                 Voir le reçu

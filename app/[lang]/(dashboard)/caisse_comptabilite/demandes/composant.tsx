@@ -31,7 +31,7 @@ import * as z from "zod"
 import { toast } from "@/components/ui/use-toast"
 import type { ValidationExpense, Demand } from "@/lib/interface"
 import { PlusCircle, FileText, AlertCircle, CheckCircle, Clock, Ban, Loader2 } from "lucide-react"
-import { fetchDemands } from "@/store/schoolservice"
+import { fetchDemands , fetchValidationExpenses } from "@/store/schoolservice"
 
 const disbursementFormSchema = z.object({
   pattern: z.string().min(5, {
@@ -45,7 +45,7 @@ const disbursementFormSchema = z.object({
 })
 
 export default function DisbursementRequestsPage() {
-  const { userOnline, settings, demands, setDemands , users } = useSchoolStore()
+  const { userOnline, settings, demands, setDemands , users , setValidationExpenses } = useSchoolStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [filteredRequests, setFilteredRequests] = useState<Demand[]>([])
@@ -113,17 +113,17 @@ export default function DisbursementRequestsPage() {
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case "approuvé": return "success"
-      case "refusé": return "destructive"
+      case "approuvée": return "success"
+      case "refusée": return "destructive"
       case "en attente": return "secondary"
-      default: return "default"
+      default: return "skyblue"
     }
   }
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "approuvé": return <CheckCircle className="h-4 w-4" />
-      case "refusé": return <Ban className="h-4 w-4" />
+      case "approuvée": return <CheckCircle className="h-4 w-4" />
+      case "refusée": return <Ban className="h-4 w-4" />
       case "en attente": return <Clock className="h-4 w-4" />
       default: return <AlertCircle className="h-4 w-4" />
     }
@@ -219,6 +219,9 @@ export default function DisbursementRequestsPage() {
 
       const updatedDemands = await fetchDemands()
       setDemands(updatedDemands)
+      const updateValidation = await fetchValidationExpenses()
+      setValidationExpenses(updateValidation)
+
       
       toast({
         title: "Succès",
@@ -342,7 +345,7 @@ export default function DisbursementRequestsPage() {
                 <SelectContent>
                   <SelectItem value="all">Tous</SelectItem>
                   <SelectItem value="en attente">En attente</SelectItem>
-                  <SelectItem value="approuvé">Approuvée</SelectItem>
+                  <SelectItem value="approuvée">Approuvée</SelectItem>
                   <SelectItem value="refusé">Refusée</SelectItem>
                 </SelectContent>
               </Select>
@@ -357,7 +360,7 @@ export default function DisbursementRequestsPage() {
             </Button>
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md">
             <Table>
               <TableHeader>
                 <TableRow>

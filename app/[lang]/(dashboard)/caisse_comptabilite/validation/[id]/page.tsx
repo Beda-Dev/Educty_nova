@@ -83,7 +83,7 @@ function Page({ params }: Props) {
   // Redirection si ID invalide ou demande introuvable
   useEffect(() => {
     if (notFound) {
-      const timer = setTimeout(() => router.push('/decaissement/validation/'), 2000)
+      const timer = setTimeout(() => router.push('/caisse_comptabilite'), 1000)
       return () => clearTimeout(timer)
     }
   }, [notFound, router])

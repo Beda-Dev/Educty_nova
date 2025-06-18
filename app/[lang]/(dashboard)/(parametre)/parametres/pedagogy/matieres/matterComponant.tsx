@@ -204,8 +204,7 @@ function MatterTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Matière</TableHead>
-                  <TableHead>Coefficient</TableHead>
+                  <TableHead>Matière</TableHead>  
                   <TableHead>Statut</TableHead>
                   {true && <TableHead>Action</TableHead>}
                 </TableRow>
@@ -223,7 +222,6 @@ function MatterTable() {
                         className="hover:bg-primary/5 border-t border-muted-foreground/20"
                       >
                         <TableCell>{item.name}</TableCell>
-                        <TableCell>{item.coefficient}</TableCell>
                         <TableCell>
                           {item.active === 1 ? (
                             <Badge color="success">Active</Badge>

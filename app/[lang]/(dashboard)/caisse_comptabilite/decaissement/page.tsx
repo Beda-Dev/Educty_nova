@@ -42,16 +42,8 @@ export default function DecaissementPage() {
       title: "Effectuer décaissement",
       description: "Enregistrer une nouvelle dépense",
       icon: <HandCoins className="w-6 h-6" />,
-      path: "depense",
+      path: "caisse_comptabilite/decaissement/depense",
       color: itemColors[0]
-    },
-    {
-      id: "validation-depense",
-      title: "Validation des dépenses",
-      description: "Valider ou rejeter les demandes de dépenses",
-      icon: <CheckCircle className="w-6 h-6" />,
-      path: "/decaissement/validation",
-      color: itemColors[2]
     }
   ];
 
@@ -96,7 +88,8 @@ export default function DecaissementPage() {
               <HandCoins className="w-8 h-8 text-skyblue" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-red-600 bg-clip-text text-transparent">
+              <h1   className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+  style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}>
                 Décaissements
               </h1>
               <p className="text-sm text-muted-foreground">

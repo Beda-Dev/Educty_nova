@@ -67,35 +67,47 @@ export async function updateStudentCountByClass(
       return;
     }
 
-    // 4. Exécuter les mises à jour en parallèle avec gestion fine des erreurs
-    const updateResults = await Promise.allSettled(
-      classesToUpdate.map(async (classe) => {
-        const newCount = classCounts[classe.id];
-        const updateData = {
-          ...classe,
-          student_number: newCount.toString()
-        };
+    // 4. Préparer les données pour les mises à jour
+    const updatePromises = classesToUpdate.map(async (classe) => {
+      const newCount = classCounts[classe.id];
+      
+      // Préparer les données à envoyer selon le format spécifié
+      const updateData: any = {
+        id: classe.id,
+        level_id: classe.level_id,
+        label: classe.label,
+        student_number: newCount.toString(),
+        max_student_number: classe.max_student_number,
+        active: classe.active,
+        // Gestion des matters selon le format demandé
+        matters: classe.matters?.map(matter => ({
+          id: matter.id,
+          coefficient: matter.pivot.coefficient
+        })) || []
+      };
 
-        const response = await fetch(`/api/classe?id=${classe.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updateData),
-        });
+      const response = await fetch(`/api/classe?id=${classe.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateData),
+      });
 
-        if (!response.ok) {
-          throw new Error(`Statut ${response.status} - ${response.statusText}`);
-        }
+      if (!response.ok) {
+        throw new Error(`Statut ${response.status} - ${response.statusText}`);
+      }
 
-        return {
-          classId: classe.id,
-          previousCount: classe.student_number,
-          newCount,
-          success: true
-        };
-      })
-    );
+      return {
+        classId: classe.id,
+        previousCount: classe.student_number,
+        newCount,
+        success: true
+      };
+    });
 
-    // 5. Analyser les résultats des mises à jour
+    // 5. Exécuter les mises à jour en parallèle avec gestion fine des erreurs
+    const updateResults = await Promise.allSettled(updatePromises);
+
+    // 6. Analyser les résultats des mises à jour
     const successfulUpdates = updateResults
       .filter((result): result is PromiseFulfilledResult<any> => result.status === "fulfilled")
       .map(result => result.value);

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle , CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -19,15 +19,15 @@ import Loading from "./loading"
 import { useRouter } from 'next/navigation'
 
 interface Props {
-    demande: Demand
-    validation: ValidationExpense
+  demande: Demand
+  validation: ValidationExpense
 }
 
 export default function DemandDetailsPage({ demande, validation }: Props) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [validationStatus, setValidationStatus] = useState<"validée" | "refusée">("validée")
+  const [validationStatus, setValidationStatus] = useState<"approuvée" | "refusée">("approuvée")
   const [comment, setComment] = useState("")
   const { userOnline, setValidationExpenses, setDemands, settings } = useSchoolStore()
 
@@ -61,7 +61,6 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
             En attente
           </Badge>
         )
-      case "validée":
       case "approuvée":
         return (
           <Badge color="success" className="bg-green-100 text-green-800">
@@ -69,9 +68,7 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         )
-      case "refusé":
       case "refusée":
-       case "rejeté": 
         return (
           <Badge color="destructive" className="bg-red-100 text-red-800">
             <XCircle className="w-3 h-3 mr-1" />
@@ -90,7 +87,7 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
 
   const handleValidation = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!demande || !userOnline) {
       toast.error("Données manquantes")
       return
@@ -130,12 +127,12 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
         throw new Error("Échec de la validation")
       }
 
-      let demandStatus: 'en attente' | 'validée' | 'approuvée' | 'refusée' = demande.status
+      let demandStatus: 'en attente' | 'approuvée' | 'refusée' = demande.status
       if (validationStatus === "refusée") {
         demandStatus = "refusée"
       }
-      if (validationStatus === "validée") {
-        demandStatus = "validée"
+      if (validationStatus === "approuvée") {
+        demandStatus = "approuvée"
       }
 
       const demandData = {
@@ -193,11 +190,11 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
     )
   }
 
-  const canValidate = validation && 
-                      userOnline && 
-                      validation.user_id === userOnline.id && 
-                      validation.validation_status === "en attente" && 
-                      demande.status === "en attente"
+  const canValidate = validation &&
+    userOnline &&
+    validation.user_id === userOnline.id &&
+    validation.validation_status === "en attente" &&
+    demande.status === "en attente"
 
   return (
     <Card className="container mx-auto p-6 space-y-6">
@@ -258,8 +255,8 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
             <div className="flex items-center gap-4">
               <Avatar className="w-12 h-12">
                 <AvatarImage asChild src={getAvatarUrl(demande.applicant.avatar)}>
-                  <Image 
-                    src={getAvatarUrl(demande.applicant.avatar) || ""} 
+                  <Image
+                    src={getAvatarUrl(demande.applicant.avatar) || ""}
                     alt={`Avatar de ${demande.applicant.name}`}
                     width={48}
                     height={48}
@@ -294,8 +291,8 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
               <div className="flex items-start gap-4">
                 <Avatar className="w-10 h-10">
                   <AvatarImage asChild src={getAvatarUrl(validation.user?.avatar)}>
-                    <Image 
-                      src={getAvatarUrl(validation.user?.avatar) || ""} 
+                    <Image
+                      src={getAvatarUrl(validation.user?.avatar) || ""}
                       alt={`Avatar de ${validation.user?.name}`}
                       width={40}
                       height={40}
@@ -313,9 +310,6 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{validation.user?.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Ordre de validation: {validation.validation_order}
-                      </p>
                     </div>
                     {getStatusBadge(validation.validation_status)}
                   </div>
@@ -332,6 +326,18 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
               <Separator className="my-4" />
             </div>
           </CardContent>
+          {!canValidate && (
+            <CardFooter className="flex justify-center gap-4">
+              <p className="text-muted-foreground">Vous n'êtes pas autorisé à valider cette demande</p>
+              <Button 
+                onClick={() => router.push("/caisse_comptabilite/decaissement/validation/")}
+                variant="outline"
+                color="destructive"
+              >
+                Retour à la liste des validations
+              </Button>
+            </CardFooter>
+          )}
         </Card>
 
         {/* Formulaire de validation */}
@@ -349,26 +355,31 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
                   <Label htmlFor="validation-status">Décision</Label>
                   <Select
                     value={validationStatus}
-                    onValueChange={(value: "validée" | "refusée") => setValidationStatus(value)}
+                    onValueChange={(value: "approuvée" | "refusée") => setValidationStatus(value)}
                     disabled={submitting}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Sélectionner une action" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="validée">Valider</SelectItem>
-                      <SelectItem value="refusée">Refuser</SelectItem>
+                      <SelectItem value="approuvée">approuver</SelectItem>
+                      <SelectItem value="refusée">refuser</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="comment">Commentaire {validationStatus === "refusée" && "(obligatoire)"}</Label>
-                  <Textarea
+                  <Textarea 
+                  color={
+                    validationStatus === "refusée"
+                      ? "destructive"
+                      : "primary"
+                  }
                     id="comment"
                     placeholder={
-                      validationStatus === "refusée" 
-                        ? "Veuillez expliquer le motif du refus" 
+                      validationStatus === "refusée"
+                        ? "Veuillez expliquer le motif du refus"
                         : "Commentaire optionnel"
                     }
                     value={comment}
@@ -379,39 +390,40 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
                   />
                 </div>
                 <div className="flex justify-around gap-2">
-                <Button 
-                  color="destructive"
-                   onClick={()=> router.push("/decaissement/validation/")}
-                  disabled={submitting}
-                  className=""
-                >
-                  Annuler
+                  <Button
+                    color="destructive"
+                    onClick={() => router.push("/caisse_comptabilite")}
+                    disabled={submitting}
+                    className=""
+                  >
+                    Annuler
 
-                </Button>
-                  
-                
+                  </Button>
 
-                <Button 
-                  color="indigodye"
-                  type="submit" 
-                  disabled={submitting || (validationStatus === "refusée" && !comment)}
-                  className=""
-                >
-                  {submitting ? (
-                    <span className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 animate-spin" />
-                      Traitement...
-                    </span>
-                  ) : (
-                    `${validationStatus === "validée" ? "Valider" : "Refuser"} la demande`
-                  )}
-                </Button>
+
+
+                  <Button
+                    color="indigodye"
+                    type="submit"
+                    disabled={submitting || (validationStatus === "refusée" && !comment)}
+                    className=""
+                  >
+                    {submitting ? (
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 animate-spin" />
+                        Traitement...
+                      </span>
+                    ) : (
+                      `${validationStatus === "approuvée" ? "approuver" : "refuser"} la demande`
+                    )}
+                  </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
         )}
       </CardContent>
+
     </Card>
   )
 }

@@ -311,19 +311,19 @@ const menuItems: MenuCategory = {
     {
       id: "encaissement",
       title: "Encaissement",
-      path: "/encaissement",
+      path: "/caisse_comptabilite/encaissement",
       icon: <DollarSign className="w-4 h-4" />,
       children: [
         {
           id: "paiement",
           title: "Paiement",
-          path: "/paiement",
+          path: "/caisse_comptabilite/encaissement/paiement",
           icon: <DollarSign className="w-4 h-4" />,
         },
         {
           id: "historique_paiement",
           title: "Historique Paiement",
-          path: "/historique_paiement",
+          path: "/caisse_comptabilite/encaissement/historique_paiement",
           icon: <Clock className="w-4 h-4" />,
         },
       ],
@@ -331,13 +331,13 @@ const menuItems: MenuCategory = {
     {
       id: "decaissement",
       title: "Décaissement",
-      path: "/decaissement",
+      path: "/caisse_comptabilite/decaissement",
       icon: <DollarSign className="w-4 h-4" />,
       children: [
         {
           id: "depense",
           title: "Dépense",
-          path: "/depense",
+          path: "/caisse_comptabilite/decaissement/depense",
           icon: <DollarSign className="w-4 h-4" />,
         }
       ],
@@ -374,7 +374,7 @@ const menuItems: MenuCategory = {
       id: "validation-decaissement",
       title: "Validation des demandes",
       icon: <CheckCircle className="w-6 h-6" />,
-      path: "/decaissement/validation",
+      path: "/caisse_comptabilite/validation",
     },
     {
       id: "finance",

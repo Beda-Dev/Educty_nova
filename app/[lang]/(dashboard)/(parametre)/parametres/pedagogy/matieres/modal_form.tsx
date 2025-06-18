@@ -27,7 +27,6 @@ import {
 
 interface MatterData {
   name: string;
-  coefficient: string;
   active: number;
 }
 
@@ -38,7 +37,6 @@ interface AddMatterModalProps {
 const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
-  const [coefficient, setCoefficient] = useState<string>("");
   const [active, setActive] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const { setMatters } = useSchoolStore();
@@ -48,14 +46,6 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
       toast({
         title: "Erreur",
         description: "Le nom de la matière est requis.",
-        color: "destructive",
-      });
-      return false;
-    }
-    if (!coefficient || isNaN(parseFloat(coefficient))) {
-      toast({
-        title: "Erreur",
-        description: "Le coefficient doit être un nombre valide.",
         color: "destructive",
       });
       return false;
@@ -70,7 +60,6 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
 
     const newMatter: MatterData = {
       name,
-      coefficient,
       active,
     };
 
@@ -95,7 +84,6 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
 
       onUpdate();
       setName("");
-      setCoefficient("");
       setActive(1);
       setOpen(false);
     } catch (error) {
@@ -132,18 +120,6 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
                   placeholder="ex: Mathématiques"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="coefficient">Coefficient</Label>
-                <Input
-                  id="coefficient"
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  placeholder="ex: 3"
-                  value={coefficient}
-                  onChange={(e) => setCoefficient(e.target.value)}
                 />
               </div>
               <div className="space-y-2">

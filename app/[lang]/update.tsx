@@ -27,9 +27,11 @@ import {
 import {AcademicYear} from '@/lib/interface'
 import {updateStudentCountByClass} from "@/lib/fonction";
 import { useRegistrationStore } from "@/hooks/use-registration-store";
+import { useReinscriptionStore } from "@/hooks/use-reinscription-store";
 
 const DataFetcher = () => {
   const {reset} = useRegistrationStore();
+  const {reset : resetReinscription} = useReinscriptionStore();
   const {userOnline ,  academicYearCurrent} = useSchoolStore();
   const setClasses = useSchoolStore((state) => state.setClasses);
   const setLevels = useSchoolStore((state) => state.setLevels);
@@ -88,6 +90,7 @@ const DataFetcher = () => {
         // await updateStudentCountByClass(registrations, academicYearCurrent, classes);
 
         reset();
+        resetReinscription();
         console.log("Données chargées avec succès :", {
           classes,
           levels,

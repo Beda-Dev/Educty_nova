@@ -43,7 +43,7 @@ export default function EncaissementPage() {
       title: "Paiement",
       description: "Enregistrer un nouveau paiement",
       icon: <CreditCard className="w-6 h-6" />,
-      path: "paiement",
+      path: "caisse_comptabilite/encaissement/paiement",
       color: itemColors[0]
     },
     {
@@ -51,7 +51,7 @@ export default function EncaissementPage() {
       title: "Historique des paiements",
       description: "Consulter les paiements enregistrés",
       icon: <History className="w-6 h-6" />,
-      path: "historique_paiement",
+      path: "caisse_comptabilite/encaissement/historique_paiement",
       color: itemColors[1]
     }
   ];

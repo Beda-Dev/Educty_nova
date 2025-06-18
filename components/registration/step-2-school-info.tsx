@@ -357,12 +357,16 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
             </div>
           </div>
           <DialogFooter>
+            <div className="flex justify-around gap-2">
+
+            
             <Button variant="outline" color="destructive" onClick={() => setOpenConfirmModal(false)}>
               Annuler
             </Button>
             <Button color="indigodye" onClick={handleConfirm}>
               Confirmer
             </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

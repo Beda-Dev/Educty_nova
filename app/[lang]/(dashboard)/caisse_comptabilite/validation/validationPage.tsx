@@ -151,7 +151,7 @@ export default function ExpenseValidationsPage() {
   // Obtenir les infos du statut
   const getStatusInfo = (status: string) => {
     switch (status) {
-      case "validée":
+      case "approuvée":
         return {
           icon: <CheckCircle2 className="h-4 w-4" />,
           color: "bg-green-100 text-green-800",
@@ -241,7 +241,7 @@ export default function ExpenseValidationsPage() {
               <SelectContent>
                 <SelectItem value="">Statuts</SelectItem>
                 <SelectItem value="en attente">En attente</SelectItem>
-                <SelectItem value="validée">Validée</SelectItem>
+                <SelectItem value="approuvée">Approuvée</SelectItem>
                 <SelectItem value="refusée">Refusée</SelectItem>
               </SelectContent>
             </Select>
@@ -364,7 +364,7 @@ export default function ExpenseValidationsPage() {
                                     size="sm"
                                     onClick={() =>
                                       router.push(
-                                        `/decaissement/validation/${validation.id}`
+                                        `/caisse_comptabilite/validation/${validation.id}`
                                       )
                                     }
                                   >

@@ -96,7 +96,7 @@ export function PaymentTable({ data }: { data: Payment[] }) {
         <Button
           variant="outline"
           className="p-2"
-          onClick={() => router.push(`/historique_paiement/${row.original.id}`)}
+          onClick={() => router.push(`/caisse_comptabilite/encaissement/historique_paiement/${row.original.id}`)}
         >
           <Eye className="h-5 w-5" />
         </Button>

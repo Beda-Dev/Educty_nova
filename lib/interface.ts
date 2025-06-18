@@ -216,6 +216,20 @@ export interface Classe {
   created_at: string;
   updated_at: string;
   level?: Level;
+  matters?: {
+    id: number;
+    name: string;
+    active: number;
+    created_at: string;
+    updated_at: string;
+    pivot: {
+            classe_id: number;
+            matter_id: number;
+            coefficient: number;
+            created_at: string;
+            updated_at: string;
+          };
+  } [] | [];
 }
 
 export interface Registration {
@@ -422,14 +436,13 @@ export interface Setting {
   longitude?: string | number | null; // plus précis que string pour les coordonnées
   latitude?: string | number | null; // plus précis que string pour les coordonnées
   expense_approval_level?: number; // niveau de validation des depenses dans select
-  primary_validator?: string | null; 
-  currency?: string | null; 
+  primary_validator?: string | null;
+  currency?: string | null;
 }
 
 export interface Matter {
   id: number;
   name: string;
-  coefficient: string;
   active: number;
   created_at: string;
   updated_at: string;
@@ -454,7 +467,7 @@ export interface Demand {
   applicant_id: number;
   pattern: string;
   amount: number;
-  status: 'en attente' | 'validée' | 'approuvée' | 'refusée'; 
+  status: 'en attente' | 'validée' | 'approuvée' | 'refusée';
   created_at: string;
   updated_at: string;
   applicant: UserSingle;

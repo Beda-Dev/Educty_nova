@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSchoolStore } from "@/store";
 import { Registration, Pricing, Student, AcademicYear, Installment, Payment } from "@/lib/interface";
 import RegistrationFinal from "./detail_registration";
-import { obtenirDonneesCompletesEtudiant  , DonneesEtudiantFusionnees} from "../../paiement/fonction";
+import { obtenirDonneesCompletesEtudiant  , DonneesEtudiantFusionnees} from "../fonction";
 
 interface Props {
   params: {

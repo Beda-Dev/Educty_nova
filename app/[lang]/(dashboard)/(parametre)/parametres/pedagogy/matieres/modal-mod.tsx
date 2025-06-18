@@ -25,29 +25,22 @@ interface EditMatterModalProps {
 
 interface MatterToUpdate {
   name: string;
-  coefficient: string;
   active: number;
 }
 
 const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterModalProps) => {
   const [name, setName] = useState<string>(matterData.name);
-  const [coefficient, setCoefficient] = useState<string>(matterData.coefficient);
   const [active, setActive] = useState<number>(matterData.active);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setName(matterData.name);
-    setCoefficient(matterData.coefficient);
     setActive(matterData.active);
   }, [matterData]);
 
   const validateForm = (): boolean => {
     if (!name.trim()) {
       toast.error("Le nom de la matière est requis.");
-      return false;
-    }
-    if (!coefficient || isNaN(parseFloat(coefficient))) {
-      toast.error("Le coefficient doit être un nombre valide.");
       return false;
     }
     return true;
@@ -61,7 +54,6 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
 
     const updatedMatter: MatterToUpdate = {
       name,
-      coefficient,
       active,
     };
 
@@ -107,16 +99,6 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label>Coefficient</Label>
-                <Input
-                  type="number"
-                  min="0.1"
-                  step="0.1"
-                  value={coefficient}
-                  onChange={(e) => setCoefficient(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-2">
