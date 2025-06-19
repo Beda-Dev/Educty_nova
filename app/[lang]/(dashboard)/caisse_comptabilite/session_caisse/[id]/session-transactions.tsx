@@ -73,9 +73,9 @@ export default function SessionTransactions({
 
       if (transaction.type === "encaissement") {
         const payment = payments.find((p) => p.transaction_id === transaction.id)
-        if (payment && payment.payment_methods) {
-          paymentMethods = payment.payment_methods.map((pm: any) => {
-            const method = methodPayment.find((m) => m.id === pm.payment_method_id)
+        if (payment && payment.payment_method && Array.isArray(payment.payment_method)) {
+          paymentMethods = payment.payment_method.map((pm: any) => {
+            const method = methodPayment.find((m) => m.id === pm.id)
             return method?.name || "Inconnu"
           })
         }
@@ -140,25 +140,39 @@ export default function SessionTransactions({
     setCurrentPage(1)
   }, [activeTab, typeFilter, paymentMethodFilter, dateFilter, searchTerm])
 
+  // Type pour l'export Excel
+  type ExportData = {
+    "Date/Heure": string;
+    "Référence": string;
+    "Type": string;
+    "Description": string;
+    "Méthodes de paiement": string;
+    "Montant": number;
+    "Montant formaté": string;
+  };
+
   // Export Excel
   const handleExportExcel = () => {
-    const exportData = filteredTransactions.map((transaction) => ({
+    const exportData: ExportData[] = filteredTransactions.map((transaction) => ({
       "Date/Heure": formatDateTime(transaction.date),
-      Référence: transaction.reference,
-      Type: transaction.type === "encaissement" ? "Encaissement" : "Décaissement",
-      Description: transaction.description,
+      "Référence": transaction.reference,
+      "Type": transaction.type === "encaissement" ? "Encaissement" : "Décaissement",
+      "Description": transaction.description || "-",
       "Méthodes de paiement": transaction.paymentMethods?.join(", ") || "-",
-      Montant: transaction.amount,
+      "Montant": transaction.amount,
       "Montant formaté": formatAmount(transaction.amount),
-    }))
+    }));
 
-    universalExportToExcel({
+    
+
+    // @ts-ignore - TypeScript a du mal avec l'inférence ici
+    universalExportToExcel<ExportData>({
       source: {
         type: "array",
         data: exportData,
       },
       fileName: `transactions_session_${sessionId}_${format(new Date(), "yyyy-MM-dd")}.xlsx`,
-    })
+    });
   }
 
   // Réinitialiser les filtres
@@ -254,13 +268,13 @@ export default function SessionTransactions({
           {/* Indicateurs de filtres actifs */}
           <div className="flex flex-wrap gap-2">
             {dateFilter && (
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1">
                 Date: {format(dateFilter, "dd/MM/yyyy")}
                 <X className="h-3 w-3 cursor-pointer" onClick={() => setDateFilter(undefined)} />
               </Badge>
             )}
             {paymentMethodFilter !== "all" && (
-              <Badge variant="secondary" className="flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1">
                 Méthode: {paymentMethodFilter}
                 <X className="h-3 w-3 cursor-pointer" onClick={() => setPaymentMethodFilter("all")} />
               </Badge>

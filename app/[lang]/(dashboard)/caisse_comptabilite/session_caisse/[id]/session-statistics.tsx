@@ -42,10 +42,12 @@ export default function SessionStatistics({
 
     // Calculer les encaissements par méthode de paiement
     payments.forEach((payment) => {
-      if (payment.payment_methods && Array.isArray(payment.payment_methods)) {
-        payment.payment_methods.forEach((pm: any) => {
-          if (stats[pm.payment_method_id]) {
-            stats[pm.payment_method_id].totalEncaissements += Number(pm.amount) || 0
+      if (payment.payment_method && Array.isArray(payment.payment_method)) {
+        payment.payment_method.forEach((pm: any) => {
+          if (stats[pm.id]) {
+            // Utiliser le montant du pivot ou le montant principal
+            const amount = pm.pivot?.montant || payment.amount
+            stats[pm.id].totalEncaissements += Number(amount) || 0
           }
         })
       }

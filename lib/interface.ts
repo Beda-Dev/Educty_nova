@@ -22,7 +22,23 @@ export interface PaymentMethod {
   name: string;
   created_at: string;
   updated_at: string;
-  payments?: Payment[];
+  payments: {  id: number;
+    student_id: number;
+    installment_id: number;
+    cash_register_id: number;
+    cashier_id: number;
+    amount: string;
+    created_at: string;
+    updated_at: string;
+    transaction_id: number;
+    pivot: {
+      payment_id: number;
+      payment_method_id: number;
+      montant: string;
+      created_at: string;
+      updated_at: string;
+    };
+  }[] | [];
 }
 
 export interface Permission {
@@ -312,7 +328,20 @@ export interface Payment {
   cash_register: CashRegister;
   cashier: UserSingle;
   transaction_id?: number;
-  payment_method?: PaymentMethod[];
+  transaction?: Transaction;
+  payment_method: {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+    pivot: {
+        payment_id: number;
+        payment_method_id: number;
+        montant: string;
+        created_at: string;
+        updated_at: string;
+      };
+    }[] | [];
 }
 
 export interface ExpenseType {

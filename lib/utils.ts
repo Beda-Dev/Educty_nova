@@ -306,7 +306,7 @@ export async function generatePDFfromRef(
 
 
 
-export function universalExportToExcel<T extends Record<string, any>[]>({
+export function universalExportToExcel<T extends Record<string, any>>({
   source,
   fileName = "export.xlsx",
 }: ExportOptions<T>) {
