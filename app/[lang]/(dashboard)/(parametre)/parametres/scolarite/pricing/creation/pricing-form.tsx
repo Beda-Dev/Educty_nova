@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useSchoolStore } from "@/store"
-import ControlledSelectData from "../componants/SelectData"
+import ControlledSelectData from "../select_data"
 
 interface PricingFormProps {
   label: string
