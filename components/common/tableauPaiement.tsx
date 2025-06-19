@@ -51,65 +51,64 @@ export const TableauPaiement: React.FC<TableauPaiementProps> = ({ payments = [],
   const hasPayment = rows.some(row => row.paid > 0);
 
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table
-        style={{ minWidth: 320, borderCollapse: 'collapse', fontSize: '0.85rem', width: '100%' }}
-        aria-label="Tableau récapitulatif des paiements"
-      >
-        <caption style={{ position: 'absolute', left: '-9999px', height: 1, width: 1, overflow: 'hidden' }}>
-          Récapitulatif des paiements par type de frais
-        </caption>
-        <thead>
+    <div className="overflow-x-auto">
+    <table className="min-w-[320px] w-full border-collapse text-sm">
+      <thead>
+        <tr>
+          <th className="border px-2 py-1 text-left font-medium">Type de frais</th>
+          <th className="border px-2 py-1 text-right font-medium">Montant total</th>
+          <th className="border px-2 py-1 text-right font-medium">Montant payé</th>
+          <th className="border px-2 py-1 text-right font-medium">Reste à payer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.length === 0 || !hasPayment ? (
           <tr>
-            <th scope="col" style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 500, textAlign: 'left' }}>Type de frais</th>
-            <th scope="col" style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 500, textAlign: 'right' }}>Montant total</th>
-            <th scope="col" style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 500, textAlign: 'right' }}>Montant payé</th>
-            <th scope="col" style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 500, textAlign: 'right' }}>Reste à payer</th>
+            <td colSpan={4} className="border px-3 py-2 text-center text-muted-foreground">
+              Aucun paiement enregistré.
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 || !hasPayment ? (
-            <tr>
-              <td colSpan={4} style={{ border: '1px solid #ddd', padding: '6px', textAlign: 'center', color: '#888' }}>
-                Aucun paiement enregistré.
+        ) : (
+          rows.map((row, i) => (
+            <tr key={i}>
+              <td className="border px-2 py-1 whitespace-nowrap">{row.label}</td>
+              <td className="border px-2 py-1 text-right">
+                {row.total.toLocaleString()} {currency}
+              </td>
+              <td className="border px-2 py-1 text-right">
+                {row.paid.toLocaleString()} {currency}
+              </td>
+              <td
+                className={`border px-2 py-1 text-right font-semibold ${
+                  row.reste > 0 ? "text-red-600 font-medium" : "text-green-700 font-semibold"
+                }`}
+              >
+                {row.reste.toLocaleString()} {currency}
               </td>
             </tr>
-          ) : (
-            rows.map((row, i) => (
-              <tr key={i}>
-                <td style={{ border: '1px solid #ddd', padding: '4px', whiteSpace: 'nowrap' }}>{row.label}</td>
-                <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right' }}>{row.total.toLocaleString()} {currency}</td>
-                <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right' }}>{row.paid.toLocaleString()} {currency}</td>
-                <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right', color: row.reste > 0 ? '#c00' : '#108a00', fontWeight: row.reste > 0 ? 500 : 600 }}>
-                  {row.reste.toLocaleString()} {currency}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 600, textAlign: 'right' }} colSpan={2}>
-              Total à payer :
-            </td>
-            <td style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 600, textAlign: 'right' }}>
-              {totalGlobal.toLocaleString()} {currency}
-            </td>
-            <td style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 600, textAlign: 'right', color: resteGlobal > 0 ? '#c00' : '#108a00' }}>
-              {resteGlobal.toLocaleString()} {currency}
-            </td>
-          </tr>
-          <tr>
-            <td style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 600, textAlign: 'right' }} colSpan={2}>
-              Total payé :
-            </td>
-            <td style={{ border: '1px solid #ddd', padding: '4px', fontWeight: 600, textAlign: 'right' }} colSpan={2}>
-              {typeof paidAmount === 'number' ? paidAmount.toLocaleString() : 0} {currency}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+          ))
+        )}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td className="border px-2 py-1 text-right font-semibold">Total à payer :</td>
+          <td className="border px-2 py-1 text-right font-semibold">
+            {totalGlobal.toLocaleString()} {currency}
+          </td>
+          <td className="border px-2 py-1 text-right font-semibold">
+            {paidAmount.toLocaleString()} {currency}
+          </td>
+          <td
+            className={`border px-2 py-1 text-right font-semibold ${
+              resteGlobal > 0 ? "text-red-600" : "text-green-700"
+            }`}
+          >
+            {resteGlobal.toLocaleString()} {currency}
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
   );
 };
 

@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { verificationPermission } from "@/lib/fonction";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil } from "lucide-react";
+import { Edit } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Pagination,
@@ -230,7 +230,7 @@ const onUpdate = async () => {
                               size="icon"
                               onClick={() => handleEditClick(item)}
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Edit className="h-4 w-4" />
                             </Button>
 
                             <Button

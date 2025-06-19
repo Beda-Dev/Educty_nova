@@ -9,11 +9,15 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Check, ChevronDown, Search, User, Calendar, CreditCard, AlertCircle, Printer } from "lucide-react"
+import { Check, User, Calendar, CreditCard, AlertCircle, Printer } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Student, Pricing, Installment, Payment , Registration} from "@/lib/interface"
 import { useRouter } from "next/navigation"
 
+interface FinancialSummaryPageProps {
+  student: Student
+  studentRegistration: Registration
+}
 
 interface StudentFinancialData {
   student: Student
@@ -33,7 +37,7 @@ interface StudentFinancialData {
   }[]
 }
 
-export default function FinancialSummaryPage() {
+export default function FinancialSummaryPage({ student, studentRegistration }: FinancialSummaryPageProps) {
   const { registrations, students, pricing, installements, payments, academicYearCurrent, settings, levels , classes } =
     useSchoolStore()
   const router = useRouter()  
@@ -46,9 +50,6 @@ export default function FinancialSummaryPage() {
     return `${num.toLocaleString('fr-FR').replace(/,/g, ' ')} ${currency}`;
   }
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [open, setOpen] = useState(false)
   const [currentClass, setCurrentClass] = useState("")
   const [currentLevel, setCurrentLevel] = useState("")
 
@@ -64,25 +65,14 @@ export default function FinancialSummaryPage() {
       .filter(Boolean) as (Student & { registration: any })[]
   }, [registrations, students, academicYearCurrent])
 
-  // Filtrer les élèves selon le terme de recherche
-  const filteredStudents = useMemo(() => {
-    if (!searchTerm) return []
 
-    return currentYearStudents.filter(
-      (student) =>
-        student.registration_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        `${student.first_name} ${student.name}`.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-  }, [currentYearStudents, searchTerm])
 
   // Calculer les données financières de l'élève sélectionné
   const financialData = useMemo((): StudentFinancialData | null => {
-    if (!selectedStudent) return null
+    if (!student) return null
 
     const studentRegistration = registrations.find(
-      (reg) => reg.student_id === selectedStudent.id && reg.academic_year_id === academicYearCurrent.id,
+      (reg) => reg.student_id === student.id && reg.academic_year_id === academicYearCurrent.id,
     )
     setCurrentClass(studentRegistration?.classe.label || "")
     const niveauCurrent = levels.find((level) => Number(level.id) === Number(studentRegistration?.classe.level_id))
@@ -93,7 +83,7 @@ export default function FinancialSummaryPage() {
     // Trouver les pricing applicables
     const applicablePricing = pricing.filter(
       (p) =>
-        p.assignment_type_id === selectedStudent.assignment_type_id &&
+        p.assignment_type_id === student.assignment_type_id &&
         p.academic_years_id === academicYearCurrent.id &&
         p.level_id === studentRegistration.classe.level_id,
     )
@@ -109,7 +99,7 @@ export default function FinancialSummaryPage() {
 
       for (const installment of pricingInstallments) {
         const installmentPayments = payments.filter(
-          (p) => p.installment_id === installment.id && p.student_id === selectedStudent.id,
+          (p) => p.installment_id === installment.id && p.student_id === student.id,
         )
 
         const amountPaid = installmentPayments.reduce((sum, payment) => sum + Number.parseFloat(payment.amount), 0)
@@ -136,7 +126,7 @@ export default function FinancialSummaryPage() {
     }
 
     return {
-      student: selectedStudent,
+      student,
       applicablePricing,
       totalDue,
       totalPaid,
@@ -145,7 +135,7 @@ export default function FinancialSummaryPage() {
       registration: studentRegistration,
       installmentDetails,
     }
-  }, [selectedStudent, registrations, academicYearCurrent, pricing, installements, payments])
+  }, [registrations, academicYearCurrent, pricing, installements, payments])
 
 
   const formatDate = (dateString: string) => {
@@ -154,74 +144,6 @@ export default function FinancialSummaryPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-
-
-      {/* Recherche d'élève */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            Rechercher un élève
-          </CardTitle>
-          <CardDescription>Recherchez par matricule, nom ou prénom</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="search">Recherche</Label>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
-                    {selectedStudent
-                      ? `${selectedStudent.registration_number} - ${selectedStudent.first_name} ${selectedStudent.name}`
-                      : "Sélectionner un élève..."}
-                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Rechercher un élève..."
-                      value={searchTerm}
-                      onValueChange={setSearchTerm}
-                    />
-                    <CommandList>
-                      <CommandEmpty>Aucun élève trouvé.</CommandEmpty>
-                      <CommandGroup>
-                        {filteredStudents.map((student) => (
-                          <CommandItem
-                            key={student.id}
-                            value={`${student.registration_number} ${student.first_name} ${student.name}`}
-                            onSelect={() => {
-                              setSelectedStudent(student)
-                              setOpen(false)
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                selectedStudent?.id === student.id ? "opacity-100" : "opacity-0",
-                              )}
-                            />
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {student.first_name} {student.name}
-                              </span>
-                              <span className="text-sm text-muted-foreground">
-                                {student.registration_number} - {student.assignment_type.label}
-                              </span>
-                            </div>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Résumé financier */}
       {financialData && (
@@ -477,18 +399,6 @@ export default function FinancialSummaryPage() {
             </div>
           )} */}
         </div>
-      )}
-
-      {!selectedStudent && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Aucun élève sélectionné</h3>
-            <p className="text-muted-foreground">
-              Utilisez la barre de recherche ci-dessus pour trouver et sélectionner un élève
-            </p>
-          </CardContent>
-        </Card>
       )}
     </div>
   )

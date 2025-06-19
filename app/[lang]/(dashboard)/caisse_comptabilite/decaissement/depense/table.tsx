@@ -60,13 +60,13 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
     "creer depenses",
   ])
 
-  if (!hasAdminAccessVoir) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    )
-  }
+  // if (!hasAdminAccessVoir) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   )
+  // }
 
   // Formatage des montants avec devise
   const formatAmount = (amount: number) => {
@@ -235,7 +235,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
             </CardHeader>
 
             <CardContent>
-              {hasAdminAccessCreer && (
+              {true && (
                 <div className="flex justify-end my-2">
                   <Button color="indigodye" onClick={handleCreateExpense}>
                     <Icon icon="heroicons:plus" className="mr-2 h-4 w-4" />

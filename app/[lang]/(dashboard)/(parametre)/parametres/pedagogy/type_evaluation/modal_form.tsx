@@ -109,7 +109,7 @@ const DialogForm = ({ onUpdate }: AddTypeModalProps) => {
 
                 <>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                "Ajouter"
+                Ajouter
                 </>
               )}
             </Button>

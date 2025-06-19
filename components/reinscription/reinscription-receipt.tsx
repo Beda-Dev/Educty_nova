@@ -134,7 +134,17 @@ export function ReinscriptionReceipt({ onNewReinscription }: ReinscriptionReceip
 
           {/* Payment Summary */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-3">DÉTAIL DES PAIEMENTS</h3>
+          <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center justify-between">
+          <span>Récapitulatif des paiements</span>
+
+          {/* Encadré Montant Versé */}
+          <span className="bg-blue-50 border border-blue-200 rounded-md px-3 py-1 text-sm font-medium flex items-center gap-2">
+            <span className="text-blue-700">Montant Versé :</span>
+            <span className="text-green-600 font-bold">
+              {paidAmount.toLocaleString()} {schoolInfo.currency}
+            </span>
+          </span>
+        </h3>
             <div className="my-2">
               <TableauPaiement
                 payments={payments}

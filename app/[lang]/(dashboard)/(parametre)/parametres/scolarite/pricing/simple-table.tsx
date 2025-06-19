@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Edit, PlusCircle , Pencil } from "lucide-react";
+import { Edit, PlusCircle, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -21,18 +21,36 @@ import { useSchoolStore } from "@/store";
 import { verificationPermission } from "@/lib/fonction";
 import DialogForm from "./edit_modal_pricing";
 import { fetchpricing } from "@/store/schoolservice";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
+
 
 interface PricingTableProps {
   data: Pricing[];
 }
 
+const formatNumber = (number: number | string) => {
+  // Convertir en nombre si c'est une chaîne
+  const num = typeof number === 'string' ? parseFloat(number) : number;
+  // Retourner 0 si NaN
+  if (isNaN(num)) return '0';
+  // Formater avec espace comme séparateur de milliers
+  return num.toLocaleString('fr-FR').replace(/,/g, ' ');
+};
+
 const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
-  const { userOnline, setPricing } = useSchoolStore();
+  const { userOnline, setPricing, settings } = useSchoolStore();
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedPricing, setSelectedPricing] = useState<Pricing | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  
 
   const router = useRouter();
 
@@ -53,10 +71,10 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
     permissionCreer
   );
 
-  if (!canView) {
-    router.push("/dashboard");
-    return null;
-  }
+  // if (!canView) {
+  //   router.push("/dashboard");
+  //   return null;
+  // }
 
   const filteredFees = data.filter(
     (item) =>
@@ -151,7 +169,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                       <TableCell>{item.fee_type.label}</TableCell>
                       <TableCell>{item.assignment_type.label}</TableCell>
                       <TableCell className="font-medium">
-                        {Number(item.amount).toLocaleString()} FCFA
+                      {formatNumber(item.amount)}{" "}{settings[0]?.currency || "FCFA"}
                       </TableCell>
                       <TableCell>{item.academic_year.label}</TableCell>
                       {canEdit && (
@@ -162,7 +180,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                             color="tyrian"
                             title="Modifier"
                           >
-                            <Pencil className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </Button>
                         </TableCell>
                       )}
@@ -172,29 +190,69 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
               </Table>
 
               {/* Pagination controls */}
-              <div className="flex justify-between items-center mt-4">
-                <div className="text-sm text-muted-foreground">
-                  Page {currentPage} sur {totalPages}
+              {filteredFees.length > itemsPerPage && (
+                <div className="mt-4 flex justify-center">
+                  <Pagination>
+                    <PaginationContent>
+                      {/* Bouton Précédent */}
+                      <PaginationItem>
+                        {currentPage === 1 ? (
+                          <PaginationPrevious className="cursor-not-allowed opacity-50" />
+                        ) : (
+                          <PaginationPrevious
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                          />
+                        )}
+                      </PaginationItem>
+
+                      {/* Affichage des pages */}
+                      {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                        const pageNum = i + 1;
+                        return (
+                          <PaginationItem key={pageNum}>
+                            <Button
+                              variant={currentPage === pageNum ? "outline" : "ghost"}
+                              onClick={() => setCurrentPage(pageNum)}
+                            >
+                              {pageNum}
+                            </Button>
+                          </PaginationItem>
+                        );
+                      })}
+
+                      {/* Points de suspension si nécessaire */}
+                      {totalPages > 3 && currentPage < totalPages - 1 && (
+                        <PaginationItem>
+                          <span className="px-2 text-muted-foreground">…</span>
+                        </PaginationItem>
+                      )}
+
+                      {/* Dernière page si nécessaire */}
+                      {totalPages > 3 && currentPage < totalPages && (
+                        <PaginationItem>
+                          <Button
+                            variant={currentPage === totalPages ? "outline" : "ghost"}
+                            onClick={() => setCurrentPage(totalPages)}
+                          >
+                            {totalPages}
+                          </Button>
+                        </PaginationItem>
+                      )}
+
+                      {/* Bouton Suivant */}
+                      <PaginationItem>
+                        {currentPage === totalPages ? (
+                          <PaginationNext className="cursor-not-allowed opacity-50" />
+                        ) : (
+                          <PaginationNext
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                          />
+                        )}
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
                 </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                  >
-                    Précédent
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                  >
-                    Suivant
-                  </Button>
-                </div>
-              </div>
+              )}
             </>
           )}
         </CardContent>

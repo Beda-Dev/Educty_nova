@@ -118,21 +118,21 @@ const menuItems: MenuCategory = {
           title: "Année academique",
           description: "Année scolaire",
           icon: <Calendar className="w-4 h-4" />,
-          path: "/academic_year",
+          path: "/parametres/pedagogy/academic_year",
         },
         {
           id: "levels",
           title: "Niveaux",
           description: "Niveaux d'études",
           icon: <Layers className="w-4 h-4" />,
-          path: "/level",
+          path: "/parametres/pedagogy/level",
         },
         {
           id: "classes",
           title: "Classes",
           description: "Gestion des classes",
           icon: <School className="w-4 h-4" />,
-          path: "/classe",
+          path: "/parametres/pedagogy/classe",
         },
         {
           id: "matiere",
@@ -175,7 +175,7 @@ const menuItems: MenuCategory = {
           title: "Types de frais",
           description: "Gestion des différents types de frais scolaires",
           icon: <List className="w-6 h-6" />,
-          path: "parametres/scolarite/fees_type",
+          path: "/parametres/scolarite/fees_type",
         },
         {
           id: "pricing",
@@ -348,13 +348,13 @@ const menuItems: MenuCategory = {
       icon: <Clock className="w-6 h-6" />,
       path: "/caisse_comptabilite/session_caisse",
       children: [
-        // {
-        //   id: "close_session",
-        //   title: "fermeture caisse",
-        //   icon: <Calendar className="w-6 h-6" />,
-        //   path: "/caisse_comptabilite/close-session",
-        //   hidden: true
-        // },
+        {
+          id: "close_session",
+          title: "fermeture caisse",
+          icon: <Calendar className="w-6 h-6" />,
+          path: "/caisse_comptabilite/close-session",
+          hidden: true
+        },
         {
           id: "open_session",
           title: "ouverture caisse",

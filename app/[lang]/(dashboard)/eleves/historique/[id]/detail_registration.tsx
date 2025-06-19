@@ -20,11 +20,37 @@ interface DataProps {
   settings: Setting[];
 }
 
+function filterPaymentsByRegistrationDate(
+  payments: Payment[],
+  registration: Registration,
+  marginMinutes: number = 1
+): Payment[] {
+  if (!registration.created_at) return [];
+
+  // Convertir la date de l'inscription en timestamp
+  const registrationDate = new Date(registration.created_at);
+  const registrationTime = registrationDate.getTime();
+
+  // Calculer la marge en millisecondes
+  const marginMs = marginMinutes * 60 * 1000;
+
+  return payments.filter(payment => {
+    if (!payment.created_at) return false;
+
+    const paymentDate = new Date(payment.created_at);
+    const paymentTime = paymentDate.getTime();
+
+    // Vérifier si le paiement est dans l'intervalle [registrationTime - margin, registrationTime + margin]
+    return Math.abs(paymentTime - registrationTime) <= marginMs;
+  });
+}
+
 export const RegistrationFinal = ({ registration, payments, settings }: DataProps) => {
   const { students, academicYears, classes, pricing, installements } = useSchoolStore();
   const [student, setStudent] = useState<Student | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
+  const filteredPayments = filterPaymentsByRegistrationDate(payments, registration);
 
   useEffect(() => {
     if (registration.student_id && students.length > 0) {
@@ -40,15 +66,15 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
 
   // Calculate payment summary
   const getPaymentSummary = () => {
-    const feeTypes: Record<number, { 
-      label: string; 
-      total: number; 
-      paid: number; 
-      pricingId?: number 
+    const feeTypes: Record<number, {
+      label: string;
+      total: number;
+      paid: number;
+      pricingId?: number
     }> = {};
 
     // Group payments by fee type
-    payments.forEach(payment => {
+    filteredPayments.forEach(payment => {
       const installment = installements.find(i => i.id === payment.installment_id);
       if (!installment) return;
 
@@ -72,8 +98,8 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
 
     // Add pricing that might not have payments yet
     pricing.forEach(pricingItem => {
-      if (pricingItem.academic_years_id === registration.academic_year_id && 
-          pricingItem.level_id === classe?.level_id && pricingItem.assignment_type_id === registration.student?.assignment_type_id) {
+      if (pricingItem.academic_years_id === registration.academic_year_id &&
+        pricingItem.level_id === classe?.level_id && pricingItem.assignment_type_id === registration.student?.assignment_type_id) {
         if (!feeTypes[pricingItem.fee_type_id]) {
           feeTypes[pricingItem.fee_type_id] = {
             label: pricingItem.fee_type?.label || pricingItem.label,
@@ -175,14 +201,24 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
 
           {/* Payment Summary */}
           <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-3">DÉTAIL DES PAIEMENTS</h3>
+            <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center justify-between">
+              <span>Récapitulatif des paiements</span>
+
+              {/* Encadré Montant Versé */}
+              <span className="bg-blue-50 border border-blue-200 rounded-md px-3 py-1 text-sm font-medium flex items-center gap-2">
+                <span className="text-blue-700">Montant Versé :</span>
+                <span className="text-green-600 font-bold">
+                  {totalPaid.toLocaleString()} {schoolInfo.currency}
+                </span>
+              </span>
+            </h3>
             <div className="my-2">
-              <PaymentTable 
-                payments={paymentSummary} 
-                totalAmount={totalAmount} 
-                totalPaid={totalPaid} 
-                remainingAmount={remainingAmount} 
-                currency={schoolInfo.currency} 
+              <PaymentTable
+                payments={paymentSummary}
+                totalAmount={totalAmount}
+                totalPaid={totalPaid}
+                remainingAmount={remainingAmount}
+                currency={schoolInfo.currency}
               />
             </div>
           </div>
@@ -204,7 +240,7 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
           {/* Footer */}
           <div className="text-center text-xs text-gray-600 mt-6 pt-4 border-t">
             <p className="mb-1">Document officiel de {schoolInfo.name}</p>
-            <p>Émis le {new Date().toLocaleDateString("fr-FR")} à {new Date().toLocaleTimeString("fr-FR", {hour: '2-digit', minute:'2-digit'})}</p>
+            <p>Émis le {new Date(registration.created_at).toLocaleDateString("fr-FR")} à {new Date(registration.created_at).toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}</p>
           </div>
         </CardContent>
       </Card>
@@ -220,20 +256,20 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
       </div>
 
       <div className="flex justify-center gap-3 mt-6 print:hidden">
-        <Button 
-          onClick={() => generatePDF("print")} 
-          variant="outline" 
-          size="sm" 
+        <Button
+          onClick={() => generatePDF("print")}
+          variant="outline"
+          size="sm"
           className="h-9 px-4 text-sm"
           disabled={isProcessing}
         >
           <Printer className="w-4 h-4 mr-2" />
           Imprimer
         </Button>
-        <Button 
-          onClick={() => generatePDF("download")} 
-          variant="outline" 
-          size="sm" 
+        <Button
+          onClick={() => generatePDF("download")}
+          variant="outline"
+          size="sm"
           className="h-9 px-4 text-sm"
           disabled={isProcessing}
         >
@@ -267,6 +303,7 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
             <th className="border border-gray-300 p-2 text-right">Montant total</th>
             <th className="border border-gray-300 p-2 text-right">Montant payé</th>
             <th className="border border-gray-300 p-2 text-right">Reste à payer</th>
+
           </tr>
         </thead>
         <tbody>
@@ -288,25 +325,21 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
               </tr>
             ))
           )}
+
         </tbody>
         <tfoot>
           <tr>
-            <td className="border border-gray-300 p-2 font-semibold text-right" colSpan={2}>
-              Total à payer :
+            <td className="border border-gray-300 p-2 font-semibold">
+              Total
             </td>
             <td className="border border-gray-300 p-2 font-semibold text-right">
               {totalAmount.toLocaleString()} {currency}
             </td>
+            <td className={`border border-gray-300 p-2 font-semibold text-right text-green-600`}>
+              {totalPaid.toLocaleString()} {currency}
+            </td>
             <td className={`border border-gray-300 p-2 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
               {remainingAmount.toLocaleString()} {currency}
-            </td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 p-2 font-semibold text-right" colSpan={2}>
-              Total payé :
-            </td>
-            <td className="border border-gray-300 p-2 font-semibold text-right" colSpan={2}>
-              {totalPaid.toLocaleString()} {currency}
             </td>
           </tr>
         </tfoot>

@@ -47,13 +47,13 @@ export default function PricingPage() {
   );
 
   // Affichage des erreurs si l'utilisateur n'a pas accès
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return <FeeTable data={pricing} />;
 }

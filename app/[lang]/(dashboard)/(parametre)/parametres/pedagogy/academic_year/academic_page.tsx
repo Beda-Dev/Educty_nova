@@ -105,13 +105,13 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
     currentPage * ITEMS_PER_PAGE
   );
 
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return (
     <div className="w-full">
@@ -174,7 +174,7 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
               </div>
 
               {/* Bouton à droite */}
-              {hasAdminAccessCreer && (
+              {true && (
                 <Button
                   color="indigodye"
                   onClick={() => setIsModalOpenAdd(true)}
@@ -192,7 +192,7 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
                       {column.label}
                     </TableHead>
                   ))}
-                  {hasAdminAccessModifier ? (
+                  {true ? (
                     <TableHead>Actions</TableHead>
                   ) : null}
                 </TableRow>
@@ -225,7 +225,7 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
                       )}
                     </TableCell>
 
-                    {hasAdminAccessModifier ? (
+                    {true ? (
                       <TableCell>
                         <Button
                           color="tyrian"

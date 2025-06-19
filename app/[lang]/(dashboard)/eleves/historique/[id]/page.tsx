@@ -15,6 +15,7 @@ const Registrationview = ({ params }: Props) => {
   const { id } = params;
   const { registrations, pricing , payments , settings } = useSchoolStore();
   const [data, setData] = useState<Registration | null>(null);
+  const [payment , setPayment] = useState<Payment[] | []>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,14 +31,17 @@ const Registrationview = ({ params }: Props) => {
         throw new Error("Inscription non trouvée");
       }
 
+      const pay = payments.filter((paiement)=> Number(paiement.student_id) === Number(registration.student_id) )
+
       // Mettre à jour les états
       setData(registration);
+      setPayment(pay)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur s'est produite");
     } finally {
       setIsLoading(false);
     }
-  }, [id, registrations, pricing]);
+  }, [id, registrations, pricing , payments]);
 
   // Charger les données au montage du composant
   useEffect(() => {
@@ -57,7 +61,7 @@ const Registrationview = ({ params }: Props) => {
     return <div>Aucune donnée disponible</div>;
   }
 
-  return <RegistrationFinal registration={data} payments={payments} settings={settings} />;
+  return <RegistrationFinal registration={data} payments={payment} settings={settings} />;
 };
 
 export default Registrationview;

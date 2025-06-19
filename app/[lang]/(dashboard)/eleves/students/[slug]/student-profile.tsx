@@ -151,9 +151,9 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                     <Image
                       src={typeof data.photo === 'string' ? data.photo : ''}
                       alt={`${data.name} ${data.first_name}`}
-                      width={40}
-                      height={40}
-                      className="rounded-sm border border-gray-200 object-cover items-center justify-center"
+                      width={80}
+                      height={80}
+                      className="school-logo"
                     />
                   ) : (
                     <AvatarFallback className="text-lg font-semibold">
@@ -210,10 +210,10 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                 size="sm"
                 className="text-skyblue-600 border-primary-300 "
                 onClick={() =>
-                  router.push(`/paiement/${data.registration_number}`)
+                  router.push(`/caisse_comptabilite/resume_financie/${data.id}`)
                 }
               >
-                Voir le reçu
+                Voir le résumé financier
               </Button>
             </div>
           </CardHeader>
@@ -410,7 +410,7 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                               variant="outline"
                               className="p-2"
                               onClick={() =>
-                                router.push(`/historique_paiement/${payment.id}`)
+                                router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`)
                               }
                             >
                               <Eye className="h-5 w-5" />

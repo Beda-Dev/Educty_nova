@@ -40,6 +40,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Edit } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string()
@@ -226,7 +227,7 @@ const DocumentTypeComponant = ({ data }: Props) => {
               className="w-full md:w-[300px]"
             />
           </div>
-          {hasAdminAccessCreer && (
+          {true && (
             <div className="flex">
               <Button color="indigodye" onClick={handleCreate}>
                 
@@ -259,7 +260,7 @@ const DocumentTypeComponant = ({ data }: Props) => {
                       className="border-t border-muted-foreground/20"
                     >
                       <TableCell>{item.name}</TableCell>
-                      {hasAdminAccessModifier && (
+                      {true && (
                         <TableCell className="text-right">
                           <Button
                             color="tyrian"
@@ -267,7 +268,7 @@ const DocumentTypeComponant = ({ data }: Props) => {
                             onClick={() => handleEdit(item)}
                             className=""
                           >
-                            
+                            <Edit className="w-4 h-4" />
                           </Button>
                         </TableCell>
                       )}

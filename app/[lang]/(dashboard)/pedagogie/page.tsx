@@ -132,8 +132,8 @@ export default function PedagogiePage() {
             </div>
             <div>
               <h1
-  className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-  style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
+                className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
 >
                 Pédagogie
               </h1>

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, PlusCircle, Trash, Loader2 } from "lucide-react";
+import { Pencil, PlusCircle, Trash, Loader2 , Edit } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -179,13 +179,13 @@ const FeesTypePage = ({ data }: Props) => {
     ...(hasAdminAccessModifier ? [{ key: "actions", label: "Actions" }] : []),
   ];
 
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return (
     <div className="w-full">
@@ -292,7 +292,7 @@ const FeesTypePage = ({ data }: Props) => {
                 />
               </div>
 
-              {hasAdminAccessCreer && (
+              {true && (
                 <Button
                   color="indigodye"
                   onClick={() => setIsModalOpenAdd(true)}
@@ -327,7 +327,7 @@ const FeesTypePage = ({ data }: Props) => {
                         <TableCell className="font-medium">
                           {item.label}
                         </TableCell>
-                        {hasAdminAccessModifier && (
+                        {true && (
                           <TableCell>
                             <div className="flex gap-2 justify-end">
                               <Button
@@ -335,7 +335,7 @@ const FeesTypePage = ({ data }: Props) => {
                                 size="icon"
                                 onClick={() => handleEdit(item)}
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Edit className="h-4 w-4" />
                               </Button>
 
                               {hasAdminAccessSupprimer && (

@@ -3,6 +3,19 @@ import { twMerge } from "tailwind-merge";
 import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
 import { toast } from "sonner"
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { Table } from "@tanstack/react-table";
+
+type DataSource<T> =
+  | { type: "tanstack"; table: Table<T>; formatRow: (row: T) => Record<string, any> }
+  | { type: "array"; data: T[]; formatRow?: (row: T) => Record<string, any> }
+  | { type: "html"; tableElement: HTMLTableElement };
+
+interface ExportOptions<T> {
+  source: DataSource<T>;
+  fileName?: string;
+}
 
 
 export function cn(...inputs: ClassValue[]) {
@@ -286,3 +299,112 @@ export async function generatePDFfromRef(
 
 // <Button onClick={() => handlePDF("download")}>Télécharger</Button>
 // <Button onClick={() => handlePDF("print")}>Imprimer</Button>
+
+
+
+
+
+
+
+export function universalExportToExcel<T extends Record<string, any>[]>({
+  source,
+  fileName = "export.xlsx",
+}: ExportOptions<T>) {
+  try {
+    toast.info("Génération du fichier Excel...");
+
+    let data: Record<string, any>[] = [];
+
+    if (source.type === "tanstack") {
+      data = source.table
+        .getFilteredRowModel()
+        .rows.map((row) => source.formatRow(row.original));
+    } else if (source.type === "array") {
+      data = source.data.map((row) =>
+        source.formatRow ? source.formatRow(row) : row
+      );
+    } else if (source.type === "html") {
+      const worksheet = XLSX.utils.table_to_sheet(source.tableElement);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Feuille1");
+      const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      saveAs(blob, fileName);
+      toast.success(`Export réussi : ${fileName}`);
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    const colWidths = data.reduce((widths: Array<{ wch: number }>, row) => {
+      Object.values(row).forEach((val, i) => {
+        const length = val ? String(val).length : 0;
+        widths[i] = {
+          wch: Math.min(Math.max(length, 10), 50),
+        };
+      });
+      return widths;
+    }, []);
+
+    worksheet["!cols"] = colWidths;
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Feuille1");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(blob, fileName);
+    toast.success(`Export réussi : ${fileName}`);
+  } catch (error) {
+    console.error("Erreur lors de l'export Excel :", error);
+    toast.error("Erreur lors de l'export du fichier Excel");
+  }
+}
+
+
+// EXEMPLE D'UTILISATION
+
+// universalExportToExcel({
+//   source: {
+//     type: "tanstack",
+//     table,
+//     formatRow: (row) => ({
+//       Nom: row.student.name,
+//       Prénom: row.student.first_name,
+//       Matricule: row.student.registration_number,
+//     }),
+//   },
+//   fileName: "élèves.xlsx",
+// });
+
+// Avec un tableau d’objets
+
+// const data = [
+//   { nom: "Jean", age: 25 },
+//   { nom: "Fatou", age: 22 },
+// ];
+
+// universalExportToExcel({
+//   source: {
+//     type: "array",
+//     data,
+//   },
+//   fileName: "personnes.xlsx",
+// });
+
+// const tableElement = document.getElementById("maTable") as HTMLTableElement;
+
+// universalExportToExcel({
+//   source: {
+//     type: "html",
+//     tableElement,
+//   },
+//   fileName: "tableau-html.xlsx",
+// });

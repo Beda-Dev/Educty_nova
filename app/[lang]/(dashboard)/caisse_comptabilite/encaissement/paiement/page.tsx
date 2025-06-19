@@ -43,7 +43,7 @@ import type { Student, Pricing, Installment, Payment, Transaction, Registration 
 import { fetchPayment, fetchTransactions } from "@/store/schoolservice"
 import { formatDateYMDHIS } from "./fonction"
 import { generatePDFfromRef } from "@/lib/utils"
-import  PaymentReceipt  from "./payment-receipt"
+import PaymentReceipt from "./payment-receipt"
 
 interface StudentFinancialData {
   student: Student
@@ -947,7 +947,7 @@ export default function PaymentManagementPage() {
                       </p>
                     </div>
                   </div>
-
+                  {/* Erreur globale */}
                   {globalError && (
                     <Alert color="destructive">
                       <AlertTriangle className="h-4 w-4" />
@@ -1015,9 +1015,11 @@ export default function PaymentManagementPage() {
                                     <div className="flex justify-between items-center">
                                       <span className="font-medium">{installment.status}</span>
                                       <span className="text-primary font-semibold">
-                                        {installmentDetail
+                                        {/* {installmentDetail
                                           ? `${formatAmount(installmentDetail.remainingAmount)} ${currency}`
-                                          : `${formatAmount(Number.parseInt(installment.amount_due))} ${currency}`}
+                                          : `${formatAmount(Number.parseInt(installment.amount_due))} ${currency}`} */}
+
+                                          Montant à payer : {`${formatAmount(Number.parseInt(installment.amount_due))} ${currency}`}
                                       </span>
                                     </div>
                                     <p className="text-sm text-muted-foreground">
@@ -1046,8 +1048,8 @@ export default function PaymentManagementPage() {
                                           value={
                                             installmentAmounts[installment.id]
                                               ? installmentAmounts[installment.id]
-                                                  .toLocaleString("fr-FR")
-                                                  .replace(/,/g, " ")
+                                                .toLocaleString("fr-FR")
+                                                .replace(/,/g, " ")
                                               : ""
                                           }
                                           onChange={(e) => {
@@ -1229,56 +1231,57 @@ export default function PaymentManagementPage() {
         )}
 
         {/* Modal de confirmation de paiement réussi */}
-        {/* Modal de confirmation de paiement réussi */}
         <Dialog open={openSuccessModal} onOpenChange={setOpenSuccessModal}>
-          <DialogContent className="w-full h-full overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
-                Paiement(s) effectué(s) avec succès
-              </DialogTitle>
-              <DialogDescription>
-                {createdPayments.length} paiement(s) enregistré(s) pour {financialData?.student.first_name}{" "}
-                {financialData?.student.name}
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent className="max-w-none w-screen max-h-screen h-screen rounded-none sm:rounded-none">
+            <div className="flex flex-col h-full">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  Paiement(s) effectué(s) avec succès
+                </DialogTitle>
+                <DialogDescription>
+                  {createdPayments.length} paiement(s) enregistré(s) pour {financialData?.student.first_name}{" "}
+                  {financialData?.student.name}
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="space-y-6 py-4">
-              {/* Reçu de paiement détaillé */}
-              <div ref={printRef} className="bg-white p-6 border rounded-lg">
-                <PaymentReceipt
-                  student={financialData?.student}
-                  payments={createdPayments}
-                  financialData={financialData}
-                  settings={settings}
-                  classe={CurrentClass}
-                  niveau={CurrentLevel}
-                  installmentAmounts={installmentAmounts}
-                  paymentMethods={paymentMethods}
-                  methodPayment={methodPayment}
-                  currency={currency}
-                />
+              <div className="flex-1 overflow-y-auto space-y-6 py-4">
+                {/* Reçu de paiement détaillé */}
+                <div ref={printRef} className="bg-white p-6 border rounded-lg">
+                  <PaymentReceipt
+                    student={financialData?.student}
+                    payments={createdPayments}
+                    financialData={financialData}
+                    settings={settings}
+                    classe={CurrentClass}
+                    niveau={CurrentLevel}
+                    installmentAmounts={installmentAmounts}
+                    paymentMethods={paymentMethods}
+                    methodPayment={methodPayment}
+                    currency={currency}
+                  />
+                </div>
               </div>
+
+              <DialogFooter className="sm:justify-between">
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => generatePDF("print")} disabled={isProcessing}>
+                    <Printer className="w-4 h-4 mr-2" />
+                    Imprimer
+                  </Button>
+                  <Button variant="outline" onClick={() => generatePDF("download")} disabled={isProcessing}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Télécharger PDF
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button color='indigodye' variant="outline" onClick={resetPaymentForm}>
+                    Fermer
+                  </Button>
+                  <Button onClick={resetPaymentForm}>Nouveau paiement</Button>
+                </div>
+              </DialogFooter>
             </div>
-
-            <DialogFooter className="sm:justify-between">
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => generatePDF("print")} disabled={isProcessing}>
-                  <Printer className="w-4 h-4 mr-2" />
-                  Imprimer
-                </Button>
-                <Button variant="outline" onClick={() => generatePDF("download")} disabled={isProcessing}>
-                  <Download className="w-4 h-4 mr-2" />
-                  Télécharger PDF
-                </Button>
-              </div>
-              <div className="flex gap-2">
-                <Button color='indigodye' variant="outline" onClick={resetPaymentForm}>
-                  Fermer
-                </Button>
-                <Button onClick={resetPaymentForm}>Nouveau paiement</Button>
-              </div>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardContent>

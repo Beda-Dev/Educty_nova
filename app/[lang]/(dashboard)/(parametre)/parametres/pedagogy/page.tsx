@@ -50,7 +50,7 @@ export default function Page() {
       title: "Année Académique",
       description: "Gestion des années académiques et périodes",
       icon: <Calendar className="w-6 h-6" />,
-      path: "/academic_year",
+      path: "/parametres/pedagogy/academic_year",
       color: itemColors[0],
     },
     {
@@ -58,7 +58,7 @@ export default function Page() {
       title: "Niveaux",
       description: "Gestion des niveaux d'études",
       icon: <Layers className="w-6 h-6" />,
-      path: "/level",
+      path: "/parametres/pedagogy/level",
       color: itemColors[1],
     },
     {
@@ -66,7 +66,7 @@ export default function Page() {
       title: "Classes",
       description: "Gestion des classes de l'établissement",
       icon: <School className="w-6 h-6" />,
-      path: "/classe",
+      path: "/parametres/pedagogy/classe",
       color: itemColors[2],
     },
     {
@@ -139,7 +139,8 @@ export default function Page() {
               <School className="w-8 h-8 text-skyblue" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}>
                 Pédagogie
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -176,7 +177,7 @@ export default function Page() {
                         className={cn(
                           "p-3 rounded-full flex items-center justify-center",
                           item.color.replace("text-", "bg-").split(" ")[0] +
-                            "/20"
+                          "/20"
                         )}
                       >
                         {item.icon}

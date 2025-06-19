@@ -87,7 +87,7 @@ export default function Page() {
     hover: {
       scale: 1.05,
       boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: "easeOut"
       },
@@ -106,7 +106,8 @@ export default function Page() {
               <UserCog className="w-8 h-8 text-skyblue" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}>
                 Gestion du Personnel
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -153,7 +154,7 @@ export default function Page() {
                           {item.description}
                         </p>
                       </div>
-                      <motion.div 
+                      <motion.div
                         className="absolute bottom-4 right-4 text-sm font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
