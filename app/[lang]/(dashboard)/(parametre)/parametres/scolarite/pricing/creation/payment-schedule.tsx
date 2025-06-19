@@ -18,7 +18,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertTriangle } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { useSchoolStore } from "@/store"
-import type { Paiement } from "../data"
+import type { Paiement } from "./data"
 
 interface PaymentScheduleProps {
   amount: string
@@ -114,7 +114,7 @@ export default function PaymentSchedule({ amount, paiements, setPaiements, useEc
       toast({
         title: "Erreur",
         description: "Le montant saisi dépasse le montant restant",
-        variant: "destructive",
+        color: "destructive",
       })
       return
     }
@@ -125,7 +125,7 @@ export default function PaymentSchedule({ amount, paiements, setPaiements, useEc
       toast({
         title: "Erreur de date",
         description: warning,
-        variant: "destructive",
+        color: "destructive",
       })
       return
     }
@@ -200,7 +200,7 @@ export default function PaymentSchedule({ amount, paiements, setPaiements, useEc
             </Popover>
 
             {dateWarning && (
-              <Alert variant={dateWarning.includes("chronologiquement") ? "destructive" : "default"}>
+              <Alert color={dateWarning.includes("chronologiquement") ? "destructive" : "skyblue"}>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>{dateWarning}</AlertDescription>
               </Alert>
