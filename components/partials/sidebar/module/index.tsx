@@ -23,7 +23,7 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
     useSidebar();
   const { isRtl } = useThemeStore();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [currentSubMenu, setCurrentSubMenu] = useState<any[]>([]);
+  const [currentSubMenu, setCurrentSubMenu] = useState<ModernNavType[]>([]);
   const [nestedIndex, setNestedIndex] = useState<number | null>(null);
   const [multiNestedIndex, setMultiNestedIndex] = useState<number | null>(null);
   // mobile menu overlay
@@ -38,8 +38,17 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
 
   const toggleSubMenu = (index: number) => {
     setActiveIndex(index);
-    if (menus[index].child) {
-      setCurrentSubMenu(menus[index].child);
+    const menuItem = menus[index];
+    if (menuItem) {
+      // Vérifier si c'est un en-tête ou un élément de menu normal
+      if (menuItem.isHeader) {
+        // Ne rien faire pour les en-têtes
+        return;
+      }
+      
+      // Si l'élément a des items, on les utilise, sinon on crée un tableau avec l'élément
+      const subMenuItems = [menuItem];
+      setCurrentSubMenu(subMenuItems);
       setSubmenu(false);
       setCollapsed(false);
       if (!isDesktop) {
@@ -48,10 +57,11 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
     } else {
       setSubmenu(true);
       setCollapsed(true);
+      setCurrentSubMenu([]);
 
       if (!isDesktop) {
         // when location match need to close the sub menu
-        if (isLocationMatch(menus[index].title, locationName)) {
+        if (menuItem && isLocationMatch(menuItem, locationName)) {
           setSubmenu(false);
         }
       }
@@ -229,7 +239,7 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
                       nestedIndex={nestedIndex}
                       locationName={locationName}
                     />
-                    <NestedMenus
+                    {/* <NestedMenus
                       index={j}
                       nestedIndex={nestedIndex}
                       nestedMenus={childItem.nested}
@@ -237,7 +247,7 @@ const ModuleSidebar = ({ trans }: { trans: any }) => {
                       toggleMulti={toggleMultiNested}
                       multiIndex={multiNestedIndex}
                       trans={trans}
-                    />
+                    /> */}
                   </li>
                 ))}
               </ul>

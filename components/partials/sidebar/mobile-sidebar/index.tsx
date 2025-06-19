@@ -1,7 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn, isLocationMatch } from "@/lib/utils";
-import { useSidebar, useThemeStore } from "@/store";
+import { useSidebar, useSchoolStore } from "@/store";
 import SidebarLogo from "../common/logo";
 import { menusConfig } from "@/config/menus";
 import MenuLabel from "../common/menu-label";
@@ -11,13 +11,58 @@ import { usePathname } from "next/navigation";
 import SingleMenuItem from "./single-menu-item";
 import SubMenuHandler from "./sub-menu-handler";
 import NestedSubMenu from "../common/nested-menus";
-import type { MenuItem } from "./type";
-const MobileSidebar = ({ className, trans }: { className?: string, trans: any }) => {
-  const { sidebarBg, mobileMenu, setMobileMenu } = useSidebar();
+import { verificationPermission } from "@/lib/fonction";
+
+const hasAccess = (
+  userPermissions: string[],
+  userRoles: string[],
+  item: any
+): boolean => {
+  const hasPermission =
+    !item.requiredPermission ||
+    verificationPermission({ permissionNames: userPermissions }, [
+      item.requiredPermission,
+    ]);
+
+  const hasRole = !item.requiredRole || userRoles.includes(item.requiredRole);
+
+  return hasPermission && hasRole && !item.hideIf;
+};
+
+const filterItems = (
+  items: any[],
+  userPermissions: string[],
+  userRoles: string[]
+): any[] => {
+  return items
+    .filter((item) => hasAccess(userPermissions, userRoles, item))
+    .map((item) => ({
+      ...item,
+      child: item.child
+        ? filterItems(item.child, userPermissions, userRoles)
+        : undefined,
+    }))
+    .filter((item) => !item.child || item.child.length > 0);
+};
+
+interface MobileSidebarProps {
+  className?: string;
+  trans: any;
+}
+
+const MobileSidebar: React.FC<MobileSidebarProps> = ({ className, trans }) => {
+  const { sidebarBg, mobileMenu, setMobileMenu, collapsed } = useSidebar();
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
   const [activeMultiMenu, setMultiMenu] = useState<number | null>(null);
-  const menus: MenuItem[] = menusConfig?.sidebarNav?.classic || [];
-  const { collapsed } = useSidebar();
+  const { userOnline } = useSchoolStore();
+  
+  // Récupérer les menus avec filtrage des permissions
+  const allMenus = menusConfig?.sidebarNav?.classic || [];
+  const filteredMenus = filterItems(
+    allMenus,
+    userOnline?.permissionNames || [],
+    userOnline?.roles?.map((r: any) => r.name) || []
+  ) as any[];
 
   const toggleSubmenu = (i: number) => {
     if (activeSubmenu === i) {
@@ -36,10 +81,10 @@ const MobileSidebar = ({ className, trans }: { className?: string, trans: any })
   };
   const locationName = usePathname();
 
-  React.useEffect(() => {
+  useEffect(() => {
     let subMenuIndex = null;
     let multiMenuIndex = null;
-    menus?.map((item: any, i: number) => {
+    filteredMenus?.map((item: any, i: number) => {
       if (item?.child) {
         item.child.map((childItem: any, j: number) => {
           if (isLocationMatch(childItem.href, locationName)) {
@@ -61,7 +106,7 @@ const MobileSidebar = ({ className, trans }: { className?: string, trans: any })
     if (mobileMenu) {
       setMobileMenu(false);
     }
-  }, [locationName]);
+  }, [locationName, mobileMenu, setMobileMenu]);
   return (
     <>
       <div
@@ -91,10 +136,9 @@ const MobileSidebar = ({ className, trans }: { className?: string, trans: any })
               " space-y-2 text-center": collapsed,
             })}
           >
-            {menus.map((item, i) => (
+            {filteredMenus.map((item, i) => (
               <li key={`menu_key_${i}`}>
                 {/* single menu  */}
-
                 {!item.child && !item.isHeader && (
                   <SingleMenuItem item={item} collapsed={collapsed} trans={trans} />
                 )}

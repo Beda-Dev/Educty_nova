@@ -15,13 +15,15 @@ import {
 
 export interface MenuItemProps {
   title: string;
-  icon: any;
+  icon?: any;
   href?: string;
   child?: MenuItemProps[];
   megaMenu?: MenuItemProps[];
   multi_menu?: MenuItemProps[];
   nested?: MenuItemProps[];
-  onClick: () => void;
+  items?: MenuItemProps[]; // Ajout du champ items
+  onClick?: () => void;
+  isHeader?: boolean;
   requiredPermission?: string; // Ex: "voir dashboard"
   requiredRole?: string; // Ex: "admin"
   hideIf?: boolean;
