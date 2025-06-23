@@ -11,6 +11,7 @@ import type { CashRegisterSession } from "@/lib/interface"
 import SessionInfo from "./session-info"
 import SessionStatistics from "./session-statistics"
 import SessionTransactions from "./session-transactions"
+import { fetchCashRegisterSessions, fetchTransactions, fetchPayment, fetchExpenses } from "@/store/schoolservice"
 
 interface Props {
   params: {
@@ -31,8 +32,42 @@ interface TransactionDetail {
 const DetailSessionPage = ({ params }: Props) => {
   const router = useRouter()
   const [sessionCurrent, setSessionCurrent] = useState<CashRegisterSession[] | null>(null)
-  const { cashRegisterSessions, transactions, payments, expenses, settings } = useSchoolStore()
+  const {
+    cashRegisterSessions,
+    setCashRegisterSessions,
+    transactions,
+    setTransactions,
+    payments,
+    setPayments,
+    expenses,
+    setExpenses,
+    settings
+  } = useSchoolStore()
   const { id } = params
+
+  // Synchronisation du store avec l'API à l'ouverture de la page
+  useEffect(() => {
+    const updateStore = async () => {
+      try {
+        const [sessions, trans, pays, exps] = await Promise.all([
+          fetchCashRegisterSessions(),
+          fetchTransactions(),
+          fetchPayment(),
+          fetchExpenses ? fetchExpenses() : Promise.resolve([]) // fetchExpenses peut ne pas exister selon ton store
+        ])
+        setCashRegisterSessions(sessions)
+        setTransactions(trans)
+        setPayments(pays)
+        if (setExpenses && exps) setExpenses(exps)
+      } catch (e) {
+        // Optionnel : gestion d'erreur
+        // console.error("Erreur lors de la mise à jour du store :", e)
+      }
+    }
+    updateStore()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Filtrer les transactions associées à la session de caisse
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => t.cash_register_session_id === Number(id))
