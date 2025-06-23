@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -15,7 +14,7 @@ import { AlertCircle, Download, Printer, CheckCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useSchoolStore } from "@/store"
 import { fetchExpenses, fetchTransactions } from "@/store/schoolservice"
-import type { ValidationExpense, Transaction, Expense } from "@/lib/interface"
+import type { ValidationExpense, Transaction, Expense, User, Role, Setting } from "@/lib/interface"
 import { toast } from "sonner"
 import { generatePDFfromRef } from "@/lib/utils"
 import Image from "next/image"
@@ -34,6 +33,8 @@ export default function DecaissementPage({ validationId, onNewDecaissement }: De
     settings,
     setExpenses,
     setTransactions,
+    users,
+    roles
   } = useSchoolStore()
 
   const [validation, setValidation] = useState<ValidationExpense | null>(null)
@@ -52,6 +53,33 @@ export default function DecaissementPage({ validationId, onNewDecaissement }: De
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const printRef = useRef<HTMLDivElement>(null)
+
+  // Format currency
+  const currency = settings[0]?.currency || "FCFA"
+
+  // Format number with spaces
+  const formatNumber = (value: string | number): string => {
+    const num = typeof value === 'string' ? parseFloat(value) : value
+    return isNaN(num) ? '0' : num.toLocaleString('fr-FR')
+  }
+
+  // Parse formatted number
+  const parseFormattedNumber = (value: string): string => {
+    return value.replace(/\s/g, '')
+  }
+
+  // Find user by id - returns undefined if not found
+  const findUser = (userId: number | null | undefined): User | undefined => {
+    if (!userId) return undefined;
+    return users.find(user => user.id === userId);
+  };
+
+  // Find user role - handles null/undefined user
+  const findUserRole = (user: User | null | undefined): string => {
+    if (!user) return "N/A";
+    const role = roles.find(role => role.id === user.roles[0]?.id);
+    return role?.name || "N/A";
+  };
 
   // Recherche de la validation dans le store
   useEffect(() => {
@@ -82,13 +110,13 @@ export default function DecaissementPage({ validationId, onNewDecaissement }: De
     if (!formData.amount) {
       newErrors.amount = "Le montant est requis."
     } else {
-      const amount = Number.parseFloat(formData.amount)
+      const amount = Number.parseFloat(parseFormattedNumber(formData.amount))
       const demandAmount = validation?.demand?.amount || 0
 
       if (isNaN(amount) || amount <= 0) {
         newErrors.amount = "Le montant doit être un nombre positif."
       } else if (amount > demandAmount) {
-        newErrors.amount = `Le montant ne peut pas être supérieur au montant de la demande (${demandAmount} FCFA).`
+        newErrors.amount = `Le montant ne peut pas être supérieur au montant de la demande (${formatNumber(demandAmount)} ${currency}).`
       }
     }
 
@@ -118,7 +146,7 @@ export default function DecaissementPage({ validationId, onNewDecaissement }: De
         user_id: userOnline.id,
         cash_register_session_id: cashRegisterSessionCurrent.id,
         transaction_date: new Date().toISOString().replace("T", " ").slice(0, 19),
-        total_amount: formData.amount,
+        total_amount: parseFormattedNumber(formData.amount),
         transaction_type: "decaissement",
       }
 
@@ -143,7 +171,7 @@ export default function DecaissementPage({ validationId, onNewDecaissement }: De
         expense_type_id: Number.parseInt(formData.expense_type_id),
         cash_register_id: cashRegisterSessionCurrent.cash_register_id,
         label: expenseTypes.find((et) => et.id === Number.parseInt(formData.expense_type_id))?.name || "Décaissement",
-        amount: formData.amount,
+        amount: parseFormattedNumber(formData.amount),
         expense_date: formData.expense_date,
         transaction_id: transactionId,
         validation_expense_id: validation.id,
@@ -197,250 +225,295 @@ export default function DecaissementPage({ validationId, onNewDecaissement }: De
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p>Chargement...</p>
-        </div>
-      </div>
+      <Card className="border-0">
+        <CardContent className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p>Chargement en cours...</p>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
   if (!validation) {
     return (
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Validation non trouvée. Vérifiez l'ID de validation.</AlertDescription>
-      </Alert>
+      <Card className="border-0">
+        <CardContent>
+          <Alert color="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>Validation non trouvée. Vérifiez l'ID de validation.</AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
     )
   }
 
   if (success && createdTransaction && createdExpense) {
     return (
-      <div className="max-w-4xl mx-auto p-4">
-        <div className="mb-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <CheckCircle className="h-6 w-6 text-green-600" />
-            <h1 className="text-2xl font-bold text-green-600">Décaissement Réussi</h1>
+      <Card className="border-0">
+        <CardContent className="max-w-4xl mx-auto p-4">
+          <div className="mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <CheckCircle className="h-6 w-6 text-green-600" />
+              <h1 className="text-2xl font-bold text-green-600">Décaissement Réussi</h1>
+            </div>
+            <p className="text-gray-600">Le décaissement a été effectué avec succès</p>
           </div>
-          <p className="text-gray-600">Le décaissement a été effectué avec succès</p>
-        </div>
 
-        <div ref={printRef}>
-          <DecaissementReceipt
-            validation={validation}
-            transaction={createdTransaction}
-            expense={createdExpense}
-            settings={settings}
-          />
-        </div>
+          <div ref={printRef}>
+            <DecaissementReceipt
+              validation={validation}
+              transaction={createdTransaction}
+              expense={createdExpense}
+              settings={settings}
+              users={users}
+              roles={roles}
+            />
+          </div>
 
-        <div className="flex justify-center gap-3 mt-6 print:hidden">
-          <Button onClick={() => generatePDF("print")} variant="outline" size="sm">
-            <Printer className="w-4 h-4 mr-2" />
-            Imprimer
-          </Button>
-          <Button onClick={() => generatePDF("download")} variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-2" />
-            Télécharger PDF
-          </Button>
-          <Button
-            onClick={() => {
-              if (onNewDecaissement) {
-                onNewDecaissement()
-              } else {
-                setSuccess(false)
-                setFormData({
-                  expense_type_id: "",
-                  amount: "",
-                  expense_date: new Date().toISOString().split("T")[0],
-                })
-              }
-            }}
-            color="indigodye"
-          >
-            Nouveau Décaissement
-          </Button>
-        </div>
-      </div>
+          <div className="flex justify-center gap-3 mt-6 print:hidden">
+            <Button onClick={() => generatePDF("print")} variant="outline" size="sm">
+              <Printer className="w-4 h-4 mr-2" />
+              Imprimer
+            </Button>
+            <Button onClick={() => generatePDF("download")} variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Télécharger PDF
+            </Button>
+            <Button
+              onClick={() => {
+                if (onNewDecaissement) {
+                  onNewDecaissement()
+                } else {
+                  setSuccess(false)
+                  setFormData({
+                    expense_type_id: "",
+                    amount: "",
+                    expense_date: new Date().toISOString().split("T")[0],
+                  })
+                }
+              }}
+              color="indigodye"
+            >
+              Nouveau Décaissement
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     )
   }
 
+  // Get applicant and validator info from store
+  const applicant = validation.demand?.applicant_id ? findUser(validation.demand.applicant_id) : null
+  const applicantRole = findUserRole(applicant)
+  
+  const validator = validation.user_id ? findUser(validation.user_id) : null
+  const validatorRole = findUserRole(validator)
+
   return (
-    <div className="max-w-4xl mx-auto p-4 space-y-6">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold">Page de Décaissement</h1>
-        <p className="text-gray-600">Validation ID: {validationId}</p>
-      </div>
+    <Card className="border-0">
+      <CardContent className="max-w-4xl mx-auto p-4 space-y-6">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold">Page de Décaissement</h1>
+          <p className="text-gray-600">Validation ID: {validationId}</p>
+        </div>
 
-      {/* Informations de la demande (non modifiable) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations de la Demande</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Demandeur</Label>
-              <Input value={validation.demand?.applicant?.name || "N/A"} readOnly className="bg-gray-50" />
-            </div>
-            <div>
-              <Label>Montant de la demande</Label>
-              <Input value={`${validation.demand?.amount || 0} FCFA`} readOnly className="bg-gray-50" />
-            </div>
-            <div>
-              <Label>Motif</Label>
-              <Input value={validation.demand?.pattern || "N/A"} readOnly className="bg-gray-50" />
-            </div>
-            <div>
-              <Label>Statut</Label>
-              <div className="flex items-center">
-                <Badge color={validation.demand?.status === "approuvée" ? "skyblue" : "secondary"} className="mt-2">
-                  {validation.demand?.status || "N/A"}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Informations de la validation (non modifiable) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations de la Validation</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Validateur</Label>
-              <Input value={validation.user?.name || "N/A"} readOnly className="bg-gray-50" />
-            </div>
-            <div>
-              <Label>Date de validation</Label>
-              <Input
-                value={new Date(validation.validation_date).toLocaleDateString("fr-FR")}
-                readOnly
-                className="bg-gray-50"
-              />
-            </div>
-            <div>
-              <Label>Statut de validation</Label>
-              <div className="flex items-center">
-                <Badge
-                  color={validation.validation_status === "approuvée" ? "skyblue" : "secondary"}
-                  className="mt-2"
-                >
-                  {validation.validation_status}
-                </Badge>
-              </div>
-            </div>
-            <div>
-              <Label>Ordre de validation</Label>
-              <Input value={validation.validation_order.toString()} readOnly className="bg-gray-50" />
-            </div>
-          </div>
-          <div>
-            <Label>Commentaire du validateur</Label>
-            <Textarea value={validation.comment || "Aucun commentaire"} readOnly className="bg-gray-50" />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Vérifications préalables */}
-      {Object.keys(errors).length > 0 && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <ul className="list-disc list-inside space-y-1">
-              {Object.values(errors).map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Formulaire de décaissement */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Formulaire de Décaissement</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Informations de la demande (non modifiable) */}
+        <Card className="border">
+          <CardHeader>
+            <CardTitle>Informations de la Demande</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="expense_type_id">Type de dépense *</Label>
-                <Select
-                  value={formData.expense_type_id}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, expense_type_id: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un type de dépense" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {expenseTypes.map((type) => (
-                      <SelectItem key={type.id} value={type.id.toString()}>
-                        {type.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.expense_type_id && <p className="text-sm text-red-600 mt-1">{errors.expense_type_id}</p>}
-              </div>
-
-              <div>
-                <Label htmlFor="amount">Montant (FCFA) *</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max={validation.demand?.amount || 0}
-                  value={formData.amount}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, amount: e.target.value }))}
-                  placeholder="Entrer le montant"
+                <Label>Demandeur</Label>
+                <Input 
+                  value={`${applicant?.name || "N/A"} (${applicantRole})`} 
+                  readOnly 
+                  className="bg-gray-50" 
                 />
-                <p className="text-sm text-gray-500 mt-1">Maximum: {validation.demand?.amount || 0} FCFA</p>
-                {errors.amount && <p className="text-sm text-red-600 mt-1">{errors.amount}</p>}
               </div>
-
               <div>
-                <Label htmlFor="expense_date">Date de dépense *</Label>
-                <Input
-                  id="expense_date"
-                  type="date"
-                  value={formData.expense_date}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, expense_date: e.target.value }))}
+                <Label>Montant de la demande</Label>
+                <Input 
+                  value={`${formatNumber(validation.demand?.amount || 0)} ${currency}`} 
+                  readOnly 
+                  className="bg-gray-50" 
                 />
-                {errors.expense_date && <p className="text-sm text-red-600 mt-1">{errors.expense_date}</p>}
               </div>
-
               <div>
-                <Label>Session de caisse actuelle</Label>
+                <Label>Motif</Label>
+                <Input value={validation.demand?.pattern || "N/A"} readOnly className="bg-gray-50" />
+              </div>
+              <div>
+                <Label>Statut</Label>
+                <div className="flex items-center">
+                  <Badge color={validation.demand?.status === "approuvée" ? "default" : "secondary"} className="mt-2">
+                    {validation.demand?.status || "N/A"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Informations de la validation (non modifiable) */}
+        <Card className="border">
+          <CardHeader>
+            <CardTitle>Informations de la Validation</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Validateur</Label>
+                <Input 
+                  value={`${validator?.name || "N/A"} (${validatorRole})`} 
+                  readOnly 
+                  className="bg-gray-50" 
+                />
+              </div>
+              <div>
+                <Label>Date de validation</Label>
                 <Input
-                  value={
-                    cashRegisterSessionCurrent
-                      ? `${cashRegisterSessionCurrent.cash_register.cash_register_number} - ${cashRegisterSessionCurrent.user.name}`
-                      : "Aucune session active"
-                  }
+                  value={new Date(validation.validation_date).toLocaleDateString("fr-FR")}
                   readOnly
-                  className={`bg-gray-50 ${!cashRegisterSessionCurrent ? "border-red-300" : ""}`}
+                  className="bg-gray-50"
                 />
-                {errors.session && <p className="text-sm text-red-600 mt-1">{errors.session}</p>}
+              </div>
+              <div>
+                <Label>Statut de validation</Label>
+                <div className="flex items-center">
+                  <Badge
+                    color={validation.validation_status === "approuvée" ? "success" : "secondary"}
+                    className="mt-2"
+                  >
+                    {validation.validation_status}
+                  </Badge>
+                </div>
+              </div>
+              <div>
+                <Label>Ordre de validation</Label>
+                <Input value={validation.validation_order.toString()} readOnly className="bg-gray-50" />
               </div>
             </div>
-
-            <Separator />
-
-            <div className="flex justify-end gap-3">
-              <Button type="submit" disabled={submitting || !cashRegisterSessionCurrent} className="min-w-[120px]">
-                {submitting ? "Traitement..." : "Effectuer le Décaissement"}
-              </Button>
+            <div>
+              <Label>Commentaire du validateur</Label>
+              <Textarea value={validation.comment || "Aucun commentaire"} readOnly className="bg-gray-50" />
             </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+
+        {/* Vérifications préalables */}
+        {Object.keys(errors).length > 0 && (
+          <Card className="border">
+            <CardContent>
+              <Alert color="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {Object.values(errors).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Formulaire de décaissement */}
+        <Card className="border">
+          <CardHeader>
+            <CardTitle>Formulaire de Décaissement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="expense_type_id">Type de dépense *</Label>
+                  <Select
+                    value={formData.expense_type_id}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, expense_type_id: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un type de dépense" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {expenseTypes.map((type) => (
+                        <SelectItem key={type.id} value={type.id.toString()}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.expense_type_id && <p className="text-sm text-red-600 mt-1">{errors.expense_type_id}</p>}
+                </div>
+
+                <div>
+                  <Label htmlFor="amount">Montant ({currency}) *</Label>
+                  <Input
+                    id="amount"
+                    type="text"
+                    inputMode="numeric"
+                    value={formData.amount}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '')
+                      const formattedValue = formatNumber(value)
+                      setFormData((prev) => ({ ...prev, amount: formattedValue }))
+                    }}
+                    placeholder="Entrer le montant"
+                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Maximum: {formatNumber(validation.demand?.amount || 0)} {currency}
+                  </p>
+                  {errors.amount && <p className="text-sm text-red-600 mt-1">{errors.amount}</p>}
+                </div>
+
+                <div>
+                  <Label htmlFor="expense_date">Date de dépense *</Label>
+                  <Input
+                    id="expense_date"
+                    type="date"
+                    value={formData.expense_date}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, expense_date: e.target.value }))}
+                  />
+                  {errors.expense_date && <p className="text-sm text-red-600 mt-1">{errors.expense_date}</p>}
+                </div>
+
+                <div>
+                  <Label>Session de caisse actuelle</Label>
+                  <Input
+                    value={
+                      cashRegisterSessionCurrent
+                        ? `${cashRegisterSessionCurrent.cash_register.cash_register_number} - ${cashRegisterSessionCurrent.user.name}`
+                        : "Aucune session active"
+                    }
+                    readOnly
+                    className={`bg-gray-50 ${!cashRegisterSessionCurrent ? "border-red-300" : ""}`}
+                  />
+                  {errors.session && <p className="text-sm text-red-600 mt-1">{errors.session}</p>}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex justify-end gap-3">
+                <Button 
+                  type="submit" 
+                  disabled={submitting || !cashRegisterSessionCurrent} 
+                  className="min-w-[120px]"
+                  color="indigodye"
+                >
+                  {submitting ? "Traitement..." : "Effectuer le Décaissement"}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -449,10 +522,38 @@ interface DecaissementReceiptProps {
   validation: ValidationExpense
   transaction: Transaction
   expense: Expense
-  settings: any[]
+  settings: Setting[]
+  users: User[]
+  roles: Role[]
 }
 
-const DecaissementReceipt = ({ validation, transaction, expense, settings }: DecaissementReceiptProps) => {
+  /**
+   * Generates a receipt for a transaction.
+   *
+   * @param {ValidationExpense} validation
+   * @param {Transaction} transaction
+   * @param {Expense} expense
+   * @param {Setting[]} settings
+   * @param {User[]} users
+   * @param {Role[]} roles
+   * @returns {JSX.Element} The generated receipt.
+   */
+const DecaissementReceipt = ({ validation, transaction, expense, settings, users, roles }: DecaissementReceiptProps) => {
+  // Find user info from store
+  const findUser = (userId: number): User | undefined => {
+    return users.find(user => user.id === userId)
+  }
+
+  const findUserRole = (user: User | undefined | null): string => {
+    if (!user) return "N/A"
+    const role = roles.find(role => role.id === user.roles[0]?.id)
+    return role?.name || "N/A"
+  }
+
+  const applicant = validation.demand?.applicant_id ? findUser(validation.demand.applicant_id) : null
+  const validator = validation.user_id ? findUser(validation.user_id) : null
+  const cashier = transaction.user_id ? findUser(transaction.user_id) : null
+
   const schoolInfo = {
     logo: settings?.[0]?.establishment_logo || "",
     name: settings?.[0]?.establishment_name || "Nom Établissement",
@@ -460,6 +561,11 @@ const DecaissementReceipt = ({ validation, transaction, expense, settings }: Dec
     phone:
       `${settings?.[0]?.establishment_phone_1 || ""} ${settings?.[0]?.establishment_phone_2 ? "/ " + settings?.[0]?.establishment_phone_2 : ""}`.trim(),
     currency: settings?.[0]?.currency || "FCFA",
+  }
+
+  const formatNumber = (value: string | number): string => {
+    const num = typeof value === 'string' ? parseFloat(value) : value
+    return isNaN(num) ? '0' : num.toLocaleString('fr-FR')
   }
 
   const generateReceiptNumber = (id: number) => {
@@ -470,7 +576,7 @@ const DecaissementReceipt = ({ validation, transaction, expense, settings }: Dec
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm max-w-2xl mx-auto">
+    <div className="p-6 bg-white rounded-lg border max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex justify-between items-start border-b pb-4 mb-6">
         <div className="flex items-start gap-4">
@@ -512,11 +618,11 @@ const DecaissementReceipt = ({ validation, transaction, expense, settings }: Dec
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="font-medium">Demandeur:</span>
-              <p className="text-gray-800">{validation.demand?.applicant?.name}</p>
+              <p className="text-gray-800">{applicant?.name} ({findUserRole(applicant || null)})</p>
             </div>
             <div>
               <span className="font-medium">Validateur:</span>
-              <p className="text-gray-800">{validation.user?.name}</p>
+              <p className="text-gray-800">{validator?.name} ({findUserRole(validator || null)})</p>
             </div>
             <div>
               <span className="font-medium">Motif:</span>
@@ -538,13 +644,13 @@ const DecaissementReceipt = ({ validation, transaction, expense, settings }: Dec
             <div className="flex justify-between items-center mb-2">
               <span>Montant demandé:</span>
               <span className="font-medium">
-                {validation.demand?.amount?.toLocaleString()} {schoolInfo.currency}
+                {formatNumber(validation.demand?.amount || 0)} {schoolInfo.currency}
               </span>
             </div>
             <div className="flex justify-between items-center text-lg font-bold text-red-600">
               <span>Montant décaissé:</span>
               <span>
-                {Number.parseFloat(expense.amount).toLocaleString()} {schoolInfo.currency}
+                {formatNumber(expense.amount)} {schoolInfo.currency}
               </span>
             </div>
           </div>
@@ -566,7 +672,7 @@ const DecaissementReceipt = ({ validation, transaction, expense, settings }: Dec
             </div>
             <div>
               <span className="font-medium">Caissier:</span>
-              <p className="text-gray-800">{transaction.user?.name}</p>
+              <p className="text-gray-800">{cashier?.name} ({findUserRole(cashier || null)})</p>
             </div>
             <div>
               <span className="font-medium">Date de dépense:</span>

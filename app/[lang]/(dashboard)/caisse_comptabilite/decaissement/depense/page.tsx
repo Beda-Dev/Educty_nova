@@ -101,10 +101,6 @@ function ExpensePage() {
   return (
     <div className="space-y-4">
       <TableExpense 
-        expenses={expenses} 
-        validations={validationExpenses} 
-        demands={demands} 
-        onRefresh={loadData}
       />
     </div>
   );

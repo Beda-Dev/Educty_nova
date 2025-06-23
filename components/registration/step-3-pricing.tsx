@@ -31,7 +31,6 @@ interface Step3Props {
   onPrevious: () => void
 }
 
-
 export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const { methodPayment, cashRegisterSessionCurrent } = useSchoolStore()
   const { setPaidAmount, setPayments, payments, paidAmount, availablePricing, setAvailablePricing } =
@@ -98,6 +97,37 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
     setInstallmentErrors(newInstallmentErrors);
   }, [givenAmount]);
 
+  // Ajoutez ce useEffect pour recalculer totalPaidAmount et nettoyer les erreurs
+  useEffect(() => {
+    // Recalcule le total payé
+    const total = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0);
+    setTotalPaidAmount(total);
+    setPaidAmount(total);
+
+    // Vérifie la cohérence des montants méthodes/échéances
+    const newErrors: Record<number, string> = {};
+    let hasGlobalError = false;
+    Object.entries(paymentMethods).forEach(([installmentId, methods]) => {
+      const totalMethodAmount = methods.reduce((sum, method) => sum + method.amount, 0);
+      const installmentAmount = installmentAmounts[Number(installmentId)] || 0;
+      if (Math.abs(totalMethodAmount - installmentAmount) > 0.01) {
+        newErrors[Number(installmentId)] =
+          `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${installmentAmount}).`;
+        hasGlobalError = true;
+      } else {
+        newErrors[Number(installmentId)] = '';
+      }
+    });
+
+    // Nettoie les erreurs locales si tout est bon
+    setInstallmentErrors(newErrors);
+
+    // Nettoie l'erreur globale si la somme est correcte
+    if (!hasGlobalError && globalError) {
+      setGlobalError('');
+    }
+  }, [installmentAmounts, paymentMethods, setPaidAmount]);
+
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(methodPayment[0]?.id || 0)
   const [openConfirmModal, setOpenConfirmModal] = useState(false)
   // Gestion des erreurs locales par échéance
@@ -158,21 +188,18 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
     setInstallmentAmounts(prev => ({
       ...prev,
       [installmentId]: numericAmount,
-    }))
-    // Vérification immédiate de la cohérence des sous-montants pour cette échéance
-    const currentMethods = paymentMethods[installmentId] || []
+    }));
+    // Nettoie l'erreur locale si la somme devient correcte
+    const currentMethods = paymentMethods[installmentId] || [];
     if (currentMethods.length === 1) {
       setPaymentMethods(prev => ({
         ...prev,
         [installmentId]: [{ ...currentMethods[0], amount: numericAmount }],
-      }))
-      // Vérification de cohérence
+      }));
       setInstallmentErrors(prev => ({
         ...prev,
-        [installmentId]: currentMethods[0].amount !== numericAmount
-          ? `La somme des méthodes (${currentMethods[0].amount}) ne correspond pas au montant de l'échéance (${numericAmount}).`
-          : ''
-      }))
+        [installmentId]: ''
+      }));
     }
   }
 
@@ -193,21 +220,20 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   }
 
   const updatePaymentMethod = (installmentId: number, index: number, field: "id" | "amount", value: number) => {
-    const currentMethods = paymentMethods[installmentId] || []
-    const updatedMethods = currentMethods.map((method, i) => (i === index ? { ...method, [field]: value } : method))
+    const currentMethods = paymentMethods[installmentId] || [];
+    const updatedMethods = currentMethods.map((method, i) => (i === index ? { ...method, [field]: value } : method));
     setPaymentMethods({
       ...paymentMethods,
       [installmentId]: updatedMethods,
-    })
-    // Vérification immédiate de la cohérence des sous-montants pour cette échéance
-    const totalMethodAmount = updatedMethods.reduce((sum, method) => sum + method.amount, 0)
-    const installmentAmount = installmentAmounts[installmentId] || 0
+    });
+    // Nettoie l'erreur locale si la somme devient correcte
+    const totalMethodAmount = updatedMethods.reduce((sum, method) => sum + method.amount, 0);
+    const installmentAmount = installmentAmounts[installmentId] || 0;
     setInstallmentErrors(prev => ({
       ...prev,
-      [installmentId]: totalMethodAmount !== installmentAmount
-        ? `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${installmentAmount}).`
-        : ''
-    }))
+      [installmentId]: totalMethodAmount === installmentAmount ? '' :
+        `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${installmentAmount}).`
+    }));
   }
 
   // Vérifie que les méthodes de paiement sont valides et complètes pour une échéance donnée
@@ -306,6 +332,8 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
     onNext()
   }
 
+  const noPaymentMethod = !methodPayment || methodPayment.length === 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -318,6 +346,15 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
           <CardTitle className="text-2xl font-bold tracking-tight">Paiement des frais scolaires</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
+          {/* Affichage d'une alerte si aucune méthode de paiement n'est définie */}
+          {noPaymentMethod && (
+            <Alert color="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Aucune méthode de paiement n'est définie dans les paramètres. Veuillez en ajouter une avant de continuer.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div
               whileHover={{ scale: 1.01 }}
@@ -454,6 +491,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                                   onValueChange={(value) =>
                                     updatePaymentMethod(installment.id, index, "id", Number.parseInt(value))
                                   }
+                                  disabled={noPaymentMethod}
                                 >
                                   <SelectTrigger>
                                     <SelectValue />
@@ -502,6 +540,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                               size="sm"
                               onClick={() => addPaymentMethod(installment.id)}
                               className="h-10"
+                              disabled={noPaymentMethod}
                             >
                               Ajouter une méthode
                             </Button>
@@ -550,10 +589,19 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
                   <p className="text-xl font-bold">
-                    {Math.max(givenAmount - totalPaidAmount, 0).toLocaleString()} {currency}
+                    0 {currency}
                   </p>
                 </div>
               </div>
+              {/* Affiche un message si la monnaie à rendre n'est pas 0 */}
+              {givenAmount - totalPaidAmount !== 0 && (
+                <Alert color="destructive" className="mt-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Attention : la monnaie à rendre doit toujours être 0. Vérifiez les montants saisis.
+                  </AlertDescription>
+                </Alert>
+              )}
             </motion.div>
           )}
         </CardContent>
@@ -566,19 +614,17 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          
             <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
               Précédent
             </Button>
-              <Button onClick={handleNext} className="h-10 px-6" disabled={
+            <Button onClick={handleNext} className="h-10 px-6" disabled={
                 !!globalError ||
                 Object.values(installmentErrors).some((err) => !!err) ||
-                givenAmount < totalPaidAmount
+                givenAmount < totalPaidAmount ||
+                noPaymentMethod
               }>
                 Suivant
               </Button>
-
-
         </motion.div>
       ) : (
         <motion.div
@@ -593,7 +639,8 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
           <Button onClick={handleNext} className="h-10 px-6" disabled={
             !!globalError ||
             Object.values(installmentErrors).some((err) => !!err) ||
-            givenAmount < totalPaidAmount
+            givenAmount < totalPaidAmount ||
+            noPaymentMethod
           }>
             Suivant
           </Button>

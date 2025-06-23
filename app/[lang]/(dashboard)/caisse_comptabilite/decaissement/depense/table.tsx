@@ -15,7 +15,7 @@ import { verificationPermission } from "@/lib/fonction"
 import ErrorPage from "@/app/[lang]/non-Autoriser"
 import { format } from "date-fns"
 import { DatePickerInput } from "./datePicker"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, FileText, Eye } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Pagination,
@@ -28,14 +28,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import DecaissementPage from "./decaissement-page"
 
-interface TableExpenseProps {
-  expenses: Expense[]
-  validations: ValidationExpense[]
-  demands: Demand[]
-  onRefresh: () => void
-}
 
-const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpenseProps) => {
+const TableExpense = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchTerm, setSearchTerm] = useState("")
@@ -47,9 +41,10 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
   const [showDecaissementPage, setShowDecaissementPage] = useState(false)
   const [selectedValidationId, setSelectedValidationId] = useState<number | null>(null)
   const [demandSearchTerm, setDemandSearchTerm] = useState("")
-  
 
-  const { userOnline, settings } = useSchoolStore()
+
+
+  const { userOnline, settings, users , expenses , demands , validationExpenses } = useSchoolStore()
   const router = useRouter()
 
   // Vérification des permissions
@@ -86,27 +81,29 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
         : true
 
       const matchesValidator = selectedValidator
-        ? validations.some((v) => expense?.validation_expense_id === v.id && v.user?.name === selectedValidator)
+        ? validationExpenses.some((v) => expense?.validation_expense_id === v.id && v.user?.name === selectedValidator)
         : true
 
       const matchesStatus = selectedStatus
-        ? validations.some((v) => expense.validation_expense_id === v.id && v.validation_status === selectedStatus)
+        ? validationExpenses.some((v) => expense.validation_expense_id === v.id && v.validation_status === selectedStatus)
         : true
 
       return matchesDate && matchesSearch && matchesCashRegister && matchesValidator && matchesStatus
     })
-  }, [expenses, selectedDate, searchTerm, selectedCashRegister, selectedValidator, selectedStatus, validations])
+  }, [expenses, selectedDate, searchTerm, selectedCashRegister, selectedValidator, selectedStatus, validationExpenses])
 
 
 
   const approvedDemandsWithValidators = useMemo(() => {
+    // je verifie si un decaissement a deja et effectuer pour les validation 
+    const filteredValidation = validationExpenses.filter(va => !expenses.some(ex => Number(ex.validation_expense_id) === Number(va.id))  )
     // 1. Filtrer les validations approuvées et ayant une demande associée
-    const approvedValidations = validations.filter(v => 
-      v.validation_status === "approuvée" && 
-      v.demand_id && 
+    const approvedValidations = filteredValidation.filter(v =>
+      v.validation_status === "approuvée" &&
+      v.demand_id &&
       v.demand // Vérifier que la demande existe dans la validation
     );
-  
+
     // 2. Créer un tableau unique de demandes (éviter les doublons)
     const uniqueDemands = new Map<number, {
       demand: Demand;
@@ -117,12 +114,12 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
       }>;
       validationId: number;
     }>();
-  
+
     approvedValidations.forEach(validation => {
       if (!validation.demand) return;
-  
+
       const existing = uniqueDemands.get(validation.demand.id);
-      
+
       if (existing) {
         // Ajouter le validateur si pas déjà présent
         if (!existing.validators.some(v => v.name === validation.user?.name)) {
@@ -144,7 +141,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
         });
       }
     });
-  
+
     // 3. Convertir en tableau et appliquer le filtre de recherche
     return Array.from(uniqueDemands.values())
       .filter(item => {
@@ -156,7 +153,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
           String(item.demand.amount).includes(demandSearchTerm)
         );
       });
-  }, [validations, demandSearchTerm]);
+  }, [validationExpenses, demandSearchTerm]);
 
   // Pagination
   const ITEMS_PER_PAGE = 10
@@ -181,12 +178,12 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
     } else {
       toast.error("Aucune demande de décaissement disponible.")
     }
-    
+
   }
 
   const handleDemandSelect = (demand: Demand) => {
     // Trouver la validation correspondante à cette demande
-    const demandValidation = validations.find((v) => v.demand_id === demand.id && v.validation_status === "approuvée")
+    const demandValidation = validationExpenses.find((v) => v.demand_id === demand.id && v.validation_status === "approuvée")
 
     if (demandValidation) {
       setSelectedValidationId(demandValidation.id)
@@ -260,7 +257,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                     <SelectValue placeholder="Caisse" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Toutes caisses</SelectItem>
+                    <SelectItem value="">caisses</SelectItem>
                     {Array.from(
                       new Set(expenses.map((e) => e.cash_register?.cash_register_number).filter(Boolean) as string[]),
                     ).map((num) => (
@@ -276,8 +273,8 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                     <SelectValue placeholder="Validateur" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Tous validateurs</SelectItem>
-                    {Array.from(new Set(validations.map((v) => v.user?.name).filter(Boolean) as string[])).map(
+                    <SelectItem value="">validateurs</SelectItem>
+                    {Array.from(new Set(validationExpenses.map((v) => v.user?.name).filter(Boolean) as string[])).map(
                       (name) => (
                         <SelectItem key={name} value={name}>
                           {name}
@@ -287,17 +284,6 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                   </SelectContent>
                 </Select>
 
-                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Statut" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Tous statuts</SelectItem>
-                    <SelectItem value="en attente">En attente</SelectItem>
-                    <SelectItem value="approuvée">Approuvée</SelectItem>
-                    <SelectItem value="refusée">Refusée</SelectItem>
-                  </SelectContent>
-                </Select>
 
                 <DatePickerInput
                   date={selectedDate}
@@ -319,7 +305,6 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                     <TableHead>Type</TableHead>
                     <TableHead>Caisse</TableHead>
                     <TableHead>Validation</TableHead>
-                    <TableHead>Statut</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -328,7 +313,7 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                   {paginatedExpenses.length > 0 ? (
                     <AnimatePresence>
                       {paginatedExpenses.map((expense) => {
-                        const validation = validations.find((v) => v.id === expense.validation_expense_id)
+                        const validation = validationExpenses.find((v) => v.id === expense.validation_expense_id)
 
                         return (
                           <motion.tr
@@ -364,20 +349,6 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge
-                                color={
-                                  validation?.validation_status === "approuvée"
-                                    ? "success"
-                                    : validation?.validation_status === "refusée"
-                                      ? "destructive"
-                                      : "warning"
-                                }
-                                className="text-xs"
-                              >
-                                {validation?.validation_status || "En attente"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
                               <div className="flex flex-col gap-1">
                                 <span className="text-sm">{format(new Date(expense.expense_date), "dd/MM/yyyy")}</span>
                                 <span className="text-xs text-muted-foreground">
@@ -386,30 +357,20 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
                               </div>
                             </TableCell>
                             <TableCell>
-                              <div className="flex gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    // Voir les détails de la dépense
-                                    toast.success("Fonctionnalité à implémenter")
-                                  }}
-                                >
-                                  <Icon icon="heroicons:eye" className="h-4 w-4" />
-                                </Button>
-                                {expense.transaction_id && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      // Voir le reçu
-                                      toast.success("Reçu à implémenter")
-                                    }}
-                                  >
-                                    <Icon icon="heroicons:document-text" className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </div>
+
+
+                              <Button
+                                color="tyrian"
+                                onClick={() => {
+                                  router.push(`/caisse_comptabilite/decaissement/depense/${expense.id}`)
+
+                                }}
+                              >
+                                <FileText className="w-5 h-5 " />
+
+                              </Button>
+
+
                             </TableCell>
                           </motion.tr>
                         )
@@ -480,110 +441,109 @@ const TableExpense = ({ expenses, validations, demands, onRefresh }: TableExpens
 
           {/* Modale pour les demandes de décaissement approuvées */}
           <Dialog open={showDemandsModal} onOpenChange={setShowDemandsModal}>
-  <DialogContent className="w-full h-full overflow-y-auto">
-    <DialogHeader>
-      <DialogTitle className="flex items-center gap-2">
-        <Icon icon="heroicons:document-currency-dollar" className="h-5 w-5" />
-        Demandes approuvées disponibles
-      </DialogTitle>
-    </DialogHeader>
+            <DialogContent size="5xl" className="w-screen h-screen max-w-none max-h-none rounded-none sm:rounded-none">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Icon icon="heroicons:document-currency-dollar" className="h-5 w-5" />
+                  Demandes approuvées disponibles
+                </DialogTitle>
+              </DialogHeader>
 
-    <div className="space-y-4">
-      <div className="flex flex-col md:flex-row gap-4">
-        <Input
-          placeholder="Rechercher par demandeur, motif ou montant..."
-          value={demandSearchTerm}
-          onChange={(e) => setDemandSearchTerm(e.target.value)}
-          className="flex-1"
-        />
-        <Badge variant="outline" className="self-center">
-          {approvedDemandsWithValidators.length} demande(s) trouvée(s)
-        </Badge>
-      </div>
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <Input
+                    placeholder="Rechercher par demandeur, motif ou montant..."
+                    value={demandSearchTerm}
+                    onChange={(e) => setDemandSearchTerm(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Badge variant="outline" className="self-center">
+                    {approvedDemandsWithValidators.length} demande(s) trouvée(s)
+                  </Badge>
+                </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader className="bg-gray-50">
-            <TableRow>
-              <TableHead className="w-[200px]">Demandeur</TableHead>
-              <TableHead className="text-right">Montant</TableHead>
-              <TableHead>Motif</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Validation</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {approvedDemandsWithValidators.length > 0 ? (
-              approvedDemandsWithValidators.map((item) => (
-                <TableRow key={item.demand.id} className="hover:bg-gray-50/50">
-                  <TableCell>
-                    <div className="font-medium">{item.demand.applicant?.name || "Inconnu"}</div>
-                    <div className="text-xs text-muted-foreground">Ref: {item.demand.id}</div>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatAmount(item.demand.amount)}
-                  </TableCell>
-                  <TableCell>
-                    <div className="line-clamp-2" title={item.demand.pattern}>
-                      {item.demand.pattern}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {format(new Date(item.demand.created_at), "dd/MM/yyyy")}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {format(new Date(item.demand.created_at), "HH:mm")}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      {item.validators.map((validator, i) => (
-                        <div key={i} className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            {validator.name}
-                          </Badge>
-                          <Badge
-                            color={validator.status === "approuvée" ? "success" : "destructive"}
-                            className="text-xs"
-                          >
-                            {validator.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      onClick={() => handleDemandSelect(item.demand)}
-                      className="gap-2"
-                    >
-                      Sélectionner
-                      <Icon icon="heroicons:arrow-right" className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center h-24">
-                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                    <Icon icon="heroicons:inbox" className="h-8 w-8" />
-                    {demandSearchTerm 
-                      ? "Aucune demande ne correspond à votre recherche"
-                      : "Aucune demande approuvée disponible"}
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  </DialogContent>
-</Dialog>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-gray-50">
+                      <TableRow>
+                        <TableHead className="w-[200px]">Demandeur</TableHead>
+                        <TableHead className="text-right">Montant</TableHead>
+                        <TableHead>Motif</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {approvedDemandsWithValidators.length > 0 ? (
+                        approvedDemandsWithValidators.map((item) => (
+                          <TableRow key={item.demand.id} className="hover:bg-gray-50/50">
+                            <TableCell>
+                              <div className="font-medium">{users.find((user) => Number(user.id) === Number(item.demand.applicant_id))?.name || "inconnu"}  { }</div>
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              {formatAmount(item.demand.amount)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="line-clamp-2" title={item.demand.pattern}>
+                                {item.demand.pattern}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">
+                                {format(new Date(item.demand.created_at), "dd/MM/yyyy")}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {format(new Date(item.demand.created_at), "HH:mm")}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-1">
+                                {item.validators.map((validator, i) => (
+                                  <div key={i} className="flex items-center gap-2">
+                                    <Badge variant="outline" className="text-xs">
+                                      {validator.name}
+                                    </Badge>
+                                    <Badge
+                                      color={validator.status === "approuvée" ? "success" : "destructive"}
+                                      className="text-xs"
+                                    >
+                                      {validator.status}
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                onClick={() => handleDemandSelect(item.demand)}
+                                className="gap-2"
+                              >
+                                Sélectionner
+                                <Icon icon="heroicons:arrow-right" className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center h-24">
+                            <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                              <Icon icon="heroicons:inbox" className="h-8 w-8" />
+                              {demandSearchTerm
+                                ? "Aucune demande ne correspond à votre recherche"
+                                : "Aucune demande approuvée disponible"}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </motion.div>

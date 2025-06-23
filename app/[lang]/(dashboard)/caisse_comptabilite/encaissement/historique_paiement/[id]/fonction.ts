@@ -21,6 +21,7 @@ export function findRegistrationById(id: number, Registrations: Registration[]):
   }  
 
   export interface DetailsPaiement {
+    etudiant: Student;
     anneeAcademique: AcademicYear;
     typeFrais: string;
     montantPaye: number;
@@ -101,6 +102,7 @@ export function findRegistrationById(id: number, Registrations: Registration[]):
     const soldeRestantApresPaiement = soldeRestantAvantPaiement - montantPayeActuel;
   
     return {
+      etudiant,
       anneeAcademique,
       typeFrais: tarif.fee_type.label,
       montantPaye: montantPayeActuel,
@@ -142,4 +144,80 @@ export interface TarificationResult {
   };
   
   export default getTarificationData;
+
+
+
+  // Ajoutez ces fonctions à fonction.ts
+
+export function getPaymentSummary(
+  studentId: number,
+  payments: Payment[],
+  pricing: Pricing[],
+  installments: Installment[],
+  academicYearId: number,
+  levelId: number,
+  assignmentTypeId: number
+) {
+  const feeTypes: Record<number, {
+    label: string;
+    total: number;
+    paid: number;
+    pricingId?: number;
+  }> = {};
+
+  // Group payments by fee type
+  payments.forEach(payment => {
+    if (payment.student_id !== studentId) return;
+    
+    const installment = installments.find(i => i.id === payment.installment_id);
+    if (!installment) return;
+
+    const pricingItem = pricing.find(p => p.id === installment.pricing_id);
+    if (!pricingItem) return;
+
+    const feeTypeId = pricingItem.fee_type_id;
+    const amount = parseFloat(payment.amount) || 0;
+
+    if (!feeTypes[feeTypeId]) {
+      feeTypes[feeTypeId] = {
+        label: pricingItem.fee_type?.label || pricingItem.label,
+        total: parseFloat(pricingItem.amount) || 0,
+        paid: 0,
+        pricingId: pricingItem.id
+      };
+    }
+
+    feeTypes[feeTypeId].paid += amount;
+  });
+
+  // Add pricing that might not have payments yet
+  pricing.forEach(pricingItem => {
+    if (pricingItem.academic_years_id === academicYearId &&
+      pricingItem.level_id === levelId && 
+      pricingItem.assignment_type_id === assignmentTypeId) {
+      if (!feeTypes[pricingItem.fee_type_id]) {
+        feeTypes[pricingItem.fee_type_id] = {
+          label: pricingItem.fee_type?.label || pricingItem.label,
+          total: parseFloat(pricingItem.amount) || 0,
+          paid: 0,
+          pricingId: pricingItem.id
+        };
+      }
+    }
+  });
+
+  return Object.values(feeTypes);
+}
+
+export function getTotalPaymentAmounts(paymentSummary: {
+  label: string;
+  total: number;
+  paid: number;
+}[]) {
+  const totalAmount = paymentSummary.reduce((sum, item) => sum + item.total, 0);
+  const totalPaid = paymentSummary.reduce((sum, item) => sum + item.paid, 0);
+  const remainingAmount = totalAmount - totalPaid;
+
+  return { totalAmount, totalPaid, remainingAmount };
+}
   

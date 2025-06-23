@@ -86,10 +86,6 @@ export function PaymentTable({ data }: { data: Payment[] }) {
       },
     },
     {
-      accessorFn: (row) => new Date(row.created_at).toLocaleDateString(),
-      header: "Date de paiement",
-    },
-    {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (

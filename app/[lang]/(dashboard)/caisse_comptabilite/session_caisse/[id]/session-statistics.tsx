@@ -46,7 +46,7 @@ export default function SessionStatistics({
         payment.payment_method.forEach((pm: any) => {
           if (stats[pm.id]) {
             // Utiliser le montant du pivot ou le montant principal
-            const amount = pm.pivot?.montant || payment.amount
+            const amount = pm.pivot?.montant
             stats[pm.id].totalEncaissements += Number(amount) || 0
           }
         })
@@ -134,7 +134,7 @@ export default function SessionStatistics({
                           {formatAmount(stats?.totalEncaissements || 0)}
                         </span>
                       </div>
-                      <div className="flex justify-between text-sm">
+                      {/* <div className="flex justify-between text-sm">
                         <span>Décaissements:</span>
                         <span className="text-red-600 font-medium">{formatAmount(stats?.totalDecaissements || 0)}</span>
                       </div>
@@ -143,7 +143,7 @@ export default function SessionStatistics({
                         <span className={stats?.soldeNet >= 0 ? "text-green-600" : "text-red-600"}>
                           {formatAmount(stats?.soldeNet || 0)}
                         </span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 )

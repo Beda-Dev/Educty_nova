@@ -33,62 +33,62 @@ interface Step3Props {
 
 export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   const { availablePricing, payments, setPayments, paidAmount, setPaidAmount } = useReinscriptionStore()
-  const { cashRegisterSessionCurrent, methodPayment } = useSchoolStore()
+  const { cashRegisterSessionCurrent, methodPayment, settings } = useSchoolStore()
 
   const [studentPaidAmount, setStudentPaidAmount] = useState(0)
 
-// Synchronisation des montants répartis et méthodes de paiement quand studentPaidAmount change
-useEffect(() => {
-  // Cas particulier : tout à zéro
-  if (studentPaidAmount === 0) {
-    setInstallmentAmounts({});
-    setPaymentMethods({});
-    setInstallmentErrors({});
-    setGlobalError("");
-    return;
-  }
-  let total = 0;
-  let changed = false;
-  let adjustedIds: number[] = [];
-  const newInstallmentAmounts: Record<number, number> = {};
-  const newPaymentMethods: Record<number, Array<{ id: number; amount: number }>> = {};
-  const newInstallmentErrors: Record<number, string> = {};
-  selectedInstallments.forEach((id) => {
-    const prevRaw = installmentAmounts[id];
-    const prev = typeof prevRaw === 'string' ? Number(prevRaw) || 0 : prevRaw || 0;
-    let newVal = prev;
-    if (total + prev > studentPaidAmount) {
-      newVal = Math.max(0, studentPaidAmount - total);
-      changed = true;
-      adjustedIds.push(id);
-      total = studentPaidAmount;
-    } else {
-      newVal = prev;
-      total += prev;
+  // Synchronisation des montants répartis et méthodes de paiement quand studentPaidAmount change
+  useEffect(() => {
+    // Cas particulier : tout à zéro
+    if (studentPaidAmount === 0) {
+      setInstallmentAmounts({});
+      setPaymentMethods({});
+      setInstallmentErrors({});
+      setGlobalError("");
+      return;
     }
-    newInstallmentAmounts[id] = newVal;
-  
-    // Recalcule précisément l'erreur locale
-    if (newVal < 0) {
-      newInstallmentErrors[id] = "Montant négatif non autorisé.";
-    } else if (newVal === 0) {
-      newInstallmentErrors[id] = "Veuillez saisir un montant positif.";
-    } else {
-      newInstallmentErrors[id] = "";
-    }
-  });
-  if (changed) {
-    setInstallmentAmounts(newInstallmentAmounts);
+    let total = 0;
+    let changed = false;
+    let adjustedIds: number[] = [];
+    const newInstallmentAmounts: Record<number, number> = {};
+    const newPaymentMethods: Record<number, Array<{ id: number; amount: number }>> = {};
+    const newInstallmentErrors: Record<number, string> = {};
+    selectedInstallments.forEach((id) => {
+      const prevRaw = installmentAmounts[id];
+      const prev = typeof prevRaw === 'string' ? Number(prevRaw) || 0 : prevRaw || 0;
+      let newVal = prev;
+      if (total + prev > studentPaidAmount) {
+        newVal = Math.max(0, studentPaidAmount - total);
+        changed = true;
+        adjustedIds.push(id);
+        total = studentPaidAmount;
+      } else {
+        newVal = prev;
+        total += prev;
+      }
+      newInstallmentAmounts[id] = newVal;
     
-    toast("Certaines répartitions ont été ajustées car le montant total a été réduit.", { position: "top-center", icon: "⚠️" });
-  }
-  // Nettoie les erreurs globales si la somme devient correcte
-  if (total <= studentPaidAmount && globalError) {
-    setGlobalError("");
-  }
-  // Réinitialise ou met à jour précisément les erreurs locales
-  setInstallmentErrors(newInstallmentErrors);
-}, [studentPaidAmount]);
+      // Recalcule précisément l'erreur locale
+      if (newVal < 0) {
+        newInstallmentErrors[id] = "Montant négatif non autorisé.";
+      } else if (newVal === 0) {
+        newInstallmentErrors[id] = "Veuillez saisir un montant positif.";
+      } else {
+        newInstallmentErrors[id] = "";
+      }
+    });
+    if (changed) {
+      setInstallmentAmounts(newInstallmentAmounts);
+      
+      toast("Certaines répartitions ont été ajustées car le montant total a été réduit.", { position: "top-center", icon: "⚠️" });
+    }
+    // Nettoie les erreurs globales si la somme devient correcte
+    if (total <= studentPaidAmount && globalError) {
+      setGlobalError("");
+    }
+    // Réinitialise ou met à jour précisément les erreurs locales
+    setInstallmentErrors(newInstallmentErrors);
+  }, [studentPaidAmount]);
   const [selectedInstallments, setSelectedInstallments] = useState<number[]>([])
   const [installmentAmounts, setInstallmentAmounts] = useState<Record<number, number>>({})
   const [paymentMethods, setPaymentMethods] = useState<Record<number, Array<{ id: number; amount: number }>>>({})
@@ -96,17 +96,42 @@ useEffect(() => {
   const [openConfirmModal, setOpenConfirmModal] = useState(false)
   const [installmentErrors, setInstallmentErrors] = useState<Record<number, string>>({})
   const [globalError, setGlobalError] = useState("")
-  const { settings } = useSchoolStore();
   const currency = (settings && settings[0]?.currency) || 'FCFA';
 
   const allInstallments = availablePricing.flatMap((pricing) => pricing.installments || [])
   const totalDue = availablePricing.reduce((sum, pricing) => sum + Number.parseInt(pricing.amount), 0)
 
+  // Ajout du recalcul automatique et nettoyage des erreurs
   useEffect(() => {
+    // Recalcule le total distribué
     const total = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0)
     setTotalDistributedAmount(total)
     setPaidAmount(total)
-  }, [installmentAmounts, setPaidAmount])
+
+    // Vérifie la cohérence des montants méthodes/échéances
+    const newErrors: Record<number, string> = {};
+    let hasGlobalError = false;
+    Object.entries(paymentMethods).forEach(([installmentId, methods]) => {
+      const totalMethodAmount = methods.reduce((sum, method) => sum + method.amount, 0);
+      const installmentAmount = installmentAmounts[Number(installmentId)] || 0;
+      if (Math.abs(totalMethodAmount - installmentAmount) > 0.01) {
+        newErrors[Number(installmentId)] =
+          `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${installmentAmount}).`;
+        hasGlobalError = true;
+      } else {
+        newErrors[Number(installmentId)] = '';
+      }
+    });
+    setInstallmentErrors(newErrors);
+
+    // Nettoie l'erreur globale si la somme est correcte
+    if (!hasGlobalError && globalError) {
+      setGlobalError('');
+    }
+  }, [installmentAmounts, paymentMethods, setPaidAmount])
+
+  // Vérification de l'absence de méthodes de paiement
+  const noPaymentMethod = !methodPayment || methodPayment.length === 0;
 
   const handleInstallmentToggle = (installmentId  : number) => {
     if (selectedInstallments.includes(installmentId)) {
@@ -137,35 +162,72 @@ useEffect(() => {
     }
   }
 
-  const handleAmountChange = (installmentId: number, amount: number | string) => {
-    const numericAmount = amount === '' ? 0 : Number(amount) || 0;
-    const totalSansActuel = Object.entries(installmentAmounts)
-      .filter(([id]) => Number(id) !== installmentId)
-      .reduce((sum, [, amt]) => sum + amt, 0);
-    if (numericAmount + totalSansActuel > studentPaidAmount) {
-      setGlobalError("La somme répartie dépasse le montant donné.");
-      return;
-    } else {
-      setGlobalError("");
-    }
-    setInstallmentAmounts(prev => ({
+// Remplacer la fonction handleAmountChange
+const handleAmountChange = (installmentId: number, amount: number | string) => {
+  const numericAmount = amount === '' ? 0 : Number(amount) || 0;
+  
+  // Vérifier si le montant est valide
+  if (numericAmount < 0) {
+    setInstallmentErrors(prev => ({
       ...prev,
-      [installmentId]: numericAmount,
-    }))
-    const currentMethods = paymentMethods[installmentId] || []
-    if (currentMethods.length === 1) {
-      setPaymentMethods(prev => ({
-        ...prev,
-        [installmentId]: [{ ...currentMethods[0], amount: numericAmount }],
-      }))
-      setInstallmentErrors(prev => ({
-        ...prev,
-        [installmentId]: currentMethods[0].amount !== numericAmount
-          ? `La somme des méthodes (${currentMethods[0].amount}) ne correspond pas au montant de l'échéance (${numericAmount}).`
-          : ''
-      }))
-    }
+      [installmentId]: "Le montant ne peut pas être négatif"
+    }));
+    return;
   }
+
+  const totalSansActuel = Object.entries(installmentAmounts)
+    .filter(([id]) => Number(id) !== installmentId)
+    .reduce((sum, [, amt]) => sum + amt, 0);
+
+  const nouveauTotal = totalSansActuel + numericAmount;
+
+  if (nouveauTotal > studentPaidAmount) {
+    setGlobalError("La somme répartie dépasse le montant donné.");
+    return;
+  } else {
+    setGlobalError("");
+  }
+
+  // Mettre à jour le montant de l'échéance
+  const newAmounts = {
+    ...installmentAmounts,
+    [installmentId]: numericAmount
+  };
+  
+  setInstallmentAmounts(newAmounts);
+
+  // Mettre à jour les méthodes de paiement
+  const currentMethods = paymentMethods[installmentId] || [];
+  if (currentMethods.length === 1) {
+    const updatedMethods = [{
+      ...currentMethods[0],
+      amount: numericAmount
+    }];
+    
+    setPaymentMethods(prev => ({
+      ...prev,
+      [installmentId]: updatedMethods
+    }));
+
+    // Vérifier la cohérence
+    const totalMethodAmount = updatedMethods.reduce((sum, m) => sum + m.amount, 0);
+    setInstallmentErrors(prev => ({
+      ...prev,
+      [installmentId]: totalMethodAmount !== numericAmount
+        ? `La somme des méthodes (${totalMethodAmount}) ne correspond pas au montant de l'échéance (${numericAmount}).`
+        : ''
+    }));
+  }
+
+  // Mettre à jour le montant total distribué
+  const newTotalDistributed = Object.values({
+    ...installmentAmounts,
+    [installmentId]: numericAmount
+  }).reduce((sum, amt) => sum + amt, 0);
+  
+  setTotalDistributedAmount(newTotalDistributed);
+  setPaidAmount(newTotalDistributed);
+}
 
   const addPaymentMethod = (installmentId: number) => {
     const currentMethods = paymentMethods[installmentId] || []
@@ -306,6 +368,15 @@ useEffect(() => {
           <CardTitle className="text-2xl font-bold tracking-tight">Paiement des frais de réinscription</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
+          {/* Affichage d'une alerte si aucune méthode de paiement n'est définie */}
+          {noPaymentMethod && (
+            <Alert color="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Aucune méthode de paiement n'est définie dans les paramètres. Veuillez en ajouter une avant de continuer.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div
               whileHover={{ scale: 1.01 }}
@@ -430,6 +501,7 @@ useEffect(() => {
 
                           <div className="space-y-3">
                             <Label>Méthodes de paiement</Label>
+                            {/* Désactive l'ajout si aucune méthode n'est dispo */}
                             {(paymentMethods[installment.id] || []).map((method, index) => (
                               <motion.div
                                 key={index}
@@ -441,6 +513,7 @@ useEffect(() => {
                                   onValueChange={(value) =>
                                     updatePaymentMethod(installment.id, index, "id", Number.parseInt(value))
                                   }
+                                  disabled={noPaymentMethod}
                                 >
                                   <SelectTrigger>
                                     <SelectValue />
@@ -489,6 +562,7 @@ useEffect(() => {
                               size="sm"
                               onClick={() => addPaymentMethod(installment.id)}
                               className="h-10"
+                              disabled={noPaymentMethod}
                             >
                               Ajouter une méthode
                             </Button>
@@ -537,10 +611,19 @@ useEffect(() => {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
                   <p className="text-xl font-bold">
-                    {Math.max(studentPaidAmount - totalDistributedAmount, 0).toLocaleString()} {currency}
+                    0 {currency}
                   </p>
                 </div>
               </div>
+              {/* Affiche un message si la monnaie à rendre n'est pas 0 */}
+              {studentPaidAmount - totalDistributedAmount !== 0 && (
+                <Alert color="destructive" className="mt-4">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Attention : la monnaie à rendre doit toujours être 0. Vérifiez les montants saisis.
+                  </AlertDescription>
+                </Alert>
+              )}
             </motion.div>
           )}
         </CardContent>
@@ -559,12 +642,11 @@ useEffect(() => {
             <Button onClick={handleNext} className="h-10 px-6" disabled={
                 !!globalError ||
                 Object.values(installmentErrors).some((err) => !!err) ||
-                studentPaidAmount < totalDistributedAmount
+                studentPaidAmount < totalDistributedAmount ||
+                noPaymentMethod
               }>
                 Suivant
               </Button>
-
-
         </motion.div>
       ) : (
         <motion.div
@@ -579,7 +661,8 @@ useEffect(() => {
           <Button onClick={handleNext} className="h-10 px-6" disabled={
             !!globalError ||
             Object.values(installmentErrors).some((err) => !!err) ||
-            studentPaidAmount < totalDistributedAmount
+            studentPaidAmount < totalDistributedAmount ||
+            noPaymentMethod
           }>
             Suivant
           </Button>

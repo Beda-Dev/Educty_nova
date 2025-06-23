@@ -4,7 +4,7 @@ import { useSchoolStore } from "@/store";
 import { Registration, Pricing, Student, AcademicYear, Installment, Payment } from "@/lib/interface";
 import RegistrationFinal from "./detail_registration";
 import { obtenirDonneesCompletesEtudiant  , DonneesEtudiantFusionnees} from "../fonction";
-
+import { Button } from "@/components/ui/button";
 interface Props {
   params: {
     slug: string;
@@ -78,12 +78,12 @@ const DetailPaymentPage = ({ params }: Props) => {
       <div className="p-4 bg-red-100 text-red-700 rounded-md">
         <p className="font-bold">Erreur</p>
         <p>{error}</p>
-        <button 
+        <Button 
           onClick={loadData}
           className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
         >
           Réessayer
-        </button>
+        </Button>
       </div>
     );
   }

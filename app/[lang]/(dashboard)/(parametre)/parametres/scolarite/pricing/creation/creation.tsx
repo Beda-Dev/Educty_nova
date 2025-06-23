@@ -16,6 +16,11 @@ import { ArrowLeft, Printer, Download } from "lucide-react"
 import PricingForm from "./pricing-form"
 import PaymentSchedule from "./payment-schedule"
 
+
+const formatCurrency = (amount: number, currency: string = "FCFA") => {
+  return new Intl.NumberFormat("fr-FR").format(amount) + ` ${currency}`;
+};
+
 export default function TarificationPage() {
   const router = useRouter()
   const { setPricing, settings, setInstallments } = useSchoolStore()
@@ -28,6 +33,7 @@ export default function TarificationPage() {
   const [feeTypeId, setFeeTypeId] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [showWarningModal, setShowWarningModal] = useState(false);
 
   const [useEcheancier, setUseEcheancier] = useState<boolean>(false)
   const [paiements, setPaiements] = useState<Paiement[]>([])
@@ -95,13 +101,17 @@ export default function TarificationPage() {
   // Check if form is valid
   const isFormValid = () => {
     const basicFormValid =
-      label.trim() &&
       amount.trim() &&
       Number(amount.replace(/\s/g, "")) > 0 &&
       selectedLevelId !== null &&
       assignmentTypeId !== null &&
       academicYearId !== null &&
       feeTypeId !== null
+
+    // Empêche la soumission si le warning modal est affiché
+    if (showWarningModal) {
+      return false
+    }
 
     // If using échéancier, must have payments and remaining amount must be 0
     if (useEcheancier) {
@@ -176,7 +186,7 @@ export default function TarificationPage() {
         academic_years_id: academicYearId!,
         level_id: selectedLevelId!,
         fee_type_id: feeTypeId!,
-        label: label,
+        label: "tarification",
         amount: amount.replace(/\s/g, ""),
       }
 
@@ -263,134 +273,178 @@ export default function TarificationPage() {
   // Sort payments by date
   const paiementsTries = [...paiements].sort((a, b) => a.date.getTime() - b.date.getTime())
 
-  // Validated payment schedule view
-  if (echeancierValide) {
-    return (
-      <div className="container mx-auto py-8 px-4 max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-background rounded-lg border p-6"
-        >
-          <div className="mb-6">
-            <h1 className="text-xl font-bold text-skyblue">Échéancier de Paiement Validé</h1>
-            <p className="text-lg text-muted-foreground">
-              {label} - Montant total:{" "}
-              <span className="font-semibold">{formatMontant(Number.parseInt(amount.replace(/\s/g, "")))}</span>
-            </p>
+// Validated payment schedule view
+if (echeancierValide) {
+  // Récupérer les données depuis le store
+  const selectedLevel = useSchoolStore.getState().levels.find(level => level.id === selectedLevelId);
+  const selectedAssignmentType = useSchoolStore.getState().assignmentTypes.find(type => type.id === assignmentTypeId);
+  const selectedAcademicYear = useSchoolStore.getState().academicYears.find(year => year.id === academicYearId);
+
+  return (
+    <div className="container mx-auto py-8 px-4 max-w-6xl">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-background rounded-lg border p-6"
+      >
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-skyblue">Échéancier de Paiement Validé</h1>
+          <p className="text-lg text-muted-foreground">
+            {label} - Montant total:{" "}
+            <span className="font-semibold">{formatCurrency(Number.parseInt(amount.replace(/\s/g, "")), currency)}</span>
+          </p>
+        </div>
+
+        <div ref={printRef} className="space-y-6">
+          {/* Establishment header for print */}
+          <div className="hidden print:block space-y-2 border-b pb-4 mb-4">
+            {settings[0]?.establishment_logo && (
+              <img
+                src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${settings[0].establishment_logo}`}
+                alt="Logo"
+                className="h-16 mx-auto"
+              />
+            )}
+            <h2 className="text-xl font-bold text-center">{settings[0]?.establishment_name || "Établissement"}</h2>
+            {settings[0]?.approval_number && (
+              <p className="text-sm text-center">N° Approbation: {settings[0].approval_number}</p>
+            )}
+            {settings[0]?.address && <p className="text-sm text-center">{settings[0].address}</p>}
+            <div className="flex justify-center gap-4 text-sm">
+              {settings[0]?.establishment_phone_1 && <span>Tél: {settings[0].establishment_phone_1}</span>}
+              {settings[0]?.email && <span>Email: {settings[0].email}</span>}
+            </div>
           </div>
 
-          <div ref={printRef} className="space-y-6">
-            {/* Establishment header for print */}
-            <div className="hidden print:block space-y-2 border-b pb-4 mb-4">
-              {settings[0]?.establishment_logo && (
-                <img
-                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${settings[0].establishment_logo}`}
-                  alt="Logo"
-                  className="h-16 mx-auto"
-                />
-              )}
-              <h2 className="text-xl font-bold text-center">{settings[0]?.establishment_name || "Établissement"}</h2>
-              {settings[0]?.approval_number && (
-                <p className="text-sm text-center">N° Approbation: {settings[0].approval_number}</p>
-              )}
-              {settings[0]?.address && <p className="text-sm text-center">{settings[0].address}</p>}
-              <div className="flex justify-center gap-4 text-sm">
-                {settings[0]?.establishment_phone_1 && <span>Tél: {settings[0].establishment_phone_1}</span>}
-                {settings[0]?.email && <span>Email: {settings[0].email}</span>}
-              </div>
+          {/* Informations sur la tarification */}
+          <div className="grid grid-cols-3 gap-4 mb-6 p-4 bg-muted/20 rounded-lg">
+            <div>
+              <p className="text-sm font-semibold">Année académique:</p>
+              <p>{selectedAcademicYear?.label || "N/A"}</p>
             </div>
+            <div>
+              <p className="text-sm font-semibold">Niveau:</p>
+              <p>{selectedLevel?.label || "N/A"}</p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Type d'affectation:</p>
+              <p>{selectedAssignmentType?.label || "N/A"}</p>
+            </div>
+          </div>
 
-            <Table className="border rounded-lg">
-              <TableHeader className="bg-muted">
-                <TableRow>
-                  <TableHead className="font-bold">N°</TableHead>
-                  <TableHead className="font-bold">Date</TableHead>
-                  <TableHead className="font-bold">Montant</TableHead>
-                  <TableHead className="font-bold">Solde restant</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+          {/* Tableau des paiements */}
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="p-3 text-left font-bold">N°</th>
+                  <th className="p-3 text-left font-bold">Date</th>
+                  <th className="p-3 text-left font-bold">Montant</th>
+                  <th className="p-3 text-left font-bold">Solde restant</th>
+                </tr>
+              </thead>
+              <tbody>
                 {paiementsTries.map((paiement, index) => {
                   const soldeAvant =
                     Number.parseInt(amount.replace(/\s/g, "")) -
-                    paiementsTries.slice(0, index).reduce((sum, p) => sum + p.montant, 0)
+                    paiementsTries.slice(0, index).reduce((sum, p) => sum + p.montant, 0);
 
-                  const soldeApres = soldeAvant - paiement.montant
+                  const soldeApres = soldeAvant - paiement.montant;
 
                   return (
-                    <TableRow key={paiement.id} className="hover:bg-muted/50">
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>{format(paiement.date, "dd/MM/yyyy")}</TableCell>
-                      <TableCell>{formatMontant(paiement.montant)}</TableCell>
-                      <TableCell>{formatMontant(soldeApres)}</TableCell>
-                    </TableRow>
-                  )
+                    <tr key={paiement.id} className="hover:bg-muted/50 border-t">
+                      <td className="p-3">{index + 1}</td>
+                      <td className="p-3">{format(paiement.date, "dd/MM/yyyy")}</td>
+                      <td className="p-3">{formatCurrency(paiement.montant, currency)}</td>
+                      <td className="p-3">{formatCurrency(soldeApres, currency)}</td>
+                    </tr>
+                  );
                 })}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
+          </div>
 
-            <div className="space-y-4 p-4 bg-muted/20 rounded-lg">
-              <div className="flex justify-between font-medium text-lg">
-                <span>Total payé:</span>
-                <span className="font-bold">{formatMontant(paiements.reduce((sum, p) => sum + p.montant, 0))}</span>
-              </div>
-              <div className="flex justify-between font-medium text-lg">
-                <span>Reste à payer:</span>
-                <span className={montantRestant > 0 ? "text-destructive font-bold" : "text-success font-bold"}>
-                  {formatMontant(montantRestant)}
-                </span>
-              </div>
+          {/* Récapitulatif */}
+          <div className="space-y-4 p-4 bg-muted/20 rounded-lg">
+            <div className="flex justify-between font-medium text-lg">
+              <span>Total payé:</span>
+              <span className="font-bold">{formatCurrency(paiements.reduce((sum, p) => sum + p.montant, 0), currency)}</span>
+            </div>
+            <div className="flex justify-between font-medium text-lg">
+              <span>Reste à payer:</span>
+              <span className={montantRestant > 0 ? "text-destructive font-bold" : "text-success font-bold"}>
+                {formatCurrency(montantRestant, currency)}
+              </span>
             </div>
           </div>
 
-          <div className="flex gap-4 justify-end border-t pt-4 mt-6">
-            <Button variant="outline" onClick={() => router.push("/parametres/scolarite/pricing")}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Retour
-            </Button>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button color="indigodye" onClick={retourModification} disabled={isProcessing}>
-                    Nouvelle Tarification
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ajouter une nouvelle tarification</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={() => generatePDF("print")} disabled={isProcessing}>
-                    <Printer className="mr-2 h-4 w-4" /> Imprimer
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Imprimer l'échéancier</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="outline" onClick={() => generatePDF("download")} disabled={isProcessing}>
-                    <Download className="mr-2 h-4 w-4" /> Télécharger en PDF
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Télécharger l'échéancier au format PDF</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+          {/* Signatures */}
+          <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t">
+            <div className="text-center space-y-2">
+              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+              <p className="text-sm text-gray-600">Signature du responsable</p>
+            </div>
+            <div className="text-center space-y-2">
+              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+              <p className="text-sm text-gray-600">Cachet et signature de l'établissement</p>
+            </div>
           </div>
-        </motion.div>
-      </div>
-    )
-  }
+
+          {/* Footer */}
+          <div className="text-center text-xs text-gray-600 mt-6 pt-4 border-t">
+            <p className="mb-1">Document officiel de {settings[0]?.establishment_name || "l'établissement"}</p>
+            <p>Émis le {new Date().toLocaleDateString("fr-FR")} à {new Date().toLocaleTimeString("fr-FR", {hour: '2-digit', minute:'2-digit'})}</p>
+          </div>
+        </div>
+
+        <div className="flex gap-4 justify-end border-t pt-4 mt-6">
+          {/* Les boutons restent inchangés */}
+          <Button variant="outline" onClick={() => router.push("/parametres/scolarite/pricing")}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Retour
+          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button color="indigodye" onClick={retourModification} disabled={isProcessing}>
+                  Nouvelle Tarification
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Ajouter une nouvelle tarification</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={() => generatePDF("print")} disabled={isProcessing}>
+                  <Printer className="mr-2 h-4 w-4" /> Imprimer
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Imprimer l'échéancier</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={() => generatePDF("download")} disabled={isProcessing}>
+                  <Download className="mr-2 h-4 w-4" /> Télécharger en PDF
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Télécharger l'échéancier au format PDF</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
 
   // Main form view
   return (
@@ -424,6 +478,7 @@ export default function TarificationPage() {
             setFeeTypeId={setFeeTypeId}
             useEcheancier={useEcheancier}
             setUseEcheancier={setUseEcheancier}
+            setShowWarningModal={setShowWarningModal}
           />
 
           {/* Payment Schedule Section */}
@@ -443,7 +498,7 @@ export default function TarificationPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex justify-around gap-4 pt-6"
           >
-            <Button variant="outline" onClick={() => router.push("/parametres/scolarite/pricing")}>
+            <Button color="destructive" variant="outline" onClick={() => router.push("/parametres/scolarite/pricing")}>
               Annuler
             </Button>
 
@@ -454,7 +509,7 @@ export default function TarificationPage() {
                     color="indigodye"
                     className="w-full md:w-auto px-8 py-6 text-lg"
                     onClick={handleSubmit}
-                    disabled={!isFormValid() || isSubmitting}
+                    disabled={!isFormValid() || isSubmitting || !useEcheancier}
                   >
                     {isSubmitting
                       ? "Enregistrement..."

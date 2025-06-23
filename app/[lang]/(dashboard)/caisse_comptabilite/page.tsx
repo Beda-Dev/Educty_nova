@@ -76,7 +76,7 @@ export default function CaissePage() {
       title: "Validation des demandes de décaissement",
       description: "Gestion de la validation des decaissement ",
       icon: <CheckCircle className="w-6 h-6" />,
-      path: "/caisse_comptabilite/decaissement/validation",
+      path: "/caisse_comptabilite/validation",
       color: itemColors[4]
     },
     {

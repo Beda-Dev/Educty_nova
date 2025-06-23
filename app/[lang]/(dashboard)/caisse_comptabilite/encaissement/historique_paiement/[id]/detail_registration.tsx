@@ -1,90 +1,55 @@
 "use client";
 import { useState, useRef } from "react";
 import Image from "next/image";
-import LogoComponent1 from "@/app/[lang]/logo1";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { Download, Printer, CheckCircle2, AlertCircle } from "lucide-react";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-import { Payment } from "@/lib/interface";
 import { DetailsPaiement } from "./fonction";
 import { motion } from "framer-motion";
-import {generationNumero} from "@/lib/fonction"
-import {useSchoolStore} from "@/store/index"
+import { generationNumero } from "@/lib/fonction";
+import { useSchoolStore } from "@/store";
+import { generatePDFfromRef } from "@/lib/utils";
+import { Payment } from "@/lib/interface";
+import { getPaymentSummary, getTotalPaymentAmounts } from "./fonction";
 
 interface Props {
   payment: Payment;
   detail: DetailsPaiement;
 }
 
-
-
 const PaymentDetail = ({ payment, detail }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
-  const {settings} = useSchoolStore()
+  const { settings, pricing, installements , registrations } = useSchoolStore();
+  const inscription = registrations.find((re)=> Number(re.academic_year_id) === Number(detail.anneeAcademique.id) )
 
 
-  const formatFCFA = (amount: number | string) => {
-    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-    if (isNaN(numAmount)) return "0 " + (settings[0].currency? settings[0].currency : "FCFA");
-  
-    return (
-      new Intl.NumberFormat("fr-FR", {
-        style: "decimal",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(numAmount) + "\u00A0" + (settings[0].currency? settings[0].currency : "FCFA")
-    );
-  };
+
+  // Get payment summary
+  const paymentSummary = getPaymentSummary(
+    payment.student_id,
+    [payment], // Pass only the current payment
+    pricing,
+    installements,
+    detail.anneeAcademique.id,
+    Number(inscription?.classe.level_id),
+    Number(payment.student.assignment_type_id)
+  );
+
+  const { totalAmount, totalPaid, remainingAmount } = getTotalPaymentAmounts(paymentSummary);
 
   const generatePDF = async (action: "print" | "download") => {
+    if (!printRef.current) return;
+
     setIsProcessing(true);
     try {
-      if (!printRef.current) return;
-
-      const canvas = await html2canvas(printRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-      });
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 190;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(
-        canvas.toDataURL("image/png"),
-        "PNG",
-        10,
-        10,
-        imgWidth,
-        imgHeight
+      generatePDFfromRef(
+        printRef, 
+        `paiement_${payment.id}_${payment.student.registration_number}`, 
+        action
       );
-
-      if (action === "print") {
-        const pdfUrl = URL.createObjectURL(pdf.output("blob"));
-        const printWindow = window.open(pdfUrl);
-        if (printWindow) {
-          printWindow.onload = () => {
-            printWindow.print();
-            URL.revokeObjectURL(pdfUrl);
-          };
-        }
-      } else {
-        pdf.save(
-          `paiement_${payment.id}_${payment.student.registration_number}.pdf`
-        );
-      }
     } catch (error) {
       console.error("PDF generation error:", error);
     } finally {
@@ -92,297 +57,231 @@ const PaymentDetail = ({ payment, detail }: Props) => {
     }
   };
 
-  const paymentStatus =
-    detail.soldeRestantApresPaiement === 0
-      ? {
-          text: "Paiement complet",
-          icon: CheckCircle2,
-          color: "text-green-600 bg-green-50",
-        }
-      : {
-          text: "Solde restant",
-          icon: AlertCircle,
-          color: "text-amber-600 bg-amber-50",
-        };
+  // School info
+  const schoolInfo = {
+    logo: settings?.[0]?.establishment_logo || "",
+    name: settings?.[0]?.establishment_name || "Nom Établissement",
+    address: settings?.[0]?.address || "Adresse établissement",
+    phone: `${settings?.[0]?.establishment_phone_1 || ""} ${settings?.[0]?.establishment_phone_2 ? "/ " + settings?.[0]?.establishment_phone_2 : ""}`.trim(),
+    currency: settings?.[0]?.currency || "FCFA"
+  };
 
-  return (
-    <div className="container mx-auto p-4 max-w-5xl">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="space-y-6"
-      >
-        {/* Receipt Card */}
-        <div
-          ref={printRef}
-          className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100"
-        >
-          <Card>
-            <CardContent className="p-6">
-              {/* Header Section */}
-              <div className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-gray-100">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <LogoComponent1 width={40} height={40} />
-                    <h1 className="text-2xl font-bold text-gray-800">Educty</h1>
-                  </div>
 
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      {payment.student.name} {payment.student.first_name}
-                    </h2>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>Matricule: {payment.student.registration_number}</p>
-                      <p>Année académique: {detail.anneeAcademique.label}</p>
-                      <p>Type de frais: {detail.typeFrais}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-lg font-medium text-gray-500">
-                    Reçu de paiement
-                  </div>
-                  <div className="text-2xl font-bold text-skyblue-600">
-                    # {generationNumero(payment.id.toString(), payment.created_at, "encaissement")}
-                  </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Émis le:{" "}
-                    {new Date(payment.created_at).toLocaleDateString("fr-FR")}
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Status */}
-              <div
-                className={`mt-4 p-3 rounded-lg flex items-center ${paymentStatus.color}`}
-              >
-                <paymentStatus.icon className="w-5 h-5 mr-2" />
-                <span className="font-medium">
-                  {paymentStatus.text}:{" "}
-                  {formatFCFA(detail.soldeRestantApresPaiement)}
-                </span>
-              </div>
-
-              {/* Payment Details */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                  Détails du paiement
-                </h3>
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader className="bg-gray-50">
-                      <TableRow>
-                        <TableHead className="font-semibold">
-                          Montant dû
-                        </TableHead>
-                        <TableHead className="font-semibold">Payé</TableHead>
-                        <TableHead className="font-semibold">
-                          Reste à payer
-                        </TableHead>
-                        <TableHead className="font-semibold">Caisse</TableHead>
-                        <TableHead className="font-semibold">
-                          Caissier
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          {formatFCFA(detail.soldeRestantAvantPaiement)}
-                        </TableCell>
-                        <TableCell className="font-medium text-green-600">
-                          {formatFCFA(payment.amount)}
-                        </TableCell>
-                        <TableCell
-                          className={`font-medium ${
-                            detail.soldeRestantApresPaiement > 0
-                              ? "text-amber-600"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {formatFCFA(detail.soldeRestantApresPaiement)}
-                        </TableCell>
-                        <TableCell>
-                          {payment.cash_register.cash_register_number}
-                        </TableCell>
-                        <TableCell>{payment.cashier.name}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-
-              
-              {/* Additional Information + Signature */}
-              <div className="mt-6 pt-4 border-t border-gray-100 space-y-8">
-                <p className="text-sm text-gray-500 text-center">
-                  Ce document fait foi de paiement. Conservez-le précieusement.
-                </p>
-
-                {/* Zone de signature */}
-                <div className="flex justify-end items-center">
-                  <div className="text-right">
-                    <p className="text-sm text-gray-700 mb-6">
-                      Signature du caissier
-                    </p>
-                    <div className="w-48 h-16 border-t-2 border-gray-500" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        <p className="my-2 border border-dashed " >---------------------------------------------------------------------------------------------------------------------------------------------------------</p>
-          <Card>
-            <CardContent className="p-6">
-              {/* Header Section */}
-              <div className="flex flex-col md:flex-row justify-between gap-6 pb-6 border-b border-gray-100">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-4">
-                    <LogoComponent1 width={40} height={40} />
-                    <h1 className="text-2xl font-bold text-gray-800">Educty</h1>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      {payment.student.name} {payment.student.first_name}
-                    </h2>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>Matricule: {payment.student.registration_number}</p>
-                      <p>Année académique: {detail.anneeAcademique.label}</p>
-                      <p>Type de frais: {detail.typeFrais}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-lg font-medium text-gray-500">
-                    Reçu de paiement
-                  </div>
-                  <div className="text-2xl font-bold text-skyblue-600">
-                    #{payment.id}
-                  </div>
-                  <div className="mt-2 text-sm text-gray-500">
-                    Émis le:{" "}
-                    {new Date(payment.created_at).toLocaleDateString("fr-FR")}
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Status */}
-              <div
-                className={`mt-4 p-3 rounded-lg flex items-center ${paymentStatus.color}`}
-              >
-                <paymentStatus.icon className="w-5 h-5 mr-2" />
-                <span className="font-medium">
-                  {paymentStatus.text}:{" "}
-                  {formatFCFA(detail.soldeRestantApresPaiement)}
-                </span>
-              </div>
-
-              {/* Payment Details */}
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                  Détails du paiement
-                </h3>
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader className="bg-gray-50">
-                      <TableRow>
-                        <TableHead className="font-semibold">
-                          Montant dû
-                        </TableHead>
-                        <TableHead className="font-semibold">Payé</TableHead>
-                        <TableHead className="font-semibold">
-                          Reste à payer
-                        </TableHead>
-                        <TableHead className="font-semibold">Caisse</TableHead>
-                        <TableHead className="font-semibold">
-                          Caissier
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="font-medium">
-                          {formatFCFA(detail.soldeRestantAvantPaiement)}
-                        </TableCell>
-                        <TableCell className="font-medium text-green-600">
-                          {formatFCFA(payment.amount)}
-                        </TableCell>
-                        <TableCell
-                          className={`font-medium ${
-                            detail.soldeRestantApresPaiement > 0
-                              ? "text-amber-600"
-                              : "text-green-600"
-                          }`}
-                        >
-                          {formatFCFA(detail.soldeRestantApresPaiement)}
-                        </TableCell>
-                        <TableCell>
-                          {payment.cash_register.cash_register_number}
-                        </TableCell>
-                        <TableCell>{payment.cashier.name}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-
-              
-              {/* Additional Information + Signature */}
-              <div className="mt-6 pt-4 border-t border-gray-100 space-y-8">
-                <p className="text-sm text-gray-500 text-center">
-                  Ce document fait foi de paiement. Conservez-le précieusement.
-                </p>
-
-                {/* Zone de signature */}
-                <div className="flex justify-end items-center">
-                  <div className="text-right">
-                    <p className="text-sm text-gray-700 mb-6">
-                      Signature du caissier
-                    </p>
-                    <div className="w-48 h-16 border-t-2 border-gray-500" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Action Buttons */}
-        {!isProcessing && (
-          <div className="flex justify-end gap-3">
-            <Button
-              onClick={() => generatePDF("download")}
-              variant="outline"
-              className="gap-2 text-gray-700"
-            >
-              <Download className="w-4 h-4" />
-              Télécharger PDF
-            </Button>
-            <Button
-              onClick={() => generatePDF("print")}
-              className="gap-2 bg-primary-600 hover:bg-primary-700"
-            >
-              <Printer className="w-4 h-4" />
-              Imprimer le reçu
-            </Button>
+  const ReceiptCopy = () => (
+    <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
+      {/* Header */}
+      <div className="flex justify-between items-start border-b pb-3 mb-4">
+        <div className="flex items-start gap-3">
+          {schoolInfo.logo ? (
+            <Image
+              src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
+              alt="Logo"
+              width={80}
+              height={80}
+              className="school-logo"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">
+              Logo
+            </div>
+          )}
+          <div className="space-y-1">
+            <h1 className="text-sm font-bold leading-snug">{schoolInfo.name}</h1>
+            <p className="text-xs text-gray-600 leading-snug">
+              {schoolInfo.address} | Tél: {schoolInfo.phone}
+            </p>
+            <p className="text-xs text-gray-600 leading-snug">
+              Année scolaire: {detail.anneeAcademique.label}
+            </p>
           </div>
-        )}
+        </div>
+        <div className="text-right space-y-1">
+          <h2 className="text-sm font-semibold leading-snug">REÇU DE PAIEMENT</h2>
+          <p className="text-xs text-gray-600 leading-snug">
+           {generationNumero(payment.id.toString(), payment.created_at, "encaissement")}
+          </p>
+          <p className="text-xs text-gray-600 leading-snug">
+            Date: {new Date(payment.created_at).toLocaleDateString("fr-FR")}
+          </p>
+        </div>
+      </div>
 
-        {isProcessing && (
-          <div className="flex justify-end">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
-              Génération du document...
+      <Card className="print:shadow-none border-0">
+        <CardContent className="p-3 space-y-4">
+          {/* Student Info */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE L'ÉLÈVE</h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <Info label="Nom complet" value={`${payment.student.name} ${payment.student.first_name}`} />
+              <Info label="Matricule" value={payment.student.registration_number} />
+              <Info label="Date de naissance" value={new Date(payment.student.birth_date).toLocaleDateString("fr-FR")} />
+              <Info label="Sexe" value={payment.student.sexe} />
+              <Info label="Classe" value={inscription?.classe.label} />
+              <Info label="Type de paiement" value={detail.typeFrais} />
             </div>
           </div>
-        )}
-      </motion.div>
+
+          <Separator className="" />
+
+          {/* Payment Details */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center justify-between">
+              <span>Détails du paiement</span>
+              <span className="bg-blue-50 border border-blue-200 rounded-md px-3 py-1 text-sm font-medium flex items-center gap-2">
+                <span className="text-blue-700">Montant Versé :</span>
+                <span className="text-green-600 font-bold">
+                  {totalPaid.toLocaleString()} {schoolInfo.currency}
+                </span>
+              </span>
+            </h3>
+            <div className="my-2">
+              <PaymentTable
+                payments={paymentSummary}
+                totalAmount={totalAmount}
+                totalPaid={totalPaid}
+                remainingAmount={remainingAmount}
+                currency={schoolInfo.currency}
+              />
+            </div>
+          </div>
+
+          <Separator className="" />
+
+          {/* Payment Method */}
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE PAIEMENT</h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <Info label="Caissier" value={payment.cashier.name} />
+              <Info label="Caisse" value={payment.cash_register.cash_register_number} />
+            </div>
+          </div>
+
+          <Separator className="" />
+
+          {/* Signatures */}
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="text-xs text-gray-700 text-center space-y-2">
+              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+              <span>Signature du parent/tuteur</span>
+            </div>
+            <div className="text-xs text-gray-700 text-center space-y-2">
+              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+              <span>Cachet et signature de l'établissement</span>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center text-xs text-gray-600 mt-4 pt-4 border-t">
+            <p className="mb-1">Document officiel de {schoolInfo.name}</p>
+            <p>Émis le {new Date(payment.created_at).toLocaleDateString("fr-FR")} à {new Date(payment.created_at).toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      <div ref={printRef} className="space-y-6">
+        <ReceiptCopy />
+        <div className="text-xs text-center text-gray-500">---------------------------- ---------------------------- ----------------------------</div>
+        <ReceiptCopy />
+      </div>
+
+      <div className="flex justify-center gap-3 mt-4 print:hidden">
+        <Button
+          onClick={() => generatePDF("print")}
+          variant="outline"
+          size="sm"
+          className="h-9 px-4 text-sm"
+          disabled={isProcessing}
+        >
+          <Printer className="w-4 h-4 mr-2" />
+          Imprimer
+        </Button>
+        <Button
+          onClick={() => generatePDF("download")}
+          variant="outline"
+          size="sm"
+          className="h-9 px-4 text-sm"
+          disabled={isProcessing}
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Télécharger PDF
+        </Button>
+      </div>
     </div>
   );
 };
+
+interface PaymentTableProps {
+  payments: {
+    label: string;
+    total: number;
+    paid: number;
+  }[];
+  totalAmount: number;
+  totalPaid: number;
+  remainingAmount: number;
+  currency: string;
+}
+
+const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, currency }: PaymentTableProps) => {
+  return (
+    <div className="overflow-x-auto">
+      <table className="min-w-full border-collapse" style={{ fontSize: "0.85rem" }}>
+        <thead>
+          <tr>
+            <th className="border border-gray-300 p-2 text-left">Type de frais</th>
+            <th className="border border-gray-300 p-2 text-right">Montant total</th>
+            <th className="border border-gray-300 p-2 text-right">Montant payé</th>
+            <th className="border border-gray-300 p-2 text-right">Reste à payer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {payments.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="border border-gray-300 p-2 text-center text-gray-500">
+                Aucun paiement enregistré
+              </td>
+            </tr>
+          ) : (
+            payments.map((payment, index) => (
+              <tr key={index}>
+                <td className="border border-gray-300 p-2">{payment.label}</td>
+                <td className="border border-gray-300 p-2 text-right">{payment.total.toLocaleString()} {currency}</td>
+                <td className="border border-gray-300 p-2 text-right">{payment.paid.toLocaleString()} {currency}</td>
+                <td className={`border border-gray-300 p-2 text-right ${payment.total - payment.paid > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"}`}>
+                  {(payment.total - payment.paid).toLocaleString()} {currency}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td className="border border-gray-300 p-2 font-semibold">Total</td>
+            <td className="border border-gray-300 p-2 font-semibold text-right">
+              {totalAmount.toLocaleString()} {currency}
+            </td>
+            <td className={`border border-gray-300 p-2 font-semibold text-right text-green-600`}>
+              {totalPaid.toLocaleString()} {currency}
+            </td>
+            <td className={`border border-gray-300 p-2 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
+              {remainingAmount.toLocaleString()} {currency}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
+};
+
+const Info = ({ label, value }: { label: string; value?: string | number | null }) => (
+  <div className="flex items-start">
+    <span className="font-semibold min-w-[100px]">{label}:</span>
+    <span className="text-gray-800 ml-2">{value || "N/A"}</span>
+  </div>
+);
 
 export default PaymentDetail;

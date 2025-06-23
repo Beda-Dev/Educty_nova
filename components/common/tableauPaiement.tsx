@@ -91,7 +91,7 @@ export const TableauPaiement: React.FC<TableauPaiementProps> = ({ payments = [],
       </tbody>
       <tfoot>
         <tr>
-          <td className="border px-2 py-1 text-right font-semibold">Total à payer :</td>
+          <td className="border px-2 py-1 text-right font-semibold">Total :</td>
           <td className="border px-2 py-1 text-right font-semibold">
             {totalGlobal.toLocaleString()} {currency}
           </td>

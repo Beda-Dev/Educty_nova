@@ -20,7 +20,7 @@ interface Step2Props {
 
 export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
   const { selectedStudent, registrationData, setRegistrationData, setAvailablePricing } = useReinscriptionStore()
-  const { classes, levels, pricing, academicYearCurrent } = useSchoolStore()
+  const { classes, levels, pricing, academicYearCurrent , registrations } = useSchoolStore()
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     class_id: 0,
@@ -35,6 +35,8 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
   const [availablePricing, setLocalAvailablePricing] = useState<Pricing[]>([])
   const [classWarning, setClassWarning] = useState("")
   const [pricingError, setPricingError] = useState("")
+
+  const [alreadyRegisteredError, setAlreadyRegisteredError] = useState("")
 
   useEffect(() => {
     if (registrationData) {
@@ -76,9 +78,32 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
     }
   }, [formData.class_id, selectedStudent, setAvailablePricing])
 
+  // Vérification si l'élève est déjà inscrit dans la classe sélectionnée
+  useEffect(() => {
+    if (
+      selectedStudent &&
+      formData.class_id &&
+      registrations.some(
+        (reg) =>
+          reg.student_id === selectedStudent.id &&
+          reg.class_id === formData.class_id &&
+          reg.academic_year_id === academicYearCurrent.id
+      )
+    ) {
+      setAlreadyRegisteredError("Cet élève est déjà inscrit dans cette année.");
+    } else {
+      setAlreadyRegisteredError("");
+    }
+  }, [selectedStudent, formData.class_id, registrations, academicYearCurrent.id]);
+
   const handleNext = () => {
     if (!formData.class_id) {
       toast.error("Veuillez sélectionner une classe")
+      return
+    }
+
+    if (alreadyRegisteredError) {
+      toast.error(alreadyRegisteredError)
       return
     }
 
@@ -230,11 +255,18 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
         </Alert>
       )}
 
+      {alreadyRegisteredError && (
+        <Alert color="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>{alreadyRegisteredError}</AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between">
         <Button variant="outline" onClick={onPrevious}>
           Précédent
         </Button>
-        <Button onClick={handleNext} disabled={!!pricingError}>
+        <Button onClick={handleNext} disabled={!!pricingError || !!alreadyRegisteredError}>
           Suivant
         </Button>
       </div>
