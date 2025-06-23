@@ -95,7 +95,7 @@ const DetailSessionPage = ({ params }: Props) => {
 
     // Transactions générales
     transactions
-      .filter((t) => t.cash_register_session_id === sessionId)
+      .filter((t) => t.cash_register_session_id === sessionId && (payments.some((p) => p.transaction_id === t.id)  || expenses.some((e)=> e.transaction_id === t.id))   )
       .forEach((t) => {
         details.push({
           id: t.id,
@@ -158,11 +158,11 @@ const DetailSessionPage = ({ params }: Props) => {
   // Statistiques
   const statistics = useMemo(() => {
     const encaissements = sessionTransactions.filter(
-      (t) => t.type === "encaissement" || payments.some((p) => p.transaction_id === t.id),
+      (t) => t.type === "encaissement" && payments.some((p) => p.transaction_id === t.id),
     )
 
     const decaissements = sessionTransactions.filter(
-      (t) => t.type === "decaissement" || expenses.some((e) => e.transaction_id === t.id),
+      (t) => t.type === "decaissement" && expenses.some((e) => e.transaction_id === t.id),
     )
     const totalEncaissements = encaissements.reduce((sum, t) => sum + t.amount, 0)
     const totalDecaissements = decaissements.reduce((sum, t) => sum + t.amount, 0)

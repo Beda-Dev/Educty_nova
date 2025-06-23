@@ -224,7 +224,7 @@ const StudentTableStatus = ({
           <div className="flex gap-3 justify-end">
             <Button
               size="icon"
-              variant="outline"
+              color='tyrian'
               className="h-7 w-7"
               onClick={() => openEditModal(student)}
             >

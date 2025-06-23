@@ -226,15 +226,17 @@ export const EditStudentModal = ({
           </div>
           
           <DialogFooter>
+          <div className="flex justify-around" >
+              
             <Button 
               type="button" 
-              variant="outline" 
+              color="destructive" 
               onClick={() => onOpenChangeAction(false)}
               disabled={isSubmitting}
             >
               Annuler
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" color="tyrian" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -242,6 +244,7 @@ export const EditStudentModal = ({
                 </>
               ) : "Enregistrer"}
             </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

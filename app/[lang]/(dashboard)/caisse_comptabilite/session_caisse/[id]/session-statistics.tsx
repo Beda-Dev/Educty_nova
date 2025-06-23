@@ -40,12 +40,11 @@ export default function SessionStatistics({
       }
     })
 
-    // Calculer les encaissements par méthode de paiement
+    // Correction : utiliser payment.payment_methods (avec "s") et pm.pivot.montant
     payments.forEach((payment) => {
-      if (payment.payment_method && Array.isArray(payment.payment_method)) {
-        payment.payment_method.forEach((pm: any) => {
+      if (payment.payment_methods && Array.isArray(payment.payment_methods)) {
+        payment.payment_methods.forEach((pm: any) => {
           if (stats[pm.id]) {
-            // Utiliser le montant du pivot ou le montant principal
             const amount = pm.pivot?.montant
             stats[pm.id].totalEncaissements += Number(amount) || 0
           }
@@ -155,3 +154,4 @@ export default function SessionStatistics({
     </>
   )
 }
+

@@ -132,7 +132,7 @@ export default function CloseSessionPage({ params }: Props) {
 
       // Filter transactions and payments for this session
       const sessionTransactions = transactions.filter(
-        (t: Transaction) => t.cash_register_session_id === sessionId
+        (t: Transaction) => t.cash_register_session_id === sessionId && (expenses.some(e => e.transaction_id === t.id) || payments.some(p => p.transaction_id === t.id))
       )
 
       const sessionPayments = payments.filter(
@@ -762,7 +762,7 @@ export default function CloseSessionPage({ params }: Props) {
                       color="destructive"
                       type="button"
                       variant="outline"
-                      onClick={() => router.push("/caisse_comptabilite/session_caisse")}
+                      onClick={() => router.replace("/caisse_comptabilite/session_caisse")}
                       className="gap-2"
                     >
                       <ArrowLeft className="h-4 w-4" />
