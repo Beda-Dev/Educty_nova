@@ -364,7 +364,7 @@ export default function ExpenseValidationsPage() {
                                     size="sm"
                                     onClick={() =>
                                       router.push(
-                                        `/caisse_comptabilite/decaissement/validation/${validation.id}`
+                                        `/caisse_comptabilite/validation/${validation.id}`
                                       )
                                     }
                                   >

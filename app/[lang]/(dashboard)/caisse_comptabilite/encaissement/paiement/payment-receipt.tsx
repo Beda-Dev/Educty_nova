@@ -56,23 +56,69 @@ const PaymentReceipt = ({
   const totalRemaining = financialData?.totalRemaining || 0
   const totalPaidOverall = financialData?.totalPaid || 0
 
-  // Créer un résumé des paiements par type de frais
+  const { payments: allPayments } = useSchoolStore();
+
+  // Créer un résumé des paiements par type de frais en vérifiant tous les paiements de l'élève
   const paymentSummary = financialData?.installmentDetails.reduce((acc: any[], detail: any) => {
-    const existing = acc.find(item => item.label === detail.pricing.fee_type.label)
-    const amountPaid = installmentAmounts[detail.installment.id] || 0
-    
+    const label = detail.pricing.fee_type.label;
+    const existing = acc.find(item => item.label === label);
+    const academicYearId = financialData?.academicYearCurrent?.id;
+
+    // Additionner tous les montants payés pour ce type de frais par l'élève ET pour la bonne année académique
+    const paidForThisInstallment = allPayments
+      .filter((p: any) => {
+        if (p.student_id !== student?.id) return false;
+        // Vérifie la correspondance année académique via installment.pricing.academic_years_id
+        if (p.installment && p.installment.pricing_id && detail.pricing) {
+          // On suppose que le store contient les pricing (tarifs) pour faire la correspondance
+          return (
+            p.installment_id === detail.installment.id &&
+            detail.pricing.academic_years_id === academicYearId
+          );
+        }
+        // Si le paiement a des détails (cas de paiement splitté)
+        if (p.payment_details) {
+          return p.payment_details.some(
+            (d: any) =>
+              d.installment_id === detail.installment.id &&
+              detail.pricing.academic_years_id === academicYearId
+          );
+        }
+        return false;
+      })
+      .reduce((sum: number, p: any) => {
+        // Paiement principal
+        if (
+          p.installment_id === detail.installment.id &&
+          detail.pricing.academic_years_id === academicYearId
+        ) {
+          return sum + Number(p.amount);
+        }
+        // Paiement splitté
+        if (p.payment_details) {
+          return sum + p.payment_details
+            .filter(
+              (d: any) =>
+                d.installment_id === detail.installment.id &&
+                detail.pricing.academic_years_id === academicYearId
+            )
+            .reduce((s: number, d: any) => s + Number(d.amount), 0);
+        }
+        return sum;
+      }, 0);
+
     if (existing) {
-      existing.total += Number(detail.installment.amount_due)
-      existing.paid += amountPaid
+      existing.total += Number(detail.installment.amount_due);
+      existing.paid += paidForThisInstallment;
     } else {
       acc.push({
-        label: detail.pricing.fee_type.label,
+        label,
         total: Number(detail.installment.amount_due),
-        paid: amountPaid
-      })
+        paid: paidForThisInstallment
+      });
     }
-    return acc
-  }, [])
+    return acc;
+  }, []);
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
@@ -121,10 +167,8 @@ const PaymentReceipt = ({
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <Info label="Nom complet" value={`${student?.first_name} ${student?.name}`} />
               <Info label="Matricule" value={student?.registration_number} />
-              <Info label="Date de naissance" value={student?.birth_date ? new Date(student.birth_date).toLocaleDateString("fr-FR") : "N/A"} />
               <Info label="Sexe" value={student?.sexe} />
               <Info label="Classe" value={classe} />
-              <Info label="Niveau" value={niveau} />
               <Info label="Type d'affectation" value={student?.assignment_type?.label} />
             </div>
           </div>
@@ -153,54 +197,6 @@ const PaymentReceipt = ({
             </div>
           </div>
 
-          <Separator className="" />
-
-          {/* Détail des échéances payées */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">DÉTAIL DES ÉCHÉANCES PAYÉES</h3>
-            <div className="space-y-3">
-              {Object.entries(installmentAmounts).map(([installmentId, amount]) => {
-                const installmentDetail = financialData?.installmentDetails.find(
-                  (detail: any) => detail.installment.id === Number(installmentId)
-                ); // <-- Ajout du point-virgule manquant ici
-                const methods = paymentMethods[Number(installmentId)] || []
-
-                return (
-                  <div key={installmentId} className="border rounded-md p-3 bg-gray-50">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{installmentDetail?.pricing.fee_type.label}</h4>
-                        <p className="text-xs text-gray-600">
-                          {installmentDetail?.pricing.label} - Échéance: {new Date(installmentDetail?.installment.due_date).toLocaleDateString("fr-FR")}
-                        </p>
-                      </div>
-                      <span className="font-bold">{formatAmount(amount)} {currency}</span>
-                    </div>
-
-                    {/* Méthodes de paiement */}
-                    {methods.length > 0 && (
-                      <div className="mt-2 pt-2 border-t">
-                        <p className="text-xs font-medium mb-1">Méthodes de paiement:</p>
-                        <div className="grid grid-cols-2 gap-1">
-                          {methods.map((method, index) => {
-                            const paymentMethodName = methodPayment.find((pm) => pm.id === method.id)?.name || "Inconnu"
-                            return (
-                              <div key={index} className="flex justify-between items-center text-xs">
-                                <span>{paymentMethodName}</span>
-                                <span className="font-medium">
-                                  {formatAmount(method.amount)} {currency}
-                                </span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
 
           <Separator className="" />
 
@@ -210,7 +206,6 @@ const PaymentReceipt = ({
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <Info label="Caissier" value={payments[0]?.cashier?.name || "N/A"} />
               <Info label="Caisse" value={payments[0]?.cash_register?.cash_register_number || "N/A"} />
-              <Info label="Numéro de transaction" value={payments[0]?.transaction_id || "N/A"} />
             </div>
           </div>
 

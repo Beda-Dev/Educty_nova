@@ -33,7 +33,30 @@ const DetailSessionPage = ({ params }: Props) => {
   const [sessionCurrent, setSessionCurrent] = useState<CashRegisterSession[] | null>(null)
   const { cashRegisterSessions, transactions, payments, expenses, settings } = useSchoolStore()
   const { id } = params
+  // Filtrer les transactions associées à la session de caisse
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((t) => t.cash_register_session_id === Number(id))
+  }, [transactions, id])
 
+  const filteredPayment = useMemo(() => {
+    const  transactionsfiltered = transactions.filter((t => t.cash_register_session_id === Number(id)))
+    if (transactionsfiltered.length === 0) return []
+    // Filtrer les paiements associés à la session de caisse
+    if (!payments || payments.length === 0) return []
+    return payments.filter((payment) =>
+      transactionsfiltered.some((t) => t.id === payment.transaction_id),
+    )
+  }, [transactions, payments, id])
+
+  const filteredExpenses = useMemo(() => {
+    const transactionsfiltered = transactions.filter((t => t.cash_register_session_id === Number(id)))
+    if (transactionsfiltered.length === 0) return []
+    // Filtrer les dépenses associées à la session de caisse
+    if (!expenses || expenses.length === 0) return []
+    return expenses.filter((expense) =>
+      transactionsfiltered.some((t) => t.id === expense.transaction_id),
+    )
+  }, [transactions, expenses, id])
   // Validation de l'ID de session
   const sessionId = useMemo(() => {
     const numId = Number(id)
@@ -94,8 +117,8 @@ const DetailSessionPage = ({ params }: Props) => {
     const details: TransactionDetail[] = []
 
     // Transactions générales
-    transactions
-      .filter((t) => t.cash_register_session_id === sessionId && (payments.some((p) => p.transaction_id === t.id)  || expenses.some((e)=> e.transaction_id === t.id))   )
+    filteredTransactions
+      .filter((t) => t.cash_register_session_id === sessionId && (filteredPayment.some((p) => p.transaction_id === t.id)  || filteredExpenses.some((e)=> e.transaction_id === t.id))   )
       .forEach((t) => {
         details.push({
           id: t.id,
@@ -113,7 +136,7 @@ const DetailSessionPage = ({ params }: Props) => {
       })
 
     // Paiements
-    payments
+    filteredPayment
       .filter(
         (p) =>
           p.transaction_id &&
@@ -132,11 +155,11 @@ const DetailSessionPage = ({ params }: Props) => {
       })
 
     // Dépenses
-    expenses
+    filteredExpenses
       ?.filter(
         (e) =>
           e.transaction_id &&
-          transactions.some(
+          filteredTransactions.some(
             (t) => t.id === e.transaction_id && t.cash_register_session_id === sessionId && t.id === e.transaction_id,
           ),
       )
@@ -173,7 +196,7 @@ const DetailSessionPage = ({ params }: Props) => {
       totalDecaissements,
       nombreEncaissements: encaissements.length,
       nombreDecaissements: decaissements.length,
-      soldeNet: totalEncaissements - totalDecaissements,
+      soldeNet: (Number(sessionCurrent?.[0]?.opening_amount ?? 0) + totalEncaissements) - totalDecaissements,
     }
   }, [sessionTransactions, payments, expenses])
 

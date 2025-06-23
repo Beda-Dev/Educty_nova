@@ -70,7 +70,7 @@ export default function SessionStatistics({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Transactions</p>
-                <p className="text-2xl font-bold">{statistics.totalTransactions}</p>
+                <p className="text-xl font-bold">{statistics.totalTransactions}</p>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -81,7 +81,7 @@ export default function SessionStatistics({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Encaissements</p>
-                <p className="text-2xl font-bold text-green-600">{formatAmount(statistics.totalEncaissements)}</p>
+                <p className="text-xl font-bold text-green-600">{formatAmount(statistics.totalEncaissements)}</p>
                 <p className="text-xs text-muted-foreground">{statistics.nombreEncaissements} transaction(s)</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
@@ -93,7 +93,7 @@ export default function SessionStatistics({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Décaissements</p>
-                <p className="text-2xl font-bold text-red-600">{formatAmount(statistics.totalDecaissements)}</p>
+                <p className="text-xl font-bold text-red-600">{formatAmount(statistics.totalDecaissements)}</p>
                 <p className="text-xs text-muted-foreground">{statistics.nombreDecaissements} transaction(s)</p>
               </div>
               <TrendingDown className="h-8 w-8 text-red-600" />
@@ -105,7 +105,7 @@ export default function SessionStatistics({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Solde Net</p>
-                <p className={`text-2xl font-bold ${statistics.soldeNet >= 0 ? "text-green-600" : "text-red-600"}`}>
+                <p className={`text-xl font-bold ${statistics.soldeNet >= 0 ? "text-green-600" : "text-red-600"}`}>
                   {formatAmount(statistics.soldeNet)}
                 </p>
               </div>

@@ -330,7 +330,7 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
             <CardFooter className="flex justify-center gap-4">
               <p className="text-muted-foreground">Vous n'êtes pas autorisé à valider cette demande</p>
               <Button 
-                onClick={() => router.push("/caisse_comptabilite/decaissement/validation/")}
+                onClick={() => router.push("/caisse_comptabilite/validation/")}
                 variant="outline"
                 color="destructive"
               >

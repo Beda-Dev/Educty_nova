@@ -26,7 +26,7 @@ export default function SessionInfo({ currentSession, formatDateTime, formatAmou
             Retour
           </Button>
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-4">
+            <h1 className="text-xl font-bold flex items-center gap-4">
               Session de Caisse #{currentSession.id}
               {currentSession.status === "open" && (
                 <Button
@@ -44,7 +44,7 @@ export default function SessionInfo({ currentSession, formatDateTime, formatAmou
             </p>
           </div>
         </div>
-        <Badge color={currentSession.status === "open" ? "default" : "secondary"} className="text-sm">
+        <Badge color={currentSession.status === "open" ? "skyblue" : "destructive"} className="text-sm">
           {currentSession.status === "open" ? (
             <span>
               Ouverte <span className="ml-1 text-xs text-orange-500 font-semibold">(En cours)</span>

@@ -25,7 +25,6 @@ import { CashRegisterSession, Transaction, Payment, PaymentMethod } from "@/lib/
 // Validation schema
 const formSchema = z.object({
   closing_amount: z.string().min(1, "Veuillez entrer un montant de fermeture"),
-  comment: z.string().optional(),
 })
 
 interface Props {
@@ -53,7 +52,8 @@ export default function CloseSessionPage({ params }: Props) {
     payments,
     setPayments,
     expenses, 
-    settings ,
+    settings,
+    methodPayment,
     setCashRegisterSessionCurrent,
     cashRegisterSessionCurrent
   } = useSchoolStore();
@@ -71,8 +71,7 @@ export default function CloseSessionPage({ params }: Props) {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      closing_amount: "",
-      comment: "",
+      closing_amount: ""
     },
   })
 
@@ -131,19 +130,20 @@ export default function CloseSessionPage({ params }: Props) {
       }
 
       // Filter transactions and payments for this session
-      const sessionTransactions = transactions.filter(
-        (t: Transaction) => t.cash_register_session_id === sessionId && (expenses.some(e => e.transaction_id === t.id) || payments.some(p => p.transaction_id === t.id))
+      const sessionTransactions = updatedTransactions.filter(
+        (t: Transaction) => t.cash_register_session_id === sessionId && (expenses.some((e: any) => e.transaction_id === t.id) || updatedPayments.some((p: Payment) => p.transaction_id === t.id))
       )
 
-      const sessionPayments = payments.filter(
-        (p: Payment) => p.transaction_id && sessionTransactions.some(t => t.id === p.transaction_id)
+      const sessionPayments = updatedPayments.filter(
+        (p: Payment) => p.transaction_id && sessionTransactions.some((t: Transaction) => t.id === p.transaction_id)
       )
 
       // Calculate payment methods summary
       const methodsSummary: PaymentMethodSummary[] = []
-      sessionPayments.forEach(payment => {
-        payment.payment_method?.forEach(method => {
-          const existingMethod = methodsSummary.find(m => m.id === method.id)
+      sessionPayments.forEach((payment: Payment) => {
+        // Utiliser le type réel des objets de payment.payment_method
+        payment.payment_method?.forEach((method: { id: number; name: string }) => {
+          const existingMethod = methodsSummary.find((m: PaymentMethodSummary) => m.id === method.id)
           const amount = parseFloat(payment.amount) / (payment.payment_method?.length || 1)
           
           if (existingMethod) {
@@ -161,23 +161,34 @@ export default function CloseSessionPage({ params }: Props) {
       setSessionTransactions(sessionTransactions)
       setSessionPayments(sessionPayments)
       setSession(foundSession)
+      setPaymentMethodsSummary(methodsSummary)
       
       // Calculate expected closing amount
-      const transactionsTotal = sessionTransactions.reduce(
-        (sum: number, t: Transaction) => sum + parseFloat(t.total_amount),
-        0
-      )
-      const expectedAmount = parseFloat(foundSession.opening_amount) + transactionsTotal
+      const mainPaymentMethod = methodPayment[0]
+      const mainMethodAmount = mainPaymentMethod 
+        ? methodsSummary.find(m => m.id === mainPaymentMethod.id)?.amount || 0
+        : 0
+
+      const totalExpenses = [
+        ...sessionTransactions
+          .filter((t: Transaction) => parseFloat(t.total_amount) >= 0)
+          .map((t: Transaction) => ({ amount: t.total_amount })),
+        ...expenses
+          .filter((e: any) => e.transaction?.cash_register_session_id === foundSession.id)
+          .map((e: any) => ({ amount: e.amount }))
+      ].reduce((sum: number, t: { amount: number | string }) => sum + Math.abs(parseFloat(t.amount as string)), 0)
+
+      const expectedAmount = parseFloat(foundSession.opening_amount) + mainMethodAmount - totalExpenses
 
       // Set initial form value
-      // form.setValue("closing_amount", formatAmount(expectedAmount))
+      form.setValue("closing_amount", formatAmount(expectedAmount))
     } catch (error) {
       console.error("Error fetching session:", error)
       setError(error instanceof Error ? error.message : "Une erreur est survenue")
     } finally {
       setIsLoading(false)
     }
-  }, [id, form, setCashRegisterSessions, setTransactions, setPayments])
+  }, [id, form, setCashRegisterSessions, setTransactions, setPayments, methodPayment, expenses])
 
   useEffect(() => {
     fetchSessionData()
@@ -218,7 +229,6 @@ export default function CloseSessionPage({ params }: Props) {
         body: JSON.stringify({
           ...session,
           closing_amount: closingAmount.toString(),
-          comment: values.comment,
           status: 'closed',
           closing_date: formatDateToYMDHIS(new Date())
         })
@@ -236,11 +246,9 @@ export default function CloseSessionPage({ params }: Props) {
       const update = await fetchCashRegisterSessions()
       setCashRegisterSessions(update)
       
-
       // Show success animation
       setShowSuccess(true)
       await new Promise((resolve) => setTimeout(resolve, 500))
-
 
       // Redirect to sessions list
       router.push("/caisse_comptabilite/session_caisse")
@@ -294,9 +302,9 @@ export default function CloseSessionPage({ params }: Props) {
       transactionsTotal: 0,
       expectedAmount: 0,
       paymentMethodsTotal: 0,
-      cashTotal: 0,
-      otherMethodsTotal: 0,
-      paymentMethods: [] as PaymentMethodSummary[]
+      paymentMethods: [] as PaymentMethodSummary[],
+      totalExpenses: 0,
+      mainMethodAmount: 0
     }
 
     // Calculate transactions total (both income and expenses)
@@ -306,7 +314,6 @@ export default function CloseSessionPage({ params }: Props) {
     )
 
     // Calculate payments total and group by method
-    let cashTotal = 0
     const methodMap = new Map<number, {name: string, amount: number}>()
 
     sessionPayments.forEach(payment => {
@@ -314,18 +321,9 @@ export default function CloseSessionPage({ params }: Props) {
       
       if (payment.payment_method && payment.payment_method.length > 0) {
         // Split amount between methods if multiple methods
-        const amountPerMethod = paymentAmount / payment.payment_method.length
+        const amountPerMethod = paymentAmount / (payment.payment_method?.length || 1)
         
         payment.payment_method.forEach(method => {
-          // Sum cash payments (handle different spellings)
-          const isCash = method.name.toLowerCase().includes('espece') || 
-                         method.name.toLowerCase().includes('espèce') ||
-                         method.name.toLowerCase().includes('cash')
-          
-          if (isCash) {
-            cashTotal += amountPerMethod
-          }
-
           // Track all methods
           const existing = methodMap.get(method.id)
           if (existing) {
@@ -337,9 +335,6 @@ export default function CloseSessionPage({ params }: Props) {
             })
           }
         })
-      } else {
-        // If no method specified, consider as cash
-        cashTotal += paymentAmount
       }
     })
 
@@ -350,7 +345,7 @@ export default function CloseSessionPage({ params }: Props) {
       amount: method.amount
     }))
 
-    // Calculer le total des décaissements (transactions négatives et expenses)
+    // Calculate total expenses
     const totalExpenses = [
       ...sessionTransactions
         .filter(t => parseFloat(t.total_amount) >= 0)
@@ -360,33 +355,35 @@ export default function CloseSessionPage({ params }: Props) {
         .map(e => ({ amount: e.amount }))
     ].reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0)
 
-    // Calculer le montant attendu : ouverture + cash - décaissements
-    const expectedAmount = parseFloat(session.opening_amount) + cashTotal - totalExpenses
+    // Get the main payment method (first one from store)
+    const mainPaymentMethod = methodPayment[0]
+    const mainMethodAmount = mainPaymentMethod 
+      ? paymentMethods.find(m => m.id === mainPaymentMethod.id)?.amount || 0
+      : 0
 
-    // Calculate other methods total
-    const otherMethodsTotal = paymentMethods
-      .filter(m => !m.name.toLowerCase().includes('espece') && 
-                   !m.name.toLowerCase().includes('espèce') &&
-                   !m.name.toLowerCase().includes('cash'))
-      .reduce((sum, m) => sum + m.amount, 0)
+    // Calculate expected amount: opening + main method payments - expenses
+    const expectedAmount = parseFloat(session.opening_amount) + mainMethodAmount - totalExpenses
+
+    // Calculate total of all payment methods
+    const paymentMethodsTotal = paymentMethods.reduce((sum, m) => sum + m.amount, 0)
 
     return {
       transactionsTotal,
       expectedAmount,
-      paymentMethodsTotal: cashTotal + otherMethodsTotal,
-      cashTotal,
-      otherMethodsTotal,
-      paymentMethods
+      paymentMethodsTotal,
+      paymentMethods,
+      totalExpenses,
+      mainMethodAmount
     }
-  }, [session, sessionTransactions, sessionPayments])
+  }, [session, sessionTransactions, sessionPayments, methodPayment, expenses])
 
   const {
     transactionsTotal,
     expectedAmount,
     paymentMethodsTotal,
-    cashTotal,
-    otherMethodsTotal,
-    paymentMethods
+    paymentMethods,
+    totalExpenses,
+    mainMethodAmount
   } = calculateTotals()
 
   useEffect(() => {
@@ -394,6 +391,7 @@ export default function CloseSessionPage({ params }: Props) {
       setPaymentMethodsSummary(paymentMethods)
     }
   }, [session, paymentMethods])
+
   const sessionUser = getUserById(session?.user_id || 0)
 
   if (isLoading) {
@@ -618,25 +616,28 @@ export default function CloseSessionPage({ params }: Props) {
                   <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-900 flex flex-col">
                     <div className="text-l text-green-600 dark:text-green-400 flex items-center gap-2">
                       <Banknote className="h-3 w-3" />
-                      Espèces
+                      {methodPayment[0]?.name || "Méthode principale"}
                     </div>
                     <div className="font-bold text-sm mt-1">
-                      +{formatAmount(cashTotal)} {currency}
+                      +{formatAmount(mainMethodAmount)} {currency}
                     </div>
                   </div>
                   <div className="p-3 rounded-md bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-900 flex flex-col">
                     <div className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-2">
                       <CreditCard className="h-3 w-3" />
-                      Autres méthodes
+                      Dépenses
                     </div>
                     <div className="font-bold text-l mt-1">
-                      +{formatAmount(otherMethodsTotal)} {currency}
+                      -{formatAmount(totalExpenses)} {currency}
                     </div>
                   </div>
                   <div className="p-3 rounded-md bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-900 flex flex-col">
                     <div className="text-l text-amber-600 dark:text-amber-400 flex items-center gap-2">
                       <Calculator className="h-3 w-3" />
                       Total attendu
+                    </div>
+                    <div className="text-xs mb-1">
+                      (Ouverture + {methodPayment[0]?.name || "méthode principale"} - Dépenses)
                     </div>
                     <div className="font-bold text-sm mt-1">
                       {formatAmount(expectedAmount)} {currency}
@@ -651,26 +652,21 @@ export default function CloseSessionPage({ params }: Props) {
                     <div>
                       <h4 className="text-sm font-medium mb-2">Détail des méthodes de paiement</h4>
                       <div className="space-y-2">
-                        {paymentMethodsSummary.map(method => {
-                          const isCash = method.name.toLowerCase().includes('espece') || 
-                                         method.name.toLowerCase().includes('espèce') ||
-                                         method.name.toLowerCase().includes('cash')
-                          return (
-                            <div key={method.id} className="flex justify-between items-center">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm">{method.name}</span>
-                                {isCash && (
-                                  <Badge variant="outline" className="text-xs py-0 px-2">
-                                    Espèces
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="font-medium">
-                                +{formatAmount(method.amount)} {currency}
-                              </span>
+                        {paymentMethodsSummary.map(method => (
+                          <div key={method.id} className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{method.name}</span>
+                              {method.id === methodPayment[0]?.id && (
+                                <Badge variant="outline" className="text-xs py-0 px-2">
+                                  Principale
+                                </Badge>
+                              )}
                             </div>
-                          )
-                        })}
+                            <span className="font-medium">
+                              +{formatAmount(method.amount)} {currency}
+                            </span>
+                          </div>
+                        ))}
                         <div className="flex justify-between items-center pt-2 border-t">
                           <span className="text-sm font-medium">Total encaissements</span>
                           <span className="font-bold">
@@ -721,33 +717,10 @@ export default function CloseSessionPage({ params }: Props) {
                     )}
                   />
 
-                  {/* Comment */}
-                  <FormField
-                    control={form.control}
-                    name="comment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Commentaire (optionnel)
-                        </FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Ajoutez des observations sur cette session..."
-                            className="resize-none min-h-[100px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Vous pouvez noter des remarques sur les opérations effectuées
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+
 
                   <div className="pt-4">
-                    <Alert color="destructive">
+                    <Alert color="warning">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Confirmation requise</AlertTitle>
                       <AlertDescription>
