@@ -193,13 +193,31 @@ export default function SessionTransactions({
     setActiveTab("all")
   }
 
+  // Correction du calcul des statistiques pour garantir :
+  // totalTransactions = nombreEncaissements + nombreDecaissements
+  const statisticsFixed = useMemo(() => {
+    const nombreEncaissements = enrichedTransactions.filter(
+      (t) => t && t.type === "encaissement"
+    ).length
+    const nombreDecaissements = enrichedTransactions.filter(
+      (t) => t && t.type === "decaissement"
+    ).length
+    return {
+      totalTransactions: nombreEncaissements + nombreDecaissements,
+      nombreEncaissements,
+      nombreDecaissements,
+    }
+  }, [enrichedTransactions])
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Transactions de la session</CardTitle>
-            <CardDescription>Toutes les transactions effectuées pendant cette session de caisse</CardDescription>
+            <CardDescription>
+              Toutes les transactions effectuées pendant cette session de caisse
+            </CardDescription>
           </div>
           <Button color="success" onClick={handleExportExcel} className="flex items-center gap-2">
             <FileSpreadsheet className="h-4 w-4" />
@@ -212,9 +230,15 @@ export default function SessionTransactions({
         <div className="space-y-4 mb-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="all">Toutes ({statistics.totalTransactions})</TabsTrigger>
-              <TabsTrigger value="encaissement">Encaissements ({statistics.nombreEncaissements})</TabsTrigger>
-              <TabsTrigger value="decaissement">Décaissements ({statistics.nombreDecaissements})</TabsTrigger>
+              <TabsTrigger value="all">
+                Toutes ({statisticsFixed.totalTransactions})
+              </TabsTrigger>
+              <TabsTrigger value="encaissement">
+                Encaissements ({statisticsFixed.nombreEncaissements})
+              </TabsTrigger>
+              <TabsTrigger value="decaissement">
+                Décaissements ({statisticsFixed.nombreDecaissements})
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 

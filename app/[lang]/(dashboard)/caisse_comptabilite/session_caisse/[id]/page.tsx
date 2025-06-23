@@ -118,8 +118,20 @@ const DetailSessionPage = ({ params }: Props) => {
 
     // Transactions générales
     filteredTransactions
-      .filter((t) => t.cash_register_session_id === sessionId && (filteredPayment.some((p) => p.transaction_id === t.id)  || filteredExpenses.some((e)=> e.transaction_id === t.id))   )
+      .filter((t) =>
+        t.cash_register_session_id === sessionId &&
+        (filteredPayment.some((p) => p.transaction_id === t.id) ||
+          filteredExpenses.some((e) => e.transaction_id === t.id))
+      )
       .forEach((t) => {
+        // Correction : éviter les doublons de décaissement (transaction et dépense)
+        if (
+          t.transaction_type?.toLowerCase().includes("decaissement") &&
+          filteredExpenses.some((e) => e.transaction_id === t.id)
+        ) {
+          // On n'ajoute pas la transaction décaissement si une dépense existe déjà pour cette transaction
+          return
+        }
         details.push({
           id: t.id,
           type: t.transaction_type?.toLowerCase().includes("encaissement") ? "encaissement" : "decaissement",
@@ -143,6 +155,10 @@ const DetailSessionPage = ({ params }: Props) => {
           transactions.some((t) => t.id === p.transaction_id && t.cash_register_session_id === sessionId),
       )
       .forEach((p) => {
+        // Évite d'ajouter un paiement déjà représenté par une transaction encaissement
+        if (details.some((d) => d.type === "encaissement" && d.id === p.transaction_id)) {
+          return
+        }
         details.push({
           id: p.id,
           type: "encaissement",
@@ -160,7 +176,15 @@ const DetailSessionPage = ({ params }: Props) => {
         (e) =>
           e.transaction_id &&
           filteredTransactions.some(
-            (t) => t.id === e.transaction_id && t.cash_register_session_id === sessionId && t.id === e.transaction_id,
+            (t) =>
+              t.id === e.transaction_id &&
+              t.cash_register_session_id === sessionId &&
+              // N'ajoute la dépense que si elle n'est pas déjà présente comme transaction décaissement
+              !details.some(
+                (d) =>
+                  d.type === "decaissement" &&
+                  (d.id === e.transaction_id || d.id === e.id)
+              )
           ),
       )
       .forEach((e) => {
@@ -175,30 +199,50 @@ const DetailSessionPage = ({ params }: Props) => {
         })
       })
 
-    return details.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    // Correction : éviter les doublons d'ID dans details
+    const uniqueDetails = details.filter(
+      (item, index, self) =>
+        index === self.findIndex((d) => d.type === item.type && d.id === item.id)
+    )
+
+    return uniqueDetails.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }, [currentSession, transactions, payments, expenses, sessionId])
 
   // Statistiques
   const statistics = useMemo(() => {
+    // Ne prendre en compte que les transactions qui concernent la session courante
     const encaissements = sessionTransactions.filter(
-      (t) => t.type === "encaissement" && filteredPayment.some((p) => p.transaction_id === t.id),
+      (t) =>
+        t.type === "encaissement" &&
+        t.details &&
+        (
+          (t.details.cash_register_session_id && t.details.cash_register_session_id === sessionId) ||
+          (t.details.transaction && t.details.transaction.cash_register_session_id === sessionId)
+        )
+    )
+    const decaissements = sessionTransactions.filter(
+      (t) =>
+        t.type === "decaissement" &&
+        t.details &&
+        (
+          (t.details.cash_register_session_id && t.details.cash_register_session_id === sessionId) ||
+          (t.details.transaction && t.details.transaction.cash_register_session_id === sessionId)
+        )
     )
 
-    const decaissements = sessionTransactions.filter(
-      (t) => t.type === "decaissement" && filteredExpenses.some((e) => e.transaction_id === t.id),
-    )
+    const totalTransactions = encaissements.length + decaissements.length
     const totalEncaissements = encaissements.reduce((sum, t) => sum + t.amount, 0)
     const totalDecaissements = decaissements.reduce((sum, t) => sum + t.amount, 0)
 
     return {
-      totalTransactions: sessionTransactions.length,
+      totalTransactions,
       totalEncaissements,
       totalDecaissements,
       nombreEncaissements: encaissements.length,
       nombreDecaissements: decaissements.length,
       soldeNet: (Number(sessionCurrent?.[0]?.opening_amount ?? 0) + totalEncaissements) - totalDecaissements,
     }
-  }, [sessionTransactions, payments, expenses])
+  }, [sessionTransactions, sessionCurrent, sessionId])
 
   if (!sessionId) {
     return (

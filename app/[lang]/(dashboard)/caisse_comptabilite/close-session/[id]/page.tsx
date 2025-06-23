@@ -409,14 +409,15 @@ export default function CloseSessionPage({ params }: Props) {
     }))
 
     // Calculate total expenses
-    const totalExpenses = [
-      ...sessionTransactions
-        .filter(t => parseFloat(t.total_amount) >= 0)
-        .map(t => ({ amount: t.total_amount })),
-      ...expenses
-        .filter(e => e.transaction?.cash_register_session_id === session.id)
-        .map(e => ({ amount: e.amount }))
-    ].reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0)
+    const totalExpenses = sessionTransactions
+      .filter(
+        t =>
+          t.transaction_type &&
+          t.transaction_type.toLowerCase().includes("decaissement") &&
+          expenses.some(e => e.transaction_id === t.id)
+      )
+      .map(t => ({ amount: t.total_amount }))
+      .reduce((sum, t) => sum + Math.abs(parseFloat(t.amount)), 0)
 
     // Get the main payment method (first one from store)
     const mainPaymentMethod = methodPayment[0]
@@ -688,7 +689,7 @@ export default function CloseSessionPage({ params }: Props) {
                   <div className="p-3 rounded-md bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-900 flex flex-col">
                     <div className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-2">
                       <CreditCard className="h-3 w-3" />
-                      Dépenses
+                      Décaissement
                     </div>
                     <div className="font-bold text-l mt-1">
                       -{formatAmount(totalExpenses)} {currency}
