@@ -72,36 +72,45 @@ export default function SessionTransactions({
       let paymentMethods: string[] = []
 
       if (transaction.type === "encaissement") {
-        const payment = payments.find((p) => p.transaction_id === transaction.id)
-        if (payment && payment.payment_method && Array.isArray(payment.payment_method)) {
-          paymentMethods = payment.payment_method.map((pm: any) => {
-            const method = methodPayment.find((m) => m.id === pm.id)
-            return method?.name || "Inconnu"
+        // Correction : utiliser payment.payment_methods (avec "s") et non payment.payment_method
+        const payment = payments.find(
+          (p) =>
+            p.transaction_id === transaction.id &&
+            p.transaction &&
+            p.transaction.cash_register_session_id === sessionId
+        )
+        if (payment && payment.payment_methods && Array.isArray(payment.payment_methods)) {
+          paymentMethods = payment.payment_methods.map((pm: any) => {
+            // pm.name est déjà le nom de la méthode de paiement
+            return pm.name || "Inconnu"
           })
         }
       }
+
+      // Pour les décaissements, rien à faire (pas de méthode de paiement)
 
       return {
         ...transaction,
         paymentMethods,
       }
-    })
-  }, [sessionTransactions, payments, methodPayment])
+    }).filter(Boolean)
+  }, [sessionTransactions, payments, methodPayment, sessionId])
 
   // Filtrage des transactions
   const filteredTransactions = useMemo(() => {
-    let filtered = enrichedTransactions
+    let filtered = enrichedTransactions.filter((t) => t !== null)
 
     if (activeTab !== "all") {
-      filtered = filtered.filter((t) => t.type === activeTab)
+      filtered = filtered.filter((t) => t && t.type === activeTab)
     }
 
     if (typeFilter !== "all") {
-      filtered = filtered.filter((t) => t.type === typeFilter)
+      filtered = filtered.filter((t) => t && t.type === typeFilter)
     }
 
     if (paymentMethodFilter !== "all") {
       filtered = filtered.filter((t) => {
+        if (!t) return false
         if (t.type === "decaissement") return true // Les décaissements n'ont pas de méthode de paiement
         return t.paymentMethods?.some((method) => method === paymentMethodFilter)
       })
@@ -110,6 +119,7 @@ export default function SessionTransactions({
     if (dateFilter) {
       const filterDate = format(dateFilter, "yyyy-MM-dd")
       filtered = filtered.filter((t) => {
+        if (!t) return false
         const transactionDate = format(new Date(t.date), "yyyy-MM-dd")
         return transactionDate === filterDate
       })
@@ -119,9 +129,10 @@ export default function SessionTransactions({
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(
         (t) =>
-          t.description?.toLowerCase().includes(term) ||
-          t.reference?.toLowerCase().includes(term) ||
-          t.amount?.toString().includes(term),
+          t &&
+          (t.description?.toLowerCase().includes(term) ||
+            t.reference?.toLowerCase().includes(term) ||
+            t.amount?.toString().includes(term)),
       )
     }
 
@@ -132,7 +143,7 @@ export default function SessionTransactions({
   const ITEMS_PER_PAGE = 15
   const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE)
   const paginatedTransactions = useMemo(() => {
-    return filteredTransactions.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+    return filteredTransactions.filter((t) => t !== null).slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
   }, [filteredTransactions, currentPage])
 
   // Reset de la pagination lors des changements de filtre
@@ -297,7 +308,7 @@ export default function SessionTransactions({
             </TableHeader>
             <TableBody>
               {paginatedTransactions.length > 0 ? (
-                paginatedTransactions.map((transaction) => (
+                paginatedTransactions.filter((transaction) => transaction !== null).map((transaction) => (
                   <TableRow key={`${transaction.type}-${transaction.id}`}>
                     <TableCell>{formatDateTime(transaction.date)}</TableCell>
                     <TableCell>
@@ -315,7 +326,7 @@ export default function SessionTransactions({
                     </TableCell>
                     <TableCell>
                       <Badge
-                        color={transaction.type === "encaissement" ? "default" : "destructive"}
+                        color={transaction.type === "encaissement" ? "success" : "destructive"}
                         className="flex items-center gap-1 w-fit"
                       >
                         {transaction.type === "encaissement" ? (
@@ -343,7 +354,7 @@ export default function SessionTransactions({
                       )}
                     </TableCell>
                     <TableCell
-                      className={`text-right font-medium ${
+                      className={` font-medium ${
                         transaction.type === "encaissement" ? "text-green-600" : "text-red-600"
                       }`}
                     >

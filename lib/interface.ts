@@ -329,7 +329,7 @@ export interface Payment {
   cashier: UserSingle;
   transaction_id?: number;
   transaction?: Transaction;
-  payment_method: {
+  payment_methods: {
     id: number;
     name: string;
     created_at: string;

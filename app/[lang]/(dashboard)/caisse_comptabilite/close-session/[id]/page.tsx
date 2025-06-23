@@ -131,21 +131,50 @@ export default function CloseSessionPage({ params }: Props) {
 
       // Filter transactions and payments for this session
       const sessionTransactions = updatedTransactions.filter(
-        (t: Transaction) => t.cash_register_session_id === sessionId && (expenses.some((e: any) => e.transaction_id === t.id) || updatedPayments.some((p: Payment) => p.transaction_id === t.id))
+        (t: Transaction) =>
+          t.cash_register_session_id === sessionId &&
+          (
+            expenses.some((e: any) =>
+              e.transaction_id === t.id &&
+              e.transaction &&
+              e.transaction.cash_register_session_id === sessionId
+            )
+            ||
+            updatedPayments.some((p: Payment) =>
+              p.transaction_id === t.id &&
+              p.transaction &&
+              p.transaction.cash_register_session_id === sessionId
+            )
+          )
       )
 
       const sessionPayments = updatedPayments.filter(
-        (p: Payment) => p.transaction_id && sessionTransactions.some((t: Transaction) => t.id === p.transaction_id)
+        (p: Payment) =>
+          p.transaction_id &&
+          p.transaction &&
+          p.transaction.cash_register_session_id === sessionId &&
+          sessionTransactions.some((t: Transaction) => t.id === p.transaction_id)
       )
 
       // Calculate payment methods summary
       const methodsSummary: PaymentMethodSummary[] = []
       sessionPayments.forEach((payment: Payment) => {
-        // Utiliser le type réel des objets de payment.payment_method
-        payment.payment_method?.forEach((method: { id: number; name: string }) => {
+        payment.payment_methods?.forEach((method: {
+          id: number;
+          name: string;
+          created_at: string;
+          updated_at: string;
+          pivot: {
+            payment_id: number;
+            payment_method_id: number;
+            montant: string;
+            created_at: string;
+            updated_at: string;
+          };
+        }) => {
           const existingMethod = methodsSummary.find((m: PaymentMethodSummary) => m.id === method.id)
-          const amount = parseFloat(payment.amount) / (payment.payment_method?.length || 1)
-          
+          // Utilise le montant réel payé par méthode (pivot.montant)
+          const amount = parseFloat(method.pivot?.montant ?? "0")
           if (existingMethod) {
             existingMethod.amount += amount
           } else {
@@ -164,7 +193,7 @@ export default function CloseSessionPage({ params }: Props) {
       setPaymentMethodsSummary(methodsSummary)
       
       // Calculate expected closing amount
-      const mainPaymentMethod = methodPayment[0]
+      const mainPaymentMethod = methodPayment[1]
       const mainMethodAmount = mainPaymentMethod 
         ? methodsSummary.find(m => m.id === mainPaymentMethod.id)?.amount || 0
         : 0
@@ -193,6 +222,40 @@ export default function CloseSessionPage({ params }: Props) {
   useEffect(() => {
     fetchSessionData()
   }, [fetchSessionData])
+
+  // Vérification si aucune méthode de paiement n'est configurée
+  if (!methodPayment || methodPayment.length === 0) {
+    return (
+      <div className="container mx-auto py-8">
+        <Card className="max-w-3xl mx-auto">
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+              Erreur de configuration
+            </CardTitle>
+            <CardDescription>
+              Aucune méthode de paiement n'est configurée. Veuillez configurer au moins une méthode de paiement dans les paramètres de l'établissement avant de fermer une session de caisse.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Alert color="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>
+                Impossible de procéder à la fermeture de la session sans méthode de paiement.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+          <CardFooter className="flex justify-start border-t pt-6">
+            <Button variant="outline" onClick={() => router.push("/caisse_comptabilite/session_caisse")}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Retour à la liste
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    )
+  }
 
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -319,11 +382,11 @@ export default function CloseSessionPage({ params }: Props) {
     sessionPayments.forEach(payment => {
       const paymentAmount = parseFloat(payment.amount)
       
-      if (payment.payment_method && payment.payment_method.length > 0) {
+      if (payment.payment_methods && payment.payment_methods.length > 0) {
         // Split amount between methods if multiple methods
-        const amountPerMethod = paymentAmount / (payment.payment_method?.length || 1)
+        const amountPerMethod = paymentAmount / (payment.payment_methods?.length || 1)
         
-        payment.payment_method.forEach(method => {
+        payment.payment_methods.forEach(method => {
           // Track all methods
           const existing = methodMap.get(method.id)
           if (existing) {
@@ -637,7 +700,7 @@ export default function CloseSessionPage({ params }: Props) {
                       Total attendu
                     </div>
                     <div className="text-xs mb-1">
-                      (Ouverture + {methodPayment[0]?.name || "méthode principale"} - Dépenses)
+                      (Ouverture + {methodPayment[1]?.name || "méthode principale"} - Dépenses)
                     </div>
                     <div className="font-bold text-sm mt-1">
                       {formatAmount(expectedAmount)} {currency}
