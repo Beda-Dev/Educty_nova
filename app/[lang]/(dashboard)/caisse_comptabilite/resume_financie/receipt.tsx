@@ -150,12 +150,12 @@ const Receipt = forwardRef<HTMLDivElement, ReceiptProps>(
             MÉTHODES DE PAIEMENT
           </h3>
           <div className="border rounded-md p-3 bg-muted/10">
-            {payments.some((payment) => payment.payment_method) ? (
+            {payments.some((payment) => payment.payment_methods) ? (
               <table className="w-full">
                 <tbody>
                   {payments.flatMap((payment, paymentIndex) =>
-                    payment.payment_method
-                      ? payment.payment_method.map((method, methodIndex) => (
+                    payment.payment_methods
+                      ? payment.payment_methods.map((method, methodIndex) => (
                           <tr key={`${paymentIndex}-${methodIndex}`}>
                             <td className="py-1 text-sm">{method.name}</td>
                           </tr>

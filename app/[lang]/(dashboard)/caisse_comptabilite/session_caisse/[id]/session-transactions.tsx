@@ -158,7 +158,6 @@ export default function SessionTransactions({
     "Type": string;
     "Description": string;
     "Méthodes de paiement": string;
-    "Montant": number;
     "Montant formaté": string;
   };
 
@@ -170,7 +169,6 @@ export default function SessionTransactions({
       "Type": transaction.type === "encaissement" ? "Encaissement" : "Décaissement",
       "Description": transaction.description || "-",
       "Méthodes de paiement": transaction.paymentMethods?.join(", ") || "-",
-      "Montant": transaction.amount,
       "Montant formaté": formatAmount(transaction.amount),
     }));
 
