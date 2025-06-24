@@ -26,7 +26,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchAcademicYears, fetchPeriods } from "@/store/schoolservice";
-import { Period } from "@/lib/interface";
+import { Period, TypePeriod } from "@/lib/interface";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DatePickerFormProps {
   onSuccess?: () => void;
@@ -42,7 +43,8 @@ const FormSchema = z.object({
 type FormSchemaType = z.infer<typeof FormSchema>;
 
 const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
-  const { setAcademicYears, setPeriods, periods } = useSchoolStore();
+  const { setAcademicYears, setPeriods, periods, typePeriods } =
+    useSchoolStore();
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(FormSchema),
@@ -51,13 +53,15 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [periodType, setPeriodType] = useState<"semestre" | "trimestre" | null>(null);
-  const [periodDates, setPeriodDates] = useState<Record<number, { start_date?: Date; end_date?: Date }>>({});
+  const [selectedTypePeriod, setSelectedTypePeriod] =
+    useState<TypePeriod | null>(null);
+  const [periodDates, setPeriodDates] = useState<
+    Record<number, { start_date?: Date; end_date?: Date }>
+  >({});
 
-  const filteredPeriods = periodType
-    ? periods.filter((p) =>
-        p.label.toLowerCase().includes(periodType)
-      )
+  // Filtrer les périodes selon le typePeriod sélectionné
+  const filteredPeriods = selectedTypePeriod
+    ? periods.filter((p) => p.type_period_id === selectedTypePeriod.id)
     : [];
 
   const closed = () => {
@@ -75,11 +79,64 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
     }
   }, [startDate, endDate, form]);
 
+  // Réinitialiser les dates des périodes quand le typePeriod change
+  useEffect(() => {
+    setPeriodDates({});
+  }, [selectedTypePeriod]);
+
+  // Vérification des bornes pour la première et la dernière période + chevauchement
+  const isPeriodDatesValid = () => {
+    if (!startDate || !endDate || filteredPeriods.length === 0) return false;
+    const firstPeriod = filteredPeriods[0];
+    const lastPeriod = filteredPeriods[filteredPeriods.length - 1];
+    const firstStart = periodDates[firstPeriod?.id]?.start_date;
+    const lastEnd = periodDates[lastPeriod?.id]?.end_date;
+    if (!firstStart || !lastEnd) return false;
+
+    // Vérifier que chaque période ne chevauche pas la suivante
+    for (let i = 0; i < filteredPeriods.length - 1; i++) {
+      const currentEnd = periodDates[filteredPeriods[i]?.id]?.end_date;
+      const nextStart = periodDates[filteredPeriods[i + 1]?.id]?.start_date;
+      if (currentEnd && nextStart && currentEnd >= nextStart) {
+        return false;
+      }
+    }
+
+    return (
+      firstStart >= startDate &&
+      lastEnd <= endDate &&
+      firstStart <= lastEnd
+    );
+  };
+
+  // Feedback utilisateur pour erreurs de chevauchement ou de bornes
+  let periodErrorMsg = "";
+  if (filteredPeriods.length > 0) {
+    const firstPeriod = filteredPeriods[0];
+    const lastPeriod = filteredPeriods[filteredPeriods.length - 1];
+    const firstStart = periodDates[firstPeriod?.id]?.start_date;
+    const lastEnd = periodDates[lastPeriod?.id]?.end_date;
+    if (firstStart && startDate && firstStart < startDate) {
+      periodErrorMsg = "La date de début de la première période doit être après ou égale à la date de début de l'année académique.";
+    } else if (lastEnd && endDate && lastEnd > endDate) {
+      periodErrorMsg = "La date de fin de la dernière période doit être avant ou égale à la date de fin de l'année académique.";
+    } else {
+      for (let i = 0; i < filteredPeriods.length - 1; i++) {
+        const currentEnd = periodDates[filteredPeriods[i]?.id]?.end_date;
+        const nextStart = periodDates[filteredPeriods[i + 1]?.id]?.start_date;
+        if (currentEnd && nextStart && currentEnd >= nextStart) {
+          periodErrorMsg = `La date de fin de la période "${filteredPeriods[i].label}" doit être avant la date de début de la période "${filteredPeriods[i + 1].label}".`;
+          break;
+        }
+      }
+    }
+  }
+
   async function onSubmit(data: FormSchemaType) {
     setIsLoading(true);
 
-    const selectedPeriods = filteredPeriods.filter((p) =>
-      periodDates[p.id]?.start_date && periodDates[p.id]?.end_date
+    const selectedPeriods = filteredPeriods.filter(
+      (p) => periodDates[p.id]?.start_date && periodDates[p.id]?.end_date
     );
 
     const periodsPayload = selectedPeriods.map((p) => ({
@@ -93,7 +150,7 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
       periods: periodsPayload,
     };
 
-    const response = await fetch("/api/academic_year", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/academicYear`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -116,7 +173,7 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
     setIsLoading(false);
     setStartDate(undefined);
     setEndDate(undefined);
-    setPeriodType(null);
+    setSelectedTypePeriod(null);
     setPeriodDates({});
     form.reset();
   }
@@ -207,107 +264,129 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
         <input type="hidden" {...form.register("start_date")} />
         <input type="hidden" {...form.register("end_date")} />
 
-        {/* Type de période */}
-        <div className="flex justify-center gap-4 pt-4">
-          <Button
-            type="button"
-            variant={periodType === "semestre" ? "ghost" : "outline"}
-            onClick={() => {
-              setPeriodType("semestre");
-              setPeriodDates({});
-            }}
-          >
-            Semestre
-          </Button>
-          <Button
-            type="button"
-            variant={periodType === "trimestre" ? "ghost" : "outline"}
-            onClick={() => {
-              setPeriodType("trimestre");
-              setPeriodDates({});
-            }}
-          >
-            Trimestre
-          </Button>
+        {/* Type de période dynamique */}
+        <div className="flex justify-center gap-4 pt-4 flex-wrap">
+          {typePeriods.map((tp) => (
+            <Button
+              key={tp.id}
+              type="button"
+              variant={selectedTypePeriod?.id === tp.id ? "ghost" : "outline"}
+              onClick={() => setSelectedTypePeriod(tp)}
+            >
+              {tp.label}
+            </Button>
+          ))}
         </div>
 
         {/* Périodes dynamiques */}
         {filteredPeriods.length > 0 && (
-          <div className="space-y-4 pt-4">
-            {filteredPeriods.map((period) => (
-              <div
-                key={period.id}
-                className="border rounded-md p-4 space-y-2 shadow-sm"
-              >
-                <p className="font-medium">{period.label}</p>
-                <div className="flex gap-4">
-                  {/* Date de début */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-[160px] justify-start text-left"
-                      >
-                        {periodDates[period.id]?.start_date
-                          ? format(periodDates[period.id].start_date!, "PP", {
-                              locale: fr,
-                            })
-                          : "Début"}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 z-[9999]">
-                      <Calendar
-                        mode="single"
-                        selected={periodDates[period.id]?.start_date}
-                        onSelect={(date) =>
-                          setPeriodDates((prev) => ({
-                            ...prev,
-                            [period.id]: {
-                              ...prev[period.id],
-                              start_date: date!,
-                            },
-                          }))
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
+          <>
+            <ScrollArea className="max-h-[350px] w-full">
+              <div className="space-y-4 pt-4">
+                {filteredPeriods.map((period, idx) => (
+                  <div
+                    key={period.id}
+                    className="border rounded-md p-4 space-y-2 shadow-sm"
+                  >
+                    <p className="font-medium">{period.label}</p>
+                    <div className="flex gap-4">
+                      {/* Date de début */}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-[160px] justify-start text-left"
+                          >
+                            {periodDates[period.id]?.start_date
+                              ? format(periodDates[period.id].start_date!, "PP", {
+                                  locale: fr,
+                                })
+                              : "Début"}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto p-0 z-[9999]"
+                          side="top"
+                          align="start"
+                          sideOffset={4}
+                        >
+                          <Calendar
+                            mode="single"
+                            selected={periodDates[period.id]?.start_date}
+                            onSelect={(date) =>
+                              setPeriodDates((prev) => ({
+                                ...prev,
+                                [period.id]: {
+                                  ...prev[period.id],
+                                  start_date: date!,
+                                },
+                              }))
+                            }
+                            // Restreindre la première période à >= startDate
+                            disabled={
+                              idx === 0 && startDate
+                                ? (date) => date < startDate
+                                : undefined
+                            }
+                          />
+                        </PopoverContent>
+                      </Popover>
 
-                  {/* Date de fin */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-[160px] justify-start text-left"
-                      >
-                        {periodDates[period.id]?.end_date
-                          ? format(periodDates[period.id].end_date!, "PP", {
-                              locale: fr,
-                            })
-                          : "Fin"}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="p-0 z-[9999]">
-                      <Calendar
-                        mode="single"
-                        selected={periodDates[period.id]?.end_date}
-                        onSelect={(date) =>
-                          setPeriodDates((prev) => ({
-                            ...prev,
-                            [period.id]: {
-                              ...prev[period.id],
-                              end_date: date!,
-                            },
-                          }))
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                      {/* Date de fin */}
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-[160px] justify-start text-left"
+                          >
+                            {periodDates[period.id]?.end_date
+                              ? format(periodDates[period.id].end_date!, "PP", {
+                                  locale: fr,
+                                })
+                              : "Fin"}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto p-0 z-[9999]"
+                          side="top"
+                          align="start"
+                          sideOffset={4}
+                          avoidCollisions={false}
+                        >
+                          <Calendar
+                            mode="single"
+                            selected={periodDates[period.id]?.end_date}
+                            onSelect={(date) =>
+                              setPeriodDates((prev) => ({
+                                ...prev,
+                                [period.id]: {
+                                  ...prev[period.id],
+                                  end_date: date!,
+                                },
+                              }))
+                            }
+                            // Restreindre la dernière période à <= endDate
+                            disabled={
+                              idx === filteredPeriods.length - 1 && endDate
+                                ? (date) => date > endDate
+                                : undefined
+                            }
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </ScrollArea>
+            {periodErrorMsg && (
+              <div className="text-sm text-destructive text-center mt-2">
+                {periodErrorMsg}
+              </div>
+            )}
+          </>
         )}
 
         {/* Actions */}
@@ -323,7 +402,13 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
           <Button
             color="indigodye"
             type="submit"
-            disabled={!startDate || !endDate || isLoading}
+            disabled={
+              !startDate ||
+              !endDate ||
+              !selectedTypePeriod ||
+              !isPeriodDatesValid() ||
+              isLoading
+            }
           >
             {isLoading ? (
               <>

@@ -1,4 +1,5 @@
 "use client"
+import { useEffect } from "react"
 import { Bell } from "@/components/svg";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,11 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import shortImage from "@/public/images/all-img/short-image-2.png";
 import { useSchoolStore } from "@/store";
 import { useRouter } from "next/navigation";
+import { fetchValidationExpenses, fetchExpenses } from "@/store/schoolservice";
 
 const formatDate = (dateString: string) => {
   try {
@@ -42,19 +44,52 @@ const formatAmount = (amount: string | number, currency: string = "FCFA") => {
 };
 
 const NotificationMessage = () => {
-  const { 
-    validationExpenses, 
-    userOnline, 
-    settings 
+  const {
+    validationExpenses,
+    setValidationExpenses,
+    userOnline,
+    settings,
+    expenses,
+    setExpenses,
   } = useSchoolStore();
   const router = useRouter();
 
-  // Vérifications strictes avec typage
-  const filteredValidationExpenses = validationExpenses.filter((v) => {
-    return v?.validation_status === "en attente" && 
-           v?.demand?.status === "en attente" && 
-           Number(v?.user_id) === Number(userOnline?.id) &&
-           typeof v.id === 'number';
+  // Rafraîchit les données du store à l'ouverture et lors du focus de la fenêtre
+  useEffect(() => {
+    const refreshData = async () => {
+      const [validationList, expensesList] = await Promise.all([
+        fetchValidationExpenses(),
+        fetchExpenses(),
+      ]);
+      setValidationExpenses(validationList);
+      setExpenses(expensesList);
+    };
+
+    refreshData();
+
+    const onFocus = () => {
+      refreshData();
+    };
+    window.addEventListener("focus", onFocus);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [setValidationExpenses, setExpenses]);
+
+  const firstFiltre = (validationExpenses || []).filter((v) =>
+    !(expenses || []).some((expense) => expense.validation_expense_id == v.id)
+  );
+
+  if (!validationExpenses || !Array.isArray(validationExpenses) || validationExpenses.length === 0) {
+    return null;
+  }
+
+  const filteredValidationExpenses = firstFiltre.filter((v) => {
+    return v?.validation_status === "en attente" &&
+      v?.demand?.status === "en attente" &&
+      Number(v?.user_id) === Number(userOnline?.id) &&
+      typeof v.id === 'number';
   });
 
   const currency = settings[0]?.currency || "FCFA";
@@ -98,7 +133,7 @@ const NotificationMessage = () => {
         <div className="h-[300px] xl:h-[350px]">
           <ScrollArea className="h-full">
             {filteredValidationExpenses.length > 0 ? (
-              filteredValidationExpenses.map((validation) => (
+              filteredValidationExpenses.reverse().map((validation) => (
                 <div 
                   key={`notification-${validation.id}`}
                   className="border-b last:border-b-0"
@@ -106,7 +141,6 @@ const NotificationMessage = () => {
                   <DropdownMenuItem className="flex gap-4 py-3 px-4 cursor-pointer dark:hover:bg-background focus:bg-accent">
                     <div className="flex-1 flex items-start gap-3">
                       <Avatar className="h-10 w-10 rounded">
-                        {/* <AvatarImage src={validation.user?.avatar || undefined} /> */}
                         <AvatarFallback>
                           {validation.user?.name
                             ?.split(" ")
@@ -188,3 +222,23 @@ const NotificationMessage = () => {
 };
 
 export default NotificationMessage;
+
+/*
+  Remarques sur le code :
+
+  1. fetchValidationExpenses et fetchExpenses doivent exister dans le store ou être importés
+  2. Si fetchValidationExpenses/fetchExpenses échouent, setValidationExpenses/setExpenses peuvent recevoir undefined
+  3. Si validationExpenses ou expenses sont undefined, le filtrage peut échouer (mais tu as bien mis || [])
+  4. Si settings[0] n'existe pas, settings[0]?.currency retournera undefined (ce qui est géré par le fallback "FCFA")
+  5. Si userOnline est null, Number(userOnline?.id) === Number(v?.user_id) retournera false (ce qui est OK)
+  6. Si validationExpenses n'est pas un tableau, le composant ne s'affiche pas (ce qui est OK)
+  7. Si setValidationExpenses ou setExpenses ne sont pas définis dans le store, il y aura une erreur
+
+  Donc :
+  - Assure-toi que setValidationExpenses et setExpenses existent bien dans le store.
+  - fetchValidationExpenses et fetchExpenses doivent être importés ou accessibles.
+  - Si tu veux éviter un appel réseau à chaque focus, tu peux ajouter un contrôle pour ne pas surcharger l'API.
+
+  Sinon, la logique est correcte et robuste pour la plupart des cas d'usage.
+  Pas d'erreur bloquante détectée dans ce code.
+*/

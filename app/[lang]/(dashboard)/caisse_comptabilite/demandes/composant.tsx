@@ -174,15 +174,26 @@ export default function DisbursementRequestsPage() {
       const newDemand = await demandResponse.json()
 
       let validatorId: number | null = null
-      if (settings && settings[0]?.expense_approval_level === 0) {
+      if (settings && Array.isArray(settings) && settings[0]?.expense_approval_level === 0) {
+        // Si le niveau d'approbation est 0, l'utilisateur courant est le validateur
         validatorId = userOnline.id
-      } else if (settings && settings[0]?.primary_validator) {
-        const usersValidator = users.find((user)=>
-          user.name.toUpperCase().trim() == settings[0]?.primary_validator
+      } else if (
+        settings &&
+        Array.isArray(settings) &&
+        typeof settings[0]?.primary_validator === "string" &&
+        settings[0]?.primary_validator.trim() !== ""
+      ) {
+        // Recherche du validateur principal par nom (insensible à la casse et aux accents)
+        const normalizedPrimaryValidator = settings[0].primary_validator.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        const usersValidator = users.find((user) =>
+          typeof user.name === "string" &&
+          user.name.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedPrimaryValidator
         )
-
-        validatorId = userOnline.id
-      } else if (userOnline.hierarchical_id) {
+        if (usersValidator) {
+          validatorId = usersValidator.id
+        }
+      } else if (userOnline && userOnline.hierarchical_id) {
+        // Sinon, on prend le supérieur hiérarchique s'il existe
         validatorId = userOnline.hierarchical_id
       }
 

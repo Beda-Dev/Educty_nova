@@ -86,12 +86,20 @@ export default function Page() {
       color: itemColors[4],
     },
     {
+      id: "type_period",
+      title: "Types de Périodes",
+      description: "Gestion des types de périodes académiques",
+      icon: <Calendar className="w-6 h-6" />,
+      path: "/parametres/pedagogy/type_period",
+      color: itemColors[5],
+    },
+    {
       id: "periodes",
       title: "Periodes",
       description: "Gestion des periodes academique",
       icon: <Calendar className="w-6 h-6" />,
       path: "/parametres/pedagogy/periodes",
-      color: itemColors[5],
+      color: itemColors[6],
     },
   ];
 

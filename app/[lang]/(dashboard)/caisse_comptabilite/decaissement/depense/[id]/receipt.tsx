@@ -45,7 +45,8 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
     name: settings?.[0]?.establishment_name || "Nom Établissement",
     address: settings?.[0]?.address || "Adresse établissement",
     phone: `${settings?.[0]?.establishment_phone_1 || ""} ${settings?.[0]?.establishment_phone_2 ? "/ " + settings?.[0]?.establishment_phone_2 : ""}`.trim(),
-    currency: settings?.[0]?.currency || "FCFA"
+    currency: settings?.[0]?.currency || "FCFA",
+    email: settings?.[0]?.email || "Email établissement",
   };
 
   // Check if applicant and validator are the same person
@@ -74,6 +75,10 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
             <p className="text-[10px] text-gray-600 leading-snug">
               {schoolInfo.address} | Tél: {schoolInfo.phone}
             </p>
+            <p className="text-[10px] text-gray-600 leading-snug">
+              Email: {schoolInfo.email}
+            </p>
+
           </div>
         </div>
         <div className="text-right space-y-0">
@@ -92,12 +97,17 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
           {/* Expense Info */}
           <div className="mb-2">
             <h3 className="text-xs font-semibold text-blue-800 mb-1">INFORMATIONS DU DÉCAISSEMENT</h3>
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+            <div className="grid grid-cols-2 gap-x-1">
               <Info label="Motif" value={expense.label} />
               <Info label="Type de dépense" value={expense.expense_type.name} />
               <Info label="Montant" value={`${Number(expense.amount).toLocaleString()} ${schoolInfo.currency}`} />
               <Info label="Date opération" value={new Date(expense.expense_date).toLocaleDateString("fr-FR")} />
               <Info label="Caisse" value={expense.cash_register.cash_register_number} />
+              <Info label="Caissier" value={`${cashier.name}`} />
+              <Info label="Demandeur" value={`${demand.applicant.name}`} />
+              <Info label="Matricule Demandeur" value={`MAT2025-${demand.applicant.id}`} />
+              <Info label="Béneficiare" value={`${demand.applicant.name}`} /> {/* La personne qui a effectuer le retrait */}
+
             </div>
           </div>
 
@@ -107,10 +117,9 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
           <div className="mb-2">
             <h3 className="text-xs font-semibold text-blue-800 mb-1">DEMANDE</h3>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-              <Info label="Référence" value={demand.pattern} />
-              <Info label="Demandeur" value={`${demand.applicant.name}`} />
+              <Info label="Motif" value={demand.pattern} />
               <Info label="Date demande" value={new Date(demand.created_at).toLocaleDateString("fr-FR")} />
-              <Info label="Statut" value={demand.status} />
+              <Info label="Statut" value={demand.status} /> 
             </div>
           </div>
 
@@ -122,24 +131,14 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
               <div className="mb-2">
                 <h3 className="text-xs font-semibold text-blue-800 mb-1">VALIDATION</h3>
                 <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                  <Info label="Validateur" value={`${validation.user?.name}`} />
+                  <Info label="Approuvée par " value={`${validation.user?.name}`} />
                   <Info label="Date validation" value={new Date(validation.validation_date).toLocaleDateString("fr-FR")} />
-                  <Info label="Statut" value={validation.validation_status} />
                   <Info label="Commentaire" value={validation.comment || "Aucun"} />
                 </div>
               </div>
               <Separator className="my-1" />
             </>
           )}
-
-          {/* Payment Info */}
-          <div className="mb-2">
-            <h3 className="text-xs font-semibold text-blue-800 mb-1">OPÉRATION DE CAISSE</h3>
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-              <Info label="Caissier" value={`${cashier.name}`} />
-              <Info label="Date opération" value={new Date(expense.created_at).toLocaleDateString("fr-FR")} />
-            </div>
-          </div>
 
           <Separator className="my-1" />
 

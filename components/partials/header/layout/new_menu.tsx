@@ -149,6 +149,13 @@ const menuItems: MenuCategory = {
           path: "/parametres/pedagogy/type_evaluation",
         },
         {
+          id: "type_period",
+          title: "Types de Périodes",
+          description: "Gestion des types de périodes académiques",
+          icon: <Calendar className="w-6 h-6" />,
+          path: "/parametres/pedagogy/type_period"
+        },
+        {
           id: "periodes",
           title: "Periodes",
           description: "Gestion des periodes academique",

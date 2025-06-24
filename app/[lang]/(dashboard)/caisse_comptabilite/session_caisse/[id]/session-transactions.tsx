@@ -153,26 +153,42 @@ export default function SessionTransactions({
 
   // Type pour l'export Excel
   type ExportData = {
-    "Date/Heure": string;
+    "Date": string;
+    "Heure": string;
     "Référence": string;
     "Type": string;
     "Description": string;
     "Méthodes de paiement": string;
-    "Montant formaté": string;
+    "Montant": number;
   };
 
   // Export Excel
   const handleExportExcel = () => {
-    const exportData: ExportData[] = filteredTransactions.map((transaction) => ({
-      "Date/Heure": formatDateTime(transaction.date),
-      "Référence": transaction.reference,
-      "Type": transaction.type === "encaissement" ? "Encaissement" : "Décaissement",
-      "Description": transaction.description || "-",
-      "Méthodes de paiement": transaction.paymentMethods?.join(", ") || "-",
-      "Montant formaté": formatAmount(transaction.amount),
-    }));
+    interface ExportTransaction {
+      date: string;
+      heure: string;
+      reference: string;
+      type: "encaissement" | "decaissement";
+      description: string;
+      paymentMethods?: string[];
+      amount: number | string;
+    }
 
-    
+    // Séparation de la date et de l'heure pour l'export
+    const exportData: ExportData[] = filteredTransactions.map((transaction) => {
+      const dateObj = new Date(transaction.date)
+      const dateStr = dateObj.toLocaleDateString("fr-FR")
+      const timeStr = dateObj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+      return {
+        "Date": dateStr,
+        "Heure": timeStr,
+        "Référence": transaction.reference,
+        "Type": transaction.type === "encaissement" ? "Encaissement" : "Décaissement",
+        "Description": transaction.description || "-",
+        "Méthodes de paiement": transaction.paymentMethods?.join(", ") || "-",
+        "Montant": Number(transaction.amount) || 0,
+      }
+    });
 
     // @ts-ignore - TypeScript a du mal avec l'inférence ici
     universalExportToExcel<ExportData>({
@@ -330,7 +346,7 @@ export default function SessionTransactions({
             </TableHeader>
             <TableBody>
               {paginatedTransactions.length > 0 ? (
-                paginatedTransactions.filter((transaction) => transaction !== null).map((transaction) => (
+                paginatedTransactions.filter((transaction) => transaction !== null).reverse().map((transaction) => (
                   <TableRow key={`${transaction.type}-${transaction.id}`}>
                     <TableCell>{formatDateTime(transaction.date)}</TableCell>
                     <TableCell>

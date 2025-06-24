@@ -72,10 +72,11 @@ import { useSchoolStore } from "@/store";
 
 const formatCurrency = (amount: string | number) => {
   // On accepte string ou number pour compatibilité
-  const numericAmount = typeof amount === 'string' ? parseInt(amount, 10) : amount;
-  if (isNaN(numericAmount)) return '';
+  const numericAmount =
+    typeof amount === "string" ? parseInt(amount, 10) : amount;
+  if (isNaN(numericAmount)) return "";
   // Format avec espaces pour les milliers, pas de décimales
-  return numericAmount.toLocaleString('fr-FR');
+  return numericAmount.toLocaleString("fr-FR");
 };
 
 const formatSessionDate = (dateString: string | null) => {
@@ -88,7 +89,7 @@ export default function CashRegisterSessionsPage({
 }: {
   data: CashRegisterSession[];
 }) {
-  const { userOnline, users, cashRegisters , settings } = useSchoolStore();
+  const { userOnline, users, cashRegisters, settings } = useSchoolStore();
   const router = useRouter();
   const [sessions, setSessions] = useState<CashRegisterSession[]>(data);
   const [searchTerm, setSearchTerm] = useState("");
@@ -414,7 +415,7 @@ export default function CashRegisterSessionsPage({
                     </TableRow>
                   ) : (
                     <AnimatePresence>
-                      {paginatedSessions.map((session) => (
+                      {paginatedSessions.reverse().map((session) => (
                         <motion.tr
                           key={session.id}
                           layout
@@ -437,28 +438,59 @@ export default function CashRegisterSessionsPage({
                               : formatSessionDate(session.closing_date)}
                           </TableCell>
                           <TableCell className="text-right">
-                            {formatCurrency(session.opening_amount)} {settings?.[0]?.currency || 'FCFA'}
+                            {formatCurrency(session.opening_amount)}{" "}
+                            {settings?.[0]?.currency || "FCFA"}
                           </TableCell>
                           <TableCell className="text-right">
-                            {session.status === "open"
-                              ? "—"
-                              : (
-                                <>
-                                  {formatCurrency(session.closing_amount)} {settings?.[0]?.currency || 'FCFA'}
-                                </>
-                              )}
+                            {session.status === "open" ? (
+                              "—"
+                            ) : (
+                              <>
+                                {formatCurrency(session.closing_amount)}{" "}
+                                {settings?.[0]?.currency || "FCFA"}
+                              </>
+                            )}
                           </TableCell>
                           <TableCell>
-                            <Badge
-                              color={session.status === "open" ? "success" : "secondary"}
-                              className={cn(
-                                "capitalize",
-                                session.status === "open" &&
-                                  "bg-success"
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                color={
+                                  session.status === "open"
+                                    ? "success"
+                                    : "secondary"
+                                }
+                                className={cn(
+                                  "capitalize",
+                                  session.status === "open" && "bg-success"
+                                )}
+                              >
+                                {session.status === "open"
+                                  ? "Ouverte"
+                                  : "Fermée"}
+                              </Badge>
+                              {session.status === "open" && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        color="success"
+                                        size="icon"
+                                        variant="outline"
+                                        onClick={() =>
+                                          navigateToSessionDetails(session.id)
+                                        }
+                                        className="ml-1"
+                                      >
+                                        <CalendarIcon className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Accéder à la caisse
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               )}
-                            >
-                              {session.status === "open" ? "Ouverte" : "Fermée"}
-                            </Badge>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <DropdownMenu>
@@ -592,7 +624,7 @@ export default function CashRegisterSessionsPage({
                   </div>
                   <div className="flex justify-center gap-3 pt-2">
                     <Button
-                    color="destructive"
+                      color="destructive"
                       variant="outline"
                       onClick={() => setShowModal(false)}
                     >

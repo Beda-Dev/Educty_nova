@@ -37,8 +37,13 @@ export default function UserSelect({
 
   useEffect(() => {
     if (value && users.length > 0) {
-      const user = users.find(u => u.id === Number(value))
-      setSelectedUser(user || null)
+      // Permettre la sélection par id (number) ou par nom (string)
+      const user =
+        users.find(u => u.id === Number(value)) ||
+        users.find(u => u.name === value);
+      setSelectedUser(user || null);
+    } else if (!value) {
+      setSelectedUser(null);
     }
   }, [value, users])
 

@@ -3,13 +3,8 @@
 import React, { useEffect } from "react";
 import CashRegisterSessionsPage from "./sessioncomponant";
 import { useSchoolStore } from "@/store";
-import { fetchCashRegisterSessions , fetchTransactions  } from "@/store/schoolservice";
-import {
-  User,
-  CashRegister,
-  UserSingle,
-  CashRegisterSession,
-} from "@/lib/interface";
+import { fetchCashRegisterSessions , fetchTransactions , fetchExpenses ,fetchPayment  } from "@/store/schoolservice";
+
 
 function SessionCaissePage() {
   const { cashRegisterSessions, setCashRegisterSessions , setTransactions , setPayments , setExpenses} = useSchoolStore();
@@ -24,11 +19,23 @@ function SessionCaissePage() {
       const transactions = await fetchTransactions();
       setTransactions(transactions);
     };
+    // Fetch expenses if needed
+    const fetchExpensesData = async () => {
+      const expenses = await fetchExpenses();
+      setExpenses(expenses);
+    }
+    // Fetch payments if needed
+    const fetchPaymentData = async () => {
+      const payments = await fetchPayment();
+      setPayments(payments);
+    } 
 
 
     fetchsession();
     fetchTransactionsData();
-  }, [setCashRegisterSessions , setTransactions]);
+    fetchExpensesData();
+    fetchPaymentData();
+  }, [setCashRegisterSessions , setTransactions , setPayments , setExpenses]);
 
   return <CashRegisterSessionsPage data={cashRegisterSessions} />;
 }

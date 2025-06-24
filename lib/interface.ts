@@ -58,6 +58,21 @@ export interface AcademicYear {
   start_date: string;
   end_date: string;
   isCurrent: number;
+  periods:{
+    id: number;
+    label: string;
+    type_period_id: number;
+    created_at: string;
+    updated_at: string;
+    pivot: {
+      academic_year_id: number;
+      period_id: number;
+      start_date: string;
+      end_date: string;
+      created_at: string;
+      updated_at: string;
+    };
+  }[] | [];
 }
 
 export interface FormatedAcademicYear {
@@ -484,9 +499,17 @@ export interface TypeEvaluation {
   updated_at: string;
 }
 
+export interface TypePeriod {
+  id: number;
+  label: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Period {
   id: number;
   label: string;
+  type_period_id: number;
   created_at: string;
   updated_at: string;
 }

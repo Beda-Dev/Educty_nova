@@ -225,6 +225,18 @@ interface Translations {
   [key: string]: string;
 }
 
+/**
+ * Fonction utilitaire pour traduire un titre à partir d'un dictionnaire de traductions.
+ * 
+ * @param title - Le texte à traduire (ex: "Dashboard")
+ * @param trans - Un objet contenant les traductions, où chaque clé est en minuscules (ex: { "dashboard": "Tableau de bord" })
+ * @returns La traduction si elle existe, sinon le texte original.
+ * 
+ * Fonctionnement :
+ * - Met le titre en minuscules pour assurer la correspondance avec les clés du dictionnaire.
+ * - Si la clé existe dans l'objet de traduction, retourne la traduction.
+ * - Sinon, retourne le texte original.
+ */
 export const translate = (title: string, trans: Translations): string => {
   const lowercaseTitle = title.toLowerCase();
 

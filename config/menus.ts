@@ -1,4 +1,3 @@
-
 import {
   DashBoard,
   Sheild,
@@ -41,32 +40,32 @@ export const menusConfig = {
       href: "/dashboard",
     },
     {
-      title: "Paramètres",
+      title: "Settings",
       icon: Settings,
       href: "/parametres",
     },
     {
-      title: "Élèves",
+      title: "Students",
       icon: UserGroup,
       href: "/eleves",
     },
     {
-      title: "Caisse",
+      title: "Cash Register",
       icon: Payment,
       href: "/caisse_comptabilite",
     },
     {
-      title: "Vie scolaire",
+      title: "School Life",
       icon: fees,
       href: "/vie_scolaire",
     },
     {
-      title: "Pédagogie",
+      title: "Pedagogy",
       icon: Docs,
       href: "/pedagogie",
     },
     {
-      title: "Inventaire",
+      title: "Inventory",
       icon: Note2,
       href: "/inventaire",
     },
@@ -83,32 +82,32 @@ export const menusConfig = {
         href: "/dashboard",
       },
       {
-        title: "Paramètres",
+        title: "Settings",
         icon: Settings,
         href: "/parametres",
       },
       {
-        title: "Élèves",
+        title: "Students",
         icon: UserGroup,
         href: "/eleves",
       },
       {
-        title: "Caisse",
+        title: "Cash Register",
         icon: Payment,
         href: "/caisse_comptabilite",
       },
       {
-        title: "Vie scolaire",
+        title: "School Life",
         icon: fees,
         href: "/vie_scolaire",
       },
       {
-        title: "Pédagogie",
+        title: "Pedagogy",
         icon: Docs,
         href: "/pedagogie",
       },
       {
-        title: "Inventaire",
+        title: "Inventory",
         icon: Note2,
         href: "/inventaire",
       },
@@ -116,7 +115,7 @@ export const menusConfig = {
     classic: [
       {
         isHeader: true,
-        title: "menu",
+        title: "Menu",
       },
       {
         title: "Dashboard",
@@ -124,33 +123,32 @@ export const menusConfig = {
         href: "/dashboard",
       },
       {
-        title: "settings",
+        title: "Settings",
         icon: Settings,
         href: "/parametres",
       },
       {
-        title: "eleves",
+        title: "Students",
         icon: UserGroup,
         href: "/eleves",
       },
-
       {
-        title: "cash register",
+        title: "Cash Register",
         icon: Payment,
         href: "/caisse_comptabilite",
       },
       {
-        title: "vie scolaire",
+        title: "School Life",
         icon: fees,
         href: "/vie_scolaire",
       },
       {
-        title: "pedagogie",
+        title: "Pedagogy",
         icon: Docs,
         href: "/pedagogie",
       },
       {
-        title: "inventaire",
+        title: "Inventory",
         icon: Note2,
         href: "/inventaire",
       },

@@ -37,18 +37,18 @@ export default function StudentsPage(): JSX.Element {
     );
   }, [registrations , academicYearCurrent]);
 
-  if (hasAdminAccess === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccess === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return (
     <TooltipProvider>
       <Card title="Eleves inscrit">
-        <StudentTableStatus Register={dataRegistrationsStudents || []} />
+        <StudentTableStatus Register={(dataRegistrationsStudents || []).slice().reverse()} />
       </Card>
     </TooltipProvider>
   );
