@@ -148,7 +148,11 @@ export default function CashRegisterSessionsPage({
         matchesDateFrom &&
         matchesDateTo
       );
-    });
+    })
+        .sort(
+      (a, b) =>
+        new Date(b.opening_date).getTime() - new Date(a.opening_date).getTime()
+    );
   }, [
     sessions,
     searchTerm,
@@ -415,7 +419,7 @@ export default function CashRegisterSessionsPage({
                     </TableRow>
                   ) : (
                     <AnimatePresence>
-                      {paginatedSessions.reverse().map((session) => (
+                      {paginatedSessions.map((session) => (
                         <motion.tr
                           key={session.id}
                           layout

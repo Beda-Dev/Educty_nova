@@ -17,8 +17,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
 import { useSchoolStore } from "@/store";
 import { fetchClasses } from "@/store/schoolservice";
-import { Classe } from "@/lib/interface";
+import { Classe, Serie } from "@/lib/interface";
 import { Loader2 , PlusCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface ClassData {
   level_id: number;
   label: string;
@@ -33,7 +36,9 @@ const DialogForm = () => {
   const [maxStudent, setMaxStudent] = useState<number | null>(null);
   const [studentNumber] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const { levels, classes, setClasses } = useSchoolStore();
+  const [hasSerie, setHasSerie] = useState<boolean>(false);
+  const [selectedSerieId, setSelectedSerieId] = useState<number | null>(null);
+  const { levels, classes, setClasses, series } = useSchoolStore();
 
   const validateForm = (): boolean => {
     if (!label.trim()) {
@@ -58,12 +63,16 @@ const DialogForm = () => {
     setLoading(true);
     toast.loading("Création en cours...");
 
-    const newClass: ClassData = {
+    let newClass: any = {
       level_id: selectedLevelId!,
       label,
       student_number: studentNumber,
       max_student_number: maxStudent!,
     };
+
+    if (hasSerie && selectedSerieId) {
+      newClass.serie_id = selectedSerieId;
+    }
 
     try {
       const response = await fetch("/api/classe", {
@@ -139,6 +148,37 @@ const DialogForm = () => {
               <div className="flex flex-col gap-2">
                 <Label>Nombre d'élèves actuels</Label>
                 <Input type="number" value={studentNumber} readOnly />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label className="flex items-center gap-2">
+                  <Checkbox
+                    checked={hasSerie}
+                    onCheckedChange={(checked) => {
+                      setHasSerie(!!checked);
+                      if (!checked) setSelectedSerieId(null);
+                    }}
+                  />
+                  Associer une série à cette classe
+                </Label>
+                {hasSerie && (
+                  <Select
+                    value={selectedSerieId ? String(selectedSerieId) : ""}
+                    onValueChange={(value) =>
+                      setSelectedSerieId(value ? Number(value) : null)
+                    }
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Sélectionner une série" />
+                    </SelectTrigger>
+                    <SelectContent className="z-[9999]">
+                      {series.map((serie: Serie) => (
+                        <SelectItem key={serie.id} value={String(serie.id)}>
+                          {serie.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             </div>
           </ScrollArea>

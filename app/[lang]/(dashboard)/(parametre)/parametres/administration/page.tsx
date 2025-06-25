@@ -49,7 +49,7 @@ export default function Page() {
       title: "Fonctions",
       description: "Gestion des rôles et fonctions du personnel",
       icon: <Briefcase className="w-6 h-6" />,
-      path: "parametres/administration/fonctions",
+      path: "/parametres/administration/fonctions",
       color: itemColors[0]
     },
     {
@@ -57,8 +57,16 @@ export default function Page() {
       title: "Employés",
       description: "Gestion du personnel administratif et enseignant",
       icon: <UserCog className="w-6 h-6" />,
-      path: "parametres/administration/employes",
+      path: "/parametres/administration/employes",
       color: itemColors[1]
+    },
+    {
+      id: "professors",
+      title: "Enseignants",
+      description: "Gestion des professeurs de l'établissement",
+      icon: <UserCog className="w-6 h-6" />,
+      path: "/parametres/administration/professeur",
+      color: itemColors[2]
     }
   ];
 
@@ -118,7 +126,7 @@ export default function Page() {
         </CardHeader>
         <CardContent className="p-4 md:p-6">
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"

@@ -1,3 +1,4 @@
+
 // for calendar
 export interface CalendarEvent {
   id: string;
@@ -246,21 +247,14 @@ export interface Classe {
   active: number;
   created_at: string;
   updated_at: string;
+  serie_id: number | null;
   level?: Level;
-  matters?: {
+  serie?: {
     id: number;
-    name: string;
-    active: number;
+    label: string;
     created_at: string;
     updated_at: string;
-    pivot: {
-            classe_id: number;
-            matter_id: number;
-            coefficient: number;
-            created_at: string;
-            updated_at: string;
-          };
-  } [] | [];
+  } ;
 }
 
 export interface Registration {
@@ -523,6 +517,30 @@ export interface Demand {
   created_at: string;
   updated_at: string;
   applicant: UserSingle;
+}
+
+// interface liée au professeur
+
+type UserInProfessor = Omit<UserSingle, 'subordinates' | 'superior'>;
+export interface Professor {
+  id: number;
+  name: string;
+  first_name: string;
+  number: string;
+  type: "permanent" | "vacataire";
+  user_id: number;
+  created_at: string;
+  updated_at: string;
+  user?: UserInProfessor; // Optionnel, si vous souhaitez inclure les détails de l'utilisateur
+
+
+}
+
+export interface Serie {
+  id: number;
+  label: string;
+  created_at: string;
+  updated_at: string
 }
 
 

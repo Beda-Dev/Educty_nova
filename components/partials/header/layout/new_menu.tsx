@@ -38,7 +38,8 @@ import {
   CheckCircle,
   Clipboard,
   UserPlus,
-  UserCheck 
+  UserCheck,
+  LayoutGrid
 } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import { forwardRef } from "react";
@@ -162,6 +163,13 @@ const menuItems: MenuCategory = {
           icon: <Calendar className="w-6 h-6" />,
           path: "/parametres/pedagogy/periodes",
         },
+        {
+          id: "serie",
+          title: "Séries",
+          description: "Gestion des séries",
+          icon: <LayoutGrid className="w-6 h-6" />,
+          path: "/parametres/pedagogy/serie",
+        }
       ],
     },
     {
@@ -213,6 +221,13 @@ const menuItems: MenuCategory = {
           icon: <UserCog className="w-4 h-4" />,
           path: "/parametres/administration/employes",
         },
+        {
+          id: "professors",
+          title: "Enseignants",
+          description: "Gérer les professeurs",
+          icon: <UserCog className="w-4 h-4" />,
+          path: "/parametres/administration/professeur",
+        }
       ],
     },
     {

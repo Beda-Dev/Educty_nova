@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Calendar, Layers, School, Book, Clipboard } from "lucide-react";
+import { Calendar, Layers, School, Book, Clipboard , LayoutGrid } from "lucide-react";
 import { useParams } from "next/navigation";
 
 // Couleurs personnalisées pour chaque item
@@ -95,12 +95,20 @@ export default function Page() {
     },
     {
       id: "periodes",
-      title: "Periodes",
+      title: "Périodes",
       description: "Gestion des periodes academique",
       icon: <Calendar className="w-6 h-6" />,
       path: "/parametres/pedagogy/periodes",
       color: itemColors[6],
     },
+    {
+      id: "serie",
+      title: "Séries",
+      description: "Gestion des séries",
+      icon: <LayoutGrid className="w-6 h-6" />,
+      path:"/parametres/pedagogy/serie",
+      color: itemColors[7],
+    }
   ];
 
   const containerVariants = {

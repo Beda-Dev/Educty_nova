@@ -36,7 +36,9 @@ import {
   DocumentFormData,
   Period, 
   Demand,
-  TypePeriod
+  TypePeriod,
+  Professor,
+  Serie
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -242,7 +244,12 @@ interface SchoolStore {
   demands: Demand[];
   setDemands: (data: Demand[]) => void;
 
+  professor: Professor[];
+  setProfessor: (data: Professor[]) => void;
 
+  // Ajout Serie
+  series: Serie[];
+  setSeries: (data: Serie[]) => void;
 
   // Registration store data
   currentStep: number;
@@ -390,6 +397,13 @@ export const useSchoolStore = create<SchoolStore>()(
 
       demands: [],
       setDemands: (data: Demand[]) => set({ demands: data }),
+
+      professor: [],
+      setProfessor: (data: Professor[]) => set({ professor: data }),
+
+      // Ajout Serie
+      series: [],
+      setSeries: (data: Serie[]) => set({ series: data }),
 
       // Registration store implementation
       currentStep: 1,

@@ -326,22 +326,18 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         createdEntities.payments.push(paymentData.id);
       }
 
-      // Step 6: Upload documents
+      // Step 6: Upload documents (ne bloque pas la continuité si erreur)
       for (const doc of documents) {
-        console.log("Processing document:", doc.label)
+        try {
+          const docFormData = new FormData()
+          docFormData.append("document_type_id", doc.document_type_id.toString())
+          docFormData.append("student_id", studentId.toString())
+          docFormData.append("label", doc.label)
 
-        const docFormData = new FormData()
-        docFormData.append("document_type_id", doc.document_type_id.toString())
-        docFormData.append("student_id", studentId.toString())
-        docFormData.append("label", doc.label)
+          const file = await getFileFromPath(doc.path)
 
-        const file = await getFileFromPath(doc.path)
-
-        if (file && file.size > 0) {
-          docFormData.append("path", file)
-          console.log("FormData prepared with file:", file.name)
-
-          try {
+          if (file && file.size > 0) {
+            docFormData.append("path", file)
             const docResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`, {
               method: "POST",
               body: docFormData,
@@ -362,23 +358,21 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                   errorText = "Impossible de lire le corps de la réponse"
                 }
               }
-
+              // Log l'erreur mais ne bloque pas la suite
               console.error(`Document upload failed (${docResponse.status}):`, errorText)
-              throw new Error(
-                `Erreur lors du téléchargement du document "${doc.label}" (${docResponse.status}): ${errorText}`,
-              )
+              continue;
             }
 
             const createdDocument = await docResponse.json()
-            console.log("Document uploaded successfully:", createdDocument.id)
             createdEntities.documents.push(createdDocument.id)
-          } catch (error) {
-            console.error("Error during document upload:", error)
-            throw error
+          } else {
+            console.error("Failed to get valid file for document:", doc.label, "File is null or empty")
+            continue;
           }
-        } else {
-          console.error("Failed to get valid file for document:", doc.label, "File is null or empty")
-          throw new Error(`Impossible de récupérer un fichier valide pour le document "${doc.label}"`)
+        } catch (error) {
+          console.error("Erreur lors de l'envoi du document:", error)
+          // Ne bloque pas la continuité
+          continue;
         }
       }
 

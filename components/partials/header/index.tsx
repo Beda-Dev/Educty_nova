@@ -21,22 +21,40 @@ import {LastOpenSessionPopover} from "./sessionCurrent";
 
 const NavTools = ({ isDesktop, isMobile, sidebarType }: { isDesktop: boolean; isMobile: boolean; sidebarType: string ; academicYearsData : AcademicYear[]  }) => {
   const { academicYears , users , userOnline , cashRegisterSessions } = useSchoolStore();
+  const isSmallScreen = useMediaQuery("(max-width: 767px)");
   return (
-    <div className="nav-tools flex items-center  gap-2">
-      
-      {userOnline && <AcademicYearsDisplay data={academicYears} user={userOnline} Mobile={isMobile} />}
+    <div
+      className={cn(
+        "nav-tools flex items-center gap-2",
+        isSmallScreen && "gap-1 [&>*]:text-xs [&>*]:p-0"
+      )}
+    >
+      {userOnline && (
+        <AcademicYearsDisplay
+          data={academicYears}
+          user={userOnline}
+          Mobile={isSmallScreen}
+        />
+      )}
       <LastOpenSessionPopover sessions={cashRegisterSessions} />
-      {isDesktop && <Language />}
-      {isDesktop && <FullScreen />}
 
-      <ThemeButton />
-      {/*<Inbox />*/}
+      {/* Ces éléments sont cachés sur écran mobile */}
+      {!isSmallScreen && (
+        <>
+          <Language />
+          <FullScreen />
+          <ThemeButton />
+        </>
+      )}
+
       <NotificationMessage />
 
       <div className="ltr:pl-2 rtl:pr-2">
         <ProfileInfo />
       </div>
-      {!isDesktop && sidebarType !== "module" && <MobileMenuHandler />}
+
+      {/* Mobile menu handler uniquement si le sidebarType n’est pas module */}
+      {isSmallScreen && sidebarType !== "module" && <MobileMenuHandler />}
     </div>
   );
 };

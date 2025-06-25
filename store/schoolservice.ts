@@ -719,5 +719,55 @@ export const fetchDemands = async (opts: RequestInit = {}) => {
     }
   }
 };
-  
-  
+
+export const fetchProfessor = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/professor`, opts);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des professeur :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log(
+          "assignments récupérées depuis localStorage : ",
+          parsedData.state.professor
+        );
+        return parsedData.state.professor || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
+export const fetchSeries = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/serie`, opts);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des séries :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log(
+          "séries récupérées depuis localStorage : ",
+          parsedData.state.series
+        );
+        return parsedData.state.series || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
+
+
+
