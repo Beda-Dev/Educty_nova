@@ -79,11 +79,8 @@ export async function updateStudentCountByClass(
         student_number: newCount.toString(),
         max_student_number: classe.max_student_number,
         active: classe.active,
-        // Gestion des matters selon le format demandé
-        matters: classe.matters?.map(matter => ({
-          id: matter.id,
-          coefficient: matter.pivot.coefficient
-        })) || []
+        // Ajout conditionnel du serie_id
+        ...(classe.serie_id !== null ? { serie_id: classe.serie_id } : {}),
       };
 
       const response = await fetch(`/api/classe?id=${classe.id}`, {
@@ -368,4 +365,4 @@ export const isMatriculeUnique = (students : Student[], matricule: string): bool
 };
 
 
-  
+
