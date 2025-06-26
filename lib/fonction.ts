@@ -70,8 +70,6 @@ export async function updateStudentCountByClass(
     // 4. Préparer les données pour les mises à jour
     const updatePromises = classesToUpdate.map(async (classe) => {
       const newCount = classCounts[classe.id];
-      
-      // Préparer les données à envoyer selon le format spécifié
       const updateData: any = {
         id: classe.id,
         level_id: classe.level_id,
@@ -79,56 +77,67 @@ export async function updateStudentCountByClass(
         student_number: newCount.toString(),
         max_student_number: classe.max_student_number,
         active: classe.active,
-        // Ajout conditionnel du serie_id
         ...(classe.serie_id !== null ? { serie_id: classe.serie_id } : {}),
       };
 
-      const response = await fetch(`/api/classe?id=${classe.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      });
+      try {
+        const response = await fetch(`/api/classe?id=${classe.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateData),
+        });
 
-      if (!response.ok) {
-        throw new Error(`Statut ${response.status} - ${response.statusText}`);
+        if (!response.ok) {
+          // Log l'erreur mais ne bloque pas la suite
+          console.error(`Erreur lors de la mise à jour de la classe ${classe.id}: Statut ${response.status} - ${response.statusText}`);
+          return {
+            classId: classe.id,
+            previousCount: classe.student_number,
+            newCount,
+            success: false,
+            error: `Statut ${response.status} - ${response.statusText}`
+          };
+        }
+
+        return {
+          classId: classe.id,
+          previousCount: classe.student_number,
+          newCount,
+          success: true
+        };
+      } catch (err) {
+        // Log l'erreur mais ne bloque pas la suite
+        console.error(`Erreur réseau lors de la mise à jour de la classe ${classe.id}:`, err);
+        return {
+          classId: classe.id,
+          previousCount: classe.student_number,
+          newCount,
+          success: false,
+          error: err instanceof Error ? err.message : String(err)
+        };
       }
-
-      return {
-        classId: classe.id,
-        previousCount: classe.student_number,
-        newCount,
-        success: true
-      };
     });
 
-    // 5. Exécuter les mises à jour en parallèle avec gestion fine des erreurs
-    const updateResults = await Promise.allSettled(updatePromises);
+    // 5. Exécuter les mises à jour en parallèle sans throw global
+    const updateResults = await Promise.all(updatePromises);
 
     // 6. Analyser les résultats des mises à jour
-    const successfulUpdates = updateResults
-      .filter((result): result is PromiseFulfilledResult<any> => result.status === "fulfilled")
-      .map(result => result.value);
+    const successfulUpdates = updateResults.filter((result) => result.success);
+    const failedUpdates = updateResults.filter((result) => !result.success);
 
-    const failedUpdates = updateResults
-      .filter((result): result is PromiseRejectedResult => result.status === "rejected")
-      .map((result, index) => ({
-        classId: classesToUpdate[index].id,
-        error: result.reason.message
-      }));
-
-    // Log des résultats
     if (successfulUpdates.length > 0) {
       console.log("Mises à jour réussies:", successfulUpdates);
     }
 
     if (failedUpdates.length > 0) {
       console.error("Échecs de mise à jour:", failedUpdates);
-      throw new Error(`${failedUpdates.length} mise(s) à jour ont échoué`);
+      // Ne pas throw ici, juste log
     }
 
   } catch (error) {
+    // Log l'erreur mais ne bloque pas la suite
     console.error("Erreur critique dans updateStudentCountByClass:", error);
-    throw new Error(`Échec de la mise à jour des classes: ${error instanceof Error ? error.message : String(error)}`);
+    // Pas de throw ici pour ne pas bloquer la continuité
   }
 }
 
@@ -363,6 +372,22 @@ export const isMatriculeUnique = (students : Student[], matricule: string): bool
       student.registration_number.trim().toLowerCase() === matricule.trim().toLowerCase() 
   );
 };
+
+
+// envoie des donnees du compte utilisateur
+// pour l'email de confirmation ou autre
+
+export async function sendAccountInfo(name: string, email: string) {
+  const res = await fetch("/api/send-account-info", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email }),
+  });
+
+  const data = await res.json();
+  return data;
+}
+
 
 
 

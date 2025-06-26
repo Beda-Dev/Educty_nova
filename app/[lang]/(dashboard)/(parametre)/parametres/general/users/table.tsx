@@ -217,12 +217,12 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                           onSuccess={handleSuccess}
                         />
                       )}
-                      {true && (
+                      {/* {false && (
                         <DeleteUserModal
                           userId={item.id}
                           onSuccess={handleSuccess}
                         />
-                      )}
+                      )} */}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -231,68 +231,71 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
           </TableBody>
         </Table>
 
-{filteredUsers.length > itemsPerPage && (
-  <div className="mt-4 flex justify-center">
-    <Pagination>
-      <PaginationContent>
-        {/* Previous */}
-        <PaginationItem>
-          {page === 1 ? (
-            <PaginationPrevious className="cursor-not-allowed opacity-50" />
-          ) : (
-            <PaginationPrevious onClick={() => setPage((p) => Math.max(p - 1, 1))} />
-          )}
-        </PaginationItem>
+        {filteredUsers.length > itemsPerPage && (
+          <div className="mt-4 flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                {/* Previous */}
+                <PaginationItem>
+                  {page === 1 ? (
+                    <PaginationPrevious className="cursor-not-allowed opacity-50" />
+                  ) : (
+                    <PaginationPrevious
+                      onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                    />
+                  )}
+                </PaginationItem>
 
-        {/* Pages */}
-        {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
-          const pageNum = i + 1;
-          return (
-            <PaginationItem key={pageNum}>
-              <Button
-                variant={page === pageNum ? "soft" : "ghost"}
-                onClick={() => setPage(pageNum)}
-              >
-                {pageNum}
-              </Button>
-            </PaginationItem>
-          );
-        })}
+                {/* Pages */}
+                {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+                  const pageNum = i + 1;
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <Button
+                        variant={page === pageNum ? "soft" : "ghost"}
+                        onClick={() => setPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    </PaginationItem>
+                  );
+                })}
 
-        {/* Ellipsis */}
-        {totalPages > 3 && page < totalPages - 1 && (
-          <PaginationItem>
-            <span className="px-2 text-muted-foreground">…</span>
-          </PaginationItem>
+                {/* Ellipsis */}
+                {totalPages > 3 && page < totalPages - 1 && (
+                  <PaginationItem>
+                    <span className="px-2 text-muted-foreground">…</span>
+                  </PaginationItem>
+                )}
+
+                {/* Dernière page */}
+                {totalPages > 3 && page < totalPages && (
+                  <PaginationItem>
+                    <Button
+                      variant={page === totalPages ? "outline" : "ghost"}
+                      onClick={() => setPage(totalPages)}
+                    >
+                      {totalPages}
+                    </Button>
+                  </PaginationItem>
+                )}
+
+                {/* Next */}
+                <PaginationItem>
+                  {page === totalPages ? (
+                    <PaginationNext className="cursor-not-allowed opacity-50" />
+                  ) : (
+                    <PaginationNext
+                      onClick={() =>
+                        setPage((p) => Math.min(p + 1, totalPages))
+                      }
+                    />
+                  )}
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         )}
-
-        {/* Dernière page */}
-        {totalPages > 3 && page < totalPages && (
-          <PaginationItem>
-            <Button
-              variant={page === totalPages ? "outline" : "ghost"}
-              onClick={() => setPage(totalPages)}
-            >
-              {totalPages}
-            </Button>
-          </PaginationItem>
-        )}
-
-        {/* Next */}
-        <PaginationItem>
-          {page === totalPages ? (
-            <PaginationNext className="cursor-not-allowed opacity-50" />
-          ) : (
-            <PaginationNext
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-            />
-          )}
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  </div>
-)}
-
       </CardContent>
     </Card>
   );

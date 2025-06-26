@@ -47,7 +47,7 @@ export default function InscriptionPage() {
     const responsePayments = await fetchPayment()
     setPayments(responsePayments)
 
-    // await updateStudentCountByClass(registrations, academicYearCurrent, classes);
+    await updateStudentCountByClass(registrations, academicYearCurrent, classes);
     setShowReceipt(true)
   }
 

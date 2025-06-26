@@ -221,7 +221,7 @@ export default function Professors() {
                         <TableHead>Numéro</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Date de création</TableHead>
+                        <TableHead>Cni</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -282,7 +282,7 @@ export default function Professors() {
                               </Badge>
                             </TableCell>
                             <TableCell>{professor.user?.email || "-"}</TableCell>
-                            <TableCell>{formatDate(professor.created_at)}</TableCell>
+                            <TableCell>{professor?.cni || "-"}</TableCell>
                             <TableCell className="flex gap-2">
                               <Button
                                 color="tyrian"

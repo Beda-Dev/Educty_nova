@@ -768,6 +768,30 @@ export const fetchSeries = async (opts: RequestInit = {}) => {
   }
 };
 
+export const fetchTimetable = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/timetable`, opts);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des emploi du temps :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log(
+          "assignments récupérées depuis localStorage : ",
+          parsedData.state.timetables
+        );
+        return parsedData.state.timetables || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
 
 
 

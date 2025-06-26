@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {sendAccountInfo} from "@/lib/fonction"
 
 const professorSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
@@ -70,7 +71,7 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
   });
 
   // Vérification email déjà utilisé
-  const checkEmailExists = (email: string) => {
+  const checkEmailExists = (email: string): boolean => {
     return users.some((u) => u.email?.toLowerCase() === email.toLowerCase());
   };
 
@@ -133,8 +134,11 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
       const updatedUsers = await fetchUsers();
       setUsers(updatedUsers);
 
-      toast.success("Professeur créé avec succès");
+      toast.success("Enseignant créé avec succès");
       onSuccess();
+      sendAccountInfo(data.name, data.email);
+      // Réinitialiser le formulaire et fermer le modal
+      form.reset();
       onClose();
     } catch (error: any) {
       toast.error(

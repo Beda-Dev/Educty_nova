@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,16 +20,36 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast"; // ✅ Shadcn toast
 import { Loader2, PlusCircle } from "lucide-react"; // ✅ Spinning loader
 import { motion } from "framer-motion"; // ✅ Animation
+import {sendAccountInfo} from "@/lib/fonction"
 
 interface AddUserModalProps {
   roles: Role[];
   onSuccess: () => void;
 }
 
+// Fonction fictive à appeler après création si mot de passe par défaut
+const sendAccount = async (name: string, email: string) => {
+  try {
+    await sendAccountInfo(name, email);
+    toast({
+      title: "Email envoyé",
+      description: "Les informations de compte ont été envoyées à l'utilisateur.",
+    });
+  } catch (error) {
+    console.error("Error sending account info:", error);
+    toast({
+      color: "destructive",
+      title: "Erreur",
+      description: "Une erreur est survenue lors de l'envoi des informations de compte.",
+    });
+  }
+};
+
 export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
   const [selectedRoles, setSelectedRoles] = useState<{ value: string; label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sendEmail, setSendEmail] = useState(false);
+  const [useDefaultPassword, setUseDefaultPassword] = useState(false);
   const animatedComponents = makeAnimated();
 
   const roleOptions = roles.map((role) => ({
@@ -51,16 +71,21 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
     email: string;
     password: string;
     roles: string[];
+    useDefaultPassword: boolean;
   }) => {
     setIsLoading(true);
     try {
+      const passwordToUse = newUser.useDefaultPassword
+        ? process.env.NEXT_PUBLIC_DEFAULT_PASSWORD
+        : newUser.password;
+
       const response = await fetch("/api/user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newUser.name,
           email: newUser.email,
-          password: newUser.password,
+          password: passwordToUse,
         }),
       });
 
@@ -81,6 +106,11 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
           if (!roleResponse.ok) throw new Error("Échec de l'attribution du rôle");
         })
       );
+
+      // Appel de la fonction d'envoi d'email si mot de passe par défaut
+      if (newUser.useDefaultPassword) {
+        await sendAccount(newUser.name, newUser.email);
+      }
 
       toast({
         title: "Succès",
@@ -120,6 +150,7 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
               email: formData.get("email") as string,
               password: formData.get("password") as string,
               roles: selectedRoles.map((role) => role.value),
+              useDefaultPassword,
             });
           }}
           initial={{ opacity: 0, y: 10 }}
@@ -128,7 +159,25 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
         >
           <Input name="name" placeholder="Nom" required />
           <Input name="email" placeholder="Email" type="email" required />
-          <Input name="password" placeholder="Mot de passe" type="password" required />
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="default-password"
+              checked={useDefaultPassword}
+              onCheckedChange={(val) => setUseDefaultPassword(Boolean(val))}
+            />
+            <Label htmlFor="default-password" className="cursor-pointer">
+              Définir le mot de passe par défaut
+            </Label>
+          </div>
+          {useDefaultPassword && (
+            <div className="text-xs text-muted-foreground mb-2">
+              Un email sera envoyé à l'utilisateur avec son mot de passe par défaut.
+            </div>
+          )}
+          {!useDefaultPassword && (
+            <Input name="password" placeholder="Mot de passe" type="password" required />
+          )}
 
           <div>
             <Label>Rôles</Label>
@@ -146,12 +195,12 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
             />
           </div>
 
-          <div className="flex items-center space-x-2 pt-2">
-            <Checkbox id="send-email" checked={sendEmail} onCheckedChange={(val) => setSendEmail(Boolean(val))} />
-            <Label htmlFor="send-email" className="cursor-pointer">
-              Envoyer un email à l’utilisateur avec son mot de passe
-            </Label>
-          </div>
+          {/* Message explicatif */}
+          {useDefaultPassword && (
+            <div className="text-xs text-muted-foreground">
+              Un email sera envoyé à l'utilisateur avec ses informations de connexion.
+            </div>
+          )}
 
           <div className="flex justify-around gap-3 pt-4">
             <DialogClose asChild>
@@ -168,8 +217,8 @@ export const AddUserModal = ({ roles, onSuccess }: AddUserModalProps) => {
                 </>
               ) : (
                 <>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                "Ajouter"
+                {/* <PlusCircle className="mr-2 h-4 w-4" /> */}
+                Ajouter
                 </>
               )}
             </Button>

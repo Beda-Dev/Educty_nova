@@ -1,3 +1,4 @@
+import { Class } from '@/components/svg';
 
 // for calendar
 export interface CalendarEvent {
@@ -23,6 +24,7 @@ export interface PaymentMethod {
   name: string;
   created_at: string;
   updated_at: string;
+  isPrincipal: 0 | 1;
   payments: {  id: number;
     student_id: number;
     installment_id: number;
@@ -527,6 +529,7 @@ export interface Professor {
   name: string;
   first_name: string;
   number: string;
+  cni: string | null; // CNI peut être null si non fourni
   type: "permanent" | "vacataire";
   user_id: number;
   created_at: string;
@@ -541,6 +544,46 @@ export interface Serie {
   label: string;
   created_at: string;
   updated_at: string
+}
+
+// interface liée à l'emploi du temps
+
+export interface TimetableFormData {
+  academic_year_id: string;
+  class_id: string;
+  professor_id: string;
+  matter_id: string;
+  period_id: string;
+  day: string;
+  start_date: string; // Format: YYYY-MM-DD
+  end_date: string;   // Format: YYYY-MM-DD
+  room: string;
+  start_time: string; // Format: HH:mm
+  end_time: string;   // Format: HH:mm
+}
+
+type ClassWithoutData = Omit<Classe, 'serie' | 'level'>;
+
+export interface Timetable {
+  id: number;
+  academic_year_id: string;
+  class_id: string;
+  professor_id: string;
+  matter_id: string;
+  period_id: string;
+  day: string;
+  start_date: string; // Format: YYYY-MM-DD
+  end_date: string;   // Format: YYYY-MM-DD
+  room: string;
+  start_time: string; // Format: HH:mm
+  end_time: string;   // Format: HH:mm
+  created_at: string;
+  updated_at: string;
+  academic_year: AcademicYear;
+  professor: Professor;
+  class: ClassWithoutData;
+  period: Period;
+  matter: Matter;
 }
 
 

@@ -1,5 +1,5 @@
 export const metadata = {
-    title: "Paramètres des professeurs",
+    title: "Paramètres des Enseignants",
   };
   
   const Layout = ({ children }: { children: React.ReactNode }) => {

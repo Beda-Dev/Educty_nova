@@ -121,7 +121,11 @@ export default function SessionStatistics({
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold mb-4">Totaux par méthode de paiement</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {methodPayment.map((method) => {
+              {[
+                // Affiche d'abord la méthode principale (isPrincipal === 1), puis les autres
+                ...methodPayment.filter((m) => m.isPrincipal === 1),
+                ...methodPayment.filter((m) => m.isPrincipal !== 1),
+              ].map((method) => {
                 const stats = paymentMethodStats[method.id]
                 return (
                   <div key={method.id} className="border rounded-lg p-4 space-y-2">

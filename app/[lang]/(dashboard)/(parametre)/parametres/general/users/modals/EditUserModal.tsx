@@ -17,6 +17,7 @@ import Select, { GroupBase, components } from "react-select";
 import makeAnimated from "react-select/animated";
 import { Icon } from "@iconify/react";
 import { User, Role } from "@/lib/interface";
+import {Edit} from 'lucide-react'
 
 interface EditUserModalProps {
   user: User;
@@ -106,8 +107,8 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="icon" color="tyrian" className="h-7 w-7">
-          <Icon icon="heroicons:pencil" className="h-4 w-4" />
+        <Button size="icon" color="tyrian">
+          <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>

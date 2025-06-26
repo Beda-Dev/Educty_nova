@@ -38,7 +38,8 @@ import {
   Demand,
   TypePeriod,
   Professor,
-  Serie
+  Serie,
+  Timetable
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -251,6 +252,10 @@ interface SchoolStore {
   series: Serie[];
   setSeries: (data: Serie[]) => void;
 
+  // Ajout Emploi du temps
+  timetables: Timetable[];
+  setTimetables: (data: Timetable[]) => void;
+
   // Registration store data
   currentStep: number;
   setCurrentStep: (step: number) => void;
@@ -404,6 +409,12 @@ export const useSchoolStore = create<SchoolStore>()(
       // Ajout Serie
       series: [],
       setSeries: (data: Serie[]) => set({ series: data }),
+      
+      // Ajout Emploi du temps
+      timetables: [],
+      setTimetables: (data: Timetable[]) => set({ timetables: data }),
+
+      
 
       // Registration store implementation
       currentStep: 1,
