@@ -364,6 +364,30 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
     }
   }, [session, paymentMethods, expectedAmount, form, formatAmount])
 
+  // Met à jour les transactions liées à la session
+  useEffect(() => {
+    if (!session || !transactions) {
+      setSessionTransactions([]);
+      return;
+    }
+    const filtered = transactions.filter(
+      (t: any) => t.cash_register_session_id === session.id
+    );
+    setSessionTransactions(filtered);
+  }, [session, transactions]);
+
+  // Met à jour les paiements liés à la session
+  useEffect(() => {
+    if (!session || !payments) {
+      setSessionPayments([]);
+      return;
+    }
+    const filtered = payments.filter(
+      (p: any) => Number(p.cash_register_session_id) === Number(session.id)
+    );
+    setSessionPayments(filtered);
+  }, [session, payments]);
+
   const sessionUser = getUserById(session?.user_id || 0)
 
   if (isLoading) {
