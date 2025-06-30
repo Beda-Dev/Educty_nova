@@ -137,7 +137,7 @@ export default function Professors() {
                   <SelectTrigger className="w-[150px]">
                     <SelectValue placeholder="Type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[9999]">
                     <SelectItem value="all">Tous</SelectItem>
                     <SelectItem value="permanent">Permanents</SelectItem>
                     <SelectItem value="vacataire">Vacataires</SelectItem>
@@ -295,7 +295,7 @@ export default function Professors() {
                                 
                               </Button>
                               <Button
-                                onClick={() => router.push(`/dashboard/parametre/administration/professeur/${professor.id}`)}
+                                onClick={() => router.push(`/parametre/administration/professeur/${professor.id}`)}
                                 color='skyblue'
                                 size="icon"
                                 aria-label="voir"

@@ -16,7 +16,7 @@ import { useSchoolStore } from "@/store";
 import { User } from "@/lib/interface";
 import { useRouter } from "next/navigation";
 import { mergeUserPermissions } from "@/lib/fonction";
-import LogoComponent from "./logo";
+import LogoComponent1 from "./logo1";
 
 const schema = z.object({
   email: z
@@ -66,11 +66,14 @@ const LogInForm = () => {
 
   const toggleVisibility = () => setIsVisible(!isVisible);
   const isDesktop2xl = useMediaQuery("(max-width: 1530px)");
+  const isMobile = useMediaQuery("(max-width: 767px)");
 
+  // La vérification des identifiants se fait côté serveur via l'API /api/login
   const onSubmit = async (formData: LoginFormData) => {
     setIsLoading(true);
     startTransition(async () => {
       try {
+        // Appel API côté serveur
         const response = await fetch("/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -119,16 +122,38 @@ const LogInForm = () => {
   // }
 
   return (
-    <div className="w-full bg-whitesmoke ">
-      <div className="2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900 bg-whitesmoke ">
-        Bonjour 👋
+    <div
+      className={`w-full ${isMobile ? "bg-white p-4 rounded-xl shadow-sm border mt-4" : "bg-whitesmoke"}`}
+      style={isMobile ? { maxWidth: 380, margin: "0 auto" } : {}}
+    >
+      {isMobile && (
+        <div className="flex flex-col items-center mb-4">
+          <LogoComponent1 width={48} height={48} />
+        </div>
+      )}
+      <div
+        className={
+          isMobile
+            ? "text-xl font-bold text-default-900 mb-2 text-center"
+            : "2xl:mt-8 mt-6 2xl:text-3xl text-2xl font-bold text-default-900 bg-whitesmoke "
+        }
+      >
+        {isMobile ? "Bienvenue 👋" : "Bonjour 👋"}
       </div>
-      <div className="2xl:text-lg text-base text-default-600 mt-2 leading-6 bg-whitesmoke">
-        Entrez vos identifiants pour accéder à votre compte
+      <div
+        className={
+          isMobile
+            ? "text-sm text-default-600 mb-4 text-center"
+            : "2xl:text-lg text-base text-default-600 mt-2 leading-6 bg-whitesmoke"
+        }
+      >
+        {isMobile
+          ? "Connectez-vous pour accéder à votre espace"
+          : "Entrez vos identifiants pour accéder à votre compte"}
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="2xl:mt-7 mt-8 bg-whitesmoke"
+        className={isMobile ? "mt-4" : "2xl:mt-7 mt-8 bg-whitesmoke"}
       >
         <div className="relative bg-whitesmoke">
           <Input

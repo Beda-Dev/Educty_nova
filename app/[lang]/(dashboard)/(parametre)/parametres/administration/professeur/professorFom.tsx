@@ -151,103 +151,117 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
 
   return (
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
-      <DialogContent className="max-w-md w-full z-[9999]">
+      <DialogContent
+        className="max-w-2xl w-full z-[9999] rounded-2xl shadow-2xl border-0 bg-gradient-to-br from-white via-blue-50 to-blue-100 animate-fade-in"
+        style={{ minWidth: 480 }}
+      >
         <DialogHeader>
-          <DialogTitle>Ajouter un professeur</DialogTitle>
-          <DialogDescription>
-            Remplissez le formulaire pour ajouter un nouveau professeur.
+          <DialogTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
+            <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-sm font-semibold mr-2">Nouveau professeur</span>
+          </DialogTitle>
+          <DialogDescription className="text-base text-gray-700 mt-2">
+            Merci de renseigner les informations du professeur. <br />
+            <span className="text-blue-700 font-medium">Un compte utilisateur sera automatiquement créé et les accès envoyés par email.</span>
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Nom du professeur"
-                      {...field}
-                      disabled={loading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prénom *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Prénom du professeur"
-                      {...field}
-                      disabled={loading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Numéro *</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Numéro du professeur"
-                      {...field}
-                      disabled={loading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type *</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={loading}
-                  >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 px-2 py-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Nom *</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Type" />
-                      </SelectTrigger>
+                      <Input
+                        placeholder="Nom du professeur"
+                        {...field}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
                     </FormControl>
-                    <SelectContent className="z-[9999]"> 
-                      <SelectItem value="permanent">Permanent</SelectItem>
-                      <SelectItem value="vacataire">Vacataire</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="first_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Prénom *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Prénom du professeur"
+                        {...field}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Numéro *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Numéro du professeur"
+                        {...field}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Type *</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={loading}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                          <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="z-[9999]">
+                        <SelectItem value="permanent">Permanent</SelectItem>
+                        <SelectItem value="vacataire">Vacataire</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email *</FormLabel>
+                  <FormLabel className="font-semibold text-blue-900">Email *</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="email@example.com"
                       {...field}
                       disabled={loading}
+                      className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       onBlur={(e) => {
                         field.onBlur?.();
                         if (e.target.value && checkEmailExists(e.target.value)) {
@@ -265,14 +279,14 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
                 </FormItem>
               )}
             />
-            <DialogFooter className="flex space-x-3 pt-4">
+            <DialogFooter className="flex space-x-3 pt-6">
               <DialogClose asChild>
                 <Button
                   type="button"
                   color="destructive"
                   onClick={onClose}
                   disabled={loading}
-                  className="flex-1"
+                  className="flex-1 rounded-lg border-0  font-semibold transition-all"
                 >
                   Annuler
                 </Button>
@@ -281,7 +295,7 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
                 color='indigodye'
                 type="submit"
                 disabled={loading || !!emailError}
-                className="flex-1"
+                className="flex-1 rounded-lg font-bold shadow-lg hover:scale-105 transition-all"
               >
                 {loading ? (
                   <>

@@ -12,8 +12,11 @@ import { Fragment, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LogoComponent from "./logo";
 import { motion } from "framer-motion";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 const LoginPage = () => {
+  const isMobile = useMediaQuery("(max-width: 767px)");
+
   return (
     <Fragment>
       <div className="min-h-screen bg-whitesmoke  flex items-center  overflow-hidden w-full">
@@ -44,7 +47,11 @@ const LoginPage = () => {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
               className="bg-whitesmoke min-h-screen basis-full md:basis-1/2 w-full px-4 py-5 flex justify-center items-center"
             >
-              <div className="lg:w-[480px] bg-whitesmoke ">
+              <div
+                className={`lg:w-[480px] bg-whitesmoke ${
+                  isMobile ? "border border-gray-200 rounded-xl shadow-sm" : ""
+                }`}
+              >
                 <LogInForm />
               </div>
             </motion.div>

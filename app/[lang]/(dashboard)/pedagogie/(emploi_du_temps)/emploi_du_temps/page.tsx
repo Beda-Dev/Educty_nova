@@ -101,7 +101,9 @@ export default function EmploiDuTempsPage() {
               <Clock className="w-8 h-8 text-skyblue" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent"
+              style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}>
+                
                 Gestion des Emplois du Temps
               </h1>
               <p className="text-sm text-muted-foreground">
