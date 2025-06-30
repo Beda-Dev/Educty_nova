@@ -284,7 +284,7 @@ export default function Professors() {
                             <TableCell>{professor.user?.email || "-"}</TableCell>
                             <TableCell>{professor?.cni || "-"}</TableCell>
                             <TableCell className="flex gap-2">
-                              <Button
+                              {/* <Button
                                 color="tyrian"
                                 size="sm"
                                 onClick={() => console.log(`Voir le modifier de ${professor.first_name} ${professor.name}`)}
@@ -293,9 +293,9 @@ export default function Professors() {
                               >
                                 <Edit className="h-4 w-4" />
                                 
-                              </Button>
+                              </Button> */}
                               <Button
-                                onClick={() => router.push(`/parametre/administration/professeur/${professor.id}`)}
+                                onClick={() => router.push(`/parametres/administration/professeur/${professor.id}`)}
                                 color='skyblue'
                                 size="icon"
                                 aria-label="voir"
