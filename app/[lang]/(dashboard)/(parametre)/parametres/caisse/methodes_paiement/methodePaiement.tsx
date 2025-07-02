@@ -52,6 +52,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import PaymentMethodForm from "./payment-method-form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PaymentPaymentProps {
   data: PaymentMethod[];
@@ -62,6 +63,8 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
     null
   );
   const [editMethodLabel, setEditMethodLabel] = useState("");
+  const [editIsPrincipal, setEditIsPrincipal] = useState(0);
+  const [principalError, setPrincipalError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
@@ -89,12 +92,28 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
+  // Trouver la méthode prioritaire actuelle
+  const currentPrincipal = data.find((item) => item.isPrincipal === 1);
+
   // Update payment method
   const updatePaymentMethod = async () => {
     if (!editingMethod || !editMethodLabel.trim()) return;
 
+    // Vérifier si on veut mettre prioritaire alors qu'il y en a déjà une autre
+    if (
+      editIsPrincipal === 1 &&
+      currentPrincipal &&
+      currentPrincipal.id !== editingMethod.id
+    ) {
+      setPrincipalError(
+        `Une méthode prioritaire existe déjà : "${currentPrincipal.name}". Veuillez d'abord la désactiver.`
+      );
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+      setPrincipalError("");
       const response = await fetch(
         `/api/payment-methods?id=${editingMethod.id}`,
         {
@@ -102,7 +121,10 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ name: editMethodLabel.trim() }),
+          body: JSON.stringify({
+            name: editMethodLabel.trim(),
+            isPrincipal: editIsPrincipal,
+          }),
         }
       );
 
@@ -112,6 +134,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
       setmethodPayment(updatedMethods);
       setEditingMethod(null);
       setEditMethodLabel("");
+      setEditIsPrincipal(0);
       setIsModalOpen(false);
       router.refresh();
 
@@ -169,11 +192,14 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
   const openEditDialog = (method: PaymentMethod) => {
     setEditingMethod(method);
     setEditMethodLabel(method.name);
+    setEditIsPrincipal(method.isPrincipal);
+    setPrincipalError("");
     setIsModalOpen(true);
   };
 
   const columns = [
     { key: "label", label: "Méthode de paiement" },
+    { key: "principal", label: "Prioritaire" },
     { key: "actions", label: "Actions" },
   ];
 
@@ -253,6 +279,13 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
                       >
                         <TableCell className="font-medium">
                           {method.name}
+                        </TableCell>
+                        <TableCell>
+                          {method.isPrincipal === 1 ? (
+                            <Badge color="skyblue" className="bg-green-600 text-white">Prioritaire</Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2 justify-end">
@@ -404,6 +437,39 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
                 onChange={(e) => setEditMethodLabel(e.target.value)}
               />
             </div>
+            <div className="flex items-center gap-2 pt-2">
+              <Checkbox
+                id="principal"
+                checked={!!editIsPrincipal}
+                onCheckedChange={(checked) => {
+                  // Si on veut cocher, vérifier qu'il n'y a pas déjà une autre prioritaire
+                  if (
+                    checked &&
+                    currentPrincipal &&
+                    currentPrincipal.id !== editingMethod?.id
+                  ) {
+                    setPrincipalError(
+                      `Une méthode prioritaire existe déjà : "${currentPrincipal.name}".`
+                    );
+                  } else {
+                    setEditIsPrincipal(checked ? 1 : 0);
+                    setPrincipalError("");
+                  }
+                }}
+                disabled={
+                  // On bloque si une autre méthode est prioritaire
+                  currentPrincipal &&
+                  currentPrincipal.id !== editingMethod?.id &&
+                  currentPrincipal.isPrincipal === 1
+                }
+              />
+              <Label htmlFor="principal" className="cursor-pointer">
+                Définir comme méthode prioritaire
+              </Label>
+            </div>
+            {principalError && (
+              <div className="text-red-600 text-sm">{principalError}</div>
+            )}
             <div className="flex justify-around gap-3 pt-4">
               <Button
                 color="destructive"
@@ -413,7 +479,7 @@ export default function PaymentMethodsPage({data}: PaymentPaymentProps) {
                 Annuler
               </Button>
               <Button
-              color="tyrian"
+                color="tyrian"
                 onClick={updatePaymentMethod}
                 disabled={isSubmitting}
                 className="min-w-[120px]"

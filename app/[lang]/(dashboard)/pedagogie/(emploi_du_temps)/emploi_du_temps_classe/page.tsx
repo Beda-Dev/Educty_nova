@@ -24,22 +24,20 @@ export default function Page() {
 
   useEffect(() => {
     (async () => {
-      const [tt, cl, pr, ay, pe, ma] = await Promise.all([
-        fetchTimetable(),
-        fetchClasses(),
-        fetchProfessor(),
-        fetchAcademicYears(),
-        fetchPeriods(),
-        fetchMatters(),
-      ]);
+      const tt = await fetchTimetable();
       setTimetables(tt || []);
+      const cl = await fetchClasses();
       setClasses(cl || []);
+      const pr = await fetchProfessor();
       setProfessor(pr || []);
+      const ay = await fetchAcademicYears();
       setAcademicYears(ay || []);
+      const pe = await fetchPeriods();
       setPeriods(pe || []);
+      const ma = await fetchMatters();
       setMatters(ma || []);
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   return <EmploiDuTempsClasse />;

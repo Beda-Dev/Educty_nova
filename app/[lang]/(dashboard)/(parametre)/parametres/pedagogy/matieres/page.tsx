@@ -3,31 +3,26 @@
 import React, { useEffect } from "react";
 import MatterTable from "./matterComponant";
 import { useSchoolStore } from "@/store";
-import { fetchMatters } from "@/store/schoolservice";
-// import {
-//   User,
-//   CashRegister,
-//   UserSingle,
-//   CashRegisterSession,
-// } from "@/lib/interface";
+import { fetchMatters, fetchLevels, fetchCoefficient } from "@/store/schoolservice";
 
 function Page() {
-  const { matters, setMatters } = useSchoolStore();
+  const { matters, setMatters, setLevels, setCoefficients } = useSchoolStore();
 
   useEffect(() => {
-    const fetchMatte = async () => {
-      const updatedMatter = await fetchMatters();
+    const fetchAll = async () => {
+      const [updatedMatter, updatedLevels, updatedCoefficients] = await Promise.all([
+        fetchMatters(),
+        fetchLevels(),
+        fetchCoefficient(),
+      ]);
       setMatters(updatedMatter);
+      setLevels(updatedLevels);
+      setCoefficients(updatedCoefficients);
     };
-    // Fetch transactions if needed
-    // const fetchTransactionsData = async () => {
-    //   const transactions = await fetchTransactions();
-    //   setTransactions(transactions);
-    // };
 
-    fetchMatte();
+    fetchAll();
     // fetchTransactionsData();
-  }, [setMatters]);
+  }, []);
 
   return <MatterTable />;
 }

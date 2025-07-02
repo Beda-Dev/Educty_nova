@@ -84,9 +84,14 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
 
   // etat pour la pagination
 
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 10;
 
-  const filteredData = data.filter((item) =>
+  // Tri décroissant par date de création
+  const sortedData = [...data].sort((a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
+  const filteredData = sortedData.filter((item) =>
     item.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -147,7 +152,8 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
                   <TableHead>Nombre d'élèves</TableHead>
                   <TableHead>Max élèves</TableHead>
                   <TableHead>Niveau</TableHead>
-                  {hasAdminAccessModifier && <TableHead>Action</TableHead>}
+                  <TableHead>Série</TableHead>
+                  {true && <TableHead>Action</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody >
@@ -166,7 +172,10 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
                         <TableCell>{item.student_number}</TableCell>
                         <TableCell>{item.max_student_number}</TableCell>
                         <TableCell>{item.level?.label}</TableCell>
-                        {hasAdminAccessModifier && (
+                        <TableCell>
+                          {item.serie?.label ? item.serie.label : "-"}
+                        </TableCell>
+                        {true && (
                           <TableCell className="flex justify-end">
                             <Button
                               color="tyrian"
@@ -184,7 +193,7 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={6}
                       className="text-center text-muted-foreground h-24"
                     >
                       {searchTerm

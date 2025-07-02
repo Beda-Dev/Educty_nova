@@ -792,6 +792,56 @@ export const fetchTimetable = async (opts: RequestInit = {}) => {
   }
 };
 
+export const fetchNotes = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/note`, opts);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des notes :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log(
+          "notes récupérées depuis localStorage : ",
+          parsedData.state.notes
+        );
+        return parsedData.state.notes || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
+export const fetchCoefficient = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient`, opts);
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des coefficients :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log(
+          "coefficients récupérés depuis localStorage : ",
+          parsedData.state.coefficients
+        );
+        return parsedData.state.coefficients || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
+
+
 
 
 

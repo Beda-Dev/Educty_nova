@@ -39,6 +39,7 @@ interface PaymentMethodSummary {
   id: number;
   name: string;
   amount: number;
+  isPrincipal?: number; // Ajouté pour cohérence avec l'usage plus bas
 }
 
 export default function CloseSessionPage({ session, isLoading, error, params }: Props) {
@@ -115,14 +116,17 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
     expenses: any[]
   ) => {
     // Paiements par méthode (toujours via pivot.montant)
-    const methodMap = new Map<number, { name: string; amount: number }>();
+    // Correction : on stocke aussi isPrincipal pour chaque méthode
+    const methodMap = new Map<number, { name: string; amount: number; isPrincipal?: number }>();
     sessionPayments.forEach(payment => {
       payment.payment_methods?.forEach(method => {
         const amount = safeParseAmount(method.pivot?.montant);
+        // On s'assure que isPrincipal est bien un nombre (0 ou 1)
+        const isPrincipal = typeof method.isPrincipal === "number" ? method.isPrincipal : Number(method.isPrincipal) || 0;
         if (methodMap.has(method.id)) {
           methodMap.get(method.id)!.amount += amount;
         } else {
-          methodMap.set(method.id, { name: method.name, amount });
+          methodMap.set(method.id, { name: method.name, amount, isPrincipal });
         }
       });
     });
@@ -130,9 +134,10 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
       id,
       name: method.name,
       amount: method.amount,
+      isPrincipal: method.isPrincipal,
     }));
 
-    // Total des paiements toutes méthodes confondues
+    // Total des paiements toutes méthodes confondues (toutes les méthodes additionnées)
     const paymentMethodsTotal = paymentMethods.reduce((sum, m) => sum + m.amount, 0);
 
     // Dépenses (décaissements) : toutes les transactions liées à une dépense
@@ -140,10 +145,14 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
       .filter((e: any) => e.transaction?.cash_register_session_id === session?.id)
       .reduce((sum: number, e: any) => sum + Math.abs(safeParseAmount(e.amount)), 0);
 
-    // Méthode principale
-    const mainPaymentMethod = methodPayment.find((m) => m.isPrincipal === 1);
+    // Méthode principale : additionner tous les montants de la méthode principale (par id)
+    const mainPaymentMethod = methodPayment.find((m) => {
+      return typeof m.isPrincipal === "number" ? m.isPrincipal === 1 : Number(m.isPrincipal) === 1;
+    });
     const mainMethodAmount = mainPaymentMethod
-      ? paymentMethods.find((m) => m.id === mainPaymentMethod.id)?.amount || 0
+      ? paymentMethods
+          .filter((m) => m.id === mainPaymentMethod.id)
+          .reduce((sum, m) => sum + m.amount, 0)
       : 0;
 
     // Montant d'ouverture
@@ -276,6 +285,7 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
   }
 
   // Format date
+  
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), "dd MMMM yyyy 'à' HH'h'mm", { locale: fr })
@@ -370,6 +380,7 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
       setSessionTransactions([]);
       return;
     }
+    // Filtrer toutes les transactions liées à cette session de caisse
     const filtered = transactions.filter(
       (t: any) => t.cash_register_session_id === session.id
     );
@@ -463,7 +474,7 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-7xl">
+    <div className="container mx-auto py-4 px-2 max-w-7xl">
       <AnimatePresence>
         {showSuccess && (
           <motion.div
@@ -476,14 +487,14 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              className="bg-white dark:bg-gray-900 p-8 rounded-lg max-w-md text-center shadow-xl"
+              className="bg-white dark:bg-gray-900 p-6 rounded-lg max-w-xs sm:max-w-md w-full text-center shadow-xl"
             >
               <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4 animate-pulse" />
-              <h3 className="text-2xl font-bold mb-2">Session fermée</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <h3 className="text-xl sm:text-2xl font-bold mb-2">Session fermée</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 text-sm sm:text-base">
                 La session #{session.id} a été fermée avec succès.
               </p>
-              <div className="text-lg font-semibold bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
+              <div className="text-base sm:text-lg font-semibold bg-green-50 dark:bg-green-900/20 p-3 rounded-md">
                 Montant final: {formatAmount(form.getValues("closing_amount"))} {currency}
               </div>
             </motion.div>
@@ -496,77 +507,85 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <Card className="max-w-5xl mx-auto"> {/* élargir la card */}
-          <CardHeader className="border-b">
-            <div className="flex items-center justify-between">
+        <Card className="w-full max-w-5xl mx-auto overflow-x-auto shadow-lg rounded-xl border bg-background">
+          <CardHeader className="border-b px-4 py-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <div>
-                <CardTitle className="text-2xl flex items-center gap-2">
+                <CardTitle className="text-lg sm:text-2xl flex items-center gap-2">
                   <FileText className="h-6 w-6 text-primary" />
                   Fermer la session de caisse
                 </CardTitle>
-                <CardDescription>Remplissez les informations pour fermer la session</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
+                  Remplissez les informations pour fermer la session
+                </CardDescription>
               </div>
-              <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
+              <Badge variant="outline" className="px-3 py-1 text-xs sm:text-sm font-medium">
                 #{session.id}
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-6">
+          <CardContent className="pt-4 px-2 sm:px-6">
+            <div className="space-y-4 sm:space-y-6">
+              {/* Message explicatif sur le calcul */}
+              <Alert color="info" className="mb-2 sm:mb-4">
+                <AlertTitle>Information sur le calcul</AlertTitle>
+                <AlertDescription>
+                  Le total des encaissements additionne tous les montants reçus, quelle que soit la méthode de paiement.<br />
+                  Le montant de la méthode principale additionne uniquement les montants des paiements effectués via la méthode principale définie dans les paramètres.
+                </AlertDescription>
+              </Alert>
+
               {/* Session information */}
-              <div className="p-5 rounded-lg bg-gray-50 dark:bg-gray-800 border">
-                <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <div className="p-3 sm:p-5 rounded-lg bg-gray-50 dark:bg-gray-800 border">
+                <h3 className="font-semibold text-base sm:text-lg mb-3 sm:mb-4 flex items-center gap-2">
                   <Calculator className="h-5 w-5" />
                   <span>Résumé de la session</span>
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
                         <Wallet className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Caisse</p>
-                        <p className="font-medium">N° {session.cash_register?.cash_register_number}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Caisse</p>
+                        <p className="font-medium text-sm sm:text-base">N° {session.cash_register?.cash_register_number}</p>
                       </div>
                     </div>
-
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
                         <UserIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Ouverte par</p>
-                        <p className="font-medium">{sessionUser?.name || "Utilisateur inconnu"}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Ouverte par</p>
+                        <p className="font-medium text-sm sm:text-base">{sessionUser?.name || "Utilisateur inconnu"}</p>
                         {sessionUser?.email && (
-                          <p className="text-sm text-muted-foreground">{sessionUser.email}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">{sessionUser.email}</p>
                         )}
                       </div>
                     </div>
                   </div>
-
                   <div className="space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-full bg-orange-100 dark:bg-orange-900/30">
                         <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Date d'ouverture</p>
-                        <p className="font-medium">{formatDate(session.opening_date)}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Date d'ouverture</p>
+                        <p className="font-medium text-sm sm:text-base">{formatDate(session.opening_date)}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           Durée: {calculateDuration(session.opening_date)}
                         </p>
                       </div>
                     </div>
-
                     <div className="flex items-start gap-3">
                       <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/30">
                         <FileText className="h-4 w-4 text-green-600 dark:text-green-400" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Transactions</p>
-                        <p className="font-medium">{sessionTransactions.length} opérations</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Transactions</p>
+                        <p className="font-medium text-sm sm:text-base">{sessionTransactions.length} opérations</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">
                           Total: {formatAmount(transactionsTotal)} {currency}
                         </p>
                       </div>
@@ -574,45 +593,45 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
                   </div>
                 </div>
 
-                <Separator className="my-4" />
+                <Separator className="my-3 sm:my-4" />
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="p-3 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900 flex flex-col">
-                    <div className="text-l text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+                  <div className="p-2 sm:p-3 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-900 flex flex-col">
+                    <div className="text-xs sm:text-base text-blue-600 dark:text-blue-400 flex items-center gap-2">
                       <Wallet className="h-3 w-3" />
                       Ouverture
                     </div>
-                    <div className="font-bold text-sm mt-1">
+                    <div className="font-bold text-xs sm:text-sm mt-1">
                       {formatAmount(session.opening_amount)} {currency}
                     </div>
                   </div>
-                  <div className="p-3 rounded-md bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-900 flex flex-col">
-                    <div className="text-l text-green-600 dark:text-green-400 flex items-center gap-2">
+                  <div className="p-2 sm:p-3 rounded-md bg-green-50 dark:bg-green-900/30 border border-green-100 dark:border-green-900 flex flex-col">
+                    <div className="text-xs sm:text-base text-green-600 dark:text-green-400 flex items-center gap-2">
                       <Banknote className="h-3 w-3" />
                       {methodPayment.find((m) => m.isPrincipal === 1)?.name || "Méthode principale"}
                     </div>
-                    <div className="font-bold text-sm mt-1">
+                    <div className="font-bold text-xs sm:text-sm mt-1">
                       +{formatAmount(mainMethodAmount)} {currency}
                     </div>
                   </div>
-                  <div className="p-3 rounded-md bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-900 flex flex-col">
+                  <div className="p-2 sm:p-3 rounded-md bg-purple-50 dark:bg-purple-900/30 border border-purple-100 dark:border-purple-900 flex flex-col">
                     <div className="text-xs text-purple-600 dark:text-purple-400 flex items-center gap-2">
                       <CreditCard className="h-3 w-3" />
                       Décaissement
                     </div>
-                    <div className="font-bold text-l mt-1">
+                    <div className="font-bold text-xs sm:text-sm mt-1">
                       -{formatAmount(totalExpenses)} {currency}
                     </div>
                   </div>
-                  <div className="p-3 rounded-md bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-900 flex flex-col">
-                    <div className="text-l text-amber-600 dark:text-amber-400 flex items-center gap-2">
+                  <div className="p-2 sm:p-3 rounded-md bg-amber-50 dark:bg-amber-900/30 border border-amber-100 dark:border-amber-900 flex flex-col">
+                    <div className="text-xs sm:text-base text-amber-600 dark:text-amber-400 flex items-center gap-2">
                       <Calculator className="h-3 w-3" />
                       Total attendu
                     </div>
                     <div className="text-xs mb-1">
                       (Ouverture + {methodPayment.find((m) => m.isPrincipal === 1)?.name || "méthode principale"} - Dépenses)
                     </div>
-                    <div className="font-bold text-sm mt-1">
+                    <div className="font-bold text-xs sm:text-sm mt-1">
                       {formatAmount(expectedAmount)} {currency}
                     </div>
                   </div>
@@ -621,28 +640,28 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
                 {/* Payment methods summary */}
                 {paymentMethodsSummary.length > 0 && (
                   <>
-                    <Separator className="my-4" />
+                    <Separator className="my-3 sm:my-4" />
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Détail des méthodes de paiement</h4>
+                      <h4 className="text-xs sm:text-sm font-medium mb-2">Détail des méthodes de paiement</h4>
                       <div className="space-y-2">
                         {paymentMethodsSummary.map(method => (
                           <div key={method.id} className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm">{method.name}</span>
+                              <span className="text-xs sm:text-sm">{method.name}</span>
                               {method.id === methodPayment.find((m) => m.isPrincipal === 1)?.id && (
                                 <Badge variant="outline" className="text-xs py-0 px-2">
                                   Principale
                                 </Badge>
                               )}
                             </div>
-                            <span className="font-medium">
+                            <span className="font-medium text-xs sm:text-sm">
                               +{formatAmount(method.amount)} {currency}
                             </span>
                           </div>
                         ))}
                         <div className="flex justify-between items-center pt-2 border-t">
-                          <span className="text-sm font-medium">Total encaissements</span>
-                          <span className="font-bold">
+                          <span className="text-xs sm:text-sm font-medium">Total encaissements</span>
+                          <span className="font-bold text-xs sm:text-sm">
                             +{formatAmount(paymentMethodsTotal)} {currency}
                           </span>
                         </div>
@@ -655,14 +674,14 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
               <Separator />
 
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                   {/* Closing Amount */}
                   <FormField
                     control={form.control}
                     name="closing_amount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="flex items-center gap-2">
+                        <FormLabel className="flex items-center gap-2 text-sm sm:text-base">
                           <Banknote className="h-4 w-4" />
                           <span>Montant de fermeture</span>
                         </FormLabel>
@@ -699,7 +718,7 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
                     </Alert>
                   )}
 
-                  <div className="pt-4">
+                  <div className="pt-2 sm:pt-4">
                     <Alert color="warning">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Confirmation requise</AlertTitle>
@@ -710,13 +729,13 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
                     </Alert>
                   </div>
 
-                  <div className="flex justify-between pt-2">
+                  <div className="flex flex-col sm:flex-row justify-between gap-2 pt-2">
                     <Button
                       color="destructive"
                       type="button"
                       variant="outline"
                       onClick={() => router.back()}
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
                     >
                       <ArrowLeft className="h-4 w-4" />
                       Annuler
@@ -725,7 +744,7 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
                       color="indigodye"
                       type="submit"
                       disabled={isSubmitting}
-                      className="gap-2"
+                      className="gap-2 w-full sm:w-auto"
                     >
                       {isSubmitting ? (
                         <>

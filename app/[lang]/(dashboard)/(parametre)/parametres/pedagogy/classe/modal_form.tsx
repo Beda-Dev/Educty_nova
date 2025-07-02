@@ -45,6 +45,11 @@ const DialogForm = () => {
       toast.error("Le libellé est requis.");
       return false;
     }
+    // Vérification unicité du label
+    if (classes.some((c) => c.label.trim().toLowerCase() === label.trim().toLowerCase())) {
+      toast.error("Une classe avec ce libellé existe déjà.");
+      return false;
+    }
     if (selectedLevelId === null) {
       toast.error("Veuillez sélectionner un niveau.");
       return false;
@@ -102,6 +107,24 @@ const DialogForm = () => {
       toast.error(`Une erreur est survenue. ${(error as Error).message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSerieChange = (value: string) => {
+    if (!label.trim()) {
+      toast.error("Veuillez d'abord remplir le libellé de la classe.");
+      setHasSerie(false);
+      setSelectedSerieId(null);
+      return;
+    }
+    const serie = series.find((s) => String(s.id) === value);
+    setSelectedSerieId(serie ? serie.id : null);
+    if (serie) {
+      // Ajoute le label de la série à la classe (après un espace, sans doublon)
+      setLabel((prev) => {
+        const base = prev.split(" ")[0];
+        return `${base} ${serie.label}`;
+      });
     }
   };
 
@@ -163,9 +186,7 @@ const DialogForm = () => {
                 {hasSerie && (
                   <Select
                     value={selectedSerieId ? String(selectedSerieId) : ""}
-                    onValueChange={(value) =>
-                      setSelectedSerieId(value ? Number(value) : null)
-                    }
+                    onValueChange={handleSerieChange}
                   >
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="Sélectionner une série" />

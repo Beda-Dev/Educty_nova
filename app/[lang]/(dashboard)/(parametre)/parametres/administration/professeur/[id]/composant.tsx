@@ -127,6 +127,26 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
       } else if (startTime >= endTime) {
         newErrors.end_time = "L'heure de fin doit être après l'heure de début";
       }
+
+      // Interdiction créneau pendant la récréation (10h15-10h30)
+      const recreationStart = new Date(`2000-01-01T10:15`);
+      const recreationEnd = new Date(`2000-01-01T10:30`);
+      if (
+        (startTime < recreationEnd && endTime > recreationStart)
+      ) {
+        newErrors.start_time = "Impossible de placer un créneau pendant la récréation (10h15-10h30)";
+        newErrors.end_time = "Impossible de placer un créneau pendant la récréation (10h15-10h30)";
+      }
+
+      // Interdiction créneau pendant la pause (12h05-13h00)
+      const pauseStart = new Date(`2000-01-01T12:05`);
+      const pauseEnd = new Date(`2000-01-01T13:00`);
+      if (
+        (startTime < pauseEnd && endTime > pauseStart)
+      ) {
+        newErrors.start_time = "Impossible de placer un créneau pendant la pause (12h05-13h00)";
+        newErrors.end_time = "Impossible de placer un créneau pendant la pause (12h05-13h00)";
+      }
     }
 
     // Validation des dates
@@ -1246,7 +1266,7 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                   </div>
                   <div className="text-gray-700 mt-1">
                     <span className="mr-4">Créé le : <b>{professor.created_at ? format(parseISO(professor.created_at), 'dd/MM/yyyy', { locale: fr }) : "-"}</b></span>
-                    <span>Modifié le : <b>{professor.updated_at ? format(parseISO(professor.updated_at), 'dd/MM/yyyy', { locale: fr }) : "-"}</b></span>
+                    <span className="mr-4">Modifié le : <b>{professor.updated_at ? format(parseISO(professor.updated_at), 'dd/MM/yyyy', { locale: fr }) : "-"}</b></span>
                   </div>
                 </div>
               </div>

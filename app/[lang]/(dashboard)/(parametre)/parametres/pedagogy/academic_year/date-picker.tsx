@@ -3,12 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Loader2, PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle, CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -22,6 +22,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useSchoolStore } from "@/store";
@@ -283,99 +284,69 @@ const DatePickerForm = ({ onSuccess }: DatePickerFormProps) => {
           <>
             <ScrollArea className="max-h-[350px] w-full">
               <div className="space-y-4 pt-4">
-                {filteredPeriods.map((period, idx) => (
+                {filteredPeriods.map((period: Period, idx: number) => (
                   <div
                     key={period.id}
                     className="border rounded-md p-4 space-y-2 shadow-sm"
                   >
                     <p className="font-medium">{period.label}</p>
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 flex-wrap">
                       {/* Date de début */}
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-[160px] justify-start text-left"
-                          >
-                            {periodDates[period.id]?.start_date
-                              ? format(periodDates[period.id].start_date!, "PP", {
-                                  locale: fr,
-                                })
-                              : "Début"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto p-0 z-[9999]"
-                          side="top"
-                          align="start"
-                          sideOffset={4}
-                        >
-                          <Calendar
-                            mode="single"
-                            selected={periodDates[period.id]?.start_date}
-                            onSelect={(date) =>
-                              setPeriodDates((prev) => ({
-                                ...prev,
-                                [period.id]: {
-                                  ...prev[period.id],
-                                  start_date: date!,
-                                },
-                              }))
-                            }
-                            // Restreindre la première période à >= startDate
-                            disabled={
-                              idx === 0 && startDate
-                                ? (date) => date < startDate
-                                : undefined
-                            }
-                          />
-                        </PopoverContent>
-                      </Popover>
-
+                      <div className="flex flex-col">
+                        <label className="text-xs mb-1">Début</label>
+                        <Input
+                          type="date"
+                          value={
+                            periodDates[period.id]?.start_date
+                              ? format(periodDates[period.id].start_date!, "yyyy-MM-dd")
+                              : ""
+                          }
+                          min={idx === 0 && startDate ? format(startDate, "yyyy-MM-dd") : undefined}
+                          max={
+                            periodDates[period.id]?.end_date
+                              ? format(periodDates[period.id].end_date!, "yyyy-MM-dd")
+                              : undefined
+                          }
+                          onChange={(e) => {
+                            const val = e.target.value ? new Date(e.target.value) : undefined;
+                            setPeriodDates((prev) => ({
+                              ...prev,
+                              [period.id]: {
+                                ...prev[period.id],
+                                start_date: val,
+                              },
+                            }));
+                          }}
+                        />
+                      </div>
                       {/* Date de fin */}
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className="w-[160px] justify-start text-left"
-                          >
-                            {periodDates[period.id]?.end_date
-                              ? format(periodDates[period.id].end_date!, "PP", {
-                                  locale: fr,
-                                })
-                              : "Fin"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto p-0 z-[9999]"
-                          side="top"
-                          align="start"
-                          sideOffset={4}
-                          avoidCollisions={false}
-                        >
-                          <Calendar
-                            mode="single"
-                            selected={periodDates[period.id]?.end_date}
-                            onSelect={(date) =>
-                              setPeriodDates((prev) => ({
-                                ...prev,
-                                [period.id]: {
-                                  ...prev[period.id],
-                                  end_date: date!,
-                                },
-                              }))
-                            }
-                            // Restreindre la dernière période à <= endDate
-                            disabled={
-                              idx === filteredPeriods.length - 1 && endDate
-                                ? (date) => date > endDate
-                                : undefined
-                            }
-                          />
-                        </PopoverContent>
-                      </Popover>
+                      <div className="flex flex-col">
+                        <label className="text-xs mb-1">Fin</label>
+                        <Input
+                          type="date"
+                          value={
+                            periodDates[period.id]?.end_date
+                              ? format(periodDates[period.id].end_date!, "yyyy-MM-dd")
+                              : ""
+                          }
+                          min={
+                            periodDates[period.id]?.start_date
+                              ? format(periodDates[period.id].start_date!, "yyyy-MM-dd")
+                              : undefined
+                          }
+                          max={idx === filteredPeriods.length - 1 && endDate ? format(endDate, "yyyy-MM-dd") : undefined}
+                          onChange={(e) => {
+                            const val = e.target.value ? new Date(e.target.value) : undefined;
+                            setPeriodDates((prev) => ({
+                              ...prev,
+                              [period.id]: {
+                                ...prev[period.id],
+                                end_date: val,
+                              },
+                            }));
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}

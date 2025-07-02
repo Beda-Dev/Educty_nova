@@ -39,7 +39,9 @@ import {
   TypePeriod,
   Professor,
   Serie,
-  Timetable
+  Timetable,
+  Note,
+  Coefficient
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -256,6 +258,10 @@ interface SchoolStore {
   timetables: Timetable[];
   setTimetables: (data: Timetable[]) => void;
 
+    // Ajout Notes
+  notes: Note[];
+  setNotes: (data: Note[]) => void;
+
   // Registration store data
   currentStep: number;
   setCurrentStep: (step: number) => void;
@@ -285,6 +291,12 @@ interface SchoolStore {
   setDocumentsForm: (documents: DocumentFormData[]) => void;
   addDocumentForm: (document: DocumentFormData) => void;
   removeDocumentForm: (index: number) => void;
+
+
+
+  // Ajout Coefficient
+  coefficients: Coefficient[];
+  setCoefficients: (data: Coefficient[]) => void;
 
   resetRegistration: () => void;
 }
@@ -451,6 +463,14 @@ export const useSchoolStore = create<SchoolStore>()(
         set((state) => ({
           documentsForm: state.documentsForm.filter((_, i) => i !== index),
         })),
+
+      // Ajout Notes
+      notes: [],
+      setNotes: (data: Note[]) => set({ notes: data }),
+
+      // Ajout Coefficient
+      coefficients: [],
+      setCoefficients: (data: Coefficient[]) => set({ coefficients: data }),
 
       resetRegistration: () =>
         set({

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Matter } from "@/lib/interface";
 import { Icon } from "@iconify/react";
 import EditMatterModal from "./modal-mod";
-import { fetchMatters } from "@/store/schoolservice";
+import { fetchMatters, fetchCoefficient } from "@/store/schoolservice";
 import { useSchoolStore } from "@/store";
 import { useRouter } from "next/navigation";
 import { verificationPermission } from "@/lib/fonction";
@@ -54,7 +54,7 @@ function MatterTable() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const { setMatters, userOnline, matters } = useSchoolStore();
+  const { setMatters, userOnline, matters, setCoefficients } = useSchoolStore();
   const [updata, setUpdata] = useState<Matter[]>(matters);
   const router = useRouter();
 
@@ -127,11 +127,17 @@ function MatterTable() {
   };
 
   const onUpdate = async () => {
-    const updatedMatters = await fetchMatters();
+    const [updatedMatters, updatedCoefficients] = await Promise.all([
+      fetchMatters(),
+      fetchCoefficient(),
+    ]);
     if (updatedMatters) {
       setMatters(updatedMatters);
       setUpdata(updatedMatters);
       router.refresh();
+    }
+    if (updatedCoefficients) {
+      setCoefficients(updatedCoefficients);
     }
   };
 

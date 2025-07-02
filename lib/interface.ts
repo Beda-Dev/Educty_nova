@@ -345,6 +345,7 @@ export interface Payment {
     name: string;
     created_at: string;
     updated_at: string;
+    isPrincipal: 0 | 1;
     pivot: {
         payment_id: number;
         payment_method_id: number;
@@ -584,6 +585,39 @@ export interface Timetable {
   class: ClassWithoutData;
   period: Period;
   matter: Matter;
+}
+
+type RegistrationSimple = Omit<Registration, 'classe' | 'academic_year' | 'student'>
+export interface Note {
+  id: number;
+  period_id: number;
+  matter_id: number;
+  registration_id: number;
+  type_note_id: number;
+  value: number;
+  maximum_note: string;
+  created_at: string;
+  updated_at: string;
+  period: Period;
+  registration: RegistrationSimple;
+  matter: Matter;
+  type_note: TypeEvaluation;
+}
+
+// interface liée aux coefficients
+
+type LevelWithoutData = Omit<Level, 'class_count'>;
+export interface Coefficient {
+  id: number;
+  matter_id: number;
+  period_id: number;
+  serie_id: number | null;
+  label: number;
+  created_at: string;
+  updated_at: string;
+  matter: Matter; 
+  level: LevelWithoutData; // Ajout de l'interface Level pour le niveau
+  serie?: Serie; // Optionnel, car la série peut être null
 }
 
 
