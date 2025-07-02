@@ -600,6 +600,34 @@ export default function PaymentManagementPage() {
     }
   }
 
+  // Ajout : calcul du résumé des méthodes de paiement pour le reçu
+const paymentMethodsSummary = useMemo(() => {
+  if (!createdPayments.length || !methodPayment.length) return []
+  const summary: { id: number; name: string; amount: number }[] = []
+  createdPayments.forEach((payment) => {
+    if (Array.isArray(payment.payment_methods) && payment.payment_methods.length > 0) {
+      payment.payment_methods.forEach((m: any) => {
+        const methodId = Number(m.id)
+        const amount = Number(m.pivot?.montant) || 0
+        const existing = summary.find((s) => s.id === methodId)
+        if (existing) {
+          existing.amount += amount
+        } else {
+          const methodObj = methodPayment.find((mp) => mp.id === methodId)
+          summary.push({
+            id: methodId,
+            name: methodObj?.name || `Méthode #${methodId}`,
+            amount,
+          })
+        }
+      })
+    }
+  })
+  return summary
+}, [createdPayments, methodPayment])
+
+  const paymentMethodsTotal = paymentMethodsSummary.reduce((sum, m) => sum + m.amount, 0)
+
   return (
     <Card>
       <CardHeader>
@@ -1265,6 +1293,38 @@ export default function PaymentManagementPage() {
                     methodPayment={methodPayment}
                     currency={currency}
                   />
+                  {/* Résumé des méthodes de paiement */}
+                  {paymentMethodsSummary.length > 0 && (
+                    <>
+                      <Separator className="my-3 sm:my-4" />
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-medium mb-2">Détail des méthodes de paiement</h4>
+                        <div className="space-y-2">
+                          {paymentMethodsSummary.map((method) => (
+                            <div key={method.id} className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs sm:text-sm">{method.name}</span>
+                                {method.id === methodPayment.find((m) => Number(m.isPrincipal) === 1)?.id && (
+                                  <Badge variant="outline" className="text-xs py-0 px-2">
+                                    Principale
+                                  </Badge>
+                                )}
+                              </div>
+                              <span className="font-medium text-xs sm:text-sm">
+                                +{formatAmount(method.amount)} {currency}
+                              </span>
+                            </div>
+                          ))}
+                          <div className="flex justify-between items-center pt-2 border-t">
+                            <span className="text-xs sm:text-sm font-medium">Total encaissements</span>
+                            <span className="font-bold text-xs sm:text-sm">
+                              +{formatAmount(paymentMethodsTotal)} {currency}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

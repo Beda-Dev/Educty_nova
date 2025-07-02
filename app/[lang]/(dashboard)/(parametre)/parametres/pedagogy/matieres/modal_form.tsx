@@ -282,7 +282,7 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
           Ajouter une matière
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto md:max-w-[600px]">
+      <DialogContent size="5xl" className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto md:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
             Ajouter une nouvelle matière

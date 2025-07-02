@@ -182,14 +182,14 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
 
   return (
     <Dialog open={onOpen} onOpenChange={onClose}>
-      <DialogContent size="xl">
+      <DialogContent size="5xl">
         <DialogHeader>
           <DialogTitle className="text-base font-medium text-default-700">
             Modifier la matière
           </DialogTitle>
         </DialogHeader>
         <div>
-          <ScrollArea className="h-[290px]">
+          <ScrollArea className="max-h-[70vh]">
             <div className="sm:grid sm:grid-cols-2 sm:gap-5 space-y-4 sm:space-y-0">
               <div className="flex flex-col gap-2">
                 <Label>Nom de la matière</Label>
@@ -212,11 +212,15 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
               </div>
             </div>
             {/* Tableau des coefficients (modification) */}
-            {levels.length > 0 && (
+            {loadingCoeffs ? (
+              <div className="text-center py-8 text-gray-500">Chargement des niveaux et coefficients...</div>
+            ) : levels.length === 0 ? (
+              <div className="text-center py-8 text-red-500">Aucun niveau disponible.</div>
+            ) : (
               <div className="mt-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Label className="font-semibold">Modifier les coefficients</Label>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">(Enreg. auto)</span>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">(Enreg. lors de la mise à jour)</span>
                 </div>
                 <div className="overflow-x-auto rounded-lg border bg-background shadow-sm">
                   <Table className="min-w-[400px]">
