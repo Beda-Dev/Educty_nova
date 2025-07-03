@@ -46,7 +46,7 @@ export const EditStudentModal = ({
   onOpenChangeAction,
   selectedStudent,
 }: EditStudentModalProps) => {
-  const { setRegistration, setStudents } = useSchoolStore();
+  const { setRegistration, setStudents, registrations } = useSchoolStore();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formdata, setFormData] = useState<FormData>({
@@ -58,12 +58,16 @@ export const EditStudentModal = ({
     sexe: "",
     status: "",
   });
+  const [matriculeError, setMatriculeError] = useState<string | null>(null);
 
   const resetForm = useCallback(() => {
     if (selectedStudent) {
       setFormData({
-        assignment_type_id: String(selectedStudent?.student?.assignment_type_id || ""),
-        registration_number: selectedStudent?.student?.registration_number || "",
+        assignment_type_id: String(
+          selectedStudent?.student?.assignment_type_id || ""
+        ),
+        registration_number:
+          selectedStudent?.student?.registration_number || "",
         name: selectedStudent?.student?.name || "",
         first_name: selectedStudent?.student?.first_name || "",
         birth_date: selectedStudent?.student?.birth_date || "",
@@ -91,20 +95,54 @@ export const EditStudentModal = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  // Vérification du matricule unique pour l'année académique courante
+  useEffect(() => {
+    if (
+      formdata.registration_number &&
+      selectedStudent &&
+      registrations &&
+      selectedStudent.academic_year_id
+    ) {
+      const duplicate = registrations.find(
+        (reg) =>
+          reg.student?.registration_number === formdata.registration_number &&
+          reg.academic_year_id === selectedStudent.academic_year_id &&
+          reg.student?.id !== selectedStudent.student?.id
+      );
+      if (duplicate) {
+        setMatriculeError(
+          "Ce matricule est déjà utilisé pour un autre élève dans la même année académique."
+        );
+      } else {
+        setMatriculeError(null);
+      }
+    } else {
+      setMatriculeError(null);
+    }
+  }, [
+    formdata.registration_number,
+    selectedStudent,
+    registrations,
+  ]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedStudent) return;
-    
+    if (matriculeError) {
+      toast.error(matriculeError);
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch(
         `/api/students?id=${selectedStudent.student?.id || ""}`,
@@ -137,9 +175,7 @@ export const EditStudentModal = ({
     } catch (error) {
       console.error("Erreur lors de la mise à jour :", error);
       toast.error(
-        error instanceof Error 
-          ? error.message 
-          : "Échec de la mise à jour !"
+        error instanceof Error ? error.message : "Échec de la mise à jour !"
       );
     } finally {
       setIsSubmitting(false);
@@ -151,10 +187,11 @@ export const EditStudentModal = ({
       <DialogContent className="max-w-2xl p-6">
         <DialogHeader>
           <DialogTitle>
-            Modifier les informations de {selectedStudent?.student?.name} {selectedStudent?.student?.first_name}
+            Modifier les informations de {selectedStudent?.student?.name}{" "}
+            {selectedStudent?.student?.first_name}
           </DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-4 py-4">
             <div className="space-y-2">
@@ -165,9 +202,13 @@ export const EditStudentModal = ({
                 placeholder="Matricule"
                 value={formdata.registration_number}
                 onChange={handleChange}
+                required
               />
+              {matriculeError && (
+                <div className="text-red-600 text-xs mt-1">{matriculeError}</div>
+              )}
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="name">Nom</Label>
               <Input
@@ -179,7 +220,7 @@ export const EditStudentModal = ({
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="first_name">Prénom</Label>
               <Input
@@ -191,7 +232,7 @@ export const EditStudentModal = ({
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="birth_date">Date de naissance</Label>
               <Input
@@ -203,7 +244,7 @@ export const EditStudentModal = ({
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>Sexe</Label>
               <Select
@@ -214,36 +255,34 @@ export const EditStudentModal = ({
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner le sexe" />
                 </SelectTrigger>
-                <SelectContent className="z-[9999]" >
+                <SelectContent className="z-[9999]">
                   <SelectItem value="Masculin">Masculin</SelectItem>
                   <SelectItem value="Feminin">Feminin</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            
-          
-            
           </div>
-          
+
           <DialogFooter>
-          <div className="flex justify-around" >
-              
-            <Button 
-              type="button" 
-              color="destructive" 
-              onClick={() => onOpenChangeAction(false)}
-              disabled={isSubmitting}
-            >
-              Annuler
-            </Button>
-            <Button type="submit" color="tyrian" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Enregistrement...
-                </>
-              ) : "Enregistrer"}
-            </Button>
+            <div className="flex flex-row gap-4 justify-center w-full">
+              <Button
+                type="button"
+                color="destructive"
+                onClick={() => onOpenChangeAction(false)}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+              <Button type="submit" color="tyrian" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enregistrement...
+                  </>
+                ) : (
+                  "Enregistrer"
+                )}
+              </Button>
             </div>
           </DialogFooter>
         </form>

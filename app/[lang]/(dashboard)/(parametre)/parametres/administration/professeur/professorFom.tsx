@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { act, useState } from "react";
 import { useSchoolStore } from "@/store";
 import { Professor } from "@/lib/interface";
 import { fetchProfessor , fetchUsers } from "@/store/schoolservice";
@@ -36,14 +36,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {sendAccountInfo} from "@/lib/fonction"
 
+// --- Ajout des champs au schéma ---
 const professorSchema = z.object({
   name: z.string().min(1, "Le nom est requis"),
   first_name: z.string().min(1, "Le prénom est requis"),
   number: z.string().min(1, "Le numéro est requis"),
   type: z.enum(["permanent", "vacataire"]),
   email: z.string().email("Email invalide"),
+  sexe: z.enum(["masculin", "feminin"], { required_error: "Le sexe est requis" }),
+  cni: z.string().optional().nullable(),
+  matricule: z.string().optional().nullable(),
+  access: z.boolean().optional(), // Pour le checkbox accès utilisateur
 });
 
 type ProfessorFormType = z.infer<typeof professorSchema>;
@@ -67,6 +73,10 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
       number: "",
       type: "permanent",
       email: "",
+      sexe: "masculin",
+      cni: "",
+      matricule: "",
+      access: true,
     },
   });
 
@@ -75,11 +85,13 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
     return users.some((u) => u.email?.toLowerCase() === email.toLowerCase());
   };
 
+  // --- Ajout de la gestion de l'activation utilisateur ---
   const createUser = async (data: ProfessorFormType) => {
     const userData = {
       name: `${data.first_name} ${data.name}`,
       email: data.email,
       password: process.env.NEXT_PUBLIC_DEFAULT_PASSWORD,
+      active: data.access ? 1 : 0, // Utilisateur actif ou non selon le checkbox
     };
 
     const response = await fetch("/api/user", {
@@ -96,6 +108,7 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
     return newUser.id;
   };
 
+  // --- Ajout des champs dans professorData ---
   const createProfessor = async (data: ProfessorFormType, userId: number) => {
     const professorData = {
       name: data.name,
@@ -103,6 +116,9 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
       number: data.number,
       type: data.type,
       user_id: userId,
+      cni: data.cni || null,
+      sexe: data.sexe,
+      matricule: data.matricule || null,
     };
 
     const response = await fetch("/api/professors", {
@@ -136,7 +152,10 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
 
       toast.success("Enseignant créé avec succès");
       onSuccess();
-      sendAccountInfo(data.name, data.email);
+      // --- Envoi de l'email uniquement si accès utilisateur activé ---
+      if (data.access) {
+        sendAccountInfo(data.name, data.email);
+      }
       // Réinitialiser le formulaire et fermer le modal
       form.reset();
       onClose();
@@ -153,7 +172,7 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
     <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
         className="max-w-2xl w-full z-[9999] rounded-2xl shadow-2xl border-0 bg-gradient-to-br from-white via-blue-50 to-blue-100 animate-fade-in"
-        style={{ minWidth: 480 }}
+        style={{ minWidth: 320, maxWidth: 480, width: "95%" }}
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
@@ -161,7 +180,11 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
           </DialogTitle>
           <DialogDescription className="text-base text-gray-700 mt-2">
             Merci de renseigner les informations du professeur. <br />
-            <span className="text-blue-700 font-medium">Un compte utilisateur sera automatiquement créé et les accès envoyés par email.</span>
+            {form.watch("access") && (
+              <span className="text-blue-700 font-medium">
+                Un compte utilisateur sera automatiquement créé et les accès envoyés par email.
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -249,6 +272,72 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
                 )}
               />
             </div>
+            {/* Ligne responsive pour sexe, cni, matricule */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="sexe"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Sexe *</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={loading}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                          <SelectValue placeholder="Sexe" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="z-[9999]">
+                        <SelectItem value="masculin">Masculin</SelectItem>
+                        <SelectItem value="feminin">Féminin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cni"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Numéro CNI</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Numéro CNI (facultatif)"
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="matricule"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Matricule</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Matricule"
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="email"
@@ -279,14 +368,34 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
                 </FormItem>
               )}
             />
-            <DialogFooter className="flex space-x-3 pt-6">
+            {/* Checkbox accès utilisateur */}
+            <FormField
+              control={form.control}
+              name="access"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loading}
+                      id="access-checkbox"
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="access-checkbox" className="font-semibold text-blue-900 cursor-pointer">
+                    Accès utilisateur (permet la connexion à la plateforme)
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+            <DialogFooter className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-3 pt-6">
               <DialogClose asChild>
                 <Button
                   type="button"
                   color="destructive"
                   onClick={onClose}
                   disabled={loading}
-                  className="flex-1 rounded-lg border-0  font-semibold transition-all"
+                  className="flex-1 rounded-lg border-0 font-semibold transition-all"
                 >
                   Annuler
                 </Button>

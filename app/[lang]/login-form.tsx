@@ -22,7 +22,9 @@ const schema = z.object({
   email: z
     .string()
     .email({ message: "Votre adresse e-mail n’est pas valide." }),
-  password: z.string().min(4),
+  password: z
+    .string()
+    .min(8, { message: "Le mot de passe doit comporter au moins 8 caractères." }),
 });
 
 function findUserByEmail(email: string, users: User[]): User | null {
@@ -83,15 +85,29 @@ const LogInForm = () => {
         const result = await response.json();
 
         if (!response.ok) {
-          setApiError(result?.message || "Identifiants invalides.");
-          toast.error(
-            result?.message || "Identifiants invalides ou erreur serveur."
-          );
+          // Vérifie si l'email existe dans users
+          const userExists = users && users.find((u) => u.email === formData.email);
+          if (userExists) {
+            setApiError("Mot de passe incorrect.");
+            toast.error("Mot de passe incorrect.");
+          } else {
+            setApiError(result?.message || "Identifiants invalides.");
+            toast.error(result?.message || "Identifiants invalides ou erreur serveur.");
+          }
           console.warn("Échec de connexion :", result);
           return;
         }
 
         const userData = result.data;
+
+        // Vérifier si l'utilisateur est désactivé
+        if (userData && userData.active === 0) {
+          setApiError("Votre compte est désactivé. Veuillez contacter l'administrateur.");
+          toast.error("Votre compte est désactivé. Veuillez contacter l'administrateur.");
+          setIsLoading(false);
+          return;
+        }
+
         const userWithPermissions = mergeUserPermissions(
           userData,
           roles,
@@ -101,6 +117,20 @@ const LogInForm = () => {
         setUserOnline(userWithPermissions || userData);
 
         toast.success("Connexion réussie");
+
+        // Attendre que roles, permissions et users soient chargés avant la redirection
+        const waitForData = async () => {
+          let tries = 0;
+          while (
+            (!roles?.length || !permissions?.length || !users?.length) &&
+            tries < 30 // max ~3s
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            tries++;
+          }
+        };
+        await waitForData();
+
         router.push("/dashboard");
         reset();
       } catch (error) {
@@ -123,7 +153,11 @@ const LogInForm = () => {
 
   return (
     <div
-      className={`w-full ${isMobile ? "bg-white p-4 rounded-xl shadow-sm border mt-4" : "bg-whitesmoke"}`}
+      className={`w-full ${
+        isMobile
+          ? "bg-white p-4 rounded-xl shadow-sm border mt-4"
+          : "bg-whitesmoke"
+      }`}
       style={isMobile ? { maxWidth: 380, margin: "0 auto" } : {}}
     >
       {isMobile && (
@@ -167,8 +201,8 @@ const LogInForm = () => {
             className={cn("peer", {
               "border-destructive": errors.email,
             })}
-              aria-invalid={!!errors.email}
-  aria-describedby="email-error"
+            aria-invalid={!!errors.email}
+            aria-describedby="email-error"
           />
           <Label
             htmlFor="email"
@@ -182,11 +216,11 @@ const LogInForm = () => {
             Email
           </Label>
         </div>
-{errors.email && (
-  <p id="email-error" className="mt-2 text-sm text-destructive">
-    {errors.email.message}
-  </p>
-)}
+        {errors.email && (
+          <p id="email-error" className="mt-2 text-sm text-destructive">
+            {errors.email.message}
+          </p>
+        )}
 
         <div className="relative mt-6 bg-whitesmoke">
           <Input
@@ -200,7 +234,6 @@ const LogInForm = () => {
             className={cn("peer", {
               "border-destructive": errors.password,
             })}
-            
           />
           <Label
             htmlFor="password"
@@ -248,7 +281,7 @@ const LogInForm = () => {
           color="tyrian"
           type="submit"
           className="w-full transition-opacity duration-300"
-          disabled={isLoading || !isValid}
+          disabled={isLoading || isPending || !isValid}
         >
           {isLoading ? (
             <>

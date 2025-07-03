@@ -35,6 +35,8 @@ import { AcademicYear } from "@/lib/interface";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {Loader2} from "lucide-react"
+import { useSchoolStore } from "@/store";
+import { fetchAcademicYears } from "@/store/schoolservice";
 
 const FormSchema = z.object({
   label: z.string().min(1, "Le label est requis"),
@@ -64,6 +66,7 @@ const EditModal: React.FC<EditModalProps> = ({
   academicYear,
   onUpdate,
 }) => {
+  console.log("EditModal", academicYear);
   // Préparation des périodes pour le formulaire
   const initialPeriods =
     academicYear.periods?.map((p) => ({
@@ -86,6 +89,8 @@ const EditModal: React.FC<EditModalProps> = ({
       })),
     },
   });
+
+  const { setAcademicYears } = useSchoolStore();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [startDate, setStartDate] = useState<Date | undefined>(
@@ -118,8 +123,8 @@ const EditModal: React.FC<EditModalProps> = ({
     else if (
       periods.some(
         p =>
-          (p.start_date < format(new Date(academicYear.start_date), "yyyy-MM-dd")) ||
-          (p.end_date > format(new Date(academicYear.end_date), "yyyy-MM-dd"))
+          (p.start_date < format(new Date(startDate ?? academicYear.start_date), "yyyy-MM-dd")) ||
+          (p.end_date > format(new Date(endDate ?? academicYear.end_date), "yyyy-MM-dd"))
       )
     ) {
       error = "Les périodes doivent être comprises dans l'année académique.";
@@ -141,12 +146,23 @@ const EditModal: React.FC<EditModalProps> = ({
       }
     }
     setPeriodsError(error);
-  }, [periods, academicYear.start_date, academicYear.end_date]);
+  }, [periods, academicYear.start_date, academicYear.end_date, startDate, endDate]);
 
   async function onSubmit(data: FormSchemaType) {
     if (periodsError) return;
     setIsLoading(true);
     try {
+      // Utilise les valeurs du state local pour start_date et end_date
+      const start_date = startDate ? format(startDate, "yyyy-MM-dd") : data.start_date;
+      const end_date = endDate ? format(endDate, "yyyy-MM-dd") : data.end_date;
+
+      // Utilise les périodes modifiées du state local
+      const periodsPayload = periods.map((p) => ({
+        id: p.id,
+        start_date: p.start_date,
+        end_date: p.end_date,
+      }));
+
       const response = await fetch(`/api/academic_year?id=${academicYear.id}`, {
         method: "PUT",
         headers: {
@@ -154,14 +170,17 @@ const EditModal: React.FC<EditModalProps> = ({
         },
         body: JSON.stringify({
           label: data.label,
-          start_date: data.start_date,
-          end_date: data.end_date,
-          periods: data.periods,
+          start_date,
+          end_date,
+          periods: periodsPayload,
         }),
       });
 
       if (response.ok) {
         toast.success("Année académique mise à jour avec succès");
+        // Mise à jour du store et de la table
+        const updatedAcademicYears = await fetchAcademicYears();
+        setAcademicYears(updatedAcademicYears);
         onUpdate();
         onClose();
       } else {
@@ -202,12 +221,12 @@ const EditModal: React.FC<EditModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent size="5xl" className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto z-[9999]">
         <DialogHeader>
           <DialogTitle>Modifier l'année académique</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-md mx-auto">
             {/* ...existing label and date pickers... */}
             <FormField
               control={form.control}
@@ -321,30 +340,37 @@ const EditModal: React.FC<EditModalProps> = ({
             {/* Affichage et édition des périodes */}
             {periods.length > 0 && (
               <div className="space-y-2">
-                <div className="font-semibold mt-2 mb-1">Périodes de l'année</div>
-                <div className="grid gap-3 max-h-[350px] overflow-y-auto pr-2">
+                <div className="font-semibold mt-2 mb-1 text-center">Périodes de l'année</div>
+                <div className="grid gap-3 max-h-[350px] overflow-y-auto pr-2 justify-center">
                   {periods.map((period, idx) => (
-                    <div key={period.id} className="flex flex-col md:flex-row items-center gap-2 border p-2 rounded">
-                      <span className="w-32 font-medium">{period.label || `Période ${idx + 1}`}</span>
-                      <div className="flex flex-col md:flex-row gap-2 w-full">
-                        <div>
-                          <label className="text-xs">Début</label>
+                    <div
+                      key={period.id}
+                      className="flex flex-col border p-2 rounded items-center w-80 mx-auto"
+                    >
+                      <span className="w-full font-medium text-center mb-2">
+                        {period.label || `Période ${idx + 1}`}
+                      </span>
+                      <div className="flex flex-row gap-2 w-full justify-center">
+                        <div className="flex flex-col items-center w-full">
+                          <label className="text-xs text-center mb-1">Début</label>
                           <Input
                             type="date"
                             value={period.start_date || ""}
                             onChange={(e) =>
                               handlePeriodDateChange(idx, "start_date", e.target.value)
                             }
+                            className="text-center"
                           />
                         </div>
-                        <div>
-                          <label className="text-xs">Fin</label>
+                        <div className="flex flex-col items-center w-full">
+                          <label className="text-xs text-center mb-1">Fin</label>
                           <Input
                             type="date"
                             value={period.end_date || ""}
                             onChange={(e) =>
                               handlePeriodDateChange(idx, "end_date", e.target.value)
                             }
+                            className="text-center"
                           />
                         </div>
                       </div>
@@ -352,12 +378,13 @@ const EditModal: React.FC<EditModalProps> = ({
                   ))}
                 </div>
                 {periodsError && (
-                  <div className="text-red-600 text-sm">{periodsError}</div>
+                  <div className="text-red-600 text-sm text-center">{periodsError}</div>
                 )}
               </div>
             )}
             <DialogFooter>
               <div className="flex justify-around space-x-3">
+
                 <DialogClose asChild>
                   <Button type="button" color="bittersweet">
                     Annuler

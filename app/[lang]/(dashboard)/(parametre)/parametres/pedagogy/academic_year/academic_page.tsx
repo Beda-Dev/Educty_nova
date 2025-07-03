@@ -48,20 +48,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
+import { fetchAcademicYears } from "@/store/schoolservice";
 
-interface Props {
-  data: AcademicYear[];
-}
 
-const AcademicYearPage = ({ data : initialData }: Props) => {
+const AcademicYearPage = () => {
+  const { userOnline, academicYears, setAcademicYears } = useSchoolStore();
+  const router = useRouter();
   const [selectedYear, setSelectedYear] = useState<AcademicYear | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalOpenAdd, setIsModalOpenAdd] = useState(false);
-  const { userOnline , academicYears } = useSchoolStore();
-  const [filtered, setFiltered] = useState(initialData);
-  const [data, setData] = useState(initialData); 
+  const [filtered, setFiltered] = useState(academicYears);
+  const [data, setData] = useState(academicYears); 
 
 
+  // useEffect qui synchronise la table avec le store
   useEffect(() => {
     setData(academicYears);
     setFiltered(academicYears);
@@ -94,6 +95,28 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
     setIsModalOpen(false);
   };
 
+  // Rafraîchir la table et le store à la fermeture de la modale d'ajout
+  const handleCloseAddModal = async (value: boolean) => {
+    setIsModalOpenAdd(value);
+    if (!value) {
+      const updatedAcademicYears = await fetchAcademicYears();
+      setAcademicYears(updatedAcademicYears);
+      setData(updatedAcademicYears);
+      setFiltered(updatedAcademicYears);
+    }
+  };
+
+  // Rafraîchir la table et le store à la fermeture de la modale d'édition
+  const handleCloseEditModal = async () => {
+    setIsModalOpen(false);
+    setSelectedYear(null);
+    // Recharger les années académiques après la modification
+    // const updatedAcademicYears = await fetchAcademicYears();
+    // setAcademicYears(updatedAcademicYears);
+    // setData(updatedAcademicYears);
+    // setFiltered(updatedAcademicYears);
+  };
+
   const filteredData = filtered;
 
   const ITEMS_PER_PAGE = 10;
@@ -115,12 +138,14 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
 
   return (
     <div className="w-full">
-      <Dialog open={isModalOpenAdd} onOpenChange={setIsModalOpenAdd}>
-        <DialogContent>
+      <Dialog open={isModalOpenAdd} onOpenChange={handleCloseAddModal}>
+        <DialogContent size="5xl">
           <DialogHeader>
             <DialogTitle>Ajouter une année académique</DialogTitle>
           </DialogHeader>
-          <DatePickerForm onSuccess={() => setIsModalOpenAdd(false)} />
+          <div className="max-h-[80vh] overflow-y-auto">
+            <DatePickerForm onSuccess={() => handleCloseAddModal(false)} />
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -297,12 +322,12 @@ const AcademicYearPage = ({ data : initialData }: Props) => {
         </Card>
       </div>
 
-      {selectedYear && (
+      {selectedYear  && (
         <EditModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseEditModal}
           academicYear={selectedYear}
-          onUpdate={handleUpdate}
+          onUpdate={handleCloseEditModal}
         />
       )}
     </div>

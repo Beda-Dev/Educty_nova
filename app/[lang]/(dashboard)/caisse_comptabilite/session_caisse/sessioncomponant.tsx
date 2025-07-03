@@ -107,52 +107,87 @@ export default function CashRegisterSessionsPage({
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const isOpeningAmountLowerThanLastClosed = (session: CashRegisterSession) => {
+    const lastClosed = lastClosedSessionByUser.get(session.user_id);
+    if (!lastClosed) return false;
+    // On vérifie que la session ouverte est postérieure à la session fermée
+    if (new Date(session.opening_date) > new Date(lastClosed.closing_date)) {
+      // Comparaison numérique
+      return Number(session.opening_amount) < Number(lastClosed.closing_amount);
+    }
+    return false;
+  };
+
+  // Fonction utilitaire pour savoir si le montant de fermeture est supérieur au montant d'ouverture suivant (pour l'utilisateur)
+  const isClosingAmountHigherThanNextOpen = (session: CashRegisterSession) => {
+    
+    // On cherche la première session ouverte après cette fermeture pour ce user
+    const nextOpen = sessions
+      .filter(
+        (s) =>
+          s.user_id === session.user_id &&
+          s.status === "open" &&
+          new Date(s.opening_date) > new Date(session.closing_date)
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.opening_date).getTime() -
+          new Date(b.opening_date).getTime()
+      )[0];
+    if (!nextOpen) return false;
+    return Number(nextOpen.opening_amount) < Number(session.closing_amount);
+  };
+
   // Filtrage des sessions
   const filteredSessions = useMemo(() => {
-    return sessions.filter((session) => {
-      const matchesSearch = searchTerm
-        ? session.user?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          session.cash_register?.cash_register_number
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        : true;
-
-      const matchesStatus =
-        statusFilter && statusFilter !== "all"
-          ? session.status === statusFilter
+    return sessions
+      .filter((session) => {
+        const matchesSearch = searchTerm
+          ? session.user?.name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase()) ||
+            session.cash_register?.cash_register_number
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())
           : true;
 
-      const matchesUser =
-        userFilter && userFilter !== "all"
-          ? session.user_id === Number(userFilter)
+        const matchesStatus =
+          statusFilter && statusFilter !== "all"
+            ? session.status === statusFilter
+            : true;
+
+        const matchesUser =
+          userFilter && userFilter !== "all"
+            ? session.user_id === Number(userFilter)
+            : true;
+
+        const matchesRegister =
+          registerFilter && registerFilter !== "all"
+            ? session.cash_register_id === Number(registerFilter)
+            : true;
+
+        const openingDate = new Date(session.opening_date);
+        const matchesDateFrom = dateRange.from
+          ? openingDate >= dateRange.from
+          : true;
+        const matchesDateTo = dateRange.to
+          ? openingDate <= new Date(dateRange.to.setHours(23, 59, 59, 999))
           : true;
 
-      const matchesRegister =
-        registerFilter && registerFilter !== "all"
-          ? session.cash_register_id === Number(registerFilter)
-          : true;
-
-      const openingDate = new Date(session.opening_date);
-      const matchesDateFrom = dateRange.from
-        ? openingDate >= dateRange.from
-        : true;
-      const matchesDateTo = dateRange.to
-        ? openingDate <= new Date(dateRange.to.setHours(23, 59, 59, 999))
-        : true;
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesUser &&
-        matchesRegister &&
-        matchesDateFrom &&
-        matchesDateTo
+        return (
+          matchesSearch &&
+          matchesStatus &&
+          matchesUser &&
+          matchesRegister &&
+          matchesDateFrom &&
+          matchesDateTo
+        );
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.opening_date).getTime() -
+          new Date(a.opening_date).getTime()
       );
-    })
-        .sort(
-      (a, b) =>
-        new Date(b.opening_date).getTime() - new Date(a.opening_date).getTime()
-    );
   }, [
     sessions,
     searchTerm,
@@ -206,6 +241,75 @@ export default function CashRegisterSessionsPage({
   const fadeIn = {
     hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  };
+
+  // Map pour retrouver la dernière session fermée par utilisateur
+  const lastClosedSessionByUser = useMemo(() => {
+    const map = new Map<number, CashRegisterSession>();
+    // On parcourt les sessions triées par date décroissante
+    [...sessions]
+      .filter((s) => s.status === "closed")
+      .sort(
+        (a, b) =>
+          new Date(b.closing_date).getTime() -
+          new Date(a.closing_date).getTime()
+      )
+      .forEach((session) => {
+        if (!map.has(session.user_id)) {
+          map.set(session.user_id, session);
+        }
+      });
+    return map;
+  }, [sessions]);
+
+  // Map pour retrouver la première session ouverte par utilisateur après une fermeture
+  const firstOpenSessionAfterClosedByUser = useMemo(() => {
+    const map = new Map<number, CashRegisterSession>();
+    // On parcourt les sessions triées par date croissante
+    [...sessions]
+      .filter((s) => s.status === "open")
+      .sort(
+        (a, b) =>
+          new Date(a.opening_date).getTime() -
+          new Date(b.opening_date).getTime()
+      )
+      .forEach((session) => {
+        if (!map.has(session.user_id)) {
+          map.set(session.user_id, session);
+        }
+      });
+    return map;
+  }, [sessions]);
+
+  // Fonction utilitaire pour savoir si le montant d'ouverture est différent du montant de fermeture précédent
+  const isOpeningAmountMismatch = (session: CashRegisterSession) => {
+    const lastClosed = lastClosedSessionByUser.get(session.user_id);
+    if (!lastClosed) return false;
+    // On vérifie que la session ouverte est postérieure à la session fermée
+    if (new Date(session.opening_date) > new Date(lastClosed.closing_date)) {
+      return session.opening_amount !== lastClosed.closing_amount;
+    }
+    return false;
+  };
+
+  // Fonction utilitaire pour savoir si le montant de fermeture est différent du montant d'ouverture suivant
+  const isClosingAmountMismatch = (session: CashRegisterSession) => {
+    if (session.status !== "closed") return false;
+    // On cherche la première session ouverte après cette fermeture pour ce user
+    const nextOpen = sessions
+      .filter(
+        (s) =>
+          s.user_id === session.user_id &&
+          s.status === "open" &&
+          new Date(s.opening_date) > new Date(session.closing_date)
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.opening_date).getTime() -
+          new Date(b.opening_date).getTime()
+      )[0];
+    if (!nextOpen) return false;
+    return session.closing_amount !== nextOpen.opening_amount;
   };
 
   return (
@@ -441,11 +545,27 @@ export default function CashRegisterSessionsPage({
                               ? "—"
                               : formatSessionDate(session.closing_date)}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell
+                            className={cn(
+                              "text-right",
+                              // Marquer en rouge si le montant d'ouverture est inférieur à la fermeture précédente
+                              isOpeningAmountLowerThanLastClosed(session) &&
+                                "text-red-600 font-bold"
+                            )}
+                          >
                             {formatCurrency(session.opening_amount)}{" "}
                             {settings?.[0]?.currency || "FCFA"}
                           </TableCell>
-                          <TableCell className="text-right">
+                          <TableCell
+                            className={cn(
+                              "text-right ",
+                              session.status === "open"
+                                ? ""
+                                : // Marquer en rouge si le montant de fermeture est supérieur à l'ouverture suivante
+                                  isClosingAmountHigherThanNextOpen(session) &&
+                                    "text-red-600 font-bold"
+                            )}
+                          >
                             {session.status === "open" ? (
                               "—"
                             ) : (

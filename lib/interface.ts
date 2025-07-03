@@ -134,6 +134,7 @@ export interface User {
   superior?: null | UserSingle;
   subordinates?: UserSingle[];
   avatar?: string | null;
+  active: 0 | 1 ;
   permissions?: Permission[];
   permissionNames?: string[];
 }
@@ -149,6 +150,7 @@ export interface UserSingle {
   superior?: null | UserSingle;
   subordinates?: UserSingle[];
   avatar?: string | null;
+  active: 0 | 1 ;
 }
 
 export type StudentPhoto = string | FileOrStored | null;
@@ -535,6 +537,8 @@ export interface Professor {
   user_id: number;
   created_at: string;
   updated_at: string;
+  sexe: string | null; // Sexe peut être null si non fourni
+  matricule: string | null; // Matricule peut être null si non fourni
   user?: UserInProfessor; // Optionnel, si vous souhaitez inclure les détails de l'utilisateur
 
 

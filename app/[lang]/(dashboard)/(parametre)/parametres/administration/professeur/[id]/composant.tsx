@@ -636,6 +636,21 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
               <span className="text-sm font-medium">CNI:</span>
               <span>{professor?.cni || <span className="italic text-gray-400">Non renseigné</span>}</span>
             </div>
+            {/* Sexe */}
+            <div className="flex items-center space-x-2 text-gray-600">
+              <span className="text-sm font-medium">Sexe:</span>
+              <span>
+                {professor?.sexe
+                  ? professor.sexe.charAt(0).toUpperCase() + professor.sexe.slice(1)
+                  : <span className="italic text-gray-400">Non renseigné</span>
+                }
+              </span>
+            </div>
+            {/* Matricule */}
+            <div className="flex items-center space-x-2 text-gray-600">
+              <span className="text-sm font-medium">Matricule:</span>
+              <span>{professor?.matricule || <span className="italic text-gray-400">Non renseigné</span>}</span>
+            </div>
             {/* Email */}
             <div className="flex items-center space-x-2 text-gray-600">
               <Mail className="h-4 w-4" />
@@ -1259,6 +1274,8 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                     <span className="mr-4">Type : <b>{professor.type === "permanent" ? "Permanent" : "Vacataire"}</b></span>
                     <span className="mr-4">N° : <b>{professor.number || "-"}</b></span>
                     <span className="mr-4">CNI : <b>{professor.cni || "-"}</b></span>
+                    <span className="mr-4">Sexe : <b>{professor.sexe ? professor.sexe.charAt(0).toUpperCase() + professor.sexe.slice(1) : "-"}</b></span>
+                    <span className="mr-4">Matricule : <b>{professor.matricule || "-"}</b></span>
                   </div>
                   <div className="text-gray-700 mt-1">
                     <span className="mr-4">Email : <b>{professor.user?.email || "-"}</b></span>

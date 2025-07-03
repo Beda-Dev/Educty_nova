@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { universalExportToExcel } from "@/lib/utils";
 import {
   Pagination,
   PaginationContent,
@@ -32,17 +33,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
-// Fonction universelle d'export Excel
-function universalExportToExcel(data: any[], filename = "export.xlsx") {
-  // @ts-ignore
-  import("xlsx").then(XLSX => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, filename);
-  });
-}
 
 export default function Professors() {
   const { professor: professors } = useSchoolStore();
@@ -95,15 +85,22 @@ export default function Professors() {
 
   // Export Excel
   const handleExport = () => {
-    const data = filteredProfessors.map((p) => ({
-      Nom: p.name,
-      Prénom: p.first_name,
-      Numéro: p.number,
-      Type: p.type === "permanent" ? "Permanent" : "Vacataire",
-      Email: p.user?.email || "",
-      "Date de création": formatDate(p.created_at),
-    }));
-    universalExportToExcel(data, "professeurs.xlsx");
+    universalExportToExcel({
+      source: {
+        type: "array",
+        data: filteredProfessors,
+        formatRow: (p) => ({
+          Matricule: p.matricule || "",
+          Nom: p.name,
+          Prénom: p.first_name,
+          Numéro: p.number,
+          Type: p.type === "permanent" ? "Permanent" : "Vacataire",
+          Email: p.user?.email || "",
+          CNI: p.cni || ""
+        }),
+      },
+      fileName: "professeurs.xlsx",
+    });
   };
 
   return (
@@ -222,6 +219,8 @@ export default function Professors() {
                         <TableHead>Type</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Cni</TableHead>
+                        <TableHead>Sexe</TableHead>
+                        <TableHead>Matricule</TableHead>
                         <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -283,6 +282,8 @@ export default function Professors() {
                             </TableCell>
                             <TableCell>{professor.user?.email || "-"}</TableCell>
                             <TableCell>{professor?.cni || "-"}</TableCell>
+                            <TableCell>{professor?.sexe ? (professor.sexe.charAt(0).toUpperCase() + professor.sexe.slice(1)) : "-"}</TableCell>
+                            <TableCell>{professor?.matricule || "-"}</TableCell>
                             <TableCell className="flex gap-2">
                               {/* <Button
                                 color="tyrian"

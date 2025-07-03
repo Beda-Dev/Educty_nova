@@ -31,15 +31,15 @@ const ServerComponent = () => {
     fetchPeriodsData();
   }, []);
 
-  if (hasAdminAccess === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccess === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
-  return <AcademicYearPage data={academicYears} />;
+  return <AcademicYearPage />;
 };
 
 export default ServerComponent;
