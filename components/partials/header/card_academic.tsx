@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 import { updateStudentCountByClass, verificationPermission } from "@/lib/fonction";
 import { Card } from "@/components/ui/card";
+import dayjs from "dayjs";
 
 interface AcademicYearsDisplayProps {
   data: AcademicYear[];
@@ -80,6 +81,19 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
     }
   };
 
+  // Trouver la période en cours pour l'année sélectionnée
+  const getCurrentPeriodLabel = (): string | null => {
+    const year = data.find(y => y.id.toString() === selectedYear);
+    if (!year || !year.periods || year.periods.length === 0) return null;
+    const now = dayjs();
+    const current = year.periods.find(
+      (p) =>
+        (dayjs(p.pivot.start_date).isSame(now, "day") || dayjs(p.pivot.start_date).isBefore(now, "day")) &&
+        (dayjs(p.pivot.end_date).isSame(now, "day") || dayjs(p.pivot.end_date).isAfter(now, "day"))
+    );
+    return current ? current.label : null;
+  };
+
   if (!data || data.length === 0) {
     return (
       <Card className="p-4 bg-background">
@@ -116,7 +130,15 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
                     <span>Chargement...</span>
                   </div>
                 ) : (
-                  <SelectValue placeholder="Sélectionnez une année" />
+                  <>
+                    <SelectValue placeholder="Sélectionnez une année" />
+                    {/* Affiche la période en cours si disponible */}
+                    {selectedYear && getCurrentPeriodLabel() && (
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        ({getCurrentPeriodLabel()})
+                      </span>
+                    )}
+                  </>
                 )}
               </SelectTrigger>
               
@@ -125,7 +147,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
                   <SelectItem 
                     key={year.id} 
                     value={year.id.toString()}
-                    className="text-sm"
+                    className="text-xs"
                   >
                     {year.label}
                   </SelectItem>
