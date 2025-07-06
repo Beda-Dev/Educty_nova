@@ -54,7 +54,7 @@ const NavTools = ({ isDesktop, isMobile, sidebarType }: { isDesktop: boolean; is
       </div>
 
       {/* Mobile menu handler uniquement si le sidebarType n’est pas module */}
-      {isSmallScreen && sidebarType !== "module" && <MobileMenuHandler />}
+      {!isDesktop && sidebarType !== "module" && <MobileMenuHandler />}
     </div>
   );
 };

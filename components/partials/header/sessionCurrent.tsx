@@ -15,41 +15,35 @@ import { fr } from "date-fns/locale";
 import { CashRegisterSession } from "@/lib/interface";
 import { useSchoolStore } from "@/store";
 import { AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSession[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { userOnline , cashRegisterSessionCurrent , settings } = useSchoolStore();
+  const { userOnline, cashRegisterSessionCurrent, settings } = useSchoolStore();
 
-  // Trouver la dernière session ouverte
-  const lastOpenSession = sessions
-    .filter((session) => session.status === "open" && session.user.id === userOnline?.id)
-    .sort((a, b) => new Date(b.opening_date).getTime() - new Date(a.opening_date).getTime())[0];
-
-  // Formater le montant avec des espaces et la devise dynamique
   const formatAmount = (amount: string | number) => {
-    const currency = settings && settings.length > 0 && settings[0]?.currency ? settings[0].currency : 'FCFA';
+    const currency = settings?.[0]?.currency || 'FCFA';
     const num = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
     if (isNaN(num)) return `0 ${currency}`;
     return `${num.toLocaleString('fr-FR').replace(/,/g, ' ')} ${currency}`;
-  }
+  };
 
-  // Formater la date
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), "dd MMM yyyy, HH:mm", { locale: fr });
   };
 
   const handleNavigate = () => {
     setIsLoading(true);
-    router.push(`/caisse_comptabilite/session_caisse/${cashRegisterSessionCurrent?.id}`)
-    setIsLoading(false)
+    router.push(`/caisse_comptabilite/session_caisse/${cashRegisterSessionCurrent?.id}`);
+    setIsLoading(false);
   };
 
   if (!cashRegisterSessionCurrent) {
     return (
       <Badge variant="outline" className="flex items-center gap-2 py-1 text-xs">
-        <AlertCircle className="h-3 w-3" />
+        <AlertCircle className="h-3 w-3 text-yellow-600" />
         <span>Aucune session active</span>
       </Badge>
     );
@@ -61,11 +55,16 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
         <Button 
           variant="outline" 
           size="sm"
-          className="h-8 px-3 text-xs font-medium hover:bg-primary/10"
+          className={cn(
+            "h-8 px-3 text-xs font-medium",
+            "hover:bg-primary/10 hover:text-primary",
+            "focus-visible:ring-2 focus-visible:ring-primary/50",
+            "transition-colors duration-200"
+          )}
         >
           <motion.span
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
             className="mr-2 h-2 w-2 rounded-full bg-green-500"
           />
           Session active
@@ -75,29 +74,32 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
       <AnimatePresence>
         {open && (
           <PopoverContent 
-            className="w-72 p-3 sm:w-80"
+            className="w-[280px] p-4 sm:w-[320px]"
             align="end"
-            asChild
             forceMount
+            sideOffset={8}
           >
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -5 }}
               transition={{ type: "spring", damping: 20, stiffness: 300 }}
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h4 className="text-sm font-semibold">Session en cours</h4>
-                  <Badge variant="outline" className="text-xs">
-                    {cashRegisterSessionCurrent.cash_register.cash_register_number}
+                  <Badge 
+                    color="secondary" 
+                    className="text-xs font-medium px-2 py-0.5"
+                  >
+                    N°{cashRegisterSessionCurrent.cash_register.cash_register_number}
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 text-xs">
+                <div className="grid gap-2.5 text-xs">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Ouverture:</span>
-                    <span className="font-medium">
+                    <span className="font-medium text-right">
                       {formatDate(cashRegisterSessionCurrent.opening_date)}
                     </span>
                   </div>
@@ -111,24 +113,29 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
                   
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Caissier:</span>
-                    <span className="font-medium">
-                      {cashRegisterSessionCurrent.user.name.split(' ')[0]} {/* Prénom seulement */}
+                    <span className="font-medium truncate max-w-[120px]">
+                      {cashRegisterSessionCurrent.user.name.split(' ')[0]}
                     </span>
                   </div>
                 </div>
 
                 <Button
                   size="sm"
-                  className="w-full mt-2 text-xs h-8"
+                  className={cn(
+                    "w-full mt-2 text-xs h-8",
+                    "transition-all duration-150",
+                    "hover:bg-primary/90 hover:shadow-sm",
+                    "focus-visible:ring-2 focus-visible:ring-primary/50"
+                  )}
                   onClick={handleNavigate}
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
                     <>
                       Accéder à la caisse
-                      <ArrowRight className="ml-1 h-3 w-3" />
+                      <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </>
                   )}
                 </Button>

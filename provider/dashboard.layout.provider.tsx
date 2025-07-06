@@ -35,7 +35,7 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     }
     if (userOnline === null) {
 
-      //router.push("/");
+      router.push("/");
     }
   }, [userOnline, router]);
 

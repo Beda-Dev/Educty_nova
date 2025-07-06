@@ -7,20 +7,20 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useSchoolStore } from "@/store";
+import { cn } from "@/lib/utils";
 
 const ProfileInfo = () => {
   const { userOnline, setUserOnline } = useSchoolStore();
   const router = useRouter();
+  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL_2;
 
   const handleLogout = () => {
     setUserOnline(null);
@@ -28,81 +28,75 @@ const ProfileInfo = () => {
     router.push("/");
   };
 
+  const getAvatarUrl = (avatar?: string | null ): string | undefined => {
+    if (!avatar) return undefined;
+    const isAbsoluteUrl =
+      avatar.startsWith("http://") || avatar.startsWith("https://");
+    return isAbsoluteUrl ? avatar : `${baseUrl}${avatar}`;
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="cursor-pointer">
-        <div className="flex items-center">
-          <Icon
-            icon="heroicons:user-circle"
-            className="w-9 h-9 text-gray-600"
-          />
-        </div>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="relative h-8 w-8 rounded-full p-0 hover:bg-muted"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage
+              src={getAvatarUrl(userOnline?.avatar)}
+              alt={userOnline?.name || "Utilisateur"}
+            />
+            <AvatarFallback className="bg-skyblue text-primary-foreground">
+              {getInitials(userOnline?.name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="sr-only">Menu profil</span>
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 p-0" align="end">
-        <DropdownMenuLabel className="flex gap-2 items-center mb-1 p-3">
-          <Icon icon="heroicons:user" className="w-9 h-9 text-gray-600" />
-          <div>
-            <div className="text-sm font-medium text-default-800 capitalize">
-              {userOnline?.name ?? "Utilisateur"}
-            </div>
-            <Link
-              href="/dashboard"
-              className="text-xs text-default-600 hover:text-skyblue"
-            >
-              {userOnline?.roles?.[0]?.name ?? "Membre"}
-            </Link>
+      <DropdownMenuContent className="w-56 p-2" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1 p-2">
+            <p className="text-sm font-medium leading-none">
+              {userOnline?.name || "Utilisateur"}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {userOnline?.email || "Aucun email"}
+            </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuGroup>
-          {[
-            { name: "Profil", icon: "heroicons:user", href: "/profil" },
-            { name: "Paramètres de l'établissement", icon: "heroicons:cog", href: "/establishment_settings" },
-          ].map((item, index) => (
-            <Link
-              href={item.href}
-              key={`info-menu-${index}`}
-              className="cursor-pointer"
-            >
-              <DropdownMenuItem className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background">
-                <Icon icon={item.icon} className="w-4 h-4" />
-                {item.name}
-              </DropdownMenuItem>
-            </Link>
-          ))}
-        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {/* <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background">
-              <Icon icon="heroicons:phone" className="w-4 h-4" />
-              Support
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                {["Portail", "Slack", "WhatsApp"].map((item, index) => (
-                  <Link
-                    href={
-                      item === "WhatsApp" ? "tel:+1234567890" : "/dashboard"
-                    }
-                    key={`support-${index}`}
-                    className="cursor-pointer"
-                  >
-                    <DropdownMenuItem className="text-sm font-medium text-default-600 capitalize px-3 py-1.5 dark:hover:bg-background">
-                      {item}
-                    </DropdownMenuItem>
-                  </Link>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub> */}
+          <Link href="/profil">
+            <DropdownMenuItem className="cursor-pointer">
+              <Icon icon="heroicons:user" className="mr-2 h-4 w-4" />
+              <span>Profil</span>
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/establishment_settings">
+            <DropdownMenuItem className="cursor-pointer">
+              <Icon icon="heroicons:cog" className="mr-2 h-4 w-4" />
+              <span>Paramètres</span>
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator className="mb-0 dark:bg-background" />
+        <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={handleLogout}
-          className="flex items-center gap-2 text-sm font-medium text-default-600 capitalize my-1 px-3 dark:hover:bg-background cursor-pointer"
+          className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+          onClick={handleLogout}
         >
-          <Icon icon="heroicons:power" className="w-4 h-4" />
-          Déconnexion
+          <Icon icon="heroicons:power" className="mr-2 h-4 w-4" />
+          <span>Déconnexion</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

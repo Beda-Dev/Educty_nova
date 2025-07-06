@@ -106,7 +106,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ className, trans }) => {
     if (mobileMenu) {
       setMobileMenu(false);
     }
-  }, [locationName, mobileMenu, setMobileMenu]);
+  }, [locationName]);
   return (
     <>
       <div
