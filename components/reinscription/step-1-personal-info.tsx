@@ -65,7 +65,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png', '.gif']
     },
-    maxSize: 5 * 1024 * 1024,
+    maxSize: 10 * 1024 * 1024,
     maxFiles: 1
   })
 
@@ -133,8 +133,8 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
     try {
       // Validate file
-      if (file.size > 3 * 1024 * 1024) {
-        throw new Error("Le fichier ne doit pas dépasser 3 Mo")
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error("Le fichier ne doit pas dépasser 10 Mo")
       }
 
       const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/svg+xml"];
@@ -439,7 +439,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
             {/* Photo Upload Zone */}
             <div className="space-y-2 md:col-span-2 mt-4">
-              <Label>Photo (optionnel - max 5Mo)</Label>
+              <Label>Photo (optionnel - max 10 Mo)</Label>
               <div
                 {...getRootProps()}
                 className={cn(
@@ -473,7 +473,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                         <>
                           Glissez-déposez une image ici, ou cliquez pour sélectionner
                           <br />
-                          <span className="text-xs">Taille maximale : 5Mo</span>
+                          <span className="text-xs">Taille maximale : 10 Mo</span>
                         </>
                       )}
                     </p>

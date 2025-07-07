@@ -17,7 +17,10 @@ import Select, { GroupBase, components } from "react-select";
 import makeAnimated from "react-select/animated";
 import { Icon } from "@iconify/react";
 import { User, Role } from "@/lib/interface";
-import {Edit} from 'lucide-react'
+import { Edit, Loader2 } from 'lucide-react';
+import { useSchoolStore } from "@/store";
+import { Switch } from "@/components/ui/switch";
+import Image from "next/image";
 
 interface EditUserModalProps {
   user: User;
@@ -26,11 +29,19 @@ interface EditUserModalProps {
 }
 
 export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) => {
-  const [selectedRoles, setSelectedRoles] = useState<
-    { value: string; label: string }[]
-  >([]);
+  const [selectedRoles, setSelectedRoles] = useState<{ value: string; label: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isActive, setIsActive] = useState(user.active === 1);
+  const [selectedHierarchical, setSelectedHierarchical] = useState<{ value: number | null; label: string } | null>(null);
   const animatedComponents = makeAnimated();
+  const { users } = useSchoolStore();
+
+  const hierarchicalOptions = users
+    .filter(u => u.id !== user.id) // Exclure l'utilisateur actuel
+    .map(user => ({
+      value: user.id,
+      label: user.name
+    }));
 
   const roleOptions = roles.map((role) => ({
     value: role.name,
@@ -46,15 +57,60 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
         }))
       );
     }
-  }, [user]);
 
-  const updateUserRoles = async (roles: string[]) => {
+    if (user.hierarchical_id) {
+      const superior = users.find(u => u.id === user.hierarchical_id);
+      if (superior) {
+        setSelectedHierarchical({
+          value: superior.id,
+          label: superior.name
+        });
+      }
+    }
+  }, [user, users]);
+
+  const CustomOption = (props: any) => {
+    return (
+      <components.Option {...props}>
+        <div className="flex items-center gap-2">
+          <Icon icon="heroicons:user-circle" className="h-4 w-4" />
+          {props.data.label}
+        </div>
+      </components.Option>
+    );
+  };
+
+  const updateUser = async (data: {
+    name: string;
+    active: boolean;
+    hierarchical_id: number | null;
+  }) => {
     setIsLoading(true);
     try {
+      const payload = {
+        name: data.name || user.name,
+        email: user.email,
+        active: data.active ? 1 : 0,
+        hierarchical_id: data.hierarchical_id,
+      };
+
+      const response = await fetch(`/api/user?id=${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error("Échec de la mise à jour");
+
+      const rolesToAssign = selectedRoles.map((role) => role.value);
+      
+      // Supprimer les anciens rôles
       await Promise.all(
         user.roles.map(async (role) => {
           const response = await fetch(
-            `https://test.com/api/users/${user.id}/remove-role`, 
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}/remove-role`, 
             {
               method: "POST",
               headers: {
@@ -67,8 +123,9 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
         })
       );
 
+      // Ajouter les nouveaux rôles
       await Promise.all(
-        roles.map(async (roleName) => {
+        rolesToAssign.map(async (roleName) => {
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}/assign-role`, 
             {
@@ -84,24 +141,13 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
       );
 
       onSuccess();
-      toast.success("Rôles mis à jour avec succès !");
+      toast.success("Utilisateur mis à jour avec succès !");
     } catch (error) {
-      console.error("Error updating roles:", error);
-      toast.error("Erreur lors de la mise à jour des rôles");
+      console.error("Error updating user:", error);
+      toast.error("Erreur lors de la mise à jour de l'utilisateur");
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const CustomOption = (props: any) => {
-    return (
-      <components.Option {...props}>
-        <div className="flex items-center gap-2">
-          <Icon icon="heroicons:user-circle" className="h-4 w-4" />
-          {props.data.label}
-        </div>
-      </components.Option>
-    );
   };
 
   return (
@@ -111,61 +157,125 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
           <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Modifier l'utilisateur</DialogTitle>
-          <form
-            className="space-y-5 pt-4"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const rolesToAssign = selectedRoles.map((role) => role.value);
-              await updateUserRoles(rolesToAssign);
-            }}
-          >
-            <div>
-              <Label>Nom</Label>
-              <Input name="name" defaultValue={user.name} required disabled />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input
-                name="email"
-                type="email"
-                defaultValue={user.email}
-                required
-                disabled
-              />
-            </div>
-            <div>
-              <Label>Rôles</Label>
-              <Select
-                isMulti
-                options={roleOptions}
-                value={selectedRoles}
-                onChange={(selected: any) => setSelectedRoles(selected)}
-                components={{
-                  ...animatedComponents,
-                  Option: CustomOption,
-                }}
-                className="react-select"
-                classNamePrefix="select"
-                placeholder="Sélectionner des rôles..."
-                noOptionsMessage={() => "Aucun rôle disponible"}
-                closeMenuOnSelect={false}
-              />
-            </div>
-            <div className="flex justify-around space-x-3">
-              <DialogClose asChild>
-                <Button type="button" color="destructive" disabled={isLoading}>
-                  Annuler
-                </Button>
-              </DialogClose>
-              <Button type="submit" color="tyrian" disabled={isLoading}>
-                {isLoading ? "Enregistrement..." : "Sauvegarder"}
-              </Button>
-            </div>
-          </form>
         </DialogHeader>
+        <form
+          className="space-y-4 pt-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            await updateUser({
+              name: formData.get('name') as string,
+              active: isActive,
+              hierarchical_id: selectedHierarchical?.value || null,
+            });
+          }}
+        >
+          <div>
+            <Label>Email</Label>
+            <Input
+              name="email"
+              type="email"
+              defaultValue={user.email}
+              required
+              disabled
+            />
+          </div>
+
+          <div>
+            <Label>Nom</Label>
+            <Input 
+              name="name" 
+              defaultValue={user.name} 
+              required 
+            />
+          </div>
+
+          {/* Affichage de l'avatar existant */}
+          {user.avatar && (
+            <div className="space-y-2">
+              <Label>Photo de profil actuelle</Label>
+              <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border">
+                <Image
+                  src={user.avatar}
+                  alt="Avatar actuel"
+                  width={128}
+                  height={128}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center space-x-2">
+            <Label>Statut</Label>
+            <Switch
+              checked={isActive}
+              onCheckedChange={setIsActive}
+              id="active-status"
+            />
+            <Label htmlFor="active-status" className="cursor-pointer">
+              {isActive ? "Actif" : "Inactif"}
+            </Label>
+          </div>
+
+          <div>
+            <Label>Supérieur hiérarchique</Label>
+            <Select
+              options={hierarchicalOptions}
+              value={selectedHierarchical}
+              onChange={(selected) => setSelectedHierarchical(selected)}
+              className="react-select"
+              classNamePrefix="select"
+              placeholder="Sélectionner un supérieur hiérarchique..."
+              noOptionsMessage={() => "Aucun utilisateur disponible"}
+              isClearable
+            />
+          </div>
+
+          <div>
+            <Label>Rôles</Label>
+            <Select
+              isMulti
+              options={roleOptions}
+              value={selectedRoles}
+              onChange={(selected) => setSelectedRoles(selected as any)}
+              components={{
+                ...animatedComponents,
+                Option: CustomOption,
+              }}
+              className="react-select"
+              classNamePrefix="select"
+              placeholder="Sélectionner des rôles..."
+              noOptionsMessage={() => "Aucun rôle disponible"}
+              closeMenuOnSelect={false}
+            />
+          </div>
+
+          <div className="flex justify-around gap-3 pt-4">
+            <DialogClose asChild>
+              <Button
+                color="destructive"
+                type="button"
+                disabled={isLoading}
+              >
+                Annuler
+              </Button>
+            </DialogClose>
+            <Button type="submit" color="indigodye" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : (
+                "Sauvegarder"
+              )}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -12,7 +12,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { User, Role } from "@/lib/interface";
-import { Icon } from "@iconify/react";
+import { Users } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -170,6 +171,9 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
               <TableHead className="font-semibold">Utilisateur</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Rôle(s)</TableHead>
+              <TableHead>Supérieur</TableHead>
+              <TableHead>Subordonnés</TableHead>
+              <TableHead>Statut</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -180,9 +184,19 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                   <TableCell className="font-medium text-card-foreground/80">
                     <div className="flex gap-3 items-center">
                       <Avatar className="rounded-full">
-                        <AvatarFallback>
-                          {item.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
+                        {item.avatar ? (
+                          <Image
+                            src={item.avatar.includes('http') ? item.avatar : `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${item.avatar}`}
+                            alt={item.name}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <AvatarFallback>
+                            {item.name.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       <span className="text-sm text-card-foreground flex">
                         {item.name}{" "}
@@ -206,6 +220,44 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                           {roleItem.name}
                         </Badge>
                       ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {item.superior ? (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6">
+                          {item.superior.avatar ? (
+                            <Image
+                              src={item.superior.avatar.includes('http') ? item.superior.avatar : `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${item.superior.avatar}`}
+                              alt={item.superior.name}
+                              width={24}
+                              height={24}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <AvatarFallback className="text-xs">
+                              {item.superior.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <span className="text-sm">{item.superior.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span>{item.subordinates?.length || 0}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className={`h-2.5 w-2.5 rounded-full ${item.active ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <span className="text-sm">
+                        {item.active ? 'Actif' : 'Inactif'}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="flex justify-end">
