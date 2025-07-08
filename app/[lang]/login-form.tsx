@@ -17,6 +17,7 @@ import { User } from "@/lib/interface";
 import { useRouter } from "next/navigation";
 import { mergeUserPermissions } from "@/lib/fonction";
 import LogoComponent1 from "./logo1";
+import { saveUser } from "@/lib/userStore";
 
 const schema = z.object({
   email: z
@@ -115,6 +116,8 @@ const LogInForm = () => {
         );
 
         setUserOnline(userWithPermissions || userData);
+        // 💾 Enregistre dans IndexedDB
+        await saveUser(userWithPermissions);
 
         toast.success("Connexion réussie");
 
@@ -153,11 +156,10 @@ const LogInForm = () => {
 
   return (
     <div
-      className={`w-full ${
-        isMobile
+      className={`w-full ${isMobile
           ? "bg-white p-4 rounded-xl shadow-sm border mt-4"
           : "bg-whitesmoke"
-      }`}
+        }`}
       style={isMobile ? { maxWidth: 380, margin: "0 auto" } : {}}
     >
       {isMobile && (

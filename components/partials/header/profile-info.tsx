@@ -16,16 +16,25 @@ import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useSchoolStore } from "@/store";
 import { cn } from "@/lib/utils";
+import { deleteUser } from "@/lib/userStore";
 
 const ProfileInfo = () => {
   const { userOnline, setUserOnline } = useSchoolStore();
   const router = useRouter();
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL_2;
 
-  const handleLogout = () => {
-    setUserOnline(null);
-    toast.success("Déconnexion réussie");
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      if (userOnline?.id) {
+        await deleteUser(); // suppression IndexedDB
+      }
+      setUserOnline(null); // vider le store
+      toast.success("Déconnexion réussie");
+      router.push("/");
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion :", error);
+      toast.error("Échec de la déconnexion. Veuillez réessayer.");
+    }
   };
 
   const getAvatarUrl = (avatar?: string | null ): string | undefined => {

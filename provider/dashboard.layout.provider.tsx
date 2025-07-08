@@ -14,8 +14,11 @@ import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
 import { useSchoolStore } from "@/store";
 import { CashRegisterSession } from '@/lib/interface'
+import { getCurrentUser } from "@/lib/userStore";
+
+
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
-  const { userOnline, cashRegisterSessions, setCashRegisterSessionCurrent } = useSchoolStore()
+  const { userOnline, cashRegisterSessions, setCashRegisterSessionCurrent , setUserOnline } = useSchoolStore()
   const { collapsed, sidebarType, setCollapsed, subMenu } = useSidebar();
   const [open, setOpen] = React.useState(false);
   const { layout } = useThemeStore();
@@ -23,21 +26,52 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   const isMobile = useMediaQuery("(min-width: 768px)");
   const mounted = useMounted();
   const router = useRouter();
+  const time = Number(process.env.NEXT_PUBLIC_SESSION_DURATION_MINUTES) || 60;
+  const minutesToMs = (minutes: number): number => minutes * 60 * 1000;
+
 
   React.useEffect(() => {
-    if (cashRegisterSessions && cashRegisterSessions.length > 0 && userOnline) {
-      const currentSession = cashRegisterSessions.find((session: CashRegisterSession) => session.user_id === userOnline.id && session.status === "open");
-      if (currentSession) {
-        setCashRegisterSessionCurrent(currentSession);
-      }else{
-        setCashRegisterSessionCurrent(null)
+    let intervalId: NodeJS.Timeout;
+  
+    const checkUserAuth = async () => {
+      if (!userOnline) {
+        const user = await getCurrentUser(); 
+  
+        if (user) {
+          setUserOnline(user); 
+        } else {
+          router.push("/"); 
+        }
       }
-    }
-    if (userOnline === null) {
-
-      router.push("/");
-    }
-  }, [userOnline, router]);
+    };
+  
+    const checkCashRegisterSession = () => {
+      if (cashRegisterSessions?.length && userOnline) {
+        const currentSession = cashRegisterSessions.find(
+          (session: CashRegisterSession) =>
+            session.user_id === userOnline.id && session.status === "open"
+        );
+        setCashRegisterSessionCurrent(currentSession ?? null);
+      }
+    };
+  
+    // 🔄 Boucle toutes les 60 minutes au moins
+    intervalId = setInterval(() => {
+      checkUserAuth();
+      checkCashRegisterSession();
+    }, minutesToMs(time)); 
+  
+    // Appel initial immédiat
+    checkUserAuth();
+    checkCashRegisterSession();
+  
+    // Nettoyage à la destruction du composant
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [cashRegisterSessions]);
+  
+  
 
 
   if (!mounted) {

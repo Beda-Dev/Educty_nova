@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { siteConfig } from "@/config/site";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { saveUser, deleteUser } from '@/lib/userStore';
 import {
   AcademicYear,
   Student,
@@ -359,8 +360,14 @@ export const useSchoolStore = create<SchoolStore>()(
       setRegistration: (data) => set({ registrations: data }),
 
       userOnline: null,
-      setUserOnline: (data) => set({ userOnline: data }),
-
+      setUserOnline: (data) => {
+        set({ userOnline: data });
+        if (data) {
+          saveUser(data);
+        } else {
+          deleteUser();
+        }
+      },
       reRegistration: null,
       setReRegistrations: (data) => set({ reRegistration: data }),
 

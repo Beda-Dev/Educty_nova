@@ -114,12 +114,17 @@ export interface Role {
   guard_name: string;
   created_at: string;
   updated_at: string;
-  pivot: {
-    model_type: string;
-    model_id: number;
-    role_id: number;
-  };
-  permissions?: Permission[];
+  permissions?: {
+    id: number;
+    name: string;
+    guard_name: string;
+    created_at: string;
+    updated_at: string;
+    pivot: {
+      role_id: number;
+      permission_id: number;
+    }
+  }[];
 }
 
 export interface User {
@@ -130,7 +135,18 @@ export interface User {
   email_verified_at: null;
   created_at: string;
   updated_at: string;
-  roles: Role[];
+  roles: {
+    id: number;
+    name: string;
+    guard_name: string;
+    created_at: string;
+    updated_at: string;
+    pivot: {
+      model_type: string;
+      model_id: number;
+      role_id: number;
+    }
+  }[];
   superior?: null | UserSingle;
   subordinates?: UserSingle[];
   avatar?: string | null;
@@ -187,7 +203,7 @@ export interface Student {
       is_tutor_legal: 0 | 1;
       created_at: string;
       updated_at: string;
-    };
+    }
   }[];
 }
 
