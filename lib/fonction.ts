@@ -171,7 +171,6 @@ export async function updateStudentCountByClass(
   
     return {
       ...inputUser,
-      roles: userRoles,
       permissions: userRoles.flatMap(role => role.permissions || []),
       permissionNames // Ajout du tableau des noms de permissions
     };
