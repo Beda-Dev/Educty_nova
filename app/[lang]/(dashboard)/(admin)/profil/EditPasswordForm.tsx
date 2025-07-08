@@ -144,10 +144,9 @@ export function EditPasswordForm({ user, onCloseAction, onSuccess }: EditPasswor
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex justify-around gap-3 pt-4">
         <Button 
-          type="button" 
-          variant="outline" 
+          type="button"  
           color="bittersweet"
           onClick={onCloseAction}
           disabled={isLoading}
@@ -156,10 +155,9 @@ export function EditPasswordForm({ user, onCloseAction, onSuccess }: EditPasswor
         </Button>
         <Button 
           type="submit" 
-          variant="outline"
-          color="skyblue"
+          color="indigodye"
           disabled={isLoading}
-          className="min-w-32 bg-primary hover:bg-primary/90"
+          className="min-w-32"
         >
           {isLoading ? (
             <>

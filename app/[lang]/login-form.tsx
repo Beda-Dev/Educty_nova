@@ -119,7 +119,7 @@ const LogInForm = () => {
         // 💾 Enregistre dans IndexedDB
         await saveUser(userWithPermissions);
 
-        toast.success("Connexion réussie");
+        
 
         // Attendre que roles, permissions et users soient chargés avant la redirection
         const waitForData = async () => {
@@ -133,6 +133,8 @@ const LogInForm = () => {
           }
         };
         await waitForData();
+
+        toast.success("Connexion réussie");
 
         router.push("/dashboard");
         reset();
