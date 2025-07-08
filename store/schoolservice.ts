@@ -842,6 +842,58 @@ export const fetchCoefficient = async (opts: RequestInit = {}) => {
 
 
 
+export const refreshAllData = async () => {
+  const refreshPromises = [
+    fetchClasses(),
+    fetchLevels(),
+    fetchAcademicYears(),
+    fetchStudents(),
+    fetchUsers(),
+    fetchRoles(),
+    fetchpricing(),
+    fetchRegistration(),
+    fetchPayment(),
+    fetchInstallment(),
+    fetchTutors(),
+    fetchTransactions(),
+    fetchExpenses(),
+  ]
+
+  try {
+    const results = await Promise.allSettled(refreshPromises)
+
+    const data = {
+      classes: results[0].status === "fulfilled" ? results[0].value : [],
+      levels: results[1].status === "fulfilled" ? results[1].value : [],
+      academicYears: results[2].status === "fulfilled" ? results[2].value : [],
+      students: results[3].status === "fulfilled" ? results[3].value : [],
+      users: results[4].status === "fulfilled" ? results[4].value : [],
+      roles: results[5].status === "fulfilled" ? results[5].value : [],
+      pricing: results[6].status === "fulfilled" ? results[6].value : [],
+      registrations: results[7].status === "fulfilled" ? results[7].value : [],
+      payments: results[8].status === "fulfilled" ? results[8].value : [],
+      installments: results[9].status === "fulfilled" ? results[9].value : [],
+      tutors: results[10].status === "fulfilled" ? results[10].value : [],
+      transactions: results[11].status === "fulfilled" ? results[11].value : [],
+      expenses: results[12].status === "fulfilled" ? results[12].value : [],
+    }
+
+    // Log des erreurs s'il y en a
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        console.error(`Erreur lors du rafraîchissement de la donnée ${index}:`, result.reason)
+      }
+    })
+
+    return data
+  } catch (error) {
+    console.error("Erreur lors du rafraîchissement global des données:", error)
+    throw error
+  }
+}
+
+
+
 
 
 

@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { BadgeCheck, Calendar, FileText, Phone, User, Eye } from "lucide-react";
+import { BadgeCheck, Calendar, FileText, Phone, User, Eye, Users } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -187,6 +187,36 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                 </div>
 
                 <Separator className="my-3" />
+
+                {/* Informations du tuteur */}
+                {data.tutors && data.tutors.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground mb-2">
+                      <Users className="h-4 w-4" />
+                      Informations du tuteur
+                    </h4>
+                    {data.tutors.map((tutor, index) => (
+                      <div key={tutor.id} className="space-y-1 text-sm">
+                        <p className="font-medium">
+                          {tutor.first_name} {tutor.name}
+                          {tutor.pivot?.is_tutor_legal === 1 && (
+                            <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                              Tuteur légal
+                            </span>
+                          )}
+                        </p>
+                        <p className="flex items-center gap-2 text-muted-foreground">
+                          <Phone className="h-3.5 w-3.5" />
+                          {tutor.phone_number}
+                        </p>
+                        <p className="text-muted-foreground">
+                          Type: {tutor.type_tutor}
+                        </p>
+                        {data.tutors && index < data.tutors.length - 1 && <Separator className="my-2" />}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
               </div>
             </div>
