@@ -14,7 +14,7 @@ import { useMounted } from "@/hooks/use-mounted";
 import LayoutLoader from "@/components/layout-loader";
 import { useSchoolStore } from "@/store";
 import { CashRegisterSession } from '@/lib/interface'
-import { getCurrentUser } from "@/lib/userStore";
+import { getCurrentUser , saveUser } from "@/lib/userStore";
 
 
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
@@ -34,6 +34,11 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
     let intervalId: NodeJS.Timeout;
   
     const checkUserAuth = async () => {
+      
+      if (userOnline){
+        saveUser(userOnline);
+      }
+
       if (!userOnline) {
         const user = await getCurrentUser(); 
   

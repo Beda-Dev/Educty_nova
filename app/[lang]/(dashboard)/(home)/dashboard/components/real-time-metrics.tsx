@@ -209,7 +209,7 @@ const RealTimeMetrics = ({ registrations, payments, users }: RealTimeMetricsProp
   return (
     <div className="space-y-4">
       {/* Métriques en temps réel */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
         {metrics.map((metric, index) => (
           <motion.div
             key={index}
@@ -313,7 +313,9 @@ const RealTimeMetrics = ({ registrations, payments, users }: RealTimeMetricsProp
       <Card>
         <CardContent className="p-4">
           <div className="text-center space-y-2">
-            <div className="text-2xl font-mono font-bold text-primary">{currentTime.toLocaleTimeString("fr-FR")}</div>
+            <div className="text-2xl font-mono font-bold text-primary">
+              {currentTime.toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}
+            </div>
             <div className="text-sm text-muted-foreground">
               {currentTime.toLocaleDateString("fr-FR", {
                 weekday: "long",

@@ -1,14 +1,13 @@
-"use client";
+"use client"
 
-import { useRouter, useParams, usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRouter, useParams, usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   Settings,
   BookOpen,
@@ -39,16 +38,18 @@ import {
   Clipboard,
   UserPlus,
   UserCheck,
-  LayoutGrid
-} from "lucide-react";
-import React, { useEffect, useState, useRef } from "react";
-import { forwardRef } from "react";
+  LayoutGrid,
+  Menu,
+  X,
+} from "lucide-react"
+import React, { useEffect, useState, useRef } from "react"
+import { forwardRef } from "react"
 
 const MenuTrigger = forwardRef<
   HTMLDivElement,
   React.PropsWithChildren<{
-    onMouseEnter: () => void;
-    onMouseLeave: () => void;
+    onMouseEnter: () => void
+    onMouseLeave: () => void
   }>
 >(({ children, onMouseEnter, onMouseLeave }, ref) => (
   <motion.div
@@ -61,35 +62,29 @@ const MenuTrigger = forwardRef<
   >
     {children}
   </motion.div>
-));
-MenuTrigger.displayName = "MenuTrigger";
+))
+MenuTrigger.displayName = "MenuTrigger"
 
 type MenuItem = {
-  id: string;
-  title: string;
-  icon: React.ReactNode;
-  path: string;
-  description?: string;
-  children?: MenuItem[];
-  hidden?: boolean;
-};
+  id: string
+  title: string
+  icon: React.ReactNode
+  path: string
+  description?: string
+  children?: MenuItem[]
+  hidden?: boolean
+}
 
 type MenuCategory = {
-  parametres: MenuItem[];
-  inventaire: MenuItem[];
-  eleves: MenuItem[];
-  caisse_comptabilite: MenuItem[];
-  pedagogie: MenuItem[];
-  vie_scolaire: MenuItem[];
-};
+  parametres: MenuItem[]
+  inventaire: MenuItem[]
+  eleves: MenuItem[]
+  caisse_comptabilite: MenuItem[]
+  pedagogie: MenuItem[]
+  vie_scolaire: MenuItem[]
+}
 
-type MenuKey =
-  | "caisse_comptabilite"
-  | "eleves"
-  | "parametres"
-  | "pedagogie"
-  | "inventaire"
-  | "vie_scolaire";
+type MenuKey = "caisse_comptabilite" | "eleves" | "parametres" | "pedagogie" | "inventaire" | "vie_scolaire"
 
 const menuItems: MenuCategory = {
   parametres: [
@@ -154,7 +149,7 @@ const menuItems: MenuCategory = {
           title: "Types de Périodes",
           description: "Gestion des types de périodes académiques",
           icon: <Calendar className="w-6 h-6" />,
-          path: "/parametres/pedagogy/type_period"
+          path: "/parametres/pedagogy/type_period",
         },
         {
           id: "periodes",
@@ -169,7 +164,7 @@ const menuItems: MenuCategory = {
           description: "Gestion des séries",
           icon: <LayoutGrid className="w-6 h-6" />,
           path: "/parametres/pedagogy/serie",
-        }
+        },
       ],
     },
     {
@@ -227,7 +222,7 @@ const menuItems: MenuCategory = {
           description: "Gérer les professeurs",
           icon: <UserCog className="w-4 h-4" />,
           path: "/parametres/administration/professeur",
-        }
+        },
       ],
     },
     {
@@ -297,13 +292,13 @@ const menuItems: MenuCategory = {
           id: "new-registration",
           title: "Nouvelle inscription",
           path: "/eleves/registration/new_registration",
-          icon: <UserPlus  className="w-4 h-4" />,
+          icon: <UserPlus className="w-4 h-4" />,
         },
         {
           id: "re-registration",
           title: "Re-inscription",
           path: "/eleves/registration/re-registration",
-          icon: <UserCheck  className="w-4 h-4" />,
+          icon: <UserCheck className="w-4 h-4" />,
         },
       ],
     },
@@ -361,7 +356,7 @@ const menuItems: MenuCategory = {
           title: "Dépense",
           path: "/caisse_comptabilite/decaissement/depense",
           icon: <DollarSign className="w-4 h-4" />,
-        }
+        },
       ],
     },
     {
@@ -375,16 +370,16 @@ const menuItems: MenuCategory = {
           title: "fermeture caisse",
           icon: <Calendar className="w-6 h-6" />,
           path: "/caisse_comptabilite/close-session",
-          hidden: true
+          hidden: true,
         },
         {
           id: "open_session",
           title: "ouverture caisse",
           icon: <Calendar className="w-6 h-6" />,
           path: "/caisse_comptabilite/open-session",
-          hidden: false
-        }
-      ]
+          hidden: false,
+        },
+      ],
     },
     {
       id: "demandes",
@@ -403,7 +398,6 @@ const menuItems: MenuCategory = {
       title: "Résumé financier",
       icon: <DollarSign className="w-4 h-4" />,
       path: "/caisse_comptabilite/resume_financie",
-
     },
   ],
   pedagogie: [
@@ -521,90 +515,76 @@ const menuItems: MenuCategory = {
       children: [],
     },
   ],
-};
+}
 
 export default function DynamicMenu() {
-  const router = useRouter();
-  const params = useParams();
-  const pathname = usePathname();
-  const lang = params.lang as string;
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
-  
+  const router = useRouter()
+  const params = useParams()
+  const pathname = usePathname()
+  const lang = params.lang as string
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [openCollapsibles, setOpenCollapsibles] = useState<Set<string>>(new Set())
+
   // Utilisation de useRef pour gérer les timers de fermeture
-  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const navigate = React.useCallback(
     (path: string) => {
-      router.push(`/${lang}/${path}`);
+      router.push(`/${lang}/${path}`)
+      setIsMobileMenuOpen(false) // Fermer le menu mobile après navigation
     },
-    [router, lang]
-  );
+    [router, lang],
+  )
 
   const isPathActive = React.useCallback(
     (path: string, children?: MenuItem[]): boolean => {
-      const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-      const fullPath = `/${lang}${normalizedPath}`;
-      const normalizedCurrent = pathname.endsWith("/") 
-        ? pathname.slice(0, -1) 
-        : pathname;
-
-      const currentSegments = normalizedCurrent.split('/').filter(Boolean);
-      const menuSegments = fullPath.split('/').filter(Boolean);
-
-      const isPrefix = menuSegments.every((segment, index) => 
-        currentSegments[index] === segment
-      );
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`
+      const fullPath = `/${lang}${normalizedPath}`
+      const normalizedCurrent = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname
+      const currentSegments = normalizedCurrent.split("/").filter(Boolean)
+      const menuSegments = fullPath.split("/").filter(Boolean)
+      const isPrefix = menuSegments.every((segment, index) => currentSegments[index] === segment)
 
       if (isPrefix) {
-        return true;
+        return true
       }
 
       if (children) {
-        return children.some((child) => 
-          isPathActive(child.path, child.children)
-        );
+        return children.some((child) => isPathActive(child.path, child.children))
       }
 
-      return false;
+      return false
     },
-    [pathname, lang]
-  );
+    [pathname, lang],
+  )
 
   const shouldShowMenu = React.useCallback(() => {
     if (pathname === `/${lang}` || pathname === `/${lang}/`) {
-      return true;
+      return true
     }
 
     const checkPathInMenu = (items: MenuItem[]): boolean => {
       return items.some((item) => {
-        const normalizedPath = item.path.startsWith("/") ? item.path : `/${item.path}`;
-        const fullPath = `/${lang}${normalizedPath}`;
-        const normalizedCurrent = pathname.endsWith("/") 
-          ? pathname.slice(0, -1) 
-          : pathname;
+        const normalizedPath = item.path.startsWith("/") ? item.path : `/${item.path}`
+        const fullPath = `/${lang}${normalizedPath}`
+        const normalizedCurrent = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname
+        const currentSegments = normalizedCurrent.split("/").filter(Boolean)
+        const menuSegments = fullPath.split("/").filter(Boolean)
+        const isPrefix = menuSegments.every((segment, index) => currentSegments[index] === segment)
 
-        const currentSegments = normalizedCurrent.split('/').filter(Boolean);
-        const menuSegments = fullPath.split('/').filter(Boolean);
+        if (isPrefix) return true
 
-        const isPrefix = menuSegments.every((segment, index) => 
-          currentSegments[index] === segment
-        );
+        return item.children ? checkPathInMenu(item.children) : false
+      })
+    }
 
-        if (isPrefix) return true;
-        
-        return item.children ? checkPathInMenu(item.children) : false;
-      });
-    };
-
-    return Object.values(menuItems).some((category) =>
-      checkPathInMenu(category)
-    );
-  }, [pathname, lang]);
+    return Object.values(menuItems).some((category) => checkPathInMenu(category))
+  }, [pathname, lang])
 
   const getActiveMenu = React.useCallback((): MenuKey => {
-    const pathSegments = pathname.split("/").filter(Boolean);
-
+    const pathSegments = pathname.split("/").filter(Boolean)
     const specialRoutes: Record<string, MenuKey> = {
       paiement: "caisse_comptabilite",
       encaissement: "caisse_comptabilite",
@@ -623,145 +603,147 @@ export default function DynamicMenu() {
       scolarite: "parametres",
       administration: "parametres",
       caisse: "parametres",
-    };
+    }
 
-    const menuKeys = Object.keys(menuItems) as MenuKey[];
-
+    const menuKeys = Object.keys(menuItems) as MenuKey[]
     for (const segment of pathSegments) {
       if (specialRoutes[segment]) {
-        return specialRoutes[segment];
+        return specialRoutes[segment]
       }
-
       if (menuKeys.includes(segment as MenuKey)) {
-        return segment as MenuKey;
+        return segment as MenuKey
       }
     }
 
-    if (pathSegments.some(seg => seg === "parametres")) {
-      return "parametres";
+    if (pathSegments.some((seg) => seg === "parametres")) {
+      return "parametres"
     }
-    if (pathSegments.some(seg => seg === "eleves")) {
-      return "eleves";
+    if (pathSegments.some((seg) => seg === "eleves")) {
+      return "eleves"
     }
     if (
-      pathSegments.some(seg => seg === "caisse_comptabilite") ||
-      pathSegments.some(seg => seg === "encaissement") ||
-      pathSegments.some(seg => seg === "decaissement")
+      pathSegments.some((seg) => seg === "caisse_comptabilite") ||
+      pathSegments.some((seg) => seg === "encaissement") ||
+      pathSegments.some((seg) => seg === "decaissement")
     ) {
-      return "caisse_comptabilite";
+      return "caisse_comptabilite"
     }
-    if (pathSegments.some(seg => seg === "pedagogie")) {
-      return "pedagogie";
+    if (pathSegments.some((seg) => seg === "pedagogie")) {
+      return "pedagogie"
     }
-    if (pathSegments.some(seg => seg === "inventaire")) {
-      return "inventaire";
+    if (pathSegments.some((seg) => seg === "inventaire")) {
+      return "inventaire"
     }
-    if (pathSegments.some(seg => seg === "vie_scolaire")) {
-      return "vie_scolaire";
+    if (pathSegments.some((seg) => seg === "vie_scolaire")) {
+      return "vie_scolaire"
     }
 
-    return "parametres";
-  }, [pathname]);
+    return "parametres"
+  }, [pathname])
 
-  const activeMenu = getActiveMenu();
-  const currentMenuItems = menuItems[activeMenu] || [];
+  const activeMenu = getActiveMenu()
+  const currentMenuItems = menuItems[activeMenu] || []
 
   // Fonction pour gérer l'ouverture du popover avec délai
   const handleOpenPopover = React.useCallback((itemId: string) => {
     // Annuler tout timer de fermeture en cours
     if (closeTimerRef.current) {
-      clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
+      clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
     }
-    setOpenPopoverId(itemId);
-  }, []);
+    setOpenPopoverId(itemId)
+  }, [])
 
   // Fonction pour gérer la fermeture du popover avec délai
   const handleClosePopover = React.useCallback(() => {
     closeTimerRef.current = setTimeout(() => {
-      setOpenPopoverId(null);
-    }, 300); // Délai de 300ms avant fermeture
-  }, []);
+      setOpenPopoverId(null)
+    }, 300) // Délai de 300ms avant fermeture
+  }, [])
+
+  // Fonction pour gérer les collapsibles sur mobile
+  const toggleCollapsible = (itemId: string) => {
+    setOpenCollapsibles((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId)
+      } else {
+        newSet.add(itemId)
+      }
+      return newSet
+    })
+  }
 
   // Nettoyage des timers au démontage du composant
   useEffect(() => {
     return () => {
       if (closeTimerRef.current) {
-        clearTimeout(closeTimerRef.current);
+        clearTimeout(closeTimerRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
-  const MenuItemComponent = React.useCallback(
+  // Composant pour les éléments de menu desktop (avec popovers)
+  const DesktopMenuItemComponent = React.useCallback(
     ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
-      const visibleChildren = item.children?.filter(child => !child.hidden) || [];
-      const hasVisibleChildren = visibleChildren.length > 0;
-      const hasAnyChildren = item.children && item.children.length > 0;
-      const isActive = isPathActive(item.path, item.children);
+      const visibleChildren = item.children?.filter((child) => !child.hidden) || []
+      const hasVisibleChildren = visibleChildren.length > 0
+      const hasAnyChildren = item.children && item.children.length > 0
+      const isActive = isPathActive(item.path, item.children)
 
       const handleMouseEnter = () => {
-        setHoveredItem(item.id);
+        setHoveredItem(item.id)
         if (hasVisibleChildren) {
-          handleOpenPopover(item.id);
+          handleOpenPopover(item.id)
         }
-      };
+      }
 
       const handleMouseLeave = () => {
-        // Ne pas fermer immédiatement, laisser le temps de naviguer vers le popover
-        handleClosePopover();
-      };
+        handleClosePopover()
+      }
 
       const handleClick = () => {
         if (!hasAnyChildren) {
-          navigate(item.path);
-          setOpenPopoverId(null); // Fermer le popover lors de la navigation
+          navigate(item.path)
+          setOpenPopoverId(null)
         }
-      };
+      }
 
-      // Fonction pour maintenir le popover ouvert quand on survole le contenu
       const handlePopoverMouseEnter = () => {
         if (closeTimerRef.current) {
-          clearTimeout(closeTimerRef.current);
-          closeTimerRef.current = null;
+          clearTimeout(closeTimerRef.current)
+          closeTimerRef.current = null
         }
-      };
+      }
 
       const handlePopoverMouseLeave = () => {
-        handleClosePopover();
-      };
+        handleClosePopover()
+      }
 
       return (
         <Popover
           open={openPopoverId === item.id && hasVisibleChildren}
           onOpenChange={(open) => {
             if (!open) {
-              handleClosePopover();
+              handleClosePopover()
             } else if (hasVisibleChildren) {
-              handleOpenPopover(item.id);
+              handleOpenPopover(item.id)
             }
           }}
         >
           <PopoverTrigger asChild>
-            <div
-              className="relative"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
+            <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
               <motion.div
                 whileHover={{ scale: level === 0 ? 1.03 : 1.02 }}
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-md cursor-pointer hover:bg-muted transition-all",
-                  isActive
-                    ? "bg-skyblue/15 text-skyblue font-medium"
-                    : "text-foreground/90",
+                  isActive ? "bg-skyblue/15 text-skyblue font-medium" : "text-foreground/90",
                   level > 0 && "px-3 py-1.5",
-                  item.hidden && "hidden"
+                  item.hidden && "hidden",
                 )}
                 onClick={handleClick}
               >
-                <div className="flex items-center justify-center w-4 h-4">
-                  {item.icon}
-                </div>
+                <div className="flex items-center justify-center w-4 h-4">{item.icon}</div>
                 <span className="text-xs">{item.title}</span>
                 {hasVisibleChildren && (
                   <motion.div
@@ -775,7 +757,6 @@ export default function DynamicMenu() {
               </motion.div>
             </div>
           </PopoverTrigger>
-
           {hasVisibleChildren && (
             <AnimatePresence>
               {openPopoverId === item.id && (
@@ -783,7 +764,7 @@ export default function DynamicMenu() {
                   className={cn(
                     "p-2 z-50 shadow-lg bg-background/95 backdrop-blur border border-border/50",
                     level === 0 ? "w-56" : "w-48",
-                    level > 0 && "ml-1"
+                    level > 0 && "ml-1",
                   )}
                   align={level === 0 ? "start" : "end"}
                   sideOffset={5}
@@ -800,11 +781,7 @@ export default function DynamicMenu() {
                   >
                     <div className="flex flex-col gap-1">
                       {visibleChildren.map((child) => (
-                        <MenuItemComponent
-                          key={child.id}
-                          item={child}
-                          level={level + 1}
-                        />
+                        <DesktopMenuItemComponent key={child.id} item={child} level={level + 1} />
                       ))}
                     </div>
                   </motion.div>
@@ -813,22 +790,116 @@ export default function DynamicMenu() {
             </AnimatePresence>
           )}
         </Popover>
-      );
+      )
     },
-    [hoveredItem, openPopoverId, isPathActive, navigate, handleOpenPopover, handleClosePopover]
-  );
+    [hoveredItem, openPopoverId, isPathActive, navigate, handleOpenPopover, handleClosePopover],
+  )
+
+  // Composant pour les éléments de menu mobile (avec collapsibles)
+  const MobileMenuItemComponent = ({ item, level = 0 }: { item: MenuItem; level?: number }) => {
+    const visibleChildren = item.children?.filter((child) => !child.hidden) || []
+    const hasVisibleChildren = visibleChildren.length > 0
+    const hasAnyChildren = item.children && item.children.length > 0
+    const isActive = isPathActive(item.path, item.children)
+    const isOpen = openCollapsibles.has(item.id)
+
+    const handleClick = () => {
+      if (hasVisibleChildren) {
+        toggleCollapsible(item.id)
+      } else if (!hasAnyChildren) {
+        navigate(item.path)
+      }
+    }
+
+    return (
+      <div className={cn("w-full", item.hidden && "hidden")}>
+        {hasVisibleChildren ? (
+          <Collapsible open={isOpen} onOpenChange={() => toggleCollapsible(item.id)}>
+            <CollapsibleTrigger asChild>
+              <Button
+                variant="ghost"
+                className={cn(
+                  "w-full justify-start gap-3 h-auto py-3 px-4 text-left font-normal",
+                  isActive && "bg-skyblue/15 text-skyblue font-medium",
+                  level > 0 && "pl-8",
+                )}
+                onClick={handleClick}
+              >
+                <div className="flex items-center justify-center w-5 h-5">{item.icon}</div>
+                <span className="flex-1 text-sm">{item.title}</span>
+                <ChevronDown className={cn("w-4 h-4 transition-transform", isOpen && "rotate-180")} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-1">
+              {visibleChildren.map((child) => (
+                <MobileMenuItemComponent key={child.id} item={child} level={level + 1} />
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        ) : (
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start gap-3 h-auto py-3 px-4 text-left font-normal",
+              isActive && "bg-skyblue/15 text-skyblue font-medium",
+              level > 0 && "pl-8",
+            )}
+            onClick={handleClick}
+          >
+            <div className="flex items-center justify-center w-5 h-5">{item.icon}</div>
+            <span className="text-sm">{item.title}</span>
+          </Button>
+        )}
+      </div>
+    )
+  }
 
   if (!shouldShowMenu()) {
-    return null;
+    return null
   }
 
   return (
-    <Card className="w-full px-4 py-3 rounded-lg shadow-sm bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex justify-center gap-4">
-        {currentMenuItems.map((item) => (
-          <MenuItemComponent key={item.id} item={item} />
-        ))}
+    <>
+      {/* Menu Desktop */}
+      <Card className="hidden md:block w-full px-4 py-3 rounded-lg shadow-sm bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex justify-center gap-4 overflow-x-auto">
+          {currentMenuItems.map((item) => (
+            <DesktopMenuItemComponent key={item.id} item={item} />
+          ))}
+        </div>
+      </Card>
+
+      {/* Menu Mobile */}
+      <div className="md:hidden">
+        <Card className="w-full px-4 py-3 rounded-lg shadow-sm bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-full justify-between">
+                <div className="flex items-center gap-2">
+                  <Menu className="w-4 h-4" />
+                  <span className="text-sm font-medium">Menu</span>
+                </div>
+                <ChevronDown className="w-4 h-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[80vh] p-0">
+              <div className="flex flex-col h-full">
+                <div className="flex items-center justify-between p-4 border-b">
+                  <h2 className="text-lg font-semibold">Navigation</h2>
+                  <Button variant="ghost" size="sm" onClick={() => setIsMobileMenuOpen(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                  {currentMenuItems.map((item) => (
+                    <MobileMenuItemComponent key={item.id} item={item} />
+                  ))}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </Card>
       </div>
-    </Card>
-  );
+    </>
+  )
 }

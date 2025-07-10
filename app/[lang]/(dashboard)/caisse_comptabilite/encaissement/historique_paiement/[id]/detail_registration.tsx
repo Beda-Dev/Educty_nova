@@ -214,12 +214,14 @@ const PaymentDetail = ({ payment, detail }: Props) => {
   );
 };
 
+type PaymentItem = {
+  label: string;
+  total: number;
+  paid: number;
+};
+
 interface PaymentTableProps {
-  payments: {
-    label: string;
-    total: number;
-    paid: number;
-  }[];
+  payments: PaymentItem[];
   totalAmount: number;
   totalPaid: number;
   remainingAmount: number;
@@ -246,7 +248,7 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
               </td>
             </tr>
           ) : (
-            payments.map((payment, index) => (
+            payments.map((payment: PaymentItem, index: number) => (
               <tr key={index}>
                 <td className="border border-gray-300 p-2">{payment.label}</td>
                 <td className="border border-gray-300 p-2 text-right">{payment.total.toLocaleString()} {currency}</td>

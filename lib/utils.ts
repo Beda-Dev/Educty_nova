@@ -272,7 +272,7 @@ export async function generatePDFfromRef(
       backgroundColor: "#ffffff",
     })
 
-    const pdf = new jsPDF("p", "mm", "a4")
+    const pdf = new jsPDF("p", "mm", "a4" , true)
     const imgData = canvas.toDataURL("image/png")
     const { width, height } = canvas
     const pdfWidth = 190

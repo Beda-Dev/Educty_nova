@@ -30,6 +30,7 @@ import { toast } from "react-hot-toast";
 import {generationNumero} from "@/lib/fonction"
 
 
+
 interface dataProps {
   registration: Registration;
   studentData: DonneesEtudiantFusionnees;
@@ -45,7 +46,7 @@ const PaymentDetail = ({ registration, studentData }: dataProps) => {
   const [visibleNotifications, setVisibleNotifications] = useState<
     Record<string, boolean>
   >({});
-  
+    
 
   useEffect(() => {
     if (studentData.detailsPaiements) {

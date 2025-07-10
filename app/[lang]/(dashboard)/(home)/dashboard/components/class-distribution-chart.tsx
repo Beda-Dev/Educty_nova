@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { GraduationCap, Users, AlertTriangle, BarChart3, PieChartIcon } from 'lucide-react'
+import { GraduationCap, Users, AlertTriangle, BarChart3, PieChartIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Registration, Classe } from "@/lib/interface"
 
@@ -30,12 +30,31 @@ interface ClassDistributionChartProps {
 }
 
 const ClassDistributionChart = ({ registrations, classes }: ClassDistributionChartProps) => {
+  // Tableau de couleurs pour le camembert
+  const CHART_COLORS = [
+    "#3b82f6", // Bleu
+    "#ef4444", // Rouge
+    "#10b981", // Vert
+    "#f59e0b", // Orange
+    "#8b5cf6", // Violet
+    "#06b6d4", // Cyan
+    "#84cc16", // Lime
+    "#f97316", // Orange foncé
+    "#ec4899", // Rose
+    "#6366f1", // Indigo
+    "#14b8a6", // Teal
+    "#eab308", // Jaune
+    "#dc2626", // Rouge foncé
+    "#059669", // Vert émeraude
+    "#7c3aed", // Violet foncé
+    "#0891b2", // Cyan foncé
+  ]
   const [viewType, setViewType] = useState<"bar" | "pie" | "detailed">("detailed")
   const [sortBy, setSortBy] = useState<"name" | "occupancy" | "students">("occupancy")
 
   // Préparer les données avec plus de détails
   const classData =
-    classes?.map((classe) => {
+    classes?.map((classe, index) => {
       const studentsInClass = registrations.filter((reg) => reg.class_id === classe.id)
       const maxStudents = Number.parseInt(classe.max_student_number || "0")
       const occupancyRate = maxStudents > 0 ? Math.round((studentsInClass.length / maxStudents) * 100) : 0
@@ -55,11 +74,17 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
       else if (occupancyRate < 100) status = "full"
       else status = "overflow"
 
+      // Créer le nom d'affichage avec série si disponible
+      const displayName = classe.level?.label ? `${classe.label} (${classe.level.label})` : classe.label
+
+      const shortDisplayName = classe.level?.label ? `${classe.label} - ${classe.level.label}` : classe.label
+
       return {
         id: classe.id,
         name: classe.label,
-        level: classe.level?.label || null, // Ajouter le niveau/série
-        displayName: classe.level?.label ? `${classe.label} (${classe.level.label})` : classe.label, // Nom d'affichage complet
+        level: classe.level?.label || null,
+        displayName,
+        shortDisplayName,
         students: studentsInClass.length,
         capacity: maxStudents,
         occupancyRate,
@@ -67,7 +92,7 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
         maleCount,
         available: Math.max(0, maxStudents - studentsInClass.length),
         status,
-        color: getStatusColor(status),
+        color: CHART_COLORS[index % CHART_COLORS.length], // Utiliser le tableau de couleurs
       }
     }) || []
 
@@ -139,7 +164,7 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white p-4 border rounded-lg shadow-xl border-border"
         >
-          <p className="font-semibold text-foreground mb-2">{data.displayName}</p>
+          <p className="font-semibold text-foreground mb-2">{data.fullName || data.displayName}</p>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Élèves:</span>
@@ -150,11 +175,19 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Taux:</span>
               <Badge
-                color={data.occupancyRate >= 90 ? "destructive" : data.occupancyRate >= 75 ? "default" : "secondary"}
+                color={data.occupancyRate >= 90 ? "destructive" : data.occupancyRate >= 75 ? "skyblue" : "secondary"}
               >
                 {data.occupancyRate}%
               </Badge>
             </div>
+            {data.level && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Série:</span>
+                <Badge variant="outline" className="text-xs">
+                  {data.level}
+                </Badge>
+              </div>
+            )}
             {data.femaleCount > 0 && (
               <div className="text-xs text-pink-600">
                 👩 {data.femaleCount} fille{data.femaleCount > 1 ? "s" : ""}
@@ -195,21 +228,35 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
 
   const renderPieChart = () => {
     const pieData = classData.map((cls) => ({
-      name: cls.displayName,
+      name: cls.shortDisplayName, // Utiliser le nom court pour la légende
+      fullName: cls.displayName, // Nom complet pour le tooltip
       value: cls.students,
       color: cls.color,
+      level: cls.level,
     }))
 
     return (
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie data={pieData} cx="50%" cy="50%" outerRadius={100} dataKey="value" animationDuration={1000}>
+          <Pie
+            data={pieData}
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            dataKey="value"
+            animationDuration={1000}
+            label={({ name, value, percent }) => (value > 0 ? `${name}: ${(percent * 100).toFixed(0)}%` : null)}
+            labelLine={false}
+          >
             {pieData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />
-          <Legend />
+          <Legend
+            wrapperStyle={{ fontSize: "12px" }}
+            formatter={(value, entry) => <span style={{ color: entry.color }}>{entry?.payload?.value || ""}</span>}
+          />
         </PieChart>
       </ResponsiveContainer>
     )
@@ -224,17 +271,17 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: index * 0.05 }}
           className={cn(
-            "p-4 rounded-lg border transition-all duration-200 hover:shadow-md",
+            "p-3 lg:p-4 rounded-lg border transition-all duration-200 hover:shadow-md",
             classe.status === "overflow" && "border-destructive/50 bg-destructive/5",
             classe.status === "full" && "border-warning/50 bg-warning/5",
             classe.status === "empty" && "border-muted bg-muted/20",
           )}
         >
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
               <div
                 className={cn(
-                  "w-3 h-3 rounded-full",
+                  "w-3 h-3 rounded-full flex-shrink-0",
                   classe.status === "overflow" && "bg-destructive animate-pulse",
                   classe.status === "full" && "bg-warning animate-pulse",
                   classe.status === "high" && "bg-orange-500",
@@ -243,18 +290,16 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
                   classe.status === "empty" && "bg-muted-foreground",
                 )}
               />
-              <div>
-                <h4 className="font-semibold">{classe.name}</h4>
-                {classe.level && (
-                  <p className="text-xs text-muted-foreground">{classe.level}</p>
-                )}
+              <div className="min-w-0 flex-1">
+                <h4 className="font-semibold text-sm lg:text-base truncate">{classe.name}</h4>
+                {classe.level && <p className="text-xs text-muted-foreground truncate">Niveau : {classe.level}</p>}
               </div>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs flex-shrink-0">
                 {getStatusLabel(classe.status)}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
               <div className="text-right">
                 <div className="text-sm font-medium">
                   {classe.students}/{classe.capacity}
@@ -289,7 +334,7 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
             />
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 lg:gap-4">
                 {classe.femaleCount > 0 && <span className="text-pink-600">👩 {classe.femaleCount}</span>}
                 {classe.maleCount > 0 && <span className="text-blue-600">👨 {classe.maleCount}</span>}
               </div>
@@ -371,35 +416,35 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
         )}
       </AnimatePresence>
 
-      {/* Contrôles */}
+      {/* Contrôles responsive */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 overflow-x-auto">
           <Button
             variant={viewType === "detailed" ? "soft" : "outline"}
             size="sm"
             onClick={() => setViewType("detailed")}
-            className="gap-2"
+            className="gap-1 lg:gap-2 flex-shrink-0"
           >
             <Users className="h-3 w-3" />
-            Détaillé
+            <span className="hidden sm:inline">Détaillé</span>
           </Button>
           <Button
             variant={viewType === "bar" ? "soft" : "outline"}
             size="sm"
             onClick={() => setViewType("bar")}
-            className="gap-2"
+            className="gap-1 lg:gap-2 flex-shrink-0"
           >
             <BarChart3 className="h-3 w-3" />
-            Barres
+            <span className="hidden sm:inline">Barres</span>
           </Button>
           <Button
             variant={viewType === "pie" ? "soft" : "outline"}
             size="sm"
             onClick={() => setViewType("pie")}
-            className="gap-2"
+            className="gap-1 lg:gap-2 flex-shrink-0"
           >
             <PieChartIcon className="h-3 w-3" />
-            Camembert
+            <span className="hidden sm:inline">Camembert</span>
           </Button>
         </div>
 
@@ -407,11 +452,11 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-1 border rounded-md text-sm bg-background"
+            className="px-3 py-1 border rounded-md text-sm bg-background min-w-0"
           >
-            <option value="occupancy">Trier par occupation</option>
-            <option value="students">Trier par nombre d'élèves</option>
-            <option value="name">Trier par nom</option>
+            <option value="occupancy">Par occupation</option>
+            <option value="students">Par élèves</option>
+            <option value="name">Par nom</option>
           </select>
         )}
       </div>

@@ -100,7 +100,9 @@ export default function PaymentManagementPage() {
   const [paymentMethods, setPaymentMethods] = useState<Record<number, Array<{ id: number; amount: number }>>>({})
   const [givenAmount, setGivenAmount] = useState(0)
   const [totalPaidAmount, setTotalPaidAmount] = useState(0)
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(methodPayment[0]?.id || 0)
+  const principalPaymentMethod = methodPayment.find(method => method.isPrincipal === 1);
+const defaultPaymentMethod = principalPaymentMethod?.id || methodPayment[0]?.id || 0;
+const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defaultPaymentMethod);
   const [openConfirmModal, setOpenConfirmModal] = useState(false)
   const [openSuccessModal, setOpenSuccessModal] = useState(false)
   const [installmentErrors, setInstallmentErrors] = useState<Record<number, string>>({})
@@ -110,6 +112,7 @@ export default function PaymentManagementPage() {
 
   const currency = settings && settings[0]?.currency ? settings[0].currency : "FCFA"
   const printRef = useRef<HTMLDivElement>(null)
+
 
   // Filtrer les élèves inscrits pour l'année académique courante
   const currentYearStudents = useMemo(() => {
@@ -212,6 +215,8 @@ export default function PaymentManagementPage() {
       installmentDetails,
     }
   }, [selectedStudent, registrations, academicYearCurrent, pricing, installements, payments])
+  
+  
 
   useEffect(() => {
     setSelectedInstallments([])
@@ -1293,57 +1298,25 @@ const paymentMethodsSummary = useMemo(() => {
                     methodPayment={methodPayment}
                     currency={currency}
                   />
-                  {/* Résumé des méthodes de paiement */}
-                  {paymentMethodsSummary.length > 0 && (
-                    <>
-                      <Separator className="my-3 sm:my-4" />
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-medium mb-2">Détail des méthodes de paiement</h4>
-                        <div className="space-y-2">
-                          {paymentMethodsSummary.map((method) => (
-                            <div key={method.id} className="flex justify-between items-center">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs sm:text-sm">{method.name}</span>
-                                {method.id === methodPayment.find((m) => Number(m.isPrincipal) === 1)?.id && (
-                                  <Badge variant="outline" className="text-xs py-0 px-2">
-                                    Principale
-                                  </Badge>
-                                )}
-                              </div>
-                              <span className="font-medium text-xs sm:text-sm">
-                                +{formatAmount(method.amount)} {currency}
-                              </span>
-                            </div>
-                          ))}
-                          <div className="flex justify-between items-center pt-2 border-t">
-                            <span className="text-xs sm:text-sm font-medium">Total encaissements</span>
-                            <span className="font-bold text-xs sm:text-sm">
-                              +{formatAmount(paymentMethodsTotal)} {currency}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
                 </div>
               </div>
 
-              <DialogFooter className="sm:justify-between px-6 pb-6">
-                <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => generatePDF("print")} disabled={isProcessing}>
-                    <Printer className="w-4 h-4 mr-2" />
+              <DialogFooter className="sm:justify-center justify-outline px-4 pb-4 pt-2">
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm" onClick={() => generatePDF("print")} disabled={isProcessing}>
+                    <Printer className="w-3.5 h-3.5 mr-1" />
                     Imprimer
                   </Button>
-                  <Button variant="outline" onClick={() => generatePDF("download")} disabled={isProcessing}>
-                    <Download className="w-4 h-4 mr-2" />
+                  <Button variant="outline" size="sm" onClick={() => generatePDF("download")} disabled={isProcessing}>
+                    <Download className="w-3.5 h-3.5 mr-1" />
                     Télécharger PDF
                   </Button>
                 </div>
-                <div className="flex gap-2">
-                  <Button color='indigodye' variant="outline" onClick={resetPaymentForm}>
+                <div className="flex gap-1 mt-2">
+                  <Button size="sm" color='destructive' onClick={resetPaymentForm}>
                     Fermer
                   </Button>
-                  <Button onClick={resetPaymentForm}>Nouveau paiement</Button>
+                  <Button size="sm" color="indigodye" onClick={resetPaymentForm}>Nouveau paiement</Button>
                 </div>
               </DialogFooter>
             </div>

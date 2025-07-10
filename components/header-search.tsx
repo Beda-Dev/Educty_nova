@@ -551,7 +551,7 @@ const HeaderSearch: React.FC<HeaderSearchProps> = ({ open, setOpen }) => {
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-full h-8 w-8"
+              className="hidden md:flex rounded-full h-8 w-8"
               onClick={() => setOpen(false)}
             >
               <X className="h-4 w-4" />

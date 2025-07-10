@@ -9,6 +9,15 @@ import { useSchoolStore } from "@/store"
 import { generationNumero } from "@/lib/fonction"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
+interface InstallmentDetail {
+  installment: Installment;
+  pricing: Pricing;
+  payments: Payment[];
+  amountPaid: number;
+  remainingAmount: number;
+  isOverdue: boolean;
+}
+
 interface PaymentReceiptProps {
   student?: Student
   payments: Payment[]
@@ -34,6 +43,7 @@ const PaymentReceipt = ({
   methodPayment,
   currency,
 }: PaymentReceiptProps) => {
+  const {academicYearCurrent}= useSchoolStore();
   const schoolInfo = {
     logo: settings?.[0]?.establishment_logo || "",
     name: settings?.[0]?.establishment_name || "Nom Établissement",
@@ -59,66 +69,30 @@ const PaymentReceipt = ({
   const { payments: allPayments } = useSchoolStore();
 
   // Créer un résumé des paiements par type de frais en vérifiant tous les paiements de l'élève
-  const paymentSummary = financialData?.installmentDetails.reduce((acc: any[], detail: any) => {
-    const label = detail.pricing.fee_type.label;
-    const existing = acc.find(item => item.label === label);
-    const academicYearId = financialData?.academicYearCurrent?.id;
-
-    // Additionner tous les montants payés pour ce type de frais par l'élève ET pour la bonne année académique
-    const paidForThisInstallment = allPayments
-      .filter((p: any) => {
-        if (p.student_id !== student?.id) return false;
-        // Vérifie la correspondance année académique via installment.pricing.academic_years_id
-        if (p.installment && p.installment.pricing_id && detail.pricing) {
-          // On suppose que le store contient les pricing (tarifs) pour faire la correspondance
-          return (
-            p.installment_id === detail.installment.id &&
-            detail.pricing.academic_years_id === academicYearId
-          );
-        }
-        // Si le paiement a des détails (cas de paiement splitté)
-        if (p.payment_details) {
-          return p.payment_details.some(
-            (d: any) =>
-              d.installment_id === detail.installment.id &&
-              detail.pricing.academic_years_id === academicYearId
-          );
-        }
-        return false;
-      })
-      .reduce((sum: number, p: any) => {
-        // Paiement principal
-        if (
-          p.installment_id === detail.installment.id &&
-          detail.pricing.academic_years_id === academicYearId
-        ) {
-          return sum + Number(p.amount);
-        }
-        // Paiement splitté
-        if (p.payment_details) {
-          return sum + p.payment_details
-            .filter(
-              (d: any) =>
-                d.installment_id === detail.installment.id &&
-                detail.pricing.academic_years_id === academicYearId
-            )
-            .reduce((s: number, d: any) => s + Number(d.amount), 0);
-        }
-        return sum;
-      }, 0);
-
-    if (existing) {
-      existing.total += Number(detail.installment.amount_due);
-      existing.paid += paidForThisInstallment;
-    } else {
-      acc.push({
-        label,
-        total: Number(detail.installment.amount_due),
-        paid: paidForThisInstallment
-      });
-    }
-    return acc;
-  }, []);
+  const paymentSummary = financialData?.applicablePricing.map((pricing: Pricing) => {
+    const feeTypeLabel = pricing.fee_type.label;
+    
+    // Trouver tous les installments pour ce pricing avec typage explicite
+    const installmentDetails = financialData.installmentDetails
+      .filter((detail: InstallmentDetail) => detail.pricing.id === pricing.id);
+    
+    // Calculer le total dû et payé avec typage explicite
+    const totalDue = installmentDetails.reduce(
+      (sum: number, detail: InstallmentDetail) => sum + Number(detail.installment.amount_due), 
+      0
+    );
+    
+    const totalPaid = installmentDetails.reduce(
+      (sum: number, detail: InstallmentDetail) => sum + detail.amountPaid, 
+      0
+    );
+  
+    return {
+      label: feeTypeLabel,
+      total: totalDue,
+      paid: totalPaid
+    };
+  });
 
   return (
     <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
@@ -144,7 +118,7 @@ const PaymentReceipt = ({
               {schoolInfo.address} | Tél: {schoolInfo.phone}
             </p>
             <p className="text-xs text-gray-600 leading-snug">
-              Année scolaire: {financialData?.academicYearCurrent?.label || "N/A"}
+              Année scolaire: {academicYearCurrent.label || "N/A"}
             </p>
           </div>
         </div>
@@ -187,13 +161,13 @@ const PaymentReceipt = ({
               </span>
             </h3>
             <div className="my-2">
-              <PaymentTable
-                payments={paymentSummary || []}
-                totalAmount={totalDue}
-                totalPaid={totalPaidOverall + totalPaid}
-                remainingAmount={totalRemaining - totalPaid}
-                currency={currency}
-              />
+            <PaymentTable
+              payments={paymentSummary || []}
+              totalAmount={financialData?.totalDue || 0}
+              totalPaid={financialData?.totalPaid || 0}
+              remainingAmount={financialData?.totalRemaining || 0}
+              currency={currency}
+            />
             </div>
           </div>
 

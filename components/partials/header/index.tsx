@@ -29,25 +29,28 @@ const NavTools = ({ isDesktop, isMobile, sidebarType }: { isDesktop: boolean; is
         isSmallScreen && "gap-1 [&>*]:text-xs [&>*]:p-0"
       )}
     >
-      {userOnline && (
+
+      
+
+      {/* Ces éléments sont cachés sur écran mobile */}
+      {!isSmallScreen && (
+        <>
+              {userOnline && (
         <AcademicYearsDisplay
           data={academicYears}
           user={userOnline}
           Mobile={isSmallScreen}
         />
       )}
-      <LastOpenSessionPopover sessions={cashRegisterSessions} />
-
-      {/* Ces éléments sont cachés sur écran mobile */}
-      {!isSmallScreen && (
-        <>
+          <LastOpenSessionPopover sessions={cashRegisterSessions} />
           <Language />
           <FullScreen />
           <ThemeButton />
+          <NotificationMessage />
         </>
       )}
 
-      <NotificationMessage />
+      
 
       <div className="ltr:pl-2 rtl:pr-2">
         <ProfileInfo />

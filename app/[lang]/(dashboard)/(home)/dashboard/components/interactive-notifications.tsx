@@ -355,106 +355,106 @@ const InteractiveNotifications = ({
         }
       }
 
-      // 4. Échéances de paiement avec détails complets
-      const upcomingDueInstallments = installments.filter((installment) => {
-        const dueDate = new Date(installment.due_date)
-        const daysDiff = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-        return daysDiff <= 7 && daysDiff >= 0 && installment.status !== "paid"
-      })
+      // // 4. Échéances de paiement avec détails complets
+      // const upcomingDueInstallments = installments.filter((installment) => {
+      //   const dueDate = new Date(installment.due_date)
+      //   const daysDiff = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      //   return daysDiff <= 7 && daysDiff >= 0 && installment.status !== "paid"
+      // })
 
-      if (upcomingDueInstallments.length > 0) {
-        const notificationId = "upcoming-due-installments"
+      // if (upcomingDueInstallments.length > 0) {
+      //   const notificationId = "upcoming-due-installments"
 
-        if (!existingIds.has(notificationId)) {
-          const totalAmount = upcomingDueInstallments.reduce(
-            (sum, inst) => sum + Number.parseFloat(inst.amount_due || "0"),
-            0,
-          )
+      //   if (!existingIds.has(notificationId)) {
+      //     const totalAmount = upcomingDueInstallments.reduce(
+      //       (sum, inst) => sum + Number.parseFloat(inst.amount_due || "0"),
+      //       0,
+      //     )
 
-          const notification: Notification = {
-            id: notificationId,
-            type: "warning",
-            title: "Échéances à venir",
-            message: `${upcomingDueInstallments.length} échéance${upcomingDueInstallments.length > 1 ? "s" : ""} dans les 7 prochains jours - ${totalAmount.toLocaleString()} FCFA`,
-            timestamp: new Date(now.getTime() - 3600000),
-            read: false,
-            priority: "high",
-            category: "deadline",
-            data: { installments: upcomingDueInstallments, totalAmount },
-            details: {
-              items: upcomingDueInstallments.map((inst) => ({
-                id: inst.id,
-                amount: Number.parseFloat(inst.amount_due || "0"),
-                dueDate: inst.due_date,
-                status: inst.status,
-                daysRemaining: Math.ceil((new Date(inst.due_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
-              })),
-              totalCount: upcomingDueInstallments.length,
-              summary: `Montant total attendu: ${totalAmount.toLocaleString()} FCFA`,
-            },
-            action: {
-              label: "Voir échéances",
-              onClick: () => {
-                setSelectedNotification(notification)
-                setIsModalOpen(true)
-              },
-            },
-          }
+      //     const notification: Notification = {
+      //       id: notificationId,
+      //       type: "warning",
+      //       title: "Échéances à venir",
+      //       message: `${upcomingDueInstallments.length} échéance${upcomingDueInstallments.length > 1 ? "s" : ""} dans les 7 prochains jours - ${totalAmount.toLocaleString()} FCFA`,
+      //       timestamp: new Date(now.getTime() - 3600000),
+      //       read: false,
+      //       priority: "high",
+      //       category: "deadline",
+      //       data: { installments: upcomingDueInstallments, totalAmount },
+      //       details: {
+      //         items: upcomingDueInstallments.map((inst) => ({
+      //           id: inst.id,
+      //           amount: Number.parseFloat(inst.amount_due || "0"),
+      //           dueDate: inst.due_date,
+      //           status: inst.status,
+      //           daysRemaining: Math.ceil((new Date(inst.due_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
+      //         })),
+      //         totalCount: upcomingDueInstallments.length,
+      //         summary: `Montant total attendu: ${totalAmount.toLocaleString()} FCFA`,
+      //       },
+      //       action: {
+      //         label: "Voir échéances",
+      //         onClick: () => {
+      //           setSelectedNotification(notification)
+      //           setIsModalOpen(true)
+      //         },
+      //       },
+      //     }
 
-          newNotifs.push(notification)
-          saveNotificationToDB(notification)
-        }
-      }
+      //     newNotifs.push(notification)
+      //     saveNotificationToDB(notification)
+      //   }
+      // }
 
-      // 5. Échéances dépassées avec détails complets
-      const overdueInstallments = installments.filter((installment) => {
-        const dueDate = new Date(installment.due_date)
-        return dueDate < now && installment.status !== "paid"
-      })
+      // // 5. Échéances dépassées avec détails complets
+      // const overdueInstallments = installments.filter((installment) => {
+      //   const dueDate = new Date(installment.due_date)
+      //   return dueDate < now && installment.status !== "paid"
+      // })
 
-      if (overdueInstallments.length > 0) {
-        const notificationId = "overdue-installments"
+      // if (overdueInstallments.length > 0) {
+      //   const notificationId = "overdue-installments"
 
-        if (!existingIds.has(notificationId)) {
-          const totalOverdueAmount = overdueInstallments.reduce(
-            (sum, inst) => sum + Number.parseFloat(inst.amount_due || "0"),
-            0,
-          )
+      //   if (!existingIds.has(notificationId)) {
+      //     const totalOverdueAmount = overdueInstallments.reduce(
+      //       (sum, inst) => sum + Number.parseFloat(inst.amount_due || "0"),
+      //       0,
+      //     )
 
-          const notification: Notification = {
-            id: notificationId,
-            type: "error",
-            title: "Échéances dépassées",
-            message: `${overdueInstallments.length} paiement${overdueInstallments.length > 1 ? "s" : ""} en retard - ${totalOverdueAmount.toLocaleString()} FCFA`,
-            timestamp: new Date(now.getTime() - 1800000),
-            read: false,
-            priority: "high",
-            category: "deadline",
-            data: { installments: overdueInstallments, totalOverdueAmount },
-            details: {
-              items: overdueInstallments.map((inst) => ({
-                id: inst.id,
-                amount: Number.parseFloat(inst.amount_due || "0"),
-                dueDate: inst.due_date,
-                status: inst.status,
-                daysOverdue: Math.ceil((now.getTime() - new Date(inst.due_date).getTime()) / (1000 * 60 * 60 * 24)),
-              })),
-              totalCount: overdueInstallments.length,
-              summary: `Montant total en retard: ${totalOverdueAmount.toLocaleString()} FCFA`,
-            },
-            action: {
-              label: "Traiter retards",
-              onClick: () => {
-                setSelectedNotification(notification)
-                setIsModalOpen(true)
-              },
-            },
-          }
+      //     const notification: Notification = {
+      //       id: notificationId,
+      //       type: "error",
+      //       title: "Échéances dépassées",
+      //       message: `${overdueInstallments.length} paiement${overdueInstallments.length > 1 ? "s" : ""} en retard - ${totalOverdueAmount.toLocaleString()} FCFA`,
+      //       timestamp: new Date(now.getTime() - 1800000),
+      //       read: false,
+      //       priority: "high",
+      //       category: "deadline",
+      //       data: { installments: overdueInstallments, totalOverdueAmount },
+      //       details: {
+      //         items: overdueInstallments.map((inst) => ({
+      //           id: inst.id,
+      //           amount: Number.parseFloat(inst.amount_due || "0"),
+      //           dueDate: inst.due_date,
+      //           status: inst.status,
+      //           daysOverdue: Math.ceil((now.getTime() - new Date(inst.due_date).getTime()) / (1000 * 60 * 60 * 24)),
+      //         })),
+      //         totalCount: overdueInstallments.length,
+      //         summary: `Montant total en retard: ${totalOverdueAmount.toLocaleString()} FCFA`,
+      //       },
+      //       action: {
+      //         label: "Traiter retards",
+      //         onClick: () => {
+      //           setSelectedNotification(notification)
+      //           setIsModalOpen(true)
+      //         },
+      //       },
+      //     }
 
-          newNotifs.push(notification)
-          saveNotificationToDB(notification)
-        }
-      }
+      //     newNotifs.push(notification)
+      //     saveNotificationToDB(notification)
+      //   }
+      // }
 
       // Combiner avec les notifications existantes et trier
       // Définition des valeurs autorisées
@@ -626,10 +626,10 @@ const InteractiveNotifications = ({
   const handleItemClick = (item: any, category: string) => {
     switch (category) {
       case "payment":
-        router.push(`/payments/${item.id}`)
+        router.push(`/caisse_comptabilite/encaissement/historique_paiement/${item.id}`)
         break
       case "registration":
-        router.push(`/students/${item.studentId}`)
+        router.push(`/eleves/historique/${item.studentId}`)
         break
       case "class":
         router.push(`/students/${item.id}`)
