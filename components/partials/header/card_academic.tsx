@@ -14,11 +14,11 @@ import dayjs from "dayjs";
 interface AcademicYearsDisplayProps {
   data: AcademicYear[];
   user: User;
-  Mobile?: boolean; 
+  Mobile?: boolean;
 }
 
-const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({ 
-  data, 
+const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
+  data,
   user
 }) => {
   const permissionRequis = ["activer annee_Academique", "creer annee_Academique", "modifier annee_Academique"];
@@ -42,7 +42,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
 
   const handleYearChange = async (value: string) => {
     if (!value) return;
-    
+
     setIsLoading(true);
     setError(null);
 
@@ -96,8 +96,8 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <Card className="p-4 bg-background">
-        <p className="text-sm text-muted-foreground">
+      <Card className="p-2 bg-background">
+        <p className="text-xs text-muted-foreground">
           Aucune année académique disponible
         </p>
       </Card>
@@ -107,19 +107,20 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
   return (
     <div className="bg-background">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium">Année académique</h3>
+        <div className="flex items-center space-x-2">
+          <h3 className="text-xs hidden sm:inline text-muted-foreground">Année académique</h3>
           {!hasAdminAccess && (
-            <p className="text-sm">
+            <p className="text-sm font-medium">
               {currentAcademicYear?.label || "Non définie"}
             </p>
           )}
         </div>
 
+
         {hasAdminAccess && (
           <div className="flex-1 sm:max-w-[250px]">
-            <Select 
-              value={selectedYear} 
+            <Select
+              value={selectedYear}
               onValueChange={handleYearChange}
               disabled={isLoading}
             >
@@ -141,11 +142,11 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
                   </>
                 )}
               </SelectTrigger>
-              
+
               <SelectContent>
                 {activeAcademicYears.map((year) => (
-                  <SelectItem 
-                    key={year.id} 
+                  <SelectItem
+                    key={year.id}
                     value={year.id.toString()}
                     className="text-xs"
                   >
@@ -154,7 +155,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
                 ))}
               </SelectContent>
             </Select>
-            
+
             {error && (
               <p className="mt-1 text-xs text-destructive">{error}</p>
             )}

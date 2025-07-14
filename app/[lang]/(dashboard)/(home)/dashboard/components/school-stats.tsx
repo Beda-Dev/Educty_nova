@@ -1,19 +1,21 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { Users, GraduationCap, UserCheck, Building } from "lucide-react"
-import type { User, Classe, Registration } from "@/lib/interface"
+import { Users, GraduationCap, UserCheck, Building, User } from "lucide-react"
+import type { User as UserType, Classe, Registration, Professor } from "@/lib/interface"
 
 interface StatsProps {
   registrations: Registration[]
   classes: Classe[]
-  users: User[]
+  users: UserType[]
+  professors: Professor[]
 }
 
-const SchoolStats = ({ registrations, classes, users }: StatsProps) => {
+const SchoolStats = ({ registrations, classes, users, professors }: StatsProps) => {
   const totalStudents = registrations.length
   const totalClasses = classes.length
-  const totalUsers = users.length
+  const totalActiveUsers = users.length // Déjà filtrés pour active === 1
+  const totalProfessors = professors.length
 
   const femaleStudents = registrations.filter((reg) =>
     ["f", "féminin", "feminin", "female"].includes(reg.student?.sexe?.toLowerCase()),
@@ -22,6 +24,10 @@ const SchoolStats = ({ registrations, classes, users }: StatsProps) => {
   const maleStudents = registrations.filter((reg) =>
     ["m", "masculin", "male"].includes(reg.student?.sexe?.toLowerCase()),
   ).length
+
+  // Statistiques des professeurs
+  const permanentProfessors = professors.filter((prof) => prof.type === "permanent").length
+  const vacataireProfessors = professors.filter((prof) => prof.type === "vacataire").length
 
   const stats = [
     {
@@ -39,11 +45,18 @@ const SchoolStats = ({ registrations, classes, users }: StatsProps) => {
       description: "Classes actives",
     },
     {
-      title: "Personnel",
-      value: totalUsers,
+      title: "Personnel Actif",
+      value: totalActiveUsers,
       icon: UserCheck,
       color: "purple",
-      description: "Utilisateurs actifs",
+      description: "Utilisateurs avec accès",
+    },
+    {
+      title: "Professeurs",
+      value: totalProfessors,
+      icon: User,
+      color: "orange",
+      description: `${permanentProfessors} permanents, ${vacataireProfessors} vacataires`,
     },
     {
       title: "Taux de remplissage",

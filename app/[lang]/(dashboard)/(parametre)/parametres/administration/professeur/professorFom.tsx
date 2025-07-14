@@ -61,7 +61,7 @@ interface ProfessorFormProps {
 }
 
 export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFormProps) {
-  const { setProfessor , setUsers, users } = useSchoolStore();
+  const { setProfessor , setUsers, users , professor} = useSchoolStore();
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
 

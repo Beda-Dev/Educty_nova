@@ -2,9 +2,8 @@
 
 import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Users, GraduationCap, DollarSign, Activity, ArrowUpRight, ArrowDownRight } from "lucide-react"
+import { Users, GraduationCap, DollarSign, Activity, ArrowUpRight, ArrowDownRight, UserCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface AdvancedStatsCardsProps {
@@ -12,6 +11,9 @@ interface AdvancedStatsCardsProps {
   totalClasses: number
   totalRevenue: number
   totalUsers: number
+  totalProfessors: number
+  permanentProfessors: number
+  vacataireProfessors: number
   femaleStudents: number
   maleStudents: number
   classOccupancyRate: number
@@ -24,6 +26,9 @@ const AdvancedStatsCards = ({
   totalClasses,
   totalRevenue,
   totalUsers,
+  totalProfessors,
+  permanentProfessors,
+  vacataireProfessors,
   femaleStudents,
   maleStudents,
   classOccupancyRate,
@@ -38,7 +43,6 @@ const AdvancedStatsCards = ({
       color: "skyblue",
       trend: { value: 12, isPositive: true },
       details: `${femaleStudents} filles, ${maleStudents} garçons`,
-      progress: Math.min((totalStudents / 1000) * 100, 100),
     },
     {
       title: "Classes Actives",
@@ -47,7 +51,6 @@ const AdvancedStatsCards = ({
       color: "success",
       trend: { value: 5, isPositive: true },
       details: `${classOccupancyRate}% d'occupation`,
-      progress: classOccupancyRate,
     },
     {
       title: "Revenus Totaux",
@@ -55,8 +58,7 @@ const AdvancedStatsCards = ({
       icon: DollarSign,
       color: "primary",
       trend: { value: 8, isPositive: true },
-      details: currency,
-      progress: 75,
+      details: `Monnaie : ${currency}`,
       format: "currency",
     },
     {
@@ -65,8 +67,15 @@ const AdvancedStatsCards = ({
       icon: Activity,
       color: "indigodye",
       trend: { value: 2, isPositive: false },
-      details: "Utilisateurs ",
-      progress: 90,
+      details: "Utilisateurs avec accès",
+    },
+    {
+      title: "Professeurs",
+      value: totalProfessors,
+      icon: UserCheck,
+      color: "warning",
+      trend: { value: 3, isPositive: true },
+      details: `${permanentProfessors} permanents,${vacataireProfessors} vacataires`,
     },
   ]
 
@@ -97,7 +106,7 @@ const AdvancedStatsCards = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+      className="grid gap-4 md:grid-cols-2 lg:grid-cols-5"
     >
       {stats.map((stat, index) => (
         <motion.div key={index} variants={cardVariants}>
@@ -109,6 +118,7 @@ const AdvancedStatsCards = ({
               stat.color === "success" && "border-l-success bg-gradient-to-br from-success/5 to-success/10",
               stat.color === "primary" && "border-l-primary bg-gradient-to-br from-primary/5 to-primary/10",
               stat.color === "indigodye" && "border-l-indigodye bg-gradient-to-br from-indigodye/5 to-indigodye/10",
+              stat.color === "warning" && "border-l-warning bg-gradient-to-br from-warning/5 to-warning/10",
             )}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -120,6 +130,7 @@ const AdvancedStatsCards = ({
                   stat.color === "success" && "bg-success/20 text-success",
                   stat.color === "primary" && "bg-primary/20 text-primary",
                   stat.color === "indigodye" && "bg-indigodye/20 text-indigodye",
+                  stat.color === "warning" && "bg-warning/20 text-warning",
                 )}
               >
                 <stat.icon className="h-4 w-4" />
@@ -128,8 +139,10 @@ const AdvancedStatsCards = ({
 
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="text-2xl font-bold">
-                  {stat.format === "currency" ? `${stat.value.toLocaleString()} FCFA` : stat.value.toLocaleString()}
+                <div className="text-l font-bold">
+                  {stat.format === "currency"
+                    ? `${stat.value.toLocaleString()} ${currency}`
+                    : stat.value.toLocaleString()}
                 </div>
 
                 {showComparison && (
@@ -153,23 +166,6 @@ const AdvancedStatsCards = ({
               </div>
 
               <p className="text-xs text-muted-foreground">{stat.details}</p>
-
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span>Progression</span>
-                  <span>{stat.progress}%</span>
-                </div>
-                <Progress
-                  value={stat.progress}
-                  className={cn(
-                    "h-2",
-                    stat.color === "skyblue" && "[&>div]:bg-skyblue",
-                    stat.color === "success" && "[&>div]:bg-success",
-                    stat.color === "primary" && "[&>div]:bg-primary",
-                    stat.color === "indigodye" && "[&>div]:bg-indigodye",
-                  )}
-                />
-              </div>
             </CardContent>
 
             {/* Effet de fond décoratif */}
@@ -180,6 +176,7 @@ const AdvancedStatsCards = ({
                 stat.color === "success" && "bg-success",
                 stat.color === "primary" && "bg-primary",
                 stat.color === "indigodye" && "bg-indigodye",
+                stat.color === "warning" && "bg-warning",
               )}
             />
           </Card>

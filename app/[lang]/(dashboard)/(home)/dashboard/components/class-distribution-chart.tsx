@@ -74,15 +74,25 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
       else if (occupancyRate < 100) status = "full"
       else status = "overflow"
 
-      // Créer le nom d'affichage avec série si disponible
-      const displayName = classe.level?.label ? `${classe.label} (${classe.level.label})` : classe.label
+      // Créer le nom d'affichage avec niveau et série
+      let displayName = classe.label
+      let shortDisplayName = classe.label
 
-      const shortDisplayName = classe.level?.label ? `${classe.label} - ${classe.level.label}` : classe.label
+      if (classe.level) {
+        displayName += ` (${classe.level.label})`
+        shortDisplayName += ` - ${classe.level.label}`
+      }
+
+      if (classe.serie) {
+        displayName += ` - ${classe.serie.label}`
+        shortDisplayName += ` - ${classe.serie.label}`
+      }
 
       return {
         id: classe.id,
         name: classe.label,
         level: classe.level?.label || null,
+        serie: classe.serie?.label || null,
         displayName,
         shortDisplayName,
         students: studentsInClass.length,
@@ -175,16 +185,24 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Taux:</span>
               <Badge
-                color={data.occupancyRate >= 90 ? "destructive" : data.occupancyRate >= 75 ? "skyblue" : "secondary"}
+                color={data.occupancyRate >= 90 ? "destructive" : data.occupancyRate >= 75 ? "default" : "skyblue"}
               >
                 {data.occupancyRate}%
               </Badge>
             </div>
             {data.level && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Série:</span>
+                <span className="text-sm text-muted-foreground">Niveau:</span>
                 <Badge variant="outline" className="text-xs">
                   {data.level}
+                </Badge>
+              </div>
+            )}
+            {data.serie && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Série:</span>
+                <Badge variant="outline" className="text-xs">
+                  {data.serie}
                 </Badge>
               </div>
             )}
@@ -233,6 +251,7 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
       value: cls.students,
       color: cls.color,
       level: cls.level,
+      serie: cls.serie,
     }))
 
     return (
@@ -255,7 +274,7 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
           <Tooltip content={<CustomTooltip />} />
           <Legend
             wrapperStyle={{ fontSize: "12px" }}
-            formatter={(value, entry) => <span style={{ color: entry.color }}>{entry?.payload?.value || ""}</span>}
+            formatter={(value, entry) => <span style={{ color: entry.color }}>{entry.payload?.value}</span>}
           />
         </PieChart>
       </ResponsiveContainer>
@@ -292,7 +311,18 @@ const ClassDistributionChart = ({ registrations, classes }: ClassDistributionCha
               />
               <div className="min-w-0 flex-1">
                 <h4 className="font-semibold text-sm lg:text-base truncate">{classe.name}</h4>
-                {classe.level && <p className="text-xs text-muted-foreground truncate">Niveau : {classe.level}</p>}
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {classe.level && (
+                    <Badge  className="text-xs">
+                      {classe.level}
+                    </Badge>
+                  )}
+                  {classe.serie && (
+                    <Badge  className="text-xs">
+                      {classe.serie}
+                    </Badge>
+                  )}
+                </div>
               </div>
               <Badge variant="outline" className="text-xs flex-shrink-0">
                 {getStatusLabel(classe.status)}

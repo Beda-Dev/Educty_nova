@@ -23,7 +23,8 @@ import {
   fetchSetting,
   fetchPermissions,
   fetchCashRegisterSessions,
-  fetchPaymentMethods
+  fetchPaymentMethods,
+  fetchProfessor,
 } from "@/store/schoolservice";
 import {AcademicYear} from '@/lib/interface'
 import {updateStudentCountByClass} from "@/lib/fonction";
@@ -55,6 +56,7 @@ const DataFetcher = () => {
   const setPermission = useSchoolStore((state) => state.setPermission);
   const setCashRegisterSessions = useSchoolStore((state) => state.setCashRegisterSessions);
   const setmethodPayment = useSchoolStore((state) => state.setmethodPayment);
+  const setProfessor = useSchoolStore((state) => state.setProfessor);
 
 
 
@@ -89,8 +91,9 @@ const DataFetcher = () => {
         const permissions = await fetchPermissions();
         const sessions = await fetchCashRegisterSessions()
         const methodPayment = await fetchPaymentMethods();
+        const professor = await fetchProfessor();
 
-        // await updateStudentCountByClass(registrations, academicYearCurrent, classes);
+        await updateStudentCountByClass(registrations, academicYearCurrent, classes);
 
         reset();
         resetReinscription();
@@ -142,7 +145,7 @@ const DataFetcher = () => {
         setPermission(permissions);
         setCashRegisterSessions(sessions);
         setmethodPayment(methodPayment);
-
+        setProfessor(professor);
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
       }
@@ -174,7 +177,8 @@ const DataFetcher = () => {
     setCashRegisters,
     setExpenseTypes,
     setSettings,
-    setPermission
+    setPermission,
+    setProfessor
   ]);
 
   return null;
