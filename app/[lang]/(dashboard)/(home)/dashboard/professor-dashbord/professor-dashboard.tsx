@@ -69,66 +69,95 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
     classes: true,
   })
 
-  // Vérifications de type et guards
+  // Vérifications de type et conversion des IDs en nombres
   const isValidProfessor = (prof: any): prof is Professor => {
-    return prof && typeof prof.id === "number" && typeof prof.user_id === "number"
+    if (!prof) return false;
+    const id = Number(prof.id);
+    const userId = Number(prof.user_id);
+    return !isNaN(id) && !isNaN(userId);
   }
 
   const isValidTimetable = (timetable: any): timetable is Timetable => {
-    return (
-      timetable &&
-      typeof timetable.id === "number" &&
-      typeof timetable.professor_id === "string" &&
-      typeof timetable.class_id === "string" &&
-      typeof timetable.matter_id === "string"
-    )
+    if (!timetable) return false;
+    const id = Number(timetable.id);
+    const professorId = Number(timetable.professor_id);
+    const classId = Number(timetable.class_id);
+    const matterId = Number(timetable.matter_id);
+    return !isNaN(id) && !isNaN(professorId) && !isNaN(classId) && !isNaN(matterId);
   }
 
   const isValidRegistration = (reg: any): reg is Registration => {
-    return (
-      reg && typeof reg.id === "number" && typeof reg.academic_year_id === "number" && typeof reg.class_id === "number"
-    )
+    if (!reg) return false;
+    const id = Number(reg.id);
+    const academicYearId = Number(reg.academic_year_id);
+    const classId = Number(reg.class_id);
+    return !isNaN(id) && !isNaN(academicYearId) && !isNaN(classId);
   }
 
   // Trouver le professeur connecté avec vérification
-  const currentProfessor = professor?.find((prof: any) => 
-    isValidProfessor(prof) && 
-    Number(prof.user_id) === Number(userOnline?.id)
-  )
+  const currentProfessor = professor?.find((prof: any) => {
+    if (!prof || !userOnline) return false;
+    const userId = Number(prof.user_id);
+    const onlineUserId = Number(userOnline.id);
+    return !isNaN(userId) && !isNaN(onlineUserId) && userId === onlineUserId;
+  });
 
   // Filtrer les données avec vérifications
   const currentYearRegistrations =
-    registrations?.filter((reg: any) => 
-      isValidRegistration(reg) && 
-      Number(reg.academic_year_id) === Number(academicYearCurrent?.id)
-    ) || []
+    registrations?.filter((reg: any) => {
+      if (!isValidRegistration(reg) || !academicYearCurrent) return false;
+      const academicYearId = Number(academicYearCurrent.id);
+      const regYearId = Number(reg.academic_year_id);
+      return !isNaN(academicYearId) && !isNaN(regYearId) && academicYearId === regYearId;
+    }) || [];
 
   // Trouver la période active actuelle
-  const currentDate = new Date()
+  const currentDate = new Date();
   const activePeriod = academicYearCurrent?.periods?.find((period) => {
-    if (!period.pivot?.start_date || !period.pivot?.end_date) return false
-    const startDate = new Date(period.pivot.start_date)
-    const endDate = new Date(period.pivot.end_date)
-    return currentDate >= startDate && currentDate <= endDate
-  })
+    if (!period || !period.pivot?.start_date || !period.pivot?.end_date) return false;
+    const startDate = new Date(period.pivot.start_date);
+    const endDate = new Date(period.pivot.end_date);
+    return !isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && 
+           currentDate >= startDate && currentDate <= endDate;
+  });
 
   // Emploi du temps du professeur filtré par période active
   const professorTimetables =
     timetables?.filter((timetable: any) => {
-      if (!isValidTimetable(timetable) || !currentProfessor) return false
-
-      return (
-        Number(timetable.professor_id) === Number(currentProfessor.id) &&
-        Number(timetable.academic_year_id) === Number(academicYearCurrent?.id) &&
-        (!activePeriod || Number(timetable.period_id) === Number(activePeriod.id))
-      )
-    }) || []
+      if (!isValidTimetable(timetable) || !currentProfessor || !academicYearCurrent) return false;
+      
+      const professorId = Number(currentProfessor.id);
+      const academicYearId = Number(academicYearCurrent.id);
+      const timetableProfId = Number(timetable.professor_id);
+      const timetableYearId = Number(timetable.academic_year_id);
+      
+      if (isNaN(professorId) || isNaN(academicYearId) || isNaN(timetableProfId) || isNaN(timetableYearId)) {
+        return false;
+      }
+      
+      const periodId = activePeriod ? Number(activePeriod.id) : null;
+      const timetablePeriodId = timetable.period_id ? Number(timetable.period_id) : null;
+      
+      if (periodId && (timetablePeriodId === null || isNaN(timetablePeriodId) || timetablePeriodId !== periodId)) {
+        return false;
+      }
+      
+      return professorId === timetableProfId && academicYearId === timetableYearId;
+    }) || []; 
 
   // Classes du professeur
   const professorClasses = professorTimetables.reduce((acc, timetable) => {
-    const classe = classes?.find((c) => c.id.toString() === timetable.class_id)
-    if (classe && !acc.find((c) => c.id === classe.id)) {
-      acc.push(classe)
+    if (!timetable.class_id) return acc;
+    const classId = Number(timetable.class_id);
+    if (isNaN(classId)) return acc;
+    
+    const classe = classes?.find((c: any) => {
+      const classIdNum = Number(c.id);
+      return !isNaN(classIdNum) && classIdNum === classId;
+    });
+    
+    if (classe && !acc.some((c: any) => c.id === classe.id)) {
+      acc.push(classe);
     }
     return acc
   }, [] as Classe[])
