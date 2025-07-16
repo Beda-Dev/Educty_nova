@@ -33,8 +33,8 @@ const TimetableGrid = ({ timetables, classes, matters }: TimetableGridProps) => 
 
   // Fonction pour obtenir les détails d'un cours
   const getCourseDetails = (timetable: Timetable) => {
-    const classe = classes.find((c) => c.id.toString() === timetable.class_id)
-    const matter = matters.find((m) => m.id.toString() === timetable.matter_id)
+    const classe = classes.find((c) => Number(c.id) === Number(timetable.class_id))
+    const matter = matters.find((m) => Number(m.id) === Number(timetable.matter_id))
     return { classe, matter }
   }
 
@@ -97,7 +97,7 @@ const TimetableGrid = ({ timetables, classes, matters }: TimetableGridProps) => 
                               {matter?.name || "Matière inconnue"}
                             </Badge>
                             <p className="text-xs font-medium text-gray-700">{classe?.label || "Classe inconnue"}</p>
-                            <p className="text-xs text-gray-500">Salle {course.room}</p>
+                            <p className="text-xs text-gray-500">{course.room}</p>
                           </div>
                         </div>
                       </td>

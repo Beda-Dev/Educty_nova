@@ -1,132 +1,89 @@
-"use client";
-import React, { useState } from "react";
-import { cn, isLocationMatch, getDynamicPath } from "@/lib/utils";
-import { useSidebar, useThemeStore } from "@/store";
-import SidebarLogo from "../common/logo";
-import { menusConfig } from "@/config/menus";
-import MenuLabel from "../common/menu-label";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePathname } from "next/navigation";
-import SingleMenuItem from "./single-menu-item";
-import SubMenuHandler from "./sub-menu-handler";
-import NestedSubMenu from "../common/nested-menus";
-import { useSchoolStore } from "@/store";
-import { verificationPermission } from "@/lib/fonction";
-import { Role } from "@/lib/interface";
-
-
-const hasAccess = (
-  userPermissions: string[],
-  userRoles: string[],
-  item: any
-): boolean => {
-  const hasPermission =
-    !item.requiredPermission ||
-    verificationPermission({ permissionNames: userPermissions }, [
-      item.requiredPermission,
-    ]);
-
-  const hasRole = !item.requiredRole || userRoles.includes(item.requiredRole);
-
-  return hasPermission && hasRole && !item.hideIf;
-};
-
-const filterItems = (
-  items: any[],
-  userPermissions: string[],
-  userRoles: string[]
-): any[] => {
-  return items
-    .filter((item) => hasAccess(userPermissions, userRoles, item))
-    .map((item) => ({
-      ...item,
-      child: item.child
-        ? filterItems(item.child, userPermissions, userRoles)
-        : undefined,
-      multi_menu: item.multi_menu
-        ? filterItems(item.multi_menu, userPermissions, userRoles)
-        : undefined,
-    }));
-};
+"use client"
+import React, { useState } from "react"
+import { cn, isLocationMatch, getDynamicPath } from "@/lib/utils"
+import { useSidebar, useThemeStore } from "@/store"
+import SidebarLogo from "../common/logo"
+import { menusConfig, filterMenuItems } from "@/config/menus"
+import MenuLabel from "../common/menu-label"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { usePathname } from "next/navigation"
+import SingleMenuItem from "./single-menu-item"
+import SubMenuHandler from "./sub-menu-handler"
+import NestedSubMenu from "../common/nested-menus"
+import { useSchoolStore } from "@/store"
+import { MenuItemProps } from "@/config/menus"  
 
 const ClassicSidebar = ({ trans }: { trans: string }) => {
-  const { sidebarBg } = useSidebar();
-  const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
-  const [activeMultiMenu, setMultiMenu] = useState<number | null>(null);
-  const { userOnline } = useSchoolStore();
-  const userPermissions = userOnline?.permissionNames || [];
-  const userRoles = userOnline?.roles.map((role: Role) => role.name) || [];
-  const menus = filterItems(
-    menusConfig?.sidebarNav?.classic || [],
-    userPermissions,
-    userRoles
-  );
+  const { sidebarBg } = useSidebar()
+  const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null)
+  const [activeMultiMenu, setMultiMenu] = useState<number | null>(null)
 
-  const { collapsed, setCollapsed } = useSidebar();
-  const { isRtl } = useThemeStore();
-  const [hovered, setHovered] = useState<boolean>(false);
+  // Récupération des données utilisateur et professeurs depuis le store
+  const { userOnline, professor } = useSchoolStore()
+
+  // Filtrage des menus selon les permissions et le rôle de l'utilisateur
+  const menus = filterMenuItems(menusConfig?.sidebarNav?.classic as MenuItemProps[] || [], userOnline, professor || []) 
+  const { collapsed, setCollapsed } = useSidebar()
+  const { isRtl } = useThemeStore()
+  const [hovered, setHovered] = useState<boolean>(false)
 
   const toggleSubmenu = (i: number) => {
     if (activeSubmenu === i) {
-      setActiveSubmenu(null);
+      setActiveSubmenu(null)
     } else {
-      setActiveSubmenu(i);
+      setActiveSubmenu(i)
     }
-  };
+  }
 
   const toggleMultiMenu = (subIndex: number) => {
     if (activeMultiMenu === subIndex) {
-      setMultiMenu(null);
+      setMultiMenu(null)
     } else {
-      setMultiMenu(subIndex);
+      setMultiMenu(subIndex)
     }
-  };
+  }
 
-  const pathname = usePathname();
-  const locationName = getDynamicPath(pathname);
+  const pathname = usePathname()
+  const locationName = getDynamicPath(pathname)
 
   // Function to check if a menu item is active
   const isActiveMenu = (href: string) => {
-    return isLocationMatch(href, locationName);
-  };
+    return isLocationMatch(href, locationName)
+  }
 
   React.useEffect(() => {
-    let subMenuIndex = null;
-    let multiMenuIndex = null;
-    menus?.map((item: any, i: number) => {
+    let subMenuIndex = null
+    let multiMenuIndex = null
+    menus?.map((item: MenuItemProps, i: number) => {
       if (item?.child) {
-        item.child.map((childItem: any, j: number) => {
+        item.child.map((childItem: MenuItemProps, j: number) => {
           if (isLocationMatch(childItem.href, locationName)) {
-            subMenuIndex = i;
+            subMenuIndex = i
           }
           if (childItem?.multi_menu) {
-            childItem.multi_menu.map((multiItem: any, k: number) => {
+            childItem.multi_menu.map((multiItem: MenuItemProps, k: number) => {
               if (isLocationMatch(multiItem.href, locationName)) {
-                subMenuIndex = i;
-                multiMenuIndex = j;
+                subMenuIndex = i
+                multiMenuIndex = j
               }
-            });
+            })
           }
-        });
+        })
       }
-    });
-    setActiveSubmenu(subMenuIndex);
-    setMultiMenu(multiMenuIndex);
-  }, [locationName]);
+    })
+    setActiveSubmenu(subMenuIndex)
+    setMultiMenu(multiMenuIndex)
+  }, [locationName, menus])
 
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={cn(
-        "fixed  z-[999] top-0  bg-card h-full hover:!w-[248px]  border-r  ",
-        {
-          "w-[248px]": !collapsed,
-          "w-[72px]": collapsed,
-          "shadow-md": collapsed || hovered,
-        }
-      )}
+      className={cn("fixed  z-[999] top-0  bg-card h-full hover:!w-[248px]  border-r  ", {
+        "w-[248px]": !collapsed,
+        "w-[72px]": collapsed,
+        "shadow-md": collapsed || hovered,
+      })}
     >
       {sidebarBg !== "none" && (
         <div
@@ -149,27 +106,23 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
             "text-start": collapsed && hovered,
           })}
         >
-          {menus.map((item, i) => (
+          {menus.map((item: MenuItemProps, i: number) => (
             <li key={`menu_key_${i}`}>
               {/* single menu  */}
-
               {item && !item.child && !item.isHeader && (
                 <SingleMenuItem
                   item={item}
                   collapsed={collapsed}
                   hovered={hovered}
                   trans={trans}
-                  isActive={isActiveMenu(item.href)}
+                  isActive={isActiveMenu(item.href as string)}
                 />
               )}
 
               {/* menu label */}
-              {item &&
-                item.isHeader &&
-                !item.child &&
-                (!collapsed || hovered) && (
-                  <MenuLabel item={item} trans={trans} />
-                )}
+              {item && item.isHeader && !item.child && (!collapsed || hovered) && (
+                <MenuLabel item={item} trans={trans} />
+              )}
 
               {/* sub menu */}
               {item && item.child && (
@@ -202,7 +155,7 @@ const ClassicSidebar = ({ trans }: { trans: string }) => {
         </ul>
       </ScrollArea>
     </div>
-  );
-};
+  )
+}
 
-export default ClassicSidebar;
+export default ClassicSidebar

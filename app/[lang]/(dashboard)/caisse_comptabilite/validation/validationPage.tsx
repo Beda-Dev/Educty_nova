@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/tooltip";
 import { ValidationExpense } from "@/lib/interface";
 import { generationNumero } from "@/lib/fonction";
+import { filterValidationsByUserRole } from "./fonction";
 
 export default function ExpenseValidationsPage() {
   const { validationExpenses, userOnline, setValidationExpenses } =
@@ -79,14 +80,18 @@ export default function ExpenseValidationsPage() {
     setSortConfig({ key, direction });
   };
 
-  // Filtrer et trier les validations
-  const filteredValidations = validationExpenses
+  // Filtrer d'abord par rôle utilisateur
+  const filteredByRole = filterValidationsByUserRole(validationExpenses, userOnline);
+
+  // Puis appliquer les autres filtres
+  const filteredValidations = filteredByRole
     .filter((validation) => {
       const matchesSearch =
         validation.demand?.applicant?.name
-          .toLowerCase()
+          ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        validation.user?.name.toLowerCase().includes(searchTerm.toLowerCase());
+        validation.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        validation.demand?.pattern?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesStatus = selectedStatus
         ? validation.validation_status === selectedStatus

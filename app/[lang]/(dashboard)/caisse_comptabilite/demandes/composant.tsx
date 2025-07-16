@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useSchoolStore } from "@/store"
+import { filterDemandsByUserRole } from "./fonction"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -80,8 +81,12 @@ export default function DisbursementRequestsPage() {
     return new Intl.NumberFormat("fr-FR").format(Number(num))
   }
 
+  const filteredByRole = useMemo(() => {
+    return filterDemandsByUserRole(requests, userOnline)
+  }, [requests, userOnline])
+
   const handleFilter = () => {
-    let filtered = requests
+    let filtered = [...filteredByRole] // Utiliser la liste déjà filtrée par rôle
 
     if (statusFilter !== "all") {
       filtered = filtered.filter((request) => request.status === statusFilter)
@@ -103,7 +108,7 @@ export default function DisbursementRequestsPage() {
 
   useEffect(() => {
     handleFilter()
-  }, [statusFilter, searchTerm, requests])
+  }, [statusFilter, searchTerm, filteredByRole])
 
   const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE)
   const paginatedRequests = filteredRequests.slice(

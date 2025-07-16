@@ -17,6 +17,9 @@ import {
   fetchPayment,
   fetchExpenses,
 } from "@/store/schoolservice";
+import { checkSessionAccess, canAccessSessionPage } from "./fonction";
+import ErrorPage from "@/app/[lang]/non-Autoriser";
+import Loading from "@/app/[lang]/loading";
 
 interface Props {
   params: {
@@ -38,10 +41,12 @@ interface TransactionDetail {
 
 const DetailSessionPage = ({ params }: Props) => {
   const router = useRouter();
-  const [sessionCurrent, setSessionCurrent] = useState<
-    CashRegisterSession[] | null
-  >(null);
-  const {
+  const [loading, setLoading] = useState<boolean>(true);
+  const [accessDenied, setAccessDenied] = useState<boolean>(false);
+  const [session, setSession] = useState<CashRegisterSession | null>(null);
+  const [allSessions, setAllSessions] = useState<CashRegisterSession[] | null>(null);
+  const sessionId = Number(params.id);
+  const { userOnline,
     cashRegisterSessions,
     setCashRegisterSessions,
     transactions,
@@ -52,41 +57,71 @@ const DetailSessionPage = ({ params }: Props) => {
     setExpenses,
     settings,
   } = useSchoolStore();
-  const { id } = params;
 
-  // Synchronisation du store avec l'API à l'ouverture de la page
+
+  // Vérification de l'accès et chargement des données
   useEffect(() => {
-    const updateStore = async () => {
+    const loadData = async () => {
       try {
-        const [sessions, trans, pays, exps] = await Promise.all([
-          fetchCashRegisterSessions(),
+        setLoading(true);
+        
+        // Vérifier d'abord les droits d'accès
+        if (!canAccessSessionPage(userOnline)) {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
+        
+        // Charger les sessions
+        const sessions = await fetchCashRegisterSessions();
+        
+        // Trouver la session demandée
+        const currentSession = sessions.find((s: CashRegisterSession) => s.id === sessionId) || null;
+        
+        // Vérifier les droits d'accès à cette session spécifique
+        const { canAccess } = checkSessionAccess(currentSession, userOnline);
+        if (!canAccess) {
+router.push('/caisse_comptabilite/session_caisse');
+          return;
+          return;
+        }
+        
+        // Charger les autres données
+        const [trans, pays, exps] = await Promise.all([
           fetchTransactions(),
           fetchPayment(),
-          fetchExpenses ? fetchExpenses() : Promise.resolve([]), // fetchExpenses peut ne pas exister selon ton store
+          fetchExpenses ? fetchExpenses() : Promise.resolve([]),
         ]);
+        
+        setSession(currentSession);
+        setAllSessions(sessions);
         setCashRegisterSessions(sessions);
         setTransactions(trans);
         setPayments(pays);
         if (setExpenses && exps) setExpenses(exps);
       } catch (e) {
-        // Optionnel : gestion d'erreur
-        // console.error("Erreur lors de la mise à jour du store :", e)
+        console.error("Erreur lors du chargement des données :", e);
+      } finally {
+        setLoading(false);
       }
     };
-    updateStore();
+    
+    loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+
 
   // Filtrer les transactions associées à la session de caisse
   const filteredTransactions = useMemo(() => {
     return transactions.filter(
-      (t) => t.cash_register_session_id === Number(id)
+      (t) => t.cash_register_session_id === sessionId
     );
-  }, [transactions, id]);
+  }, [transactions, sessionId]);
 
   const filteredPayment = useMemo(() => {
     const transactionsfiltered = transactions.filter(
-      (t) => t.cash_register_session_id === Number(id)
+      (t) => t.cash_register_session_id === sessionId
     );
     if (transactionsfiltered.length === 0) return [];
     // Filtrer les paiements associés à la session de caisse
@@ -94,11 +129,11 @@ const DetailSessionPage = ({ params }: Props) => {
     return payments.filter((payment) =>
       transactionsfiltered.some((t) => t.id === payment.transaction_id)
     );
-  }, [transactions, payments, id]);
+  }, [transactions, payments, sessionId]);
 
   const filteredExpenses = useMemo(() => {
     const transactionsfiltered = transactions.filter(
-      (t) => t.cash_register_session_id === Number(id)
+      (t) => t.cash_register_session_id === sessionId
     );
     if (transactionsfiltered.length === 0) return [];
     // Filtrer les dépenses associées à la session de caisse
@@ -106,31 +141,9 @@ const DetailSessionPage = ({ params }: Props) => {
     return expenses.filter((expense) =>
       transactionsfiltered.some((t) => t.id === expense.transaction_id)
     );
-  }, [transactions, expenses, id]);
-  // Validation de l'ID de session
-  const sessionId = useMemo(() => {
-    const numId = Number(id);
-    return isNaN(numId) ? null : numId;
-  }, [id]);
-
-  // Récupération de la session
-  useEffect(() => {
-    if (!sessionId) return;
-
-    const session = cashRegisterSessions.find((s) => s.id === sessionId);
-    if (session) {
-      setSessionCurrent([session]);
-    } else {
-      setSessionCurrent(null);
-    }
-  }, [cashRegisterSessions, sessionId]);
-
-  // Vérification des données
-  const currentSession = useMemo(() => {
-    if (!sessionCurrent || sessionCurrent.length === 0) return null;
-    return sessionCurrent[0];
-  }, [sessionCurrent]);
-
+  }, [transactions, expenses, sessionId]);
+  
+  // Récupération de la devise
   const currency = useMemo(() => settings[0]?.currency || "FCFA", [settings]);
 
   // Formatage des données
@@ -166,7 +179,7 @@ const DetailSessionPage = ({ params }: Props) => {
 
   // Consolidation des transactions
   const sessionTransactions = useMemo<TransactionDetail[]>(() => {
-    if (!currentSession || !sessionId) return [];
+    if (!session || !sessionId) return [];
     const details: TransactionDetail[] = [];
 
     // Transactions générales
@@ -186,35 +199,36 @@ const DetailSessionPage = ({ params }: Props) => {
           // On n'ajoute pas la transaction décaissement si une dépense existe déjà pour cette transaction
           return;
         }
-            const payment_id = t.transaction_type?.toLowerCase().includes("encaissement")
-      ? (filteredPayment.find((p) => p.transaction_id === t.id)?.id ?? 0)
-      : 0;
-    const expense_id = t.transaction_type?.toLowerCase().includes("decaissement")
-      ? (filteredExpenses.find((e) => e.transaction_id === t.id)?.id ?? 0)
-      : 0;
-details.push({
-  id: t.id,
-  type: t.transaction_type?.toLowerCase().includes("encaissement")
-    ? "encaissement"
-    : "decaissement",
-  amount: Number(t.total_amount),
-  date: t.transaction_date,
-  description: `Transaction ${t.transaction_type}`,
-  reference: `${generationNumero(
-    payment_id !== 0 ? payment_id : expense_id, // <-- ici
-    t.transaction_date,
-    t.transaction_type?.toLowerCase().includes("encaissement")
-      ? "encaissement"
-      : "decaissement"
-  )}`,
-  details: t,
-  payment_id: t.transaction_type?.toLowerCase().includes("encaissement")
-    ? (filteredPayment.find((p) => p.transaction_id === t.id)?.id ?? 0)
-    : 0,
-  expense_id: t.transaction_type?.toLowerCase().includes("decaissement")
-    ? (filteredExpenses.find((e) => e.transaction_id === t.id)?.id ?? 0)
-    : 0,
-});
+        const payment_id = t.transaction_type?.toLowerCase().includes("encaissement")
+          ? (filteredPayment.find((p) => p.transaction_id === t.id)?.id ?? 0)
+          : 0;
+        const expense_id = t.transaction_type?.toLowerCase().includes("decaissement")
+          ? (filteredExpenses.find((e) => e.transaction_id === t.id)?.id ?? 0)
+          : 0;
+        
+        details.push({
+          id: t.id,
+          type: t.transaction_type?.toLowerCase().includes("encaissement")
+            ? "encaissement"
+            : "decaissement",
+          amount: Number(t.total_amount),
+          date: t.transaction_date,
+          description: `Transaction ${t.transaction_type}`,
+          reference: `${generationNumero(
+            payment_id !== 0 ? payment_id : expense_id,
+            t.transaction_date,
+            t.transaction_type?.toLowerCase().includes("encaissement")
+              ? "encaissement"
+              : "decaissement"
+          )}`,
+          details: t,
+          payment_id: t.transaction_type?.toLowerCase().includes("encaissement")
+            ? (filteredPayment.find((p) => p.transaction_id === t.id)?.id ?? 0)
+            : 0,
+          expense_id: t.transaction_type?.toLowerCase().includes("decaissement")
+            ? (filteredExpenses.find((e) => e.transaction_id === t.id)?.id ?? 0)
+            : 0,
+        });
       });
 
     // Paiements
@@ -237,19 +251,19 @@ details.push({
         ) {
           return;
         }
-details.push({
-  id: p.id,
-  type: "encaissement",
-  amount: Number(p.amount),
-  date: p.created_at,
-  description: p.student
-    ? `Paiement - ${p.student.first_name} ${p.student.name}`
-    : "Paiement",
-  reference: `${generationNumero(p.id, p.created_at, "encaissement")}`,
-  details: p,
-  payment_id: p.id,
-  expense_id: 0,
-});
+        details.push({
+          id: p.id,
+          type: "encaissement",
+          amount: Number(p.amount),
+          date: p.created_at,
+          description: p.student
+            ? `Paiement - ${p.student.first_name} ${p.student.name}`
+            : "Paiement",
+          reference: `${generationNumero(p.id, p.created_at, "encaissement")}`,
+          details: p,
+          payment_id: p.id,
+          expense_id: 0,
+        });
       });
 
     // Dépenses
@@ -270,21 +284,21 @@ details.push({
           )
       )
       .forEach((e) => {
-details.push({
-  id: e.id,
-  type: "decaissement",
-  amount: Number(e.amount),
-  date: e.expense_date,
-  description: e.label,
-  reference: `${generationNumero(
-    e.id,
-    e.expense_date,
-    "decaissement"
-  )}`,
-  details: e,
-  payment_id: 0,
-  expense_id: e.id,
-});
+        details.push({
+          id: e.id,
+          type: "decaissement",
+          amount: Number(e.amount),
+          date: e.expense_date,
+          description: e.label,
+          reference: `${generationNumero(
+            e.id,
+            e.expense_date,
+            "decaissement"
+          )}`,
+          details: e,
+          payment_id: 0,
+          expense_id: e.id,
+        });
       });
 
     // Correction : éviter les doublons d'ID dans details
@@ -297,10 +311,21 @@ details.push({
     return uniqueDetails.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-  }, [currentSession, transactions, payments, expenses, sessionId]);
+  }, [session, transactions, payments, expenses, sessionId, filteredTransactions, filteredPayment, filteredExpenses]);
 
   // Statistiques
   const statistics = useMemo(() => {
+    if (!session || !sessionId) {
+      return {
+        totalTransactions: 0,
+        totalEncaissements: 0,
+        totalDecaissements: 0,
+        nombreEncaissements: 0,
+        nombreDecaissements: 0,
+        soldeNet: 0
+      };
+    }
+    
     // Ne prendre en compte que les transactions qui concernent la session courante
     const encaissements = sessionTransactions.filter(
       (t) =>
@@ -338,11 +363,20 @@ details.push({
       nombreEncaissements: encaissements.length,
       nombreDecaissements: decaissements.length,
       soldeNet:
-        Number(sessionCurrent?.[0]?.opening_amount ?? 0) +
+        Number(session?.opening_amount ?? 0) +
         totalEncaissements -
         totalDecaissements,
     };
-  }, [sessionTransactions, sessionCurrent, sessionId]);
+  }, [sessionTransactions, session, sessionId]);
+  
+  // Gestion des états de chargement et d'erreur
+  if (loading) {
+    return <Loading />;
+  }
+  
+  if (accessDenied) {
+    return <ErrorPage />;
+  }
 
   if (!sessionId) {
     return (
@@ -365,7 +399,7 @@ details.push({
     );
   }
 
-  if (!currentSession) {
+  if (!session) {
     return (
       <Card>
         <CardContent className="p-12 text-center">
@@ -390,7 +424,7 @@ details.push({
     <Card>
       <CardContent className="p-6 space-y-6">
         <SessionInfo
-          currentSession={currentSession}
+          currentSession={session}
           formatDateTime={formatDateTime}
           formatAmount={formatAmount}
         />

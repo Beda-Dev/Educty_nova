@@ -10,8 +10,26 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowDownCircle, ArrowUpCircle, Wallet, Clock, FileText , CheckCircle } from "lucide-react";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Wallet,
+  Clock,
+  FileText,
+  CheckCircle,
+} from "lucide-react";
 import { useParams } from "next/navigation";
+import { useSchoolStore } from "@/store"; // ⬅️ import du store pour accès à userOnline & validationExpenses
+import { ValidationExpense } from "@/lib/interface";
+
+// Rôles disposant d'un accès complet (casse & espaces ignorés)
+const FULL_ACCESS_ROLES = [
+  "administrateur",
+  "directeur",
+  "caisse",
+  "caissier",
+  "comptable",
+];
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
@@ -24,20 +42,36 @@ const itemColors = [
   "bg-bittersweet-200 dark:bg-bittersweet-800/50 text-bittersweet-800 dark:text-bittersweet-100",
   "bg-skyblue-200 dark:bg-skyblue-800/50 text-skyblue-800 dark:text-skyblue-100",
   "bg-indigodye-200 dark:bg-indigodye-800/50 text-indigodye-800 dark:text-indigodye-100",
-  "bg-whitesmoke-200 dark:bg-whitesmoke-800/50 text-whitesmoke-800 dark:text-whitesmoke-100"
+  "bg-whitesmoke-200 dark:bg-whitesmoke-800/50 text-whitesmoke-800 dark:text-whitesmoke-100",
 ];
-
 
 export default function CaissePage() {
   const router = useRouter();
   const params = useParams();
   const lang = params.lang as string;
 
+  // ——————————— store
+  const { userOnline, validationExpenses } = useSchoolStore();
+
+  // Helpers ————————————————————————————————————
+  const normalize = (str?: string) =>
+    str?.toLowerCase().replace(/\s+/g, "") ?? "";
+
+  const hasFullAccess = userOnline?.roles?.some((role: any) =>
+    FULL_ACCESS_ROLES.includes(normalize(role.name))
+  );
+
+  const hasPendingValidation = validationExpenses?.some(
+    (v: ValidationExpense) =>
+      normalize(v.validation_status) === "en attente" || normalize(v.validation_status) === "refusée" || normalize(v.validation_status) === "approuvée" && v.user_id === userOnline?.id
+  );
+
   const getLocalizedPath = (path: string) => {
-    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    const cleanPath = path.startsWith("/") ? path.slice(1) : path;
     return `/${lang}/${cleanPath}`;
   };
 
+  // Définition du menu complet
   const menuItems = [
     {
       id: "encaissement",
@@ -45,7 +79,7 @@ export default function CaissePage() {
       description: "Gestion des entrées d'argent",
       icon: <ArrowDownCircle className="w-6 h-6" />,
       path: "/caisse_comptabilite/encaissement",
-      color: itemColors[0]
+      color: itemColors[0],
     },
     {
       id: "decaissement",
@@ -53,7 +87,7 @@ export default function CaissePage() {
       description: "Gestion des sorties d'argent",
       icon: <ArrowUpCircle className="w-6 h-6" />,
       path: "/caisse_comptabilite/decaissement",
-      color: itemColors[1]
+      color: itemColors[1],
     },
     {
       id: "sessions",
@@ -61,34 +95,46 @@ export default function CaissePage() {
       description: "Historique et gestion des sessions",
       icon: <Clock className="w-6 h-6" />,
       path: "/caisse_comptabilite/session_caisse",
-      color: itemColors[2]
+      color: itemColors[2],
     },
     {
-      id: "demandes de decaissement",
+      id: "demandes",
       title: "Demandes de décaissement",
       description: "Gestion des demandes de décaissement",
       icon: <FileText className="w-6 h-6" />,
       path: "/caisse_comptabilite/demandes",
-      color: itemColors[3]
+      color: itemColors[3],
     },
     {
-      id: "validation-decaissement",
+      id: "validation",
       title: "Validation des demandes de décaissement",
-      description: "Gestion de la validation des decaissement ",
+      description: "Gestion de la validation des décaissements",
       icon: <CheckCircle className="w-6 h-6" />,
       path: "/caisse_comptabilite/validation",
-      color: itemColors[4]
+      color: itemColors[4],
     },
     {
-      id: "resumer_financié",
+      id: "resume",
       title: "Résumé financier des élèves",
       description: "Gestion et visualisation des paiements des élèves",
       icon: <CheckCircle className="w-6 h-6" />,
       path: "/caisse_comptabilite/resume_financie",
-      color: itemColors[5]
-    }
+      color: itemColors[5],
+    },
   ];
 
+  // Filtrage selon les droits de l'utilisateur
+  const filteredItems = menuItems.filter((item) => {
+    if (hasFullAccess) return true; // Accès total
+
+    if (item.id === "demandes") return true; // Demandes de décaissement tjs visible
+
+    if (item.id === "validation" && hasPendingValidation) return true; // Validation visible si en attente
+
+    return false; // Tout le reste masqué
+  });
+
+  // Variants animation ——————————————————
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -97,7 +143,7 @@ export default function CaissePage() {
         staggerChildren: 0.1,
       },
     },
-  };
+  } as const;
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
@@ -116,14 +162,15 @@ export default function CaissePage() {
       boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
       transition: {
         duration: 0.3,
-        ease: "easeOut"
+        ease: "easeOut",
       },
     },
     tap: {
       scale: 0.98,
-    }
-  };
+    },
+  } as const;
 
+  // ——————————— Render
   return (
     <div className="p-4 md:p-6">
       <Card className="h-full border-none shadow-lg dark:shadow-none dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800">
@@ -135,7 +182,10 @@ export default function CaissePage() {
             <div>
               <h1
                 className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
+                style={{
+                  backgroundImage:
+                    "linear-gradient(90deg, skyblue, #ff6f61, #66023c)",
+                }}
               >
                 Gestion de Caisse
               </h1>
@@ -152,7 +202,7 @@ export default function CaissePage() {
             initial="hidden"
             animate="visible"
           >
-            {menuItems.map((item) => (
+            {filteredItems.map((item) => (
               <TooltipProvider key={item.id} delayDuration={100}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -161,18 +211,20 @@ export default function CaissePage() {
                       whileHover="hover"
                       whileTap="tap"
                       className={cn(
-                        "p-6 rounded-xl border cursor-pointer transition-all h-full",
+                        "relative p-6 rounded-xl border cursor-pointer transition-all h-full",
                         "flex flex-col items-start gap-4",
                         "bg-white dark:bg-gray-800/70",
                         "hover:shadow-md dark:hover:shadow-primary/10",
-                        item.color
+                        item.color,
                       )}
                       onClick={() => router.push(getLocalizedPath(item.path))}
                     >
-                      <div className={cn(
-                        "p-3 rounded-full flex items-center justify-center",
-                        item.color.replace('text-', 'bg-').split(' ')[0] + '/20'
-                      )}>
+                      <div
+                        className={cn(
+                          "p-3 rounded-full flex items-center justify-center",
+                          item.color.replace("text-", "bg-").split(" ")[0] + "/20",
+                        )}
+                      >
                         {item.icon}
                       </div>
                       <div className="space-y-1">

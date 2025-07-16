@@ -506,8 +506,8 @@ export default function CashRegisterSessionsPage({
                     <TableHead>Utilisateur</TableHead>
                     <TableHead>Ouverture</TableHead>
                     <TableHead>Fermeture</TableHead>
-                    <TableHead className="text-right">Montant initial</TableHead>
-                    <TableHead className="text-right">Montant final</TableHead>
+                    <TableHead >Montant initial</TableHead>
+                    <TableHead >Montant final</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="w-[50px]">Actions</TableHead>
                   </TableRow>
@@ -539,16 +539,16 @@ export default function CashRegisterSessionsPage({
                               Caisse {session.cash_register?.cash_register_number}
                             </TableCell>
                             <TableCell>{session.user?.name}</TableCell>
-                            <TableCell>{formatSessionDate(session.opening_date)}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-xs">{formatSessionDate(session.opening_date)}</TableCell>
+                            <TableCell className="text-xs" >
                               {session.status === "open" ? "—" : formatSessionDate(session.closing_date)}
                             </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex items-center justify-end">
+                            <TableCell className="text-xs" >
+                              <div>
                                 <span
                                   className={cn(
-                                    openingStatus?.type === "lower" && "text-red-600 font-semibold",
-                                    openingStatus?.type === "higher" && "text-green-600 font-semibold",
+                                    openingStatus?.type === "lower" && "text-red-600 ",
+                                    openingStatus?.type === "higher" && "text-green-600",
                                   )}
                                 >
                                   {formatCurrency(session.opening_amount)} {settings?.[0]?.currency || "FCFA"}
@@ -556,15 +556,15 @@ export default function CashRegisterSessionsPage({
                                 <AmountInconsistencyIndicator status={openingStatus} type="opening" />
                               </div>
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-xs">
                               {session.status === "open" ? (
                                 "—"
                               ) : (
-                                <div className="flex items-center justify-end">
+                                <div className="">
                                   <span
                                     className={cn(
-                                      closingStatus?.type === "lower" && "text-red-600 font-semibold",
-                                      closingStatus?.type === "higher" && "text-green-600 font-semibold",
+                                      closingStatus?.type === "lower" && "text-red-600",
+                                      closingStatus?.type === "higher" && "text-green-600",
                                     )}
                                   >
                                     {formatCurrency(session.closing_amount)} {settings?.[0]?.currency || "FCFA"}

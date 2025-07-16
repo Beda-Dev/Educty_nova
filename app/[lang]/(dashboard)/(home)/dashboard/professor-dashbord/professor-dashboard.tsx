@@ -164,8 +164,8 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
 
   // Matières du professeur
   const professorMatters = professorTimetables.reduce((acc, timetable) => {
-    const matter = matters?.find((m) => m.id.toString() === timetable.matter_id)
-    if (matter && !acc.find((m) => m.id === matter.id)) {
+    const matter = matters?.find((m) => Number(m.id) === Number(timetable.matter_id))
+    if (matter && !acc.find((m) => Number(m.id) === Number(matter.id))) {
       acc.push(matter)
     }
     return acc
