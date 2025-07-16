@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation"
 import SingleMenuItem from "./single-menu-item"
 import SubMenuHandler from "./sub-menu-handler"
 import NestedSubMenu from "../common/nested-menus"
+import { MenuItemProps } from "@/config/menus"
 
 interface MobileSidebarProps {
   className?: string
@@ -26,7 +27,7 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({ className, trans }) => {
   const { userOnline, professor } = useSchoolStore()
 
   // Filtrage des menus selon les permissions et le rôle de l'utilisateur
-  const filteredMenus = filterMenuItems(menusConfig?.sidebarNav?.classic || [], userOnline, professor || [])
+  const filteredMenus = filterMenuItems(menusConfig?.sidebarNav?.classic as MenuItemProps[] || [], userOnline, professor || [])
 
   const toggleSubmenu = (i: number) => {
     if (activeSubmenu === i) {
