@@ -44,7 +44,8 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
     }
 
     const weightedScore = Object.entries(weights).reduce((sum, [key, weight]) => {
-      return sum + scores[key] * weight
+      const scoreKey = key as keyof typeof scores;
+      return sum + scores[scoreKey] * weight;
     }, 0)
 
     return {
@@ -198,7 +199,7 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
                   </div>
                   <Progress value={score} className="h-2" />
                   <div className="text-xs text-muted-foreground">
-                    Poids: {(performanceScore.weights[key] * 100).toFixed(0)}%
+                    Poids: {((performanceScore.weights as Record<string, number>)[key] * 100).toFixed(0)}%
                   </div>
                 </div>
               ))}
@@ -298,7 +299,15 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
                         : `${typeof comparativeAnalysis.actuals[key] === "number" ? comparativeAnalysis.actuals[key].toFixed(1) : comparativeAnalysis.actuals[key]}${key.includes("Rate") || key === "efficiency" ? "%" : ""}`}
                     </span>
                   </div>
-                  <Progress value={Math.min(100, (comparativeAnalysis.actuals[key] / target) * 100)} className="h-2" />
+                  <Progress 
+                    value={
+                      Math.min(
+                        100, 
+                        (Number(comparativeAnalysis.actuals[key]) / Number(target)) * 100
+                      )
+                    } 
+                    className="h-2" 
+                  />
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Écart:</span>
                     <span
@@ -318,7 +327,7 @@ const PerformanceMetrics = ({ data }: PerformanceMetricsProps) => {
                 <div className="p-3 border rounded-lg">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Moyenne Quotidienne</span>
-                    <Badge variant="secondary">
+                    <Badge variant="outline">
                       {productivityTrends.dailyAverages.monthly.transactions.toFixed(1)} trans/jour
                     </Badge>
                   </div>
