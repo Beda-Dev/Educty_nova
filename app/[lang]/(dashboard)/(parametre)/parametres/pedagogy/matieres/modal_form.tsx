@@ -37,6 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 interface MatterData {
   name: string;
   active: number;
+  coefficient?: 0
 }
 
 interface AddMatterModalProps {
@@ -184,10 +185,11 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
     const newMatter: MatterData = {
       name,
       active,
+      coefficient: 0,
     };
 
     try {
-      const response = await fetch("/api/matter", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -210,7 +212,7 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
             if (val && val.trim() !== "") {
               const ctrl = new AbortController();
               abortControllers.current.push(ctrl);
-              await fetch("/api/coefficient", {
+              await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -228,7 +230,7 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
           if (val && val.trim() !== "") {
             const ctrl = new AbortController();
             abortControllers.current.push(ctrl);
-            await fetch("/api/coefficient", {
+            await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -282,14 +284,14 @@ const DialogForm = ({ onUpdate }: AddMatterModalProps) => {
           Ajouter une matière
         </Button>
       </DialogTrigger>
-      <DialogContent size="5xl" className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto md:max-w-[600px]">
+      <DialogContent size="full" className="overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
             Ajouter une nouvelle matière
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <ScrollArea className="max-h-[350px] w-full">
+          <ScrollArea className="w-full">
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nom de la matière</Label>

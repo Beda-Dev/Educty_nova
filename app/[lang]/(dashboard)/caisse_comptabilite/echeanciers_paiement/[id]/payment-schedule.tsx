@@ -69,9 +69,9 @@ export function PaymentSchedule({ pricing }: PaymentScheduleProps) {
           <p className="text-xs text-gray-600 leading-snug">
             Niveau: {pricing.level.label}
           </p>
-          <p className="text-xs text-gray-600 leading-snug">
+          {/* <p className="text-xs text-gray-600 leading-snug">
             Type: {pricing.assignment_type.label}
-          </p>
+          </p> */}
         </div>
       </div>
 
@@ -85,7 +85,7 @@ export function PaymentSchedule({ pricing }: PaymentScheduleProps) {
           </div>
           <div className="flex items-start">
             <span className="font-semibold min-w-[100px]">Statut:</span>
-            <span className="text-gray-800 ml-2">{pricing.assignment_type.label}</span>
+            <span className="text-gray-800 ml-1">{pricing.assignment_type.label}</span>
           </div>
           <div className="flex items-start">
             <span className="font-semibold min-w-[100px]">Montant total:</span>

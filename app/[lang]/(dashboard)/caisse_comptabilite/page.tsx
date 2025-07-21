@@ -17,19 +17,14 @@ import {
   Clock,
   FileText,
   CheckCircle,
+  CalendarCheck
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useSchoolStore } from "@/store"; // ⬅️ import du store pour accès à userOnline & validationExpenses
 import { ValidationExpense } from "@/lib/interface";
+import {RoleWithFullAccessCaisse ,  RoleStandart} from "./RoleFullAcess"
 
-// Rôles disposant d'un accès complet (casse & espaces ignorés)
-const FULL_ACCESS_ROLES = [
-  "administrateur",
-  "directeur",
-  "caisse",
-  "caissier",
-  "comptable",
-];
+
 
 // Couleurs personnalisées pour chaque item
 const itemColors = [
@@ -54,16 +49,22 @@ export default function CaissePage() {
   const { userOnline, validationExpenses } = useSchoolStore();
 
   // Helpers ————————————————————————————————————
-  const normalize = (str?: string) =>
-    str?.toLowerCase().replace(/\s+/g, "") ?? "";
-
-  const hasFullAccess = userOnline?.roles?.some((role: any) =>
-    FULL_ACCESS_ROLES.includes(normalize(role.name))
-  );
+  const normalizeString = (str?: string): string => {
+    // Supprimer les accents, espaces et mettre en minuscule
+    return str?.toLowerCase() ?? "";
+  };
+  
+  const hasFullAccess = userOnline?.roles?.some((role: any) => {
+    const normalizedRoleName = normalizeString(role.name);
+    return (
+      RoleWithFullAccessCaisse.map(normalizeString).includes(normalizedRoleName) ||
+      RoleStandart.map(normalizeString).includes(normalizedRoleName)
+    );
+  });
 
   const hasPendingValidation = validationExpenses?.some(
     (v: ValidationExpense) =>
-      normalize(v.validation_status) === "en attente" || normalize(v.validation_status) === "refusée" || normalize(v.validation_status) === "approuvée" && v.user_id === userOnline?.id
+      normalizeString(v.validation_status) === "en attente" || normalizeString(v.validation_status) === "refusée" || normalizeString(v.validation_status) === "approuvée" && v.user_id === userOnline?.id
   );
 
   const getLocalizedPath = (path: string) => {
@@ -121,6 +122,14 @@ export default function CaissePage() {
       path: "/caisse_comptabilite/resume_financie",
       color: itemColors[5],
     },
+    {
+      id: "payment-schedules",
+      title: "Échéanciers de Paiement",
+      description: "Gestion des plans de paiement et échéances",
+      icon: <CalendarCheck className="w-6 h-6" />,
+      path: "/caisse_comptabilite/echeanciers_paiement",
+      color: itemColors[7]
+    }
   ];
 
   // Filtrage selon les droits de l'utilisateur

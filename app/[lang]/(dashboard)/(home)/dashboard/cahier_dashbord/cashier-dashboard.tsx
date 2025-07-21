@@ -468,7 +468,7 @@ const CashierDashboard = ({ trans }: CashierDashboardProps) => {
             <div>
               <h1
                 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(90deg, #10b981, #059669, #047857)" }}
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
                 Tableau de bord Caissier
               </h1>

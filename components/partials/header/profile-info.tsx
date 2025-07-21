@@ -10,13 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSchoolStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { deleteUser } from "@/lib/userStore";
+import { RoleWithFullAccessCaisse } from "@/lib/full";
 
 const ProfileInfo = () => {
   const { userOnline, setUserOnline } = useSchoolStore();
@@ -37,11 +39,14 @@ const ProfileInfo = () => {
     }
   };
 
-  const getAvatarUrl = (avatar?: string | null ): string | undefined => {
+  const hasFullAccess = userOnline?.roles?.some(role =>
+    RoleWithFullAccessCaisse.includes(role.name)
+  );
+
+  const getAvatarUrl = (avatar?: string | null): string | undefined => {
     if (!avatar) return undefined;
-    const isAbsoluteUrl =
-      avatar.startsWith("http://") || avatar.startsWith("https://");
-    return isAbsoluteUrl ? avatar : `${baseUrl}${avatar}`;
+    const isAbsoluteUrl = avatar.startsWith("http://") || avatar.startsWith("https://");
+    return isAbsoluteUrl ? avatar : `${baseUrl}/${avatar}`;
   };
 
   const getInitials = (name?: string) => {
@@ -62,13 +67,20 @@ const ProfileInfo = () => {
           className="relative h-8 w-8 rounded-full p-0 hover:bg-muted"
         >
           <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={getAvatarUrl(userOnline?.avatar)}
-              alt={userOnline?.name || "Utilisateur"}
-            />
-            <AvatarFallback className="bg-skyblue text-primary-foreground">
+            {userOnline?.avatar ? (
+              <div className="relative h-full w-full">
+                <Image
+                  src={getAvatarUrl(userOnline.avatar) || ''}
+                  alt={userOnline?.name || "Utilisateur"}
+                  fill
+                  className="object-cover"
+                  sizes="32px"
+                />
+              </div>
+            ) : <AvatarFallback className="bg-skyblue text-primary-foreground">
               {getInitials(userOnline?.name)}
-            </AvatarFallback>
+            </AvatarFallback>}
+
           </Avatar>
           <span className="sr-only">Menu profil</span>
         </Button>
@@ -92,12 +104,14 @@ const ProfileInfo = () => {
               <span>Profil</span>
             </DropdownMenuItem>
           </Link>
-          <Link href="/establishment_settings">
-            <DropdownMenuItem className="cursor-pointer">
-              <Icon icon="heroicons:cog" className="mr-2 h-4 w-4" />
-              <span>Paramètres</span>
-            </DropdownMenuItem>
-          </Link>
+          {hasFullAccess && (
+            <Link href="/establishment_settings">
+              <DropdownMenuItem className="cursor-pointer">
+                <Icon icon="heroicons:cog" className="mr-2 h-4 w-4" />
+                <span>Paramètres</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem

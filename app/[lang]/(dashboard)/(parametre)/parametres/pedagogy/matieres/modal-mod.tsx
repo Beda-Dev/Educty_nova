@@ -30,63 +30,98 @@ interface MatterToUpdate {
   active: number;
 }
 
+interface CoefficientState {
+  value: string;
+  id?: number;
+  changed?: boolean;
+}
+
 const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterModalProps) => {
   const [name, setName] = useState<string>(matterData.name);
   const [active, setActive] = useState<number>(matterData.active);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Ajout état pour les coefficients (avec id)
-  const [coefficients, setCoefficients] = useState<Record<number, { value: string, id?: number }>>({});
-  const [levelHasSeries, setLevelHasSeries] = useState<Record<number, boolean>>({});
-  const [coefficientsBySerie, setCoefficientsBySerie] = useState<Record<number, Record<number, { value: string, id?: number }>>>({});
-  const [series, setSeries] = useState<any[]>([]);
-  const [levels, setLevels] = useState<any[]>([]);
+  // États pour les coefficients
+  const [coefficients, setCoefficients] = useState<Record<number, CoefficientState>>({});
+  const [coefficientsBySerie, setCoefficientsBySerie] = useState<Record<number, Record<number, CoefficientState>>>({});
+  const [seriesByLevel, setSeriesByLevel] = useState<Record<number, any[]>>({});
   const [loadingCoeffs, setLoadingCoeffs] = useState(false);
+
+  // Récupération des données depuis le store
+  const { levels: storeLevels, series: storeSeries, coefficients: storeCoefficients } = useSchoolStore();
 
   useEffect(() => {
     setName(matterData.name);
     setActive(matterData.active);
   }, [matterData]);
 
-  // Charger niveaux, séries et coefficients existants
+  // Chargement des données initiales
   useEffect(() => {
-    async function fetchData() {
+    if (!onOpen) return;
+
+    async function loadCoefficients() {
       setLoadingCoeffs(true);
       try {
-        const [levelsRes, seriesRes, coeffsRes] = await Promise.all([
-          fetch("/api/level"),
-          fetch("/api/serie"),
-          fetch(`/api/coefficient?matter_id=${matterData.id}`),
-        ]);
-        const levelsData = await levelsRes.json();
-        const seriesData = await seriesRes.json();
-        const coeffsData = await coeffsRes.json();
-        setLevels(levelsData);
-        setSeries(seriesData);
-        // Pré-remplir les états avec id
-        const coeffs: Record<number, { value: string, id?: number }> = {};
-        const bySerie: Record<number, Record<number, { value: string, id?: number }>> = {};
-        const hasSeries: Record<number, boolean> = {};
-        for (const coeff of coeffsData) {
-          if (coeff.serie_id) {
-            hasSeries[coeff.level_id] = true;
-            if (!bySerie[coeff.level_id]) bySerie[coeff.level_id] = {};
-            bySerie[coeff.level_id][coeff.serie_id] = { value: coeff.label, id: coeff.id };
-          } else {
-            coeffs[coeff.level_id] = { value: coeff.label, id: coeff.id };
-          }
-        }
-        setCoefficients(coeffs);
-        setCoefficientsBySerie(bySerie);
-        setLevelHasSeries(hasSeries);
-      } catch (e) {
-        // ignore
+        // Préparer les séries par niveau
+        const seriesByLevelData: Record<number, any[]> = {};
+        const levelsWithSeries = new Set<number>();
+
+        // Filtrer les coefficients pour cette matière
+        const matterCoefficients = storeCoefficients.filter(c => c.matter_id === matterData.id);
+
+        // Initialiser les coefficients par défaut
+        const defaultCoeffs: Record<number, CoefficientState> = {};
+        const defaultCoeffsBySerie: Record<number, Record<number, CoefficientState>> = {};
+
+        // Traiter d'abord les coefficients sans série
+        matterCoefficients
+          .filter(c => !c.serie_id)
+          .forEach(coeff => {
+            defaultCoeffs[coeff.level_id] = {
+              value: coeff.label.toString(),
+              id: coeff.id,
+              changed: false
+            };
+          });
+
+        // Traiter ensuite les coefficients avec série
+        matterCoefficients
+          .filter((c): c is typeof c & { serie_id: number } => Boolean(c.serie_id))
+          .forEach(coeff => {
+            levelsWithSeries.add(coeff.level_id);
+            if (!defaultCoeffsBySerie[coeff.level_id]) {
+              defaultCoeffsBySerie[coeff.level_id] = {};
+            }
+            defaultCoeffsBySerie[coeff.level_id][coeff.serie_id] = {
+              value: coeff.label.toString(),
+              id: coeff.id,
+              changed: false
+            };
+          });
+
+        // Préparer les séries disponibles par niveau
+        storeLevels.forEach(level => {
+          const levelSeries = storeSeries.filter(serie => 
+            matterCoefficients.some(c => 
+              c.level_id === level.id && c.serie_id === serie.id
+            )
+          );
+          seriesByLevelData[level.id] = levelSeries;
+        });
+
+        setCoefficients(defaultCoeffs);
+        setCoefficientsBySerie(defaultCoeffsBySerie);
+        setSeriesByLevel(seriesByLevelData);
+      } catch (error) {
+        console.error("Erreur lors du chargement des coefficients:", error);
+        toast.error("Erreur lors du chargement des coefficients");
       } finally {
         setLoadingCoeffs(false);
       }
     }
-    if (onOpen) fetchData();
-  }, [onOpen, matterData.id]);
+
+    loadCoefficients();
+  }, [onOpen, matterData.id, storeLevels, storeSeries, storeCoefficients]);
 
   const validateForm = (): boolean => {
     if (!name.trim()) {
@@ -100,51 +135,67 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
     if (!validateForm()) return;
     setLoading(true);
     toast.loading("Mise à jour en cours...");
-    const updatedMatter: MatterToUpdate = { name, active };
+
     try {
       // 1. Mettre à jour la matière
-      const response = await fetch(`/api/matter?id=${matterData.id}`, {
+      const matterResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter/${matterData.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedMatter),
+        body: JSON.stringify({ name, active , coefficient:0}),
       });
-      if (!response.ok) throw new Error("Erreur lors de la mise à jour de la matière.");
-      // 2. Mettre à jour les coefficients (niveaux sans série)
-      const coeffPromises = Object.entries(coefficients).map(async ([levelId, { value, id }]) => {
-        if (value && value.trim() !== "") {
-          const url = id ? `/api/coefficient?id=${id}` : "/api/coefficient";
-          const res = await fetch(url, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              matter_id: matterData.id,
-              level_id: Number(levelId),
-              label: value,
-            }),
-          });
-          if (!res.ok) throw new Error("Erreur lors de la mise à jour d'un coefficient.");
-        }
-      });
-      // 3. Mettre à jour les coefficients par série
-      const coeffSeriePromises = Object.entries(coefficientsBySerie).flatMap(([levelId, seriesObj]) =>
-        Object.entries(seriesObj).map(async ([serieId, { value, id }]) => {
-          if (value && value.trim() !== "") {
-            const url = id ? `/api/coefficient?id=${id}` : "/api/coefficient";
-            const res = await fetch(url, {
-              method: "PUT",
+      if (!matterResponse.ok) throw new Error("Erreur lors de la mise à jour de la matière.");
+
+      // 2. Préparer les requêtes pour les coefficients
+      const updateRequests: Promise<any>[] = [];
+
+      // Coefficients sans série (niveau seul)
+      Object.entries(coefficients).forEach(([levelId, { value, id, changed }]) => {
+        if (changed && value.trim() !== "") {
+          const url = id 
+            ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient/${id}`
+            : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient`;
+            
+          updateRequests.push(
+            fetch(url, {
+              method: id ? "PUT" : "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 matter_id: matterData.id,
                 level_id: Number(levelId),
-                serie_id: Number(serieId),
                 label: value,
               }),
-            });
-            if (!res.ok) throw new Error("Erreur lors de la mise à jour d'un coefficient de série.");
+            })
+          );
+        }
+      });
+
+      // Coefficients avec série
+      Object.entries(coefficientsBySerie).forEach(([levelId, seriesObj]) => {
+        Object.entries(seriesObj).forEach(([serieId, { value, id, changed }]) => {
+          if (changed && value.trim() !== "") {
+            const url = id 
+              ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient/${id}`
+              : `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient`;
+              
+            updateRequests.push(
+              fetch(url, {
+                method: id ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  matter_id: matterData.id,
+                  level_id: Number(levelId),
+                  serie_id: Number(serieId),
+                  label: value,
+                }),
+              })
+            );
           }
-        })
-      );
-      await Promise.all([...coeffPromises, ...coeffSeriePromises]);
+        });
+      });
+
+      // Exécuter toutes les requêtes
+      await Promise.all(updateRequests);
+
       toast.dismiss();
       toast.success("Matière et coefficients mis à jour avec succès !");
       onUpdate();
@@ -158,38 +209,44 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
   };
 
   const handleCoefficientChange = (levelId: number, value: string) => {
-    setCoefficients((prev) => ({ ...prev, [levelId]: { ...prev[levelId], value } }));
+    setCoefficients(prev => ({
+      ...prev,
+      [levelId]: {
+        ...(prev[levelId] || { value: "", id: undefined }),
+        value,
+        changed: true
+      }
+    }));
   };
-  const handleLevelHasSeriesChange = (levelId: number, checked: boolean) => {
-    setLevelHasSeries((prev) => ({ ...prev, [levelId]: checked }));
-    if (!checked) {
-      setCoefficientsBySerie((prev) => {
-        const copy = { ...prev };
-        delete copy[levelId];
-        return copy;
-      });
-    }
-  };
+
   const handleSerieCoefficientChange = (levelId: number, serieId: number, value: string) => {
-    setCoefficientsBySerie((prev) => ({
+    setCoefficientsBySerie(prev => ({
       ...prev,
       [levelId]: {
         ...(prev[levelId] || {}),
-        [serieId]: { ...((prev[levelId] || {})[serieId]), value },
-      },
+        [serieId]: {
+          ...((prev[levelId] || {})[serieId] || { value: "", id: undefined }),
+          value,
+          changed: true
+        }
+      }
     }));
+  };
+
+  const hasSeriesForLevel = (levelId: number): boolean => {
+    return !!coefficientsBySerie[levelId] && Object.keys(coefficientsBySerie[levelId]).length > 0;
   };
 
   return (
     <Dialog open={onOpen} onOpenChange={onClose}>
-      <DialogContent size="5xl">
+      <DialogContent size="full" className="overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base font-medium text-default-700">
             Modifier la matière
           </DialogTitle>
         </DialogHeader>
-        <div>
-          <ScrollArea className="max-h-[70vh]">
+        <div className="space-y-4">
+          <ScrollArea className="w-full">
             <div className="sm:grid sm:grid-cols-2 sm:gap-5 space-y-4 sm:space-y-0">
               <div className="flex flex-col gap-2">
                 <Label>Nom de la matière</Label>
@@ -211,64 +268,67 @@ const EditMatterModal = ({ matterData, onClose, onUpdate, onOpen }: EditMatterMo
                 </select>
               </div>
             </div>
-            {/* Tableau des coefficients (modification) */}
+
+            {/* Tableau des coefficients */}
             {loadingCoeffs ? (
-              <div className="text-center py-8 text-gray-500">Chargement des niveaux et coefficients...</div>
-            ) : levels.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">Chargement des coefficients...</div>
+            ) : storeLevels.length === 0 ? (
               <div className="text-center py-8 text-red-500">Aucun niveau disponible.</div>
             ) : (
               <div className="mt-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <Label className="font-semibold">Modifier les coefficients</Label>
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">(Enreg. lors de la mise à jour)</span>
+                  <Label className="font-semibold">Coefficients par niveau</Label>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    (Seules les modifications seront enregistrées)
+                  </span>
                 </div>
                 <div className="overflow-x-auto rounded-lg border bg-background shadow-sm">
                   <Table className="min-w-[400px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Niveau</TableHead>
-                        <TableHead>Plusieurs séries ?</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Coefficient(s)</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {levels.map((level) => (
+                      {storeLevels.map((level) => (
                         <TableRow key={level.id}>
                           <TableCell className="font-medium">{level.label}</TableCell>
                           <TableCell>
-                            <Checkbox
-                              checked={!!levelHasSeries[level.id]}
-                              onCheckedChange={(checked) => handleLevelHasSeriesChange(level.id, !!checked)}
-                              disabled={series.length === 0}
-                            />
+                            {hasSeriesForLevel(level.id) ? "Par série" : "Unique"}
                           </TableCell>
                           <TableCell>
-                            {levelHasSeries[level.id] ? (
-                              series.length > 0 ? (
+                            {hasSeriesForLevel(level.id) ? (
+                              seriesByLevel[level.id]?.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                  {series.map((serie) => (
+                                  {seriesByLevel[level.id].map((serie) => (
                                     <div key={serie.id} className="flex items-center gap-1">
                                       <span className="text-xs">{serie.label}:</span>
                                       <Input
                                         type="number"
-                                        min={0}
+                                        min="0"
+                                        step="0.5"
                                         value={coefficientsBySerie[level.id]?.[serie.id]?.value || ""}
                                         onChange={(e) => handleSerieCoefficientChange(level.id, serie.id, e.target.value)}
-                                        className="w-16"
+                                        className="w-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        placeholder={coefficientsBySerie[level.id]?.[serie.id]?.value || "0"}
                                       />
                                     </div>
                                   ))}
                                 </div>
                               ) : (
-                                <span className="text-xs text-muted-foreground">Aucune série disponible</span>
+                                <span className="text-xs text-muted-foreground">Aucune série définie</span>
                               )
                             ) : (
                               <Input
                                 type="number"
-                                min={0}
+                                min="0"
+                                step="0.5"
                                 value={coefficients[level.id]?.value || ""}
                                 onChange={(e) => handleCoefficientChange(level.id, e.target.value)}
-                                className="w-24"
+                                className="w-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                placeholder={coefficients[level.id]?.value || "0"}
                               />
                             )}
                           </TableCell>

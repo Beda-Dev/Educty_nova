@@ -92,7 +92,7 @@ export const isCaissier = (userOnline: User | null): boolean => {
   if (!userOnline) return false
   
   return userOnline.roles?.some(
-    (role) => role.name.toLowerCase() === "caisse"
+    (role) => role.name.toLowerCase() === "caisse" || role.name.toLowerCase() === "comptable"
   ) || false
 }
 

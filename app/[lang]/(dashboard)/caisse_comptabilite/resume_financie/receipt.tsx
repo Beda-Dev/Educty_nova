@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import type { Payment, Student, Transaction } from "@/lib/interface"
 import { Phone, Mail, MapPin, Calendar, CreditCard, User, FileText, CheckCircle } from "lucide-react"
 import dayjs from "dayjs"
-import { formatCurrency } from "../../(parametre)/parametres/caisse/echeanciers_paiement/[id]/fonction"
+import { formatCurrency } from "../echeanciers_paiement/[id]/fonction"
 
 interface ReceiptProps {
   transaction: Transaction

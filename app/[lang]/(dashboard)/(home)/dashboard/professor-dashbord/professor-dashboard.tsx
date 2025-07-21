@@ -323,7 +323,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
             <div>
               <h1
                 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4)" }}
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
                 Tableau de bord Professeur
               </h1>

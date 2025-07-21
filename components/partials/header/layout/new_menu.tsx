@@ -3,6 +3,9 @@
 import { useRouter, useParams, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
+import { RoleWithFullAccessCaisse , RoleStandart } from "@/app/[lang]/(dashboard)/caisse_comptabilite/RoleFullAcess"
+import { useSchoolStore } from "@/store/index"
+import { useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -248,13 +251,7 @@ const menuItems: MenuCategory = {
           title: "Méthodes de Paiement",
           path: "/parametres/caisse/methodes_paiement",
           icon: <CreditCard className="w-6 h-6" />,
-        },
-        {
-          id: "payment-schedules",
-          title: "Échéanciers de Paiement",
-          icon: <CalendarCheck className="w-6 h-6" />,
-          path: "/parametres/caisse/echeanciers_paiement",
-        },
+        }
       ],
     },
   ],
@@ -342,7 +339,8 @@ const menuItems: MenuCategory = {
           title: "Historique Paiement",
           path: "/caisse_comptabilite/encaissement/historique_paiement",
           icon: <Clock className="w-4 h-4" />,
-        },
+        }
+
       ],
     },
     {
@@ -399,6 +397,12 @@ const menuItems: MenuCategory = {
       icon: <DollarSign className="w-4 h-4" />,
       path: "/caisse_comptabilite/resume_financie",
     },
+    {
+      id: "payment-schedules",
+      title: "Échéanciers de Paiement",
+      icon: <CalendarCheck className="w-6 h-6" />,
+      path: "/caisse_comptabilite/echeanciers_paiement",
+    }
   ],
   pedagogie: [
     {
@@ -642,7 +646,30 @@ export default function DynamicMenu() {
   }, [pathname])
 
   const activeMenu = getActiveMenu()
-  const currentMenuItems = menuItems[activeMenu] || []
+  // Récupération des données utilisateur
+  const { userOnline } = useSchoolStore()
+
+  const hasFullAccess = userOnline?.roles?.some((role: any) => RoleWithFullAccessCaisse.includes(role.name) || RoleStandart.includes(role.name))
+
+  // Filtrer les éléments du menu en fonction des rôles
+  const filteredMenuItems = useMemo(() => {
+    if (!userOnline) return menuItems
+
+    // Si l'utilisateur a un rôle avec accès complet, on retourne tous les éléments du menu
+    if (hasFullAccess) {
+      return menuItems
+    }
+
+    // Sinon, on filtre pour ne garder que les éléments spécifiés dans la caisse_comptabilite
+    return {
+      ...menuItems,
+      caisse_comptabilite: menuItems.caisse_comptabilite.filter(item => 
+        ["demandes", "validation-decaissement"].includes(item.id)
+      )
+    }
+  }, [userOnline, hasFullAccess])
+
+  const currentMenuItems = filteredMenuItems[activeMenu] || []
 
   // Fonction pour gérer l'ouverture du popover avec délai
   const handleOpenPopover = React.useCallback((itemId: string) => {

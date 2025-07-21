@@ -67,14 +67,6 @@ export default function CashSettingsPage() {
       icon: <CreditCard className="w-6 h-6" />,
       path: "/parametres/caisse/methodes_paiement",
       color: itemColors[2]
-    },
-    {
-      id: "payment-schedules",
-      title: "Échéanciers de Paiement",
-      description: "Gestion des plans de paiement et échéances",
-      icon: <CalendarCheck className="w-6 h-6" />,
-      path: "/parametres/caisse/echeanciers_paiement",
-      color: itemColors[3]
     }
   ];
 

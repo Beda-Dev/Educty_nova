@@ -240,15 +240,15 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
     setPasswordModalOpen(false)
   }, [])
 
-  // Vérification des accès
-  if (!canViewUserDetails) {
-    return (
-      <Alert className="max-w-md mx-auto mt-8">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Vous n'avez pas les permissions nécessaires pour voir ces détails.</AlertDescription>
-      </Alert>
-    )
-  }
+  // // Vérification des accès
+  // if (!canViewUserDetails) {
+  //   return (
+  //     <Alert className="max-w-md mx-auto mt-8">
+  //       <AlertCircle className="h-4 w-4" />
+  //       <AlertDescription>Vous n'avez pas les permissions nécessaires pour voir ces détails.</AlertDescription>
+  //     </Alert>
+  //   )
+  // }
 
   // Loading state
   if (isLoading) {

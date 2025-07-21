@@ -51,6 +51,7 @@ const NotificationMessage = () => {
     settings,
     expenses,
     setExpenses,
+    users
   } = useSchoolStore();
   const router = useRouter();
 
@@ -150,13 +151,13 @@ const NotificationMessage = () => {
                       </Avatar>
                       <div className="flex-1">
                         <div className="text-sm font-medium text-default-900 mb-1">
-                          {validation.user?.name || "Utilisateur inconnu"} - {validation.demand?.applicant?.name || "Demandeur inconnu"}
+                          {validation.user?.name || "Utilisateur inconnu"} - { users.find((user)=> Number(user.id) == Number(validation.demand?.applicant_id) )?.name || "Demandeur inconnu"}
                         </div>
                         <div className="text-xs text-default-600 mb-1">
-                          Montant: {formatAmount(validation.demand?.amount || 0, currency)}
+                          Montant demandé: {formatAmount(validation.demand?.amount || 0, currency)}
                         </div>
                         <div className="text-xs text-default-900 line-clamp-2">
-                          {validation.comment || "Aucun commentaire"}
+                         Justification :  {validation.comment || "aucune"}
                         </div>
                       </div>
                     </div>
