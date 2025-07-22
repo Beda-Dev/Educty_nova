@@ -50,13 +50,6 @@ export default function HomePage() {
     permissionRequisInscrire
   );
 
-  if (hasAdminAccessInscrire === false) {
-    return (
-      <Card className="w-full min-h-[80vh] flex items-center justify-center p-6">
-        <ErrorPage />
-      </Card>
-    );
-  }
 
   const handleReinscriptionClick = () => {
     router.push("/eleves/registration/re-registration");

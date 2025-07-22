@@ -3,7 +3,7 @@
 import { act, useState } from "react";
 import { useSchoolStore } from "@/store";
 import { Professor } from "@/lib/interface";
-import { fetchProfessor , fetchUsers } from "@/store/schoolservice";
+import { fetchProfessor, fetchUsers } from "@/store/schoolservice";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -37,7 +37,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import {sendAccountInfo} from "@/lib/fonction"
+import { sendAccountInfo } from "@/lib/fonction";
+import { FileUploader } from "./components/file-uploader";
 
 // --- Ajout des champs au schéma ---
 const professorSchema = z.object({
@@ -49,7 +50,14 @@ const professorSchema = z.object({
   sexe: z.enum(["masculin", "feminin"], { required_error: "Le sexe est requis" }),
   cni: z.string().optional().nullable(),
   matricule: z.string().optional().nullable(),
-  access: z.boolean().optional(), // Pour le checkbox accès utilisateur
+  access: z.boolean().optional(),
+  photo: z.any().optional().nullable(),
+  number_of_years_of_teaching: z.number().optional().nullable(),
+  date_of_teaching_authorization: z.string().optional().nullable(),
+  subject_taught: z.string().optional().nullable(),
+  graduate: z.string().optional().nullable(),
+  cnps_social_security_number: z.string().optional().nullable(),
+  official: z.boolean().optional(),
 });
 
 type ProfessorFormType = z.infer<typeof professorSchema>;
@@ -61,9 +69,11 @@ interface ProfessorFormProps {
 }
 
 export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFormProps) {
-  const { setProfessor , setUsers, users , professor} = useSchoolStore();
+  const { setProfessor, setUsers, users, professor, matters } = useSchoolStore();
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   const form = useForm<ProfessorFormType>({
     resolver: zodResolver(professorSchema),
@@ -77,27 +87,46 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
       cni: "",
       matricule: "",
       access: true,
+      photo: null,
+      number_of_years_of_teaching: null,
+      date_of_teaching_authorization: "",
+      subject_taught: "",
+      graduate: "",
+      cnps_social_security_number: "",
+      official: false,
     },
   });
 
-  // Vérification email déjà utilisé
   const checkEmailExists = (email: string): boolean => {
     return users.some((u) => u.email?.toLowerCase() === email.toLowerCase());
   };
 
-  // --- Ajout de la gestion de l'activation utilisateur ---
+  const handleFileChange = (file: File | null) => {
+    if (file) {
+      setFile(file);
+      setFilePreview(URL.createObjectURL(file));
+      form.setValue("photo", file);
+    } else {
+      setFile(null);
+      setFilePreview(null);
+      form.setValue("photo", null);
+    }
+  };
+
   const createUser = async (data: ProfessorFormType) => {
-    const userData = {
-      name: `${data.first_name} ${data.name}`,
-      email: data.email,
-      password: process.env.NEXT_PUBLIC_DEFAULT_PASSWORD,
-      active: data.access ? 1 : 0, // Utilisateur actif ou non selon le checkbox
-    };
+    const formData = new FormData();
+    formData.append("name", `${data.first_name} ${data.name}`);
+    formData.append("email", data.email);
+    formData.append("password", process.env.NEXT_PUBLIC_DEFAULT_PASSWORD || "");
+    formData.append("active", data.access ? "1" : "0");
+    
+    if (file) {
+      formData.append("avatar", file);
+    }
 
     const response = await fetch("/api/user", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
+      body: formData,
     });
 
     if (!response.ok) {
@@ -108,23 +137,30 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
     return newUser.id;
   };
 
-  // --- Ajout des champs dans professorData ---
   const createProfessor = async (data: ProfessorFormType, userId: number) => {
-    const professorData = {
-      name: data.name,
-      first_name: data.first_name,
-      number: data.number,
-      type: data.type,
-      user_id: userId,
-      cni: data.cni || null,
-      sexe: data.sexe,
-      matricule: data.matricule || null,
-    };
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("first_name", data.first_name);
+    formData.append("number", data.number);
+    formData.append("type", data.type);
+    formData.append("user_id", userId.toString());
+    formData.append("cni", data.cni || "");
+    formData.append("sexe", data.sexe);
+    formData.append("matricule", data.matricule || "");
+    formData.append("number_of_years_of_teaching", data.number_of_years_of_teaching?.toString() || "");
+    formData.append("date_of_teaching_authorization", data.date_of_teaching_authorization || "");
+    formData.append("subject_taught", data.subject_taught || "");
+    formData.append("graduate", data.graduate || "");
+    formData.append("cnps_social_security_number", data.cnps_social_security_number || "");
+    formData.append("official", data.official ? "1" : "0");
+    
+    if (file) {
+      formData.append("photo", file);
+    }
 
     const response = await fetch("/api/professors", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(professorData),
+      body: formData,
     });
 
     if (!response.ok) {
@@ -142,7 +178,6 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
     }
     setLoading(true);
     try {
-      // Toujours créer un utilisateur
       const userId = await createUser(data);
       await createProfessor(data, userId);
       const updatedProfessor = await fetchProfessor();
@@ -152,11 +187,9 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
 
       toast.success("Enseignant créé avec succès");
       onSuccess();
-      // --- Envoi de l'email uniquement si accès utilisateur activé ---
       if (data.access) {
         sendAccountInfo(data.name, data.email);
       }
-      // Réinitialiser le formulaire et fermer le modal
       form.reset();
       onClose();
     } catch (error: any) {
@@ -169,10 +202,10 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
   };
 
   return (
-    <Dialog open={open} onOpenChange={open => { if (!open) onClose(); }}>
+    <Dialog open={open}  onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
-        className="max-w-2xl w-full z-[9999] rounded-2xl shadow-2xl border-0 bg-gradient-to-br from-white via-blue-50 to-blue-100 animate-fade-in"
-        style={{ minWidth: 320, maxWidth: 480, width: "95%" }}
+        size="5xl"
+        className="rounded-xl border-0 bg-gradient-to-br from-white via-blue-50 to-blue-100 animate-fade-in overflow-y-auto"
       >
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
@@ -189,6 +222,28 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 px-2 py-2">
+            {/* Photo upload */}
+            <FormField
+              control={form.control}
+              name="photo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold text-blue-900">Photo (facultative)</FormLabel>
+                  <FormControl>
+                    <FileUploader
+                      onValueChange={handleFileChange}
+                      value={file}
+                      maxSize={10 * 1024 * 1024}
+                      accept={{
+                        'image/*': ['.jpg', '.jpeg', '.png', '.svg']
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -333,6 +388,145 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
                         className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            {/* Nouveaux champs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="number_of_years_of_teaching"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Années d'enseignement</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Nombre d'années d'enseignement"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="date_of_teaching_authorization"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Date d'autorisation</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        placeholder="Date d'autorisation d'enseigner"
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="subject_taught"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Matière principale</FormLabel>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                      disabled={loading}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                          <SelectValue placeholder="Sélectionnez une matière" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="z-[9999]">
+                        {matters.map((matter) => (
+                          <SelectItem key={matter.id} value={matter.name}>
+                            {matter.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="graduate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Diplôme</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Diplôme du professeur"
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="cnps_social_security_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold text-blue-900">Numéro CNPS</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Numéro de sécurité sociale"
+                        {...field}
+                        value={field.value ?? ""}
+                        disabled={loading}
+                        className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="official"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col justify-end">
+                    <FormLabel className="font-semibold text-blue-900">Statut</FormLabel>
+                    <Select
+                      value={field.value ? "1" : "0"}
+                      onValueChange={(value) => field.onChange(value === "1")}
+                      disabled={loading}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="rounded-lg border-blue-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+                          <SelectValue placeholder="Statut" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="z-[9999]">
+                        <SelectItem value="1">Fonctionnaire</SelectItem>
+                        <SelectItem value="0">Non fonctionnaire</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

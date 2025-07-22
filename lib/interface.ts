@@ -551,11 +551,20 @@ export interface Professor {
   cni: string | null; // CNI peut être null si non fourni
   type: "permanent" | "vacataire";
   user_id: number;
+  photo : string | null;
+  number_of_years_of_teaching: number | null;
+  date_of_teaching_authorization: string | null;
+  subject_taught: string | null;
+  graduate: string | null;
+  service_rate: number | null;
+  cnps_social_security_number: string | null;
+  official: 0 | 1;
   created_at: string;
   updated_at: string;
   sexe: string | null; // Sexe peut être null si non fourni
   matricule: string | null; // Matricule peut être null si non fourni
   user?: UserInProfessor; // Optionnel, si vous souhaitez inclure les détails de l'utilisateur
+  
 
 
 }
@@ -607,21 +616,33 @@ export interface Timetable {
   matter: Matter;
 }
 
+export interface Evaluation {
+  id : number;
+  period_id : number;
+  professor_id : number;
+  academic_id : number;
+  matter_id : number;
+  classe_id : number;
+  type_note_id: number;
+  maximum_note: number;
+  coefficient : number;
+  date_evaluation:string
+  period: Period;
+  matter: Matter;
+  type_note: TypeEvaluation;
+
+}
+
 type RegistrationSimple = Omit<Registration, 'classe' | 'academic_year' | 'student'>
 export interface Note {
   id: number;
-  period_id: number;
-  matter_id: number;
+  evaluation_id: number;
   registration_id: number;
-  type_note_id: number;
   value: number;
-  maximum_note: string;
   created_at: string;
   updated_at: string;
-  period: Period;
   registration: RegistrationSimple;
-  matter: Matter;
-  type_note: TypeEvaluation;
+
 }
 
 // interface liée aux coefficients
@@ -639,6 +660,74 @@ export interface Coefficient {
   level: LevelWithoutData; // Ajout de l'interface Level pour le niveau
   serie: Serie | null; // Optionnel, car la série peut être null
 }
+
+
+
+export interface Office {
+  id: number;
+  name: string;
+  category: string;
+  is_active: 0 | 1 ;
+  base_salary: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+  employees: EmployeeData[] | []
+
+}
+
+type OfficeWithouEmployer = Omit<Office, 'employees'>;
+
+export interface Employee {
+  id: number;
+  office_id: number ;
+  user_id: number;
+  photo : string | number;
+  last_name : string ;
+  first_name : string ;
+  gender : string ;
+  birth_date : string | null ;
+  birth_place : string | null ;
+  phone : string ;
+  address : string ; 
+  registration_number : string ;
+  hiring_date : string ;
+  status : string ; 
+  salary : string | null ;
+  contract_type : string ;
+  contract_end_date : string | null ;
+  education_level : string ; 
+  marital_status : string | null ;
+  social_security_number : string | null ;
+  office: OfficeWithouEmployer
+  user : UserInProfessor
+}
+
+export interface EmployeeData {
+  id: number;
+  office_id: number ;
+  user_id: number;
+  photo : string | number;
+  last_name : string ;
+  first_name : string ;
+  gender : string ;
+  birth_date : string | null ;
+  birth_place : string | null ;
+  phone : string ;
+  address : string ; 
+  registration_number : string ;
+  hiring_date : string ;
+  status : string ; 
+  salary : string | null ;
+  contract_type : string ;
+  contract_end_date : string | null ;
+  education_level : string ; 
+  marital_status : string | null ;
+  social_security_number : string | null ;
+
+}
+
+ 
 
 
 // interface liée au processus d'inscription
