@@ -37,6 +37,7 @@ import {
   fetchRegistration,
   fetchNotes,
   fetchPeriods,
+  fetchEvaluations,
 } from "@/store/schoolservice"
 import TimetableGrid from "./components/timetable-grid"
 
@@ -58,6 +59,8 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
     notes,
     matters,
     periods,
+    evaluations,
+    setEvaluations,
   } = useSchoolStore()
 
   const [isLoading, setIsLoading] = useState(true)
@@ -95,16 +98,26 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
   }
 
   // Trouver le professeur connecté avec vérification
-  const currentProfessor = professor?.find((prof: any) => {
-    if (!prof || !userOnline) return false;
+  const currentProfessor = professor?.find((prof: Professor) => {
+    // Si aucun utilisateur n'est connecté, retourne false immédiatement
+    if (!userOnline) return false;
+    
+    // Convertit l'ID utilisateur du professeur en nombre
     const userId = Number(prof.user_id);
+    // Convertit l'ID de l'utilisateur connecté en nombre
     const onlineUserId = Number(userOnline.id);
+    
+    // Retourne true uniquement si :
+    // 1. userId est un nombre valide
+    // 2. onlineUserId est un nombre valide
+    // 3. L'ID utilisateur du professeur correspond à celui de l'utilisateur connecté
     return !isNaN(userId) && !isNaN(onlineUserId) && userId === onlineUserId;
   });
 
+ 
   // Filtrer les données avec vérifications
   const currentYearRegistrations =
-    registrations?.filter((reg: any) => {
+    registrations?.filter((reg: Registration) => {
       if (!isValidRegistration(reg) || !academicYearCurrent) return false;
       const academicYearId = Number(academicYearCurrent.id);
       const regYearId = Number(reg.academic_year_id);
@@ -123,7 +136,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
 
   // Emploi du temps du professeur filtré par période active
   const professorTimetables =
-    timetables?.filter((timetable: any) => {
+    timetables?.filter((timetable: Timetable) => {
       if (!isValidTimetable(timetable) || !currentProfessor || !academicYearCurrent) return false;
 
       const professorId = Number(currentProfessor.id);
@@ -151,12 +164,12 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
     const classId = Number(timetable.class_id);
     if (isNaN(classId)) return acc;
 
-    const classe = classes?.find((c: any) => {
+    const classe = classes?.find((c: Classe) => {
       const classIdNum = Number(c.id);
       return !isNaN(classIdNum) && classIdNum === classId;
     });
 
-    if (classe && !acc.some((c: any) => c.id === classe.id)) {
+    if (classe && !acc.some((c: Classe) => c.id === classe.id)) {
       acc.push(classe);
     }
     return acc
@@ -176,18 +189,35 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
     professorClasses.some((classe) => classe.id === reg.class_id),
   )
 
+  // Évaluations du professeur
+  const professorEvaluations = evaluations.filter(
+    (evaluation) => evaluation.professor_id === currentProfessor?.id
+  )
+
   // Notes saisies par le professeur
-  const professorNotes =
-    notes?.filter((note: Note) => {
-      const registration = currentYearRegistrations.find((reg) => reg.id === note.registration_id)
-      return registration && professorMatters.some((matter) => matter.id === note.matter_id)
-    }) || []
+  const notesByEvaluation = professorEvaluations.map((evaluation) => {
+    const evaluationNotes = notes.filter((note) => note.evaluation_id === evaluation.id)
+    const matter = matters?.find((m) => m.id === evaluation.matter_id)
+    const period = periods?.find((p) => p.id === evaluation.period_id)
+    const classe = classes?.find((c) => c.id === evaluation.classe_id)
+    
+    return {
+      evaluation,
+      matter,
+      period,
+      classe,
+      notes: evaluationNotes.map(note => ({
+        ...note,
+        registration: currentYearRegistrations.find((reg) => reg.id === note.registration_id)
+      }))
+    }
+  })
 
   // Statistiques
   const totalClasses = professorClasses.length
   const totalMatters = professorMatters.length
   const totalStudents = professorStudents.length
-  const totalNotes = professorNotes.length
+  const totalEvaluations = professorEvaluations.length
 
   // Cours aujourd'hui
   const today = new Date().toLocaleDateString("en-CA") // Format YYYY-MM-DD
@@ -210,7 +240,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
       })
 
       // Recharger les données
-      const [professorsData, mattersData, timetablesData, classesData, registrationsData, notesData, periodsData] =
+      const [professorsData, mattersData, timetablesData, classesData, registrationsData, notesData, periodsData, evaluationsData] =
         await Promise.all([
           fetchProfessor(),
           fetchMatters(),
@@ -219,6 +249,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
           fetchRegistration(),
           fetchNotes(),
           fetchPeriods(),
+          fetchEvaluations(),
         ])
 
       // Mettre à jour le store
@@ -230,6 +261,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
       if (registrationsData?.length > 0) store.setRegistration(registrationsData)
       if (notesData?.length > 0) store.setNotes(notesData)
       if (periodsData?.length > 0) store.setPeriods(periodsData)
+      if (evaluationsData?.length > 0) store.setEvaluations(evaluationsData)
 
       toast({
         title: "✅ Actualisation réussie",
@@ -251,7 +283,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
       setIsLoading(true)
       try {
         // Charger uniquement les données nécessaires pour le professeur
-        const [professorsData, mattersData, timetablesData, classesData, registrationsData, notesData, periodsData] =
+        const [professorsData, mattersData, timetablesData, classesData, registrationsData, notesData, periodsData, evaluationsData] =
           await Promise.all([
             fetchProfessor(),
             fetchMatters(),
@@ -260,6 +292,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
             fetchRegistration(),
             fetchNotes(),
             fetchPeriods(),
+            fetchEvaluations(),
           ])
 
         // Mettre à jour le store
@@ -271,6 +304,7 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
         if (registrationsData?.length > 0) store.setRegistration(registrationsData)
         if (notesData?.length > 0) store.setNotes(notesData)
         if (periodsData?.length > 0) store.setPeriods(periodsData)
+        if (evaluationsData?.length > 0) store.setEvaluations(evaluationsData)
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error)
         toast({
@@ -322,13 +356,13 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
           >
             <div>
               <h1
-                className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                className="text-l md:text-xl lg:text-2xl font-bold bg-gradient-to-r bg-clip-text uppercase text-transparent"
                 style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
-                Tableau de bord Professeur
+                Tableau de bord
               </h1>
-              <p className="text-sm lg:text-base text-muted-foreground">
-                Bienvenue {currentProfessor.first_name} {currentProfessor.name} - {academicYearCurrent?.label}
+              <p className="text-xs lowcase lg:text-base text-muted-foreground">
+                Bienvenue {currentProfessor.first_name} {currentProfessor.name}
               </p>
             </div>
 
@@ -375,10 +409,10 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className="gap-1 lg:gap-2 border-blue-500 text-blue-600 text-xs">
+                {/* <Badge variant="outline" className="gap-1 lg:gap-2 border-blue-500 text-blue-600 text-xs">
                   <Calendar className="h-3 w-3 lg:h-4 lg:w-4" />
                   <span className="hidden sm:inline">{academicYearCurrent?.label}</span>
-                </Badge>
+                </Badge> */}
                 <Badge className="gap-1 lg:gap-2 bg-green-100 text-green-700 border-green-200 text-xs">
                   <GraduationCap className="h-3 w-3 lg:h-4 lg:w-4" />
                   <span className="hidden sm:inline">Professeur</span>
@@ -434,12 +468,12 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Notes Saisies</CardTitle>
+                    <CardTitle className="text-sm font-medium">Mes Évaluations</CardTitle>
                     <Award className="h-4 w-4 text-orange-600" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-orange-600">{totalNotes}</div>
-                    <p className="text-xs text-muted-foreground">Notes enregistrées</p>
+                    <div className="text-2xl font-bold text-orange-600">{totalEvaluations}</div>
+                    <p className="text-xs text-muted-foreground">Évaluations enregistrées</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -462,9 +496,9 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
                   <Users className="h-3 w-3 lg:h-4 lg:w-4" />
                   Mes Classes
                 </TabsTrigger>
-                <TabsTrigger value="notes" className="gap-1 lg:gap-2 text-xs lg:text-sm">
+                <TabsTrigger value="evaluations" className="gap-1 lg:gap-2 text-xs lg:text-sm">
                   <FileText className="h-3 w-3 lg:h-4 lg:w-4" />
-                  Notes
+                  Évaluations
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -656,36 +690,64 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
               </div>
             </TabsContent>
 
-            <TabsContent value="notes" className="space-y-4">
+            <TabsContent value="evaluations" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Mes Evaluation récentes</CardTitle>
+                  <CardTitle>Mes évaluations</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[400px]">
-                    {/* {professorNotes.length > 0 ? (
+                    {professorEvaluations.length > 0 ? (
                       <div className="space-y-3">
-                        {professorNotes.slice(0, 20).map((note) => {
-                          const registration = currentYearRegistrations.find((reg) => reg.id === note.registration_id)
-                          const matter = matters?.find((m) => m.id === note.matter_id)
-                          const period = periods?.find((p) => p.id === note.period_id)
+                        {professorEvaluations.map((evaluation) => {
+                          const matter = matters?.find((m) => m.id === evaluation.matter_id)
+                          const period = periods?.find((p) => p.id === evaluation.period_id)
+                          const classe = classes?.find((c) => c.id === evaluation.classe_id)
+                          const evaluationNotes = notes.filter((note) => note.evaluation_id === evaluation.id)
 
                           return (
-                            <div key={note.id} className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium text-sm">
-                                  {registration?.student.first_name} {registration?.student.name}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {matter?.name} - {period?.label}
-                                </p>
+                            <div key={evaluation.id} className="p-4 border rounded-lg">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium">{evaluation.type_note?.label || 'Évaluation'}</h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {matter?.name} - {classe?.label}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {period?.label} • {new Date(evaluation.date_evaluation).toLocaleDateString('fr-FR')}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold">
+                                    {evaluationNotes.length} notes
+                                  </p>
+                                  <p className="text-sm">
+                                    Max: {evaluation.maximum_note} • Coef: {evaluation.coefficient}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="font-bold text-lg">
-                                  {note.value}/{note.maximum_note}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{note.type_note.label}</p>
-                              </div>
+                              
+                              {evaluationNotes.length > 0 && (
+                                <div className="mt-3 border-t pt-2">
+                                  <h5 className="text-xs font-medium text-muted-foreground mb-1">Notes des élèves :</h5>
+                                  <div className="space-y-1">
+                                    {evaluationNotes.slice(0, 3).map((note) => {
+                                      const registration = currentYearRegistrations.find((reg) => reg.id === note.registration_id)
+                                      return (
+                                        <div key={note.id} className="flex justify-between text-sm">
+                                          <span>{registration?.student.first_name} {registration?.student.name}</span>
+                                          <span className="font-medium">{note.value}/{evaluation.maximum_note}</span>
+                                        </div>
+                                      )
+                                    })}
+                                    {evaluationNotes.length > 3 && (
+                                      <p className="text-xs text-muted-foreground text-center mt-1">
+                                        + {evaluationNotes.length - 3} autres notes
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )
                         })}
@@ -693,14 +755,65 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
                     ) : (
                       <div className="text-center text-muted-foreground py-8">
                         <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>Aucune note saisie pour le moment</p>
+                        <p>Aucune évaluation créée pour le moment</p>
                       </div>
-                    )} */}
+                    )}
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-                    <div className="text-center text-muted-foreground py-8">
-                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Aucune note saisie pour le moment</p>
-                    </div>
+            <TabsContent value="notes" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notes des élèves</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    {notesByEvaluation.length > 0 ? (
+                      <div className="space-y-4">
+                        {notesByEvaluation.map(({ evaluation, matter, period, classe, notes }) => (
+                          <div key={evaluation.id} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <h3 className="font-medium">{matter?.name} - {evaluation.type_note?.label}</h3>
+                              <Badge variant="outline" className="text-xs">
+                                {classe?.label}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              {period?.label} • {new Date(evaluation.date_evaluation).toLocaleDateString('fr-FR')}
+                            </p>
+                            
+                            <div className="space-y-2">
+                              {notes.map(({ registration, value, id }) => (
+                                <div key={id} className="flex justify-between items-center p-2 bg-muted/30 rounded">
+                                  <span className="text-sm">
+                                    {registration?.student.first_name} {registration?.student.name}
+                                  </span>
+                                  <div className="text-right">
+                                    <span className="font-medium">
+                                      {value}/{evaluation.maximum_note}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground block">
+                                      Coef: {evaluation.coefficient}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            
+                            <div className="mt-3 pt-2 border-t text-xs text-muted-foreground">
+                              Moyenne: {(notes.reduce((sum, note) => sum + note.value, 0) / notes.length).toFixed(2)}/{evaluation.maximum_note}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>Aucune note disponible pour le moment</p>
+                      </div>
+                    )}
                   </ScrollArea>
                 </CardContent>
               </Card>

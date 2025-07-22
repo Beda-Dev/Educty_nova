@@ -8,7 +8,7 @@ import ProfessorDashboard from "./professor-dashbord/professor-dashboard"
 import CashierDashboard from "./cahier_dashbord/cashier-dashboard"
 import AccountingDashboard from "./acounting_dashbord/accounting-dashboard"
 import Loading from "./loading"
-import { Card } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RocketIcon, UserIcon, CalculatorIcon, WalletIcon, ShieldIcon } from "lucide-react"
 import { motion } from "framer-motion"
@@ -76,25 +76,38 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
     if (userOnline) {
       // Extraire les noms des rôles de l'utilisateur en minuscules
       const roles = userOnline.roles?.map(role => role.name.toLowerCase()) || []
+      console.log('Rôles de l\'utilisateur:', roles);
       setUserRoles(roles)
 
       // Vérifier si l'utilisateur est un professeur
       const isProfessor = professor.some(
         (prof: Professor) => prof.user_id === userOnline.id
       )
+      console.log('Est un professeur?', isProfessor);
+      
       if (isProfessor) {
-        setUserRoles(prev => [...prev, 'professor'])
+        const newRoles = [...roles, 'professor', 'professeur', 'enseignant', 'teacher'];
+        console.log('Nouveaux rôles avec professeur:', newRoles);
+        setUserRoles(newRoles);
       }
+
+      // Afficher les options de dashboard disponibles
+      console.log('Toutes les options de dashboard:', dashboardOptions);
 
       // Trouver les dashboards disponibles pour cet utilisateur
       const available = dashboardOptions.filter(option =>
-        option.roles.some(role => roles.includes(role))
+        option.roles.some(role => 
+          roles.includes(role) || 
+          (isProfessor && option.id === 'professor')
+        )
       )
 
+      console.log('Dashboards disponibles:', available.map(d => d.id));
       setAvailableDashboards(available)
 
       // Si un seul dashboard disponible, le sélectionner automatiquement
       if (available.length === 1) {
+        console.log('Un seul dashboard disponible, sélection automatique:', available[0].id);
         setSelectedDashboard(available[0].id)
       }
     }
@@ -123,18 +136,23 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
   // Si plusieurs dashboards disponibles, afficher le choix
   if (availableDashboards.length > 1 && !selectedDashboard) {
     return (
-      <div className="container py-8">
+      <Card className="container py-8">
+        <CardHeader>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center mb-8"
         >
-          <h1 className="text-3xl font-bold mb-2">Sélectionnez votre tableau de bord</h1>
+          <h1 className="text-xl font-bold mb-2">Sélectionnez votre tableau de bord</h1>
           <p className="text-muted-foreground">
             Vous avez accès à plusieurs interfaces en fonction de vos rôles: {userRoles.join(', ')}
           </p>
         </motion.div>
+        </CardHeader>
+        <CardContent>
+
+        
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {availableDashboards.map((dashboard) => (
@@ -148,10 +166,11 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
                   <div className="p-3 rounded-lg bg-primary/10 text-primary mr-4">
                     {dashboard.icon}
                   </div>
-                  <h3 className="text-xl font-semibold">{dashboard.name}</h3>
+                  <h3 className="text-lg font-semibold">{dashboard.name}</h3>
                 </div>
                 <p className="text-muted-foreground mb-6 flex-grow">{dashboard.description}</p>
                 <Button
+                
                   onClick={() => setSelectedDashboard(dashboard.id)}
                   className="w-full"
                 >
@@ -161,7 +180,8 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
             </motion.div>
           ))}
         </div>
-      </div>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -171,7 +191,7 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
     : availableDashboards[0]?.component
 
   // Priorité au dashboard admin si disponible (même si d'autres sont disponibles)
-  const adminDashboard = dashboardOptions.find(d => d.id === 'admin')
+  const adminDashboard = dashboardOptions.find(d => d.id === 'Administrateur')
   if (adminDashboard && userRoles.some(r => adminDashboard.roles.includes(r))) {
     return adminDashboard.component
   }

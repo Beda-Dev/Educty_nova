@@ -246,12 +246,12 @@ const DashboardView = ({ trans }: DashboardViewProps) => {
           >
             <div>
               <h1
-                className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                className="text-l md:text-xl lg:text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
                 style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
                 Tableau de bord
               </h1>
-              <p className="text-sm lg:text-base text-muted-foreground">
+              <p className="text-xs lg:text-base text-muted-foreground">
                 <span className="hidden sm:inline">Vue d'ensemble de votre établissement - </span>
                 {academicYearCurrent?.label}
               </p>

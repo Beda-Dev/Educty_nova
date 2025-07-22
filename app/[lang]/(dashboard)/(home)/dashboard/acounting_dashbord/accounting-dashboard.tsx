@@ -649,14 +649,11 @@ const AccountingDashboard = ({ trans }: AccountingDashboardProps) => {
           >
             <div>
               <h1
-                className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-                style={{ backgroundImage: "linear-gradient(90deg, #10b981, #059669, #047857)" }}
+                className="text-l md:text-xl lg:text-2xl font-bold bg-gradient-to-r bg-clip-text uppercase text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
-                Tableau de bord Comptabilité
+                Tableau de bord
               </h1>
-              <p className="text-sm lg:text-base text-muted-foreground">
-                Bienvenue {userOnline?.name} - Gestion financière et comptable
-              </p>
             </div>
 
             {/* Contrôles et filtres */}

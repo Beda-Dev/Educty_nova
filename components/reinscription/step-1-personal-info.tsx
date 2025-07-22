@@ -362,6 +362,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                     value={formData.registration_number}
                     onChange={(e) => handleStudentChange("registration_number", e.target.value)}
                     required
+                    readOnly
                   />
                 </div>
               </div>

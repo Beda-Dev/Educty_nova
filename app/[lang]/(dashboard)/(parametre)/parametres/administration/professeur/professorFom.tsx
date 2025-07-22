@@ -124,7 +124,7 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
       formData.append("avatar", file);
     }
 
-    const response = await fetch("/api/user", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users`, {
       method: "POST",
       body: formData,
     });
@@ -158,7 +158,7 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
       formData.append("photo", file);
     }
 
-    const response = await fetch("/api/professors", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/professor`, {
       method: "POST",
       body: formData,
     });

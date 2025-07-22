@@ -42,7 +42,10 @@ import {
   Serie,
   Timetable,
   Note,
-  Coefficient
+  Coefficient,
+  Evaluation , 
+  Office,
+  Employee
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -251,19 +254,24 @@ interface SchoolStore {
   professor: Professor[];
   setProfessor: (data: Professor[]) => void;
 
-  // Ajout Serie
   series: Serie[];
   setSeries: (data: Serie[]) => void;
 
-  // Ajout Emploi du temps
   timetables: Timetable[];
   setTimetables: (data: Timetable[]) => void;
 
-    // Ajout Notes
   notes: Note[];
   setNotes: (data: Note[]) => void;
 
-  // Registration store data
+  evaluations: Evaluation[];
+  setEvaluations: (data: Evaluation[]) => void;
+
+  offices: Office[];
+  setOffices: (data: Office[]) => void;
+
+  employees: Employee[];
+  setEmployees: (data: Employee[]) => void;
+
   currentStep: number;
   setCurrentStep: (step: number) => void;
 
@@ -474,6 +482,18 @@ export const useSchoolStore = create<SchoolStore>()(
       // Ajout Notes
       notes: [],
       setNotes: (data: Note[]) => set({ notes: data }),
+
+      // Ajout Evaluation
+      evaluations: [],
+      setEvaluations: (data: Evaluation[]) => set({ evaluations: data }),
+
+      // Ajout Office
+      offices: [],
+      setOffices: (data: Office[]) => set({ offices: data }),
+
+      // Ajout Employee
+      employees: [],
+      setEmployees: (data: Employee[]) => set({ employees: data }),
 
       // Ajout Coefficient
       coefficients: [],

@@ -634,6 +634,7 @@ export interface Evaluation {
 }
 
 type RegistrationSimple = Omit<Registration, 'classe' | 'academic_year' | 'student'>
+
 export interface Note {
   id: number;
   evaluation_id: number;

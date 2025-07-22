@@ -466,14 +466,14 @@ const CashierDashboard = ({ trans }: CashierDashboardProps) => {
             className="flex flex-col gap-3 lg:gap-4 md:flex-row md:items-center md:justify-between"
           >
             <div>
-              <h1
-                className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+            <h1
+                className="text-l md:text-xl lg:text-2xl font-bold bg-gradient-to-r bg-clip-text uppercase text-transparent"
                 style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
-                Tableau de bord Caissier
+                Tableau de bord 
               </h1>
               <p className="text-sm lg:text-base text-muted-foreground">
-                Bienvenue {userOnline?.name} - Caisse {cashRegisterCurrent?.cash_register_number}
+               Caisse {cashRegisterCurrent?.cash_register_number}
               </p>
               {cashRegisterSessionCurrent && (
                 <Badge className="mt-2 bg-green-100 text-green-700 border-green-200">

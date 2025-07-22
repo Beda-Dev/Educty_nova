@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import { updateStudentCountByClass, verificationPermission } from "@/lib/fonction";
 import { Card } from "@/components/ui/card";
 import dayjs from "dayjs";
+import { FULL_ACCESS_ROLES } from "@/config/menus";
 
 interface AcademicYearsDisplayProps {
   data: AcademicYear[];
@@ -26,11 +27,19 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
   const [selectedYear, setSelectedYear] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const currentAcademicYear = academicYearCurrent as AcademicYear;
-  const hasAdminAccess = verificationPermission(
+  // Vérifie si l'utilisateur a un rôle dans FULL_ACCESS_ROLES (comparaison insensible à la casse)
+  const hasFullAccess = user?.roles?.some(userRole => 
+    FULL_ACCESS_ROLES.some(role => 
+      role.toLowerCase() === userRole.name.toLowerCase()
+    )
+  );
+    
+  // L'utilisateur a accès s'il a un rôle admin OU les permissions requises
+  const hasAdminAccess = hasFullAccess || verificationPermission(
     { permissionNames: user.permissionNames || [] },
     permissionRequis
   );
+  const currentAcademicYear = academicYearCurrent as AcademicYear;
   const activeAcademicYears = data?.filter(year => year.active === 1) || [];
 
   // Initialize selected year

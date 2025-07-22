@@ -57,7 +57,7 @@ export const MENU_ACCESS_CONFIG = {
   CAISSE_ALLOWED_MENUS: ["Dashboard", "Students", "Cash Register"] as AllowedMenu[],
 
   // Rôles avec accès complet (administrateurs)
-  FULL_ACCESS_ROLES: ["Administrateur", "directeur", "super-admin"],
+   FULL_ACCESS_ROLES: ["Administrateur", "directeur", "super-admin" , "Directeur"],
 } as const
 
 /**
@@ -454,3 +454,5 @@ export const menusConfig = {
 export type ModernNavType = (typeof menusConfig.sidebarNav.modern)[number]
 export type ClassicNavType = (typeof menusConfig.sidebarNav.classic)[number]
 export type MainNavType = (typeof menusConfig.mainNav)[number]
+export const FULL_ACCESS_ROLES = MENU_ACCESS_CONFIG.FULL_ACCESS_ROLES
+

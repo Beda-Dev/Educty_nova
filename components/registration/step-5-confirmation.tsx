@@ -65,7 +65,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         const uniqueIds = Array.from(new Set(ids));
         const res = await Promise.allSettled(
           uniqueIds.map(id =>
-            fetch(`${endpoint}?id=${id}`, { method: "DELETE" })
+            fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}/${id}`, { method: "DELETE" })
           )
         );
         results[label] = res.map((r, i) => ({
@@ -84,7 +84,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
       if (createdEntities.registration) {
         try {
-          await fetch(`/api/registration?id=${createdEntities.registration}`, { method: "DELETE" });
+          await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registration/${createdEntities.registration}`, { method: "DELETE" });
           results.registration = { id: createdEntities.registration, status: "fulfilled" };
         } catch (err) {
           results.registration = { id: createdEntities.registration, status: "rejected", reason: err };
