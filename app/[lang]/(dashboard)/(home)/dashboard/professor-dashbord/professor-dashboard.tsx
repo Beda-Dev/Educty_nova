@@ -117,45 +117,45 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
     if (!period || !period.pivot?.start_date || !period.pivot?.end_date) return false;
     const startDate = new Date(period.pivot.start_date);
     const endDate = new Date(period.pivot.end_date);
-    return !isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && 
-           currentDate >= startDate && currentDate <= endDate;
+    return !isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) &&
+      currentDate >= startDate && currentDate <= endDate;
   });
 
   // Emploi du temps du professeur filtré par période active
   const professorTimetables =
     timetables?.filter((timetable: any) => {
       if (!isValidTimetable(timetable) || !currentProfessor || !academicYearCurrent) return false;
-      
+
       const professorId = Number(currentProfessor.id);
       const academicYearId = Number(academicYearCurrent.id);
       const timetableProfId = Number(timetable.professor_id);
       const timetableYearId = Number(timetable.academic_year_id);
-      
+
       if (isNaN(professorId) || isNaN(academicYearId) || isNaN(timetableProfId) || isNaN(timetableYearId)) {
         return false;
       }
-      
+
       const periodId = activePeriod ? Number(activePeriod.id) : null;
       const timetablePeriodId = timetable.period_id ? Number(timetable.period_id) : null;
-      
+
       if (periodId && (timetablePeriodId === null || isNaN(timetablePeriodId) || timetablePeriodId !== periodId)) {
         return false;
       }
-      
+
       return professorId === timetableProfId && academicYearId === timetableYearId;
-    }) || []; 
+    }) || [];
 
   // Classes du professeur
   const professorClasses = professorTimetables.reduce((acc, timetable) => {
     if (!timetable.class_id) return acc;
     const classId = Number(timetable.class_id);
     if (isNaN(classId)) return acc;
-    
+
     const classe = classes?.find((c: any) => {
       const classIdNum = Number(c.id);
       return !isNaN(classIdNum) && classIdNum === classId;
     });
-    
+
     if (classe && !acc.some((c: any) => c.id === classe.id)) {
       acc.push(classe);
     }
@@ -659,11 +659,11 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
             <TabsContent value="notes" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Mes notes récentes</CardTitle>
+                  <CardTitle>Mes Evaluation récentes</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="h-[400px]">
-                    {professorNotes.length > 0 ? (
+                    {/* {professorNotes.length > 0 ? (
                       <div className="space-y-3">
                         {professorNotes.slice(0, 20).map((note) => {
                           const registration = currentYearRegistrations.find((reg) => reg.id === note.registration_id)
@@ -695,7 +695,12 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
                         <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                         <p>Aucune note saisie pour le moment</p>
                       </div>
-                    )}
+                    )} */}
+
+                    <div className="text-center text-muted-foreground py-8">
+                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>Aucune note saisie pour le moment</p>
+                    </div>
                   </ScrollArea>
                 </CardContent>
               </Card>
