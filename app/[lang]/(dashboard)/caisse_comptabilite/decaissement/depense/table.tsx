@@ -215,7 +215,6 @@ const TableExpense = () => {
               <Icon icon="heroicons:arrow-left" className="h-4 w-4" />
               Retour à la sélection
             </Button>
-            <h2 className="text-xl font-semibold">Décaissement</h2>
           </div>
           <DecaissementPage validationId={selectedValidationId} onNewDecaissement={handleNewDecaissement} />
         </div>

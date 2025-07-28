@@ -275,6 +275,17 @@ export interface Classe {
     created_at: string;
     updated_at: string;
   } ;
+  not_studied_matters: {
+    id: number;
+    name: string;
+    active: 0 | 1 ;
+    created_at: string;
+    updated_at: string;
+    pivot : {
+      classe_id: number;
+      matter_id: number;
+    }
+  }[] | []
 }
 
 export interface Registration {
@@ -728,6 +739,42 @@ export interface EmployeeData {
 
 }
 
+export interface Average {
+  id:number;
+  value:number;
+  rank:number;
+  appreciation: string | null ;
+  period_id : number ;
+  report_card_id : number ;
+  professor_id : number ;
+  created_at : string ;
+  updated_at : string ;
+  period: Period;
+  professor: Omit<Professor, 'user'>;
+  report_card: Omit<ReportCard, 'period' | 'registration' | 'academic_year'>;
+
+}
+
+export interface ReportCard {
+  id: number;
+  rank: number;
+  class_rank : number;
+  report_type: string; // Trimestriel , Semestriel ou Annuelle
+  general_average: string;
+  council_decision: string | null;
+  total_coefficient: number;
+  mention: string | null;
+  honor_roll: 0 | 1 ;
+  registration_id: number;
+  academic_year_id: number;
+  period_id: number | null ; // null si c'est un bulletin anuelle
+  created_at: string;
+  updated_at: string;
+  academic_year: Omit<AcademicYear, 'periods'>;
+  period: Omit<Period, 'type_period'> | null; 
+  registration: Omit<Registration, 'classe' | 'academic_year' | 'student'>;
+
+}
  
 
 

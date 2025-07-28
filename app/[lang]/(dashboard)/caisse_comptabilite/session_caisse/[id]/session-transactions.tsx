@@ -160,10 +160,10 @@ export default function SessionTransactions({
     }
 
     if (dateFilter) {
-      const filterDate = format(dateFilter, "yyyy-MM-dd");
+      const filterDate = format(dateFilter, "yyyy-MM-dd HH:mm:ss");
       filtered = filtered.filter((t) => {
         if (!t) return false;
-        const transactionDate = format(new Date(t.date), "yyyy-MM-dd");
+        const transactionDate = format(new Date(t.date), "yyyy-MM-dd HH:mm:ss");
         return transactionDate === filterDate;
       });
     }
@@ -403,7 +403,7 @@ export default function SessionTransactions({
           <div className="flex flex-wrap gap-2">
             {dateFilter && (
               <Badge variant="outline" className="flex items-center gap-1">
-                Date: {format(dateFilter, "dd/MM/yyyy")}
+                Date: {format(dateFilter, "dd/MM/yyyy HH:mm:ss")}
                 <X
                   className="h-3 w-3 cursor-pointer"
                   onClick={() => setDateFilter(undefined)}

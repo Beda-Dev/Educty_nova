@@ -67,13 +67,13 @@ function ExpensePage() {
   }, [loadData]);
 
   // Affichage conditionnel
-  if (!hasAdminAccessVoir) {
-    return (
-      <Card className="w-full h-full flex items-center justify-center min-h-[400px]">
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (!hasAdminAccessVoir) {
+  //   return (
+  //     <Card className="w-full h-full flex items-center justify-center min-h-[400px]">
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   if (isLoading) {
     return (

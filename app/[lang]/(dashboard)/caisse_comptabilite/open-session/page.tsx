@@ -54,7 +54,11 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useSchoolStore } from "@/store";
 import { CashRegisterSession, CashRegister, User } from "@/lib/interface";
-import { fetchCashRegisterSessions, fetchTransactions, fetchPayment } from "@/store/schoolservice"
+import {
+  fetchCashRegisterSessions,
+  fetchTransactions,
+  fetchPayment,
+} from "@/store/schoolservice";
 
 const formSchema = z.object({
   cash_register_id: z.string().min(1, "Veuillez sélectionner une caisse"),
@@ -65,7 +69,8 @@ const formSchema = z.object({
 export default function OpenCashRegisterSession() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [lastClosedSession, setLastClosedSession] = useState<CashRegisterSession | null>(null);
+  const [lastClosedSession, setLastClosedSession] =
+    useState<CashRegisterSession | null>(null);
   const [showAmountWarning, setShowAmountWarning] = useState(false);
   const {
     userOnline,
@@ -73,7 +78,7 @@ export default function OpenCashRegisterSession() {
     setCashRegisterSessionCurrent,
     cashRegisterCurrent,
     cashRegisterSessions,
-    setCashRegisterSessions
+    setCashRegisterSessions,
   } = useSchoolStore();
 
   // Get last closed session by the current user
@@ -83,8 +88,10 @@ export default function OpenCashRegisterSession() {
         (s) => s.user_id === userOnline.id && s.status === "closed"
       );
       if (userSessions.length > 0) {
-        const lastSession = userSessions.reduce((latest, session) => 
-          new Date(session.closing_date) > new Date(latest.closing_date) ? session : latest
+        const lastSession = userSessions.reduce((latest, session) =>
+          new Date(session.closing_date) > new Date(latest.closing_date)
+            ? session
+            : latest
         );
         setLastClosedSession(lastSession);
       }
@@ -125,34 +132,37 @@ export default function OpenCashRegisterSession() {
   // Format amount with spaces as thousand separators
   const formatAmount = (amount: number | string): string => {
     try {
-      const num = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
-      if (isNaN(num)) return '0';
-      return num.toLocaleString('fr-FR', { maximumFractionDigits: 0 });
+      const num =
+        typeof amount === "string"
+          ? parseFloat(amount.replace(/\s/g, ""))
+          : amount;
+      if (isNaN(num)) return "0";
+      return num.toLocaleString("fr-FR", { maximumFractionDigits: 0 });
     } catch {
-      return '0';
+      return "0";
     }
   };
 
   // Parse formatted amount back to number
   const parseAmount = (formattedAmount: string): number => {
     try {
-      return parseFloat(formattedAmount.replace(/\s/g, '')) || 0;
+      return parseFloat(formattedAmount.replace(/\s/g, "")) || 0;
     } catch {
       return 0;
     }
   };
 
   // Get currency from settings
-  const currency = useSchoolStore.getState().settings?.[0]?.currency || 'FCFA';
+  const currency = useSchoolStore.getState().settings?.[0]?.currency || "FCFA";
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     if (!userOnline) return;
 
-    if(cashRegisterCurrent){
+    if (cashRegisterCurrent) {
       toast({
         title: "Session ouverte",
         description: "Une session de caisse est deja ouverte.",
-        color: "destructive"
+        color: "destructive",
       });
       return;
     }
@@ -162,16 +172,20 @@ export default function OpenCashRegisterSession() {
     try {
       const now = new Date();
       // Format date for API (Y-m-d H:i:s)
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      const formattedDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      const formattedDate = `${now.getFullYear()}-${pad(
+        now.getMonth() + 1
+      )}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(
+        now.getMinutes()
+      )}:${pad(now.getSeconds())}`;
 
       // Validate amount
       const openingAmount = parseAmount(values.opening_amount);
-      if (isNaN(openingAmount) || openingAmount <= 0) {
+      if (isNaN(openingAmount) || openingAmount < 0) {
         toast({
           title: "Montant invalide",
           description: "Veuillez entrer un montant d'ouverture valide.",
-          color: "destructive"
+          color: "destructive",
         });
         setIsSubmitting(false);
         return;
@@ -188,19 +202,24 @@ export default function OpenCashRegisterSession() {
         comment: values.comment || undefined,
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/cashRegisterSession`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newSession),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || ""}/api/cashRegisterSession`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newSession),
+        }
+      );
 
       const data = await response.json();
       setCashRegisterSessionCurrent(data.session as CashRegisterSession);
 
       if (!response.ok) {
-        throw new Error(data.message || "Erreur lors de l'ouverture de la session");
+        throw new Error(
+          data.message || "Erreur lors de l'ouverture de la session"
+        );
       }
 
       toast({
@@ -208,22 +227,30 @@ export default function OpenCashRegisterSession() {
         description: (
           <div className="mt-2">
             <p>
-              La caisse <span className="font-semibold">{caissesDisponibles.find(c => c.id === Number(values.cash_register_id))?.cash_register_number || values.cash_register_id}</span> a été ouverte avec succès.
+              La caisse{" "}
+              <span className="font-semibold">
+                {caissesDisponibles.find(
+                  (c) => c.id === Number(values.cash_register_id)
+                )?.cash_register_number || values.cash_register_id}
+              </span>{" "}
+              a été ouverte avec succès.
             </p>
             <p className="font-semibold mt-1">
               Montant : {formatAmount(openingAmount)} {currency}
             </p>
             {values.comment && (
-              <p className="text-xs mt-1 text-muted-foreground">Commentaire : {values.comment}</p>
+              <p className="text-xs mt-1 text-muted-foreground">
+                Commentaire : {values.comment}
+              </p>
             )}
           </div>
         ),
         color: "success",
-        duration: 500
+        duration: 500,
       });
 
-      const update = await fetchCashRegisterSessions()
-      setCashRegisterSessions(update)
+      const update = await fetchCashRegisterSessions();
+      setCashRegisterSessions(update);
 
       router.push("/caisse_comptabilite/session_caisse");
     } catch (error) {
@@ -299,7 +326,9 @@ export default function OpenCashRegisterSession() {
                         <UserIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Nom</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Nom
+                        </p>
                         <p className="font-medium">{userOnline.name}</p>
                       </div>
                     </div>
@@ -310,7 +339,9 @@ export default function OpenCashRegisterSession() {
                         <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Email</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Email
+                        </p>
                         <p className="font-medium">{userOnline.email}</p>
                       </div>
                     </div>
@@ -319,7 +350,10 @@ export default function OpenCashRegisterSession() {
               </div>
 
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                >
                   {/* Cash Register Selection */}
                   <FormField
                     control={form.control}
@@ -354,6 +388,20 @@ export default function OpenCashRegisterSession() {
                         <FormDescription>
                           Sélectionnez la caisse que vous souhaitez ouvrir
                         </FormDescription>
+                        {cashRegisters.length === 0 && (
+                          <p className="text-sm text-red-500 mt-2">
+                            Aucune caisse disponible. Veuillez en créer une
+                            d'abord.
+                          </p>
+                        )}
+                        {cashRegisters.length > caissesDisponibles.length && (
+                          <div className="mt-2 text-xs text-blue-700 bg-blue-50 border border-blue-100 rounded px-2 py-1">
+                            Les autres caisses sont déjà occupées par d'autres
+                            sessions ouvertes.
+                          </div>
+                        )}
+                        {/* Message explicatif sur les caisses occupées */}
+
                         <FormMessage />
                       </FormItem>
                     )}
@@ -392,8 +440,13 @@ export default function OpenCashRegisterSession() {
                                 inputMode="numeric"
                                 autoComplete="off"
                                 onChange={(e) => {
-                                  let raw = e.target.value.replace(/\s/g, "").replace(/\D/g, "");
-                                  const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                                  let raw = e.target.value
+                                    .replace(/\s/g, "")
+                                    .replace(/\D/g, "");
+                                  const formatted = raw.replace(
+                                    /\B(?=(\d{3})+(?!\d))/g,
+                                    " "
+                                  );
                                   field.onChange(formatted);
                                 }}
                                 value={field.value}
@@ -421,35 +474,14 @@ export default function OpenCashRegisterSession() {
                       <AlertTriangle className="h-4 w-4" />
                       <AlertTitle>Attention</AlertTitle>
                       <AlertDescription>
-                        Le montant saisi ({formatAmount(openingAmount)} {currency}) est différent du montant de fermeture de votre dernière session ({formatAmount(lastClosedSession.closing_amount)} {currency}). Vérifiez que c'est bien intentionnel.
+                        Le montant saisi ({formatAmount(openingAmount)}{" "}
+                        {currency}) est différent du montant de fermeture de
+                        votre dernière session (
+                        {formatAmount(lastClosedSession.closing_amount)}{" "}
+                        {currency}). Vérifiez que c'est bien intentionnel.
                       </AlertDescription>
                     </Alert>
                   )}
-
-                  {/* Comment */}
-                  <FormField
-                    control={form.control}
-                    name="comment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Commentaire (optionnel)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Ajoutez un commentaire si nécessaire..."
-                            {...field}
-                            className="h-11"
-                          />
-                        </FormControl>
-                        <FormDescription>
-                          Vous pouvez ajouter une remarque sur cette session
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <Separator />
 

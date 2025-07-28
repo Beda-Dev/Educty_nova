@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { generationNumero } from "@/lib/fonction";
-import type { CashRegisterSession } from "@/lib/interface";
+import type { CashRegisterSession , Transaction } from "@/lib/interface";
 import SessionInfo from "./session-info";
 import SessionStatistics from "./session-statistics";
 import SessionTransactions from "./session-transactions";
@@ -155,6 +155,8 @@ router.push('/caisse_comptabilite/session_caisse');
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        second: "2-digit",
+        hour12: false
       });
     } catch {
       return "Date invalide";
@@ -190,7 +192,7 @@ router.push('/caisse_comptabilite/session_caisse');
           (filteredPayment.some((p) => p.transaction_id === t.id) ||
             filteredExpenses.some((e) => e.transaction_id === t.id))
       )
-      .forEach((t) => {
+      .forEach((t: Transaction) => {
         // Correction : éviter les doublons de décaissement (transaction et dépense)
         if (
           t.transaction_type?.toLowerCase().includes("decaissement") &&
@@ -216,7 +218,7 @@ router.push('/caisse_comptabilite/session_caisse');
           description: `Transaction ${t.transaction_type}`,
           reference: `${generationNumero(
             payment_id !== 0 ? payment_id : expense_id,
-            t.transaction_date,
+            t.created_at,
             t.transaction_type?.toLowerCase().includes("encaissement")
               ? "encaissement"
               : "decaissement"
@@ -288,11 +290,11 @@ router.push('/caisse_comptabilite/session_caisse');
           id: e.id,
           type: "decaissement",
           amount: Number(e.amount),
-          date: e.expense_date,
+          date: e.created_at,
           description: e.label,
           reference: `${generationNumero(
             e.id,
-            e.expense_date,
+            e.created_at,
             "decaissement"
           )}`,
           details: e,
@@ -312,6 +314,8 @@ router.push('/caisse_comptabilite/session_caisse');
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
   }, [session, transactions, payments, expenses, sessionId, filteredTransactions, filteredPayment, filteredExpenses]);
+
+  console.log(sessionTransactions)
 
   // Statistiques
   const statistics = useMemo(() => {

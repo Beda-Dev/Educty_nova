@@ -10,6 +10,7 @@ import { useSchoolStore } from "@/store";
 import { generatePDFfromRef } from "@/lib/utils";
 import { Expense, Demand, ValidationExpense, User } from "@/lib/interface";
 
+
 interface Props {
   expense: Expense;
   demand: Demand;
@@ -21,6 +22,21 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
   const { settings } = useSchoolStore();
+
+  function getMatricule(applicant: any) {
+    // Récupère les employés et professeurs depuis le store
+    const employees = useSchoolStore.getState().employees || [];
+    const professors = useSchoolStore.getState().professor || [];
+    // Cherche dans les employés
+    const emp = employees.find(e => e.user_id === applicant?.id);
+    if (emp && emp.registration_number) return emp.registration_number;
+    // Cherche dans les professeurs
+    const prof = professors.find(p => p.user_id === applicant?.id);
+    if (prof && prof.matricule) return prof.matricule;
+    // Sinon, matricule généré
+    const year = new Date().getFullYear();
+    return `MAT${year}-${applicant?.id || "N/A"}`;
+  }
 
   const generatePDF = async (action: "print" | "download") => {
     if (!printRef.current) return;
@@ -105,7 +121,7 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
               <Info label="Caisse" value={expense.cash_register.cash_register_number} />
               <Info label="Caissier" value={`${cashier.name}`} />
               <Info label="Demandeur" value={`${demand.applicant.name}`} />
-              <Info label="Matricule Demandeur" value={`MAT2025-${demand.applicant.id}`} />
+              <Info label="Matricule Demandeur" value={getMatricule(demand?.applicant)} />
               <Info label="Béneficiare" value={`${demand.applicant.name}`} /> {/* La personne qui a effectuer le retrait */}
 
             </div>

@@ -1,7 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useDropzone, type DropzoneOptions, type FileRejection } from "react-dropzone";
+import {
+  useDropzone,
+  type DropzoneOptions,
+  type FileRejection,
+} from "react-dropzone";
 import { X, UploadCloud } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -46,7 +50,9 @@ export function FileUploader({
         if (error?.code === "file-too-large") {
           toast({
             title: "Fichier trop volumineux",
-            description: `La taille maximale autorisée est ${maxSize / 1024 / 1024}MB`,
+            description: `La taille maximale autorisée est ${
+              maxSize / 1024 / 1024
+            }MB`,
             color: "destructive",
           });
         } else if (error?.code === "file-invalid-type") {
@@ -86,14 +92,14 @@ export function FileUploader({
     <Card className={cn("overflow-hidden", className)} {...props}>
       <CardContent className="p-0">
         {preview ? (
-          <div className="relative group">
-            <div className="relative h-48 w-full">
+          <div className="relative group flex items-center justify-center" >
+            <div className=" bg-red-700 relative h-48 w-48 rounded-full overflow-hidden flex items-center justify-center">
               <Image
                 src={preview}
                 alt="Preview"
                 fill
                 className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes="(max-width: 128px) 100vw, (max-width: 128px) 50vw, 33vw"
               />
             </div>
             <Button
@@ -125,10 +131,11 @@ export function FileUploader({
                     : "Glissez-déposez votre fichier ou cliquez pour sélectionner"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Formats supportés: JPG, PNG, SVG (max. {maxSize / 1024 / 1024}MB)
+                  Formats supportés: JPG, PNG, SVG (max. {maxSize / 1024 / 1024}
+                  MB)
                 </p>
               </div>
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 size="sm"
@@ -136,7 +143,7 @@ export function FileUploader({
                 onClick={(e) => e.stopPropagation()}
               >
                 Sélectionner un fichier
-              </Button>
+              </Button> */}
             </div>
           </div>
         )}

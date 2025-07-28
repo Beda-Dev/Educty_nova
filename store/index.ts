@@ -45,7 +45,9 @@ import {
   Coefficient,
   Evaluation , 
   Office,
-  Employee
+  Employee,
+  Average ,
+  ReportCard
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -301,11 +303,17 @@ interface SchoolStore {
   addDocumentForm: (document: DocumentFormData) => void;
   removeDocumentForm: (index: number) => void;
 
-
-
   // Ajout Coefficient
   coefficients: Coefficient[];
   setCoefficients: (data: Coefficient[]) => void;
+
+  // Ajout des moyennes
+  averages: Average[];
+  setAverages: (data: Average[]) => void;
+
+  // Ajout des bulletins de notes
+  reportCards: ReportCard[];
+  setReportCards: (data: ReportCard[]) => void;
 
   resetRegistration: () => void;
 }
@@ -433,17 +441,36 @@ export const useSchoolStore = create<SchoolStore>()(
       professor: [],
       setProfessor: (data: Professor[]) => set({ professor: data }),
 
-      // Ajout Serie
       series: [],
       setSeries: (data: Serie[]) => set({ series: data }),
       
-      // Ajout Emploi du temps
       timetables: [],
       setTimetables: (data: Timetable[]) => set({ timetables: data }),
 
-      
+      notes: [],
+      setNotes: (data: Note[]) => set({ notes: data }),
 
-      // Registration store implementation
+      evaluations: [],
+      setEvaluations: (data: Evaluation[]) => set({ evaluations: data }),
+
+      offices: [],
+      setOffices: (data: Office[]) => set({ offices: data }),
+
+      employees: [],
+      setEmployees: (data: Employee[]) => set({ employees: data }),
+
+      // Ajout Coefficient
+      coefficients: [],
+      setCoefficients: (data: Coefficient[]) => set({ coefficients: data }),
+      
+      // Ajout des moyennes
+      averages: [],
+      setAverages: (data: Average[]) => set({ averages: data }),
+      
+      // Ajout des bulletins de notes
+      reportCards: [],
+      setReportCards: (data: ReportCard[]) => set({ reportCards: data }),
+      
       currentStep: 1,
       setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -479,27 +506,7 @@ export const useSchoolStore = create<SchoolStore>()(
           documentsForm: state.documentsForm.filter((_, i) => i !== index),
         })),
 
-      // Ajout Notes
-      notes: [],
-      setNotes: (data: Note[]) => set({ notes: data }),
-
-      // Ajout Evaluation
-      evaluations: [],
-      setEvaluations: (data: Evaluation[]) => set({ evaluations: data }),
-
-      // Ajout Office
-      offices: [],
-      setOffices: (data: Office[]) => set({ offices: data }),
-
-      // Ajout Employee
-      employees: [],
-      setEmployees: (data: Employee[]) => set({ employees: data }),
-
-      // Ajout Coefficient
-      coefficients: [],
-      setCoefficients: (data: Coefficient[]) => set({ coefficients: data }),
-
-      resetRegistration: () =>
+      resetRegistration: () => {
         set({
           currentStep: 1,
           studentData: null,
@@ -510,7 +517,8 @@ export const useSchoolStore = create<SchoolStore>()(
           paymentsForm: [],
           paidAmount: 0,
           documentsForm: [],
-        }),
+        });
+      },
     }),
     {
       name: "school-store",

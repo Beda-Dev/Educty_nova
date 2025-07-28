@@ -10,7 +10,7 @@ import {
   fetchPeriods,
   fetchMatters,
 } from "@/store/schoolservice";
-import EmploiDuTempsProfesseur from "./componant";
+import ProfessorTimetable from "./componant";
 
 export default function Page() {
   const {
@@ -42,5 +42,5 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <EmploiDuTempsProfesseur />;
+  return <ProfessorTimetable />;
 }

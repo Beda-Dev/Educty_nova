@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Calculator, Calendar, Clock, Wallet, Banknote, ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type { CashRegisterSession } from "@/lib/interface"
+import { useSchoolStore } from "@/store"
+import { RoleWithFullAccessCaisse } from "@/app/[lang]/(dashboard)/caisse_comptabilite/RoleFullAcess"
 
 interface SessionInfoProps {
   currentSession: CashRegisterSession
@@ -15,6 +17,7 @@ interface SessionInfoProps {
 
 export default function SessionInfo({ currentSession, formatDateTime, formatAmount }: SessionInfoProps) {
   const router = useRouter()
+  const { userOnline } = useSchoolStore()
 
   return (
     <>
@@ -27,16 +30,34 @@ export default function SessionInfo({ currentSession, formatDateTime, formatAmou
           </Button>
           <div>
             <h1 className="text-xl font-bold flex items-center gap-4">
-              Session de Caisse #{currentSession.id}
+            Session de Caisse du <span className="text-muted-foreground text-xs font-normal">{formatDateTime(currentSession.created_at)}</span>
+              {currentSession.status === 'closed' && (
+                <span className="text-muted-foreground text-xs font-normal">
+                  au {" "} {formatDateTime(currentSession.updated_at)}
+                </span>
+              )}
               {currentSession.status === "open" && (
-                <Button
-                  color="destructive"
-                  size="sm"
-                  className="ml-2"
-                  onClick={() => router.push(`/caisse_comptabilite/close-session/${currentSession.id}`)}
-                >
-                  Fermer la session
-                </Button>
+                (() => {
+                  const hasAccess = 
+                    userOnline?.id === currentSession.user_id || 
+                    userOnline?.roles?.some(role => {
+                      const allowedRoles = RoleWithFullAccessCaisse.filter(r => r.toLowerCase() !== 'comptable');
+                      return allowedRoles
+                        .map(r => r.toLowerCase())
+                        .includes(role.name?.toLowerCase() || '');
+                    });
+                  
+                  return hasAccess && (
+                    <Button
+                      color="destructive"
+                      size="sm"
+                      className="ml-2"
+                      onClick={() => router.push(`/caisse_comptabilite/close-session/${currentSession.id}`)}
+                    >
+                      Fermer la session
+                    </Button>
+                  );
+                })()
               )}
             </h1>
             <p className="text-muted-foreground">

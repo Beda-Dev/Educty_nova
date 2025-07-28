@@ -10,7 +10,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 // Fonction de logging pour le débogage
 const debugLog = (message: string, data?: any) => {
   if (process.env.NODE_ENV === 'development') {
-    console.log(`[CloseSessionPageWrapper] ${message}`, data);
+    // console.log(`[CloseSessionPageWrapper] ${message}`, data);
   }
 };
 

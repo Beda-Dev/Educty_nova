@@ -1,14 +1,29 @@
 "use client";
 
-import React, { useMemo, useRef, useState, useCallback } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useSchoolStore } from "@/store/index";
-import { Timetable, Classe, Professor, AcademicYear, Period, Matter } from "@/lib/interface";
-import { Loader2, Download, FileSpreadsheet, Calendar, Users, BookOpen, Clock, X } from "lucide-react";
+import { Timetable, Professor } from "@/lib/interface";
+import { 
+  Loader2, 
+  Download, 
+  FileSpreadsheet, 
+  Calendar, 
+  Users, 
+  BookOpen, 
+  Clock, 
+  BarChart3,
+  User,
+  GraduationCap,
+  Timer,
+  MapPin
+} from "lucide-react";
 import { generatePDFfromRef, universalExportToExcel } from "@/lib/utils";
+import { useEffect } from "react";
 
 // Utilitaire pour détecter les conflits d'horaires
 function hasConflict(timetable: Timetable, all: Timetable[]) {
@@ -25,234 +40,263 @@ function hasConflict(timetable: Timetable, all: Timetable[]) {
   );
 }
 
-// Palette de couleurs par défaut
-const DEFAULT_COLORS = [
-  "#a5b4fc", "#fca5a5", "#fdba74", "#6ee7b7", "#fcd34d", "#f472b6", "#38bdf8", "#818cf8", "#fbbf24", "#34d399"
+// Couleurs pour les matières
+const SUBJECT_COLORS = [
+  "bg-blue-100 border-blue-300 text-blue-800",
+  "bg-green-100 border-green-300 text-green-800",
+  "bg-purple-100 border-purple-300 text-purple-800",
+  "bg-orange-100 border-orange-300 text-orange-800",
+  "bg-pink-100 border-pink-300 text-pink-800",
+  "bg-indigo-100 border-indigo-300 text-indigo-800",
+  "bg-yellow-100 border-yellow-300 text-yellow-800",
+  "bg-red-100 border-red-300 text-red-800",
+  "bg-teal-100 border-teal-300 text-teal-800",
+  "bg-cyan-100 border-cyan-300 text-cyan-800"
 ];
 
-export default function EmploiDuTempsProfesseur() {
+export default function ProfessorTimetable() {
   const {
     timetables,
     classes,
     professor,
-    academicYears,
-    periods,
+    academicYearCurrent,
     matters,
+    userOnline
   } = useSchoolStore();
-
-  // Filtres
-  const [selectedProfessor, setSelectedProfessor] = useState<string>("");
-  const [selectedClasse, setSelectedClasse] = useState<string>("");
-  const [selectedYear, setSelectedYear] = useState<string>("");
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
-  const [selectedDay, setSelectedDay] = useState<string>("");
-  const [selectedHour, setSelectedHour] = useState<string>("");
-  const [search, setSearch] = useState<string>("");
-
-  // Couleurs personnalisées
-  const [colorMode, setColorMode] = useState<"matiere" | "classe" | "aucune">("matiere");
-  const [customColors, setCustomColors] = useState<Record<string, string>>({});
-
-  const handleColorChange = useCallback((id: string, color: string) => {
-    setCustomColors((prev) => ({ ...prev, [id]: color }));
-  }, []);
-
-  const handleRemoveColor = useCallback((id: string) => {
-    setCustomColors((prev) => {
-      const copy = { ...prev };
-      delete copy[id];
-      return copy;
-    });
-  }, []);
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
 
-  // Liste des jours
+  // Trouver le professeur connecté
+  const currentProfessor = useMemo(() => {
+    return professor.find(p => p.user_id === userOnline?.id);
+  }, [professor, userOnline]);
+
+  // Obtenir la période actuelle basée sur la date d'aujourd'hui
+  const currentPeriod = useMemo(() => {
+    if (!academicYearCurrent?.periods) return null;
+    
+    const today = new Date();
+    return academicYearCurrent.periods.find(period => {
+      const startDate = new Date(period.pivot.start_date);
+      const endDate = new Date(period.pivot.end_date);
+      return today >= startDate && today <= endDate;
+    });
+  }, [academicYearCurrent]);
+
+  // Période sélectionnée (par défaut la période actuelle)
+  const activePeriod = useMemo(() => {
+    if (selectedPeriod) {
+      return academicYearCurrent?.periods?.find(p => p.id.toString() === selectedPeriod);
+    }
+    return currentPeriod;
+  }, [selectedPeriod, currentPeriod, academicYearCurrent]);
+
+  // Filtrer les emplois du temps du professeur connecté pour l'année académique courante et la période sélectionnée
+  const professorTimetables = useMemo(() => {
+    if (!currentProfessor || !academicYearCurrent || !activePeriod) return [];
+    return timetables.filter(t => 
+      Number(t.professor_id) === Number(currentProfessor.id) &&
+      Number(t.academic_year_id) === Number(academicYearCurrent.id) &&
+      Number(t.period_id) === Number(activePeriod.id)
+    );
+  }, [timetables, currentProfessor, academicYearCurrent, activePeriod]);
+
+  // Initialiser la période sélectionnée avec la période actuelle
+  useEffect(() => {
+    if (currentPeriod && !selectedPeriod) {
+      setSelectedPeriod(currentPeriod.id.toString());
+    }
+    // console.log("Emploie du temps sélectionnée :", professorTimetables);
+  }, [currentPeriod, selectedPeriod]);
+
+  // Jours de la semaine
   const DAYS_OF_WEEK = [
-    { value: "lundi", label: "Lundi" },
-    { value: "mardi", label: "Mardi" },
-    { value: "mercredi", label: "Mercredi" },
-    { value: "jeudi", label: "Jeudi" },
-    { value: "vendredi", label: "Vendredi" },
-    { value: "samedi", label: "Samedi" },
+    { key: "lundi", label: "Lundi" },
+    { key: "mardi", label: "Mardi" },
+    { key: "mercredi", label: "Mercredi" },
+    { key: "jeudi", label: "Jeudi" },
+    { key: "vendredi", label: "Vendredi" },
+    { key: "samedi", label: "Samedi" },
   ];
 
-  // Liste des heures uniques
-  const allHours = useMemo(() => {
-    const hours = Array.from(
-      new Set(
-        timetables.map((t) => `${t.start_time} - ${t.end_time}`)
-      )
+  // Extraire tous les créneaux horaires uniques et les trier
+  const timeSlots = useMemo(() => {
+    const slots = Array.from(new Set(professorTimetables.map(t => `${t.start_time}-${t.end_time}`)));
+    return slots.sort();
+  }, [professorTimetables]);
+
+  // Fonction pour obtenir le cours à un créneau donné
+  const getCourseAtSlot = (day: string, timeSlot: string) => {
+    return professorTimetables.find(
+      t => t.day.toLowerCase() === day.toLowerCase() && `${t.start_time}-${t.end_time}` === timeSlot
     );
-    return hours.sort();
-  }, [timetables]);
-
-  // Recherche textuelle et filtres
-  const filteredTimetables = useMemo(() => {
-    let result = timetables.filter((t) => {
-      if (selectedProfessor && t.professor_id !== selectedProfessor) return false;
-      if (selectedClasse && t.class_id !== selectedClasse) return false;
-      if (selectedYear && t.academic_year_id !== selectedYear) return false;
-      if (selectedPeriod && t.period_id !== selectedPeriod) return false;
-      if (selectedDay && t.day !== selectedDay) return false;
-      if (selectedHour && `${t.start_time} - ${t.end_time}` !== selectedHour) return false;
-      return true;
-    });
-    if (search.trim()) {
-      const s = search.trim().toLowerCase();
-      result = result.filter((t) => {
-        const matiere = t.matter?.name?.toLowerCase() || "";
-        const classe = classes.find((c) => c.id.toString() === t.class_id)?.label?.toLowerCase() || "";
-        const salle = t.room?.toLowerCase() || "";
-        return matiere.includes(s) || classe.includes(s) || salle.includes(s);
-      });
-    }
-    return result;
-  }, [
-    timetables,
-    selectedProfessor,
-    selectedClasse,
-    selectedYear,
-    selectedPeriod,
-    selectedDay,
-    selectedHour,
-    search,
-    classes,
-  ]);
-
-  // Export PDF
-  const handleExportPDF = async () => {
-    setIsExporting(true);
-    await generatePDFfromRef(pdfRef, "emploi_du_temps_professeur", "download");
-    setIsExporting(false);
   };
 
-  // Export Excel
-  const handleExportExcel = () => {
-    universalExportToExcel({
-      source: {
-        type: "array",
-        data: filteredTimetables,
-        formatRow: (row) => ({
-          "Professeur": professor.find((p) => p.id.toString() === row.professor_id)?.name + " " + professor.find((p) => p.id.toString() === row.professor_id)?.first_name || "",
-          "Classe": classes.find((c) => c.id.toString() === row.class_id)?.label || "",
-          "Année académique": academicYears.find((a) => a.id.toString() === row.academic_year_id)?.label || "",
-          "Période": periods.find((p) => p.id.toString() === row.period_id)?.label || "",
-          "Jour": DAYS_OF_WEEK.find((d) => d.value === row.day)?.label || "",
-          "Heure": `${row.start_time} - ${row.end_time}`,
-          "Matière": row.matter?.name || "",
-          "Salle": row.room,
-        }),
-      },
-      fileName: "emploi_du_temps_professeur.xlsx",
-    });
-  };
-
-  // Regroupe les emplois du temps par année académique et période
-  const timetableByYearAndPeriod = useMemo(() => {
-    const result: Record<string, Record<string, Timetable[]>> = {};
-    for (const t of filteredTimetables) {
-      if (!result[t.academic_year_id]) result[t.academic_year_id] = {};
-      if (!result[t.academic_year_id][t.period_id]) result[t.academic_year_id][t.period_id] = [];
-      result[t.academic_year_id][t.period_id].push(t);
-    }
-    return result;
-  }, [filteredTimetables]);
-
-  // Liste unique des intervalles d'heures (triées)
-  const allIntervals = useMemo(() => {
-    const intervals = Array.from(
-      new Set(
-        filteredTimetables.map((t) => `${t.start_time} - ${t.end_time}`)
-      )
-    );
-    return intervals.sort();
-  }, [filteredTimetables]);
-
-  // Génère les libellés d'heure (1ère H, 2e H, etc.)
-  const getHourLabel = (idx: number) => {
-    if (idx === 0) return "1ère H";
-    if (idx === 1) return "2e H";
-    return `${idx + 1}e H`;
-  };
-
-  // Statistiques du professeur sélectionné
-  const selectedProfessorObj = useMemo(
-    () => professor.find((p) => p.id.toString() === selectedProfessor),
-    [professor, selectedProfessor]
-  );
-
-  const profTimetables = useMemo(
-    () => filteredTimetables.filter((t) => t.professor_id === selectedProfessor),
-    [filteredTimetables, selectedProfessor]
-  );
-
-  const profClasses = useMemo(() => {
-    const ids = Array.from(new Set(profTimetables.map((t) => t.class_id)));
-    return classes.filter((c) => ids.includes(c.id.toString()));
-  }, [profTimetables, classes]);
-
-  const profMatters = useMemo(() => {
-    const ids = Array.from(new Set(profTimetables.map((t) => t.matter_id)));
-    return matters.filter((m) => ids.includes(m.id.toString()));
-  }, [profTimetables, matters]);
-
-  const totalHours = useMemo(() => {
-    return profTimetables.reduce((sum, t) => {
+  // Statistiques du professeur
+  const stats = useMemo(() => {
+    const uniqueClasses = Array.from(new Set(professorTimetables.map(t => t.class_id)));
+    const uniqueMatters = Array.from(new Set(professorTimetables.map(t => t.matter_id)));
+    
+    const totalHours = professorTimetables.reduce((sum, t) => {
       const start = t.start_time.split(":").map(Number);
       const end = t.end_time.split(":").map(Number);
       const startMinutes = start[0] * 60 + start[1];
       const endMinutes = end[0] * 60 + end[1];
       return sum + Math.max(0, (endMinutes - startMinutes) / 60);
     }, 0);
-  }, [profTimetables]);
 
-  // Couleur pour une matière ou une classe
-  const getCellColor = useCallback(
-    (cours: Timetable) => {
-      if (colorMode === "matiere") {
-        if (customColors[cours.matter_id]) return customColors[cours.matter_id];
-        const idx = profMatters.findIndex((m) => m.id.toString() === cours.matter_id);
-        return DEFAULT_COLORS[idx % DEFAULT_COLORS.length];
-      }
-      if (colorMode === "classe") {
-        if (customColors[cours.class_id]) return customColors[cours.class_id];
-        const idx = profClasses.findIndex((c) => c.id.toString() === cours.class_id);
-        return DEFAULT_COLORS[idx % DEFAULT_COLORS.length];
-      }
-      return undefined;
-    },
-    [colorMode, customColors, profMatters, profClasses]
-  );
+    return {
+      totalClasses: uniqueClasses.length,
+      totalMatters: uniqueMatters.length,
+      totalCourses: professorTimetables.length,
+      totalHours: totalHours,
+      conflicts: professorTimetables.filter(t => hasConflict(t, professorTimetables)).length
+    };
+  }, [professorTimetables]);
 
-  // Liste des matières/classes pour la personnalisation des couleurs
-  const colorOptions = useMemo(() => {
-    if (colorMode === "matiere") {
-      return profMatters;
-    }
-    if (colorMode === "classe") {
-      return profClasses;
-    }
-    return [];
-  }, [colorMode, profMatters, profClasses]);
+  // Données pour les tableaux de statistiques
+  const classesData = useMemo(() => {
+    const classMap = new Map();
+    professorTimetables.forEach(t => {
+      const classe = classes.find(c => Number(c.id) === Number(t.class_id)  );
+      if (classe) {
+        const key = classe.id.toString();
+        if (!classMap.has(key)) {
+          classMap.set(key, {
+            name: classe.label,
+            courses: 0,
+            hours: 0
+          });
+        }
+        const data = classMap.get(key);
+        data.courses += 1;
+        
+        const start = t.start_time.split(":").map(Number);
+        const end = t.end_time.split(":").map(Number);
+        const startMinutes = start[0] * 60 + start[1];
+        const endMinutes = end[0] * 60 + end[1];
+        data.hours += Math.max(0, (endMinutes - startMinutes) / 60);
+      }
+    });
+    return Array.from(classMap.values());
+  }, [professorTimetables, classes]);
+
+  const mattersData = useMemo(() => {
+    const matterMap = new Map();
+    professorTimetables.forEach(t => {
+      const matter = matters.find(m => m.id.toString() === t.matter_id);
+      if (matter) {
+        const key = matter.id.toString();
+        if (!matterMap.has(key)) {
+          matterMap.set(key, {
+            name: matter.name,
+            courses: 0,
+            hours: 0
+          });
+        }
+        const data = matterMap.get(key);
+        data.courses += 1;
+        
+        const start = t.start_time.split(":").map(Number);
+        const end = t.end_time.split(":").map(Number);
+        const startMinutes = start[0] * 60 + start[1];
+        const endMinutes = end[0] * 60 + end[1];
+        data.hours += Math.max(0, (endMinutes - startMinutes) / 60);
+      }
+    });
+    return Array.from(matterMap.values());
+  }, [professorTimetables, matters]);
+
+  // Export PDF
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    await generatePDFfromRef(pdfRef, `emploi_du_temps_${currentProfessor?.name}_${currentProfessor?.first_name}`, "download");
+    setIsExporting(false);
+  };
+
+  // Export Excel
+  const handleExportExcel = () => {
+    // Préparer les données pour l'export Excel dans le même format que l'affichage
+    const excelData: any[] = [];
+    
+    // En-tête
+    const header = ["Horaires", ...DAYS_OF_WEEK.map(d => d.label)];
+    excelData.push(header);
+    
+    // Données des créneaux
+    timeSlots.forEach(timeSlot => {
+      const row = [timeSlot];
+      DAYS_OF_WEEK.forEach(day => {
+        const course = getCourseAtSlot(day.key, timeSlot);
+        if (course) {
+          const classe = classes.find(c => Number(c.id) === Number(course.class_id) );
+          const matter = matters.find(m => Number(m.id) === Number(course.matter_id) );
+          row.push(`${matter?.name || 'N/A'} - ${classe?.label || 'N/A'} - ${course.room || 'N/A'}`);
+        } else {
+          row.push('');
+        }
+      });
+      excelData.push(row);
+    });
+
+    universalExportToExcel({
+      source: {
+        type: "array",
+        data: excelData.slice(1).map((row, index) => {
+          const obj: any = {};
+          header.forEach((h, i) => {
+            obj[h] = row[i];
+          });
+          return obj;
+        })
+      },
+      fileName: `emploi_du_temps_${currentProfessor?.name}_${currentProfessor?.first_name}.xlsx`,
+    });
+  };
+
+  if (!currentProfessor) {
+    return (
+      <Card className="container mx-auto py-8 px-4">
+        <Card>
+          <CardContent className="flex items-center justify-center py-8">
+            <div className="text-center text-muted-foreground">
+              <User className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+              <p>Vous devez être connecté en tant que professeur pour voir votre emploi du temps.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </Card>
+    );
+  }
 
   return (
-    <div className="container mx-auto py-8 px-2 sm:px-6">
-      <Card className="w-full overflow-hidden shadow-lg border border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-indigo-600 to-skyblue-500 text-white rounded-t-md">
+    <Card className="container mx-auto py-8 px-4 space-y-8">
+      {/* En-tête avec informations du professeur */}
+      <Card className=" border-0 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <CardHeader>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <CardTitle className="text-2xl flex items-center gap-2 text-white">
-                <Calendar className="h-7 w-7" />
-                Emploi du Temps des Enseignants
-              </CardTitle>
-              <CardDescription className="text-white/80">
-                Visualisez et exportez l'emploi du temps filtré par enseignant, classe, année, période, jour ou heure.
-              </CardDescription>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-100 rounded-full">
+                <GraduationCap className="h-8 w-8 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl text-gray-900">
+                  {currentProfessor.name} {currentProfessor.first_name}
+                </CardTitle>
+                <CardDescription className="text-lg">
+                  {currentProfessor.sexe === "masculin"
+                    ? "Enseignant"
+                    : currentProfessor.sexe === "féminin"
+                    ? "Enseignante"
+                    : "Enseignant(e)"
+                  } {currentProfessor.type} • {academicYearCurrent?.label}
+                </CardDescription>
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handleExportPDF} disabled={isExporting} className="shadow">
+            <div className="flex gap-3">
+              <Button onClick={handleExportPDF} disabled={isExporting} className="">
                 {isExporting ? (
                   <Loader2 className="animate-spin h-4 w-4 mr-2" />
                 ) : (
@@ -260,302 +304,311 @@ export default function EmploiDuTempsProfesseur() {
                 )}
                 Exporter PDF
               </Button>
-              <Button color="success" onClick={handleExportExcel} className="shadow">
+              <Button onClick={handleExportExcel} variant="outline" className="">
                 <FileSpreadsheet className="h-4 w-4 mr-2" />
                 Exporter Excel
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="bg-gray-50">
-          {/* Filtres */}
-          <div className="flex flex-wrap gap-4 mb-4 justify-center">
-            <div className="w-48">
-              <Select value={selectedProfessor} onValueChange={setSelectedProfessor}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Professeur" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les professeurs</SelectItem>
-                  {professor.map((p) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>
-                      {p.name} {p.first_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-48">
-              <Select value={selectedClasse} onValueChange={setSelectedClasse}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Classe" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les classes</SelectItem>
-                  {classes.map((classe) => (
-                    <SelectItem key={classe.id} value={classe.id.toString()}>
-                      {classe.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-48">
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Année académique" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les années</SelectItem>
-                  {academicYears.map((a) => (
-                    <SelectItem key={a.id} value={a.id.toString()}>
-                      {a.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-48">
+      </Card>
+
+      {/* Filtre de période */}
+      {academicYearCurrent?.periods && academicYearCurrent.periods.length > 0 && (
+        <Card className="">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">Période :</label>
               <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Période" />
+                <SelectTrigger className="w-64">
+                  <SelectValue placeholder="Sélectionner une période" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes les périodes</SelectItem>
-                  {periods.map((p) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>
-                      {p.label}
+                  {academicYearCurrent.periods.map((period) => (
+                    <SelectItem key={period.id} value={period.id.toString()}>
+                      {period.label} 
+                      {currentPeriod?.id === period.id && " (Actuelle)"}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              {activePeriod && (
+                <div className="text-sm text-gray-600">
+                  Du {new Date(activePeriod.pivot.start_date).toLocaleDateString()}  {" "}
+                  au {new Date(activePeriod.pivot.end_date).toLocaleDateString()}
+                </div>
+              )}
             </div>
-            <div className="w-48">
-              <Select value={selectedDay} onValueChange={setSelectedDay}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Jour" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les jours</SelectItem>
-                  {DAYS_OF_WEEK.map((d) => (
-                    <SelectItem key={d.value} value={d.value}>
-                      {d.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="w-48">
-              <Select value={selectedHour} onValueChange={setSelectedHour}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Heure" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les heures</SelectItem>
-                  {allHours.map((h) => (
-                    <SelectItem key={h} value={h}>
-                      {h}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            {/* Recherche textuelle */}
-            <div className="w-64">
-              <input
-                type="text"
-                placeholder="Recherche matière, classe, salle..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-skyblue"
-              />
-            </div>
-          </div>
+          </CardContent>
+        </Card>
+      )}
 
-          {/* Couleurs personnalisables */}
-          <div className="flex flex-wrap gap-4 mb-8 items-center justify-center">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-gray-700">Couleur par :</span>
-              <Select value={colorMode} onValueChange={v => setColorMode(v as any)}>
-                <SelectTrigger className="w-32 bg-white shadow-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="matiere">Matière</SelectItem>
-                  <SelectItem value="classe">Classe</SelectItem>
-                  <SelectItem value="aucune">Aucune</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {colorMode !== "aucune" && (
-              <div className="flex flex-wrap gap-2 items-center">
-                {colorOptions.map((item) => (
-                  <div key={item.id} className="flex items-center gap-1">
-                    <label className="text-xs text-gray-700">
-                      {colorMode === "matiere"
-                        ? "name" in item
-                          ? item.name
-                          : ""
-                        : "label" in item
-                        ? item.label
-                        : ""}
-                    </label>
-                    <input
-                      type="color"
-                      value={customColors[item.id.toString()] || DEFAULT_COLORS[item.id % DEFAULT_COLORS.length]}
-                      onChange={e => handleColorChange(item.id.toString(), e.target.value)}
-                      className="w-6 h-6 border-0 p-0"
-                      style={{ cursor: "pointer" }}
-                    />
-                    {customColors[item.id.toString()] && (
-                      <button
-                        type="button"
-                        className="ml-1 text-gray-400 hover:text-red-500"
-                        onClick={() => handleRemoveColor(item.id.toString())}
-                        title="Réinitialiser la couleur"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Informations et statistiques du professeur */}
-          {selectedProfessorObj && (
-            <div className="mb-8 bg-white rounded-lg shadow p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border">
+      {/* Statistiques */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <Card className="">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <div className="text-xl font-bold text-indigo-700 mb-1">
-                  {selectedProfessorObj.name} {selectedProfessorObj.first_name}
-                </div>
-                <div className="text-gray-600 text-sm">
-                  Type : <b>{selectedProfessorObj.type}</b>
-                </div>
+                <p className="text-sm font-medium text-gray-600">Classes</p>
+                <p className="text-3xl font-bold text-blue-600">{stats.totalClasses}</p>
               </div>
-              <div className="flex flex-wrap gap-4">
-                <div className="bg-green-50 rounded-lg px-4 py-2 flex flex-col items-center min-w-[90px]">
-                  <Users className="h-5 w-5 text-green-600 mb-1" />
-                  <span className="font-bold text-lg">{profClasses.length}</span>
-                  <span className="text-xs text-gray-600">Classes</span>
-                </div>
-                <div className="bg-skyblue-50 rounded-lg px-4 py-2 flex flex-col items-center min-w-[90px]">
-                  <BookOpen className="h-5 w-5 text-skyblue-600 mb-1" />
-                  <span className="font-bold text-lg">{profMatters.length}</span>
-                  <span className="text-xs text-gray-600">Matières</span>
-                </div>
-                <div className="bg-orange-50 rounded-lg px-4 py-2 flex flex-col items-center min-w-[90px]">
-                  <Clock className="h-5 w-5 text-orange-600 mb-1" />
-                  <span className="font-bold text-lg">{profTimetables.length}</span>
-                  <span className="text-xs text-gray-600">Cours</span>
-                </div>
-                <div className="bg-purple-50 rounded-lg px-4 py-2 flex flex-col items-center min-w-[90px]">
-                  <Clock className="h-5 w-5 text-purple-600 mb-1" />
-                  <span className="font-bold text-lg">{totalHours.toFixed(1)}h</span>
-                  <span className="text-xs text-gray-600">Heures</span>
-                </div>
-              </div>
+              <Users className="h-8 w-8 text-blue-600" />
             </div>
-          )}
+          </CardContent>
+        </Card>
 
-          {/* Emploi du temps différencié par année académique et période */}
-          {Object.entries(timetableByYearAndPeriod).length === 0 && (
-            <div className="text-center text-gray-500 py-8">
-              Aucun créneau trouvé pour les filtres sélectionnés.
+        <Card className="">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Matières</p>
+                <p className="text-3xl font-bold text-green-600">{stats.totalMatters}</p>
+              </div>
+              <BookOpen className="h-8 w-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Cours</p>
+                <p className="text-3xl font-bold text-purple-600">{stats.totalCourses}</p>
+              </div>
+              <Calendar className="h-8 w-8 text-purple-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Heures</p>
+                <p className="text-3xl font-bold text-orange-600">{stats.totalHours.toFixed(1)}h</p>
+              </div>
+              <Clock className="h-8 w-8 text-orange-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Conflits</p>
+                <p className={`text-3xl font-bold ${stats.conflicts > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                  {stats.conflicts}
+                </p>
+              </div>
+              <Timer className="h-8 w-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Emploi du temps principal */}
+      <Card className="" ref={pdfRef}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calendar className="h-6 w-6" />
+            Emploi du temps - {activePeriod?.label || "Période sélectionnée"}
+          </CardTitle>
+          {activePeriod && (
+            <CardDescription>
+              Période du {new Date(activePeriod.pivot.start_date).toLocaleDateString()} {" "}
+              au {new Date(activePeriod.pivot.end_date).toLocaleDateString()}
+            </CardDescription>
+          )}
+        </CardHeader>
+        <CardContent>
+          {professorTimetables.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500 text-lg">
+                Aucun cours programmé pour cette période
+              </p>
+              {!activePeriod && (
+                <p className="text-gray-400 text-sm mt-2">
+                  Veuillez sélectionner une période
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="border-collapse border border-gray-300">
+                <TableHeader>
+                  <TableRow className="bg-gray-50">
+                    <TableHead className="border border-gray-300 text-center  min-w-[120px]">
+                      Horaires/Jours
+                    </TableHead>
+                    {DAYS_OF_WEEK.map((day) => (
+                      <TableHead
+                        key={day.key}
+                        className="border border-gray-300 text-center font-semibold min-w-[180px]"
+                      >
+                        {day.label}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {timeSlots.map((timeSlot) => (
+                    <TableRow key={timeSlot}>
+                      <TableCell className="border border-gray-300 bg-gray-50 text-xs text-center">
+                        {timeSlot.replace('-', ' - ')}
+                      </TableCell>
+                      {DAYS_OF_WEEK.map((day) => {
+                        const course = getCourseAtSlot(day.key, timeSlot);
+                        if (!course) {
+                          return (
+                            <TableCell key={day.key} className="border border-gray-300 h-20">
+                              {/* Cellule vide */}
+                            </TableCell>
+                          );
+                        }
+
+                        const classe = classes.find(c => Number(c.id) === Number(course.class_id) );
+                        const matter = matters.find(m => Number(m.id) === Number(course.matter_id) );
+                        const isConflict = hasConflict(course, professorTimetables);
+                        const colorIndex = matters.findIndex(m => Number(m.id) === Number(course.matter_id)) % SUBJECT_COLORS.length;
+
+                        return (
+                          <TableCell key={day.key} className="border border-gray-300 p-2">
+                            <div className={`${SUBJECT_COLORS[colorIndex]} border-l-4 p-3 rounded-r h-full min-h-[80px] flex flex-col justify-center relative ${isConflict ? 'ring-2 ring-red-500' : ''}`}>
+                              <div className="space-y-1">
+                                <Badge color="secondary" className="text-xs font-medium mb-1">
+                                  {matter?.name || "Matière inconnue"}
+                                </Badge>
+                                <p className="text-sm font-semibold">{classe?.label || "Classe inconnue"}</p>
+                                <p className="text-xs text-gray-600 flex items-center gap-1">
+                                  <MapPin className="inline-block h-4 w-4 text-gray-500" />
+                                  {course.room || "Salle non définie"}
+                                </p>
+                              </div>
+                              {isConflict && (
+                                <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded animate-pulse">
+                                  ⚠️
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
-          {Object.entries(timetableByYearAndPeriod).map(([yearId, periodsObj]) => {
-            const yearLabel = academicYears.find(a => a.id.toString() === yearId)?.label || yearId;
-            return Object.entries(periodsObj).map(([periodId, tts]) => {
-              const periodLabel = periods.find(p => p.id.toString() === periodId)?.label || periodId;
-              // Pour chaque intervalle d'heure, on prépare une ligne
-              return (
-                <div key={yearId + "-" + periodId} className="mb-10">
-                  <div className="flex items-center gap-4 mb-2">
-                    <span className="font-bold text-lg text-indigo-700">{yearLabel}</span>
-                    <span className="font-semibold text-skyblue-700">{periodLabel}</span>
-                  </div>
-                  <div
-                    ref={pdfRef}
-                    className="overflow-x-auto bg-white rounded-md border shadow-sm"
-                    style={{
-                      minHeight: 300,
-                      WebkitOverflowScrolling: "touch",
-                      maxWidth: "100vw",
-                    }}
-                  >
-                    <Table className="min-w-max">
-                      <TableHeader>
-                        <TableRow className="bg-gray-100 sticky top-0 z-10">
-                          <TableHead className="text-center" colSpan={2}>Horaire</TableHead>
-                          {DAYS_OF_WEEK.map((d) => (
-                            <TableHead key={d.value} className="text-center">{d.label}</TableHead>
-                          ))}
-                        </TableRow>
-                        <TableRow className="sticky top-8 z-10 bg-gray-50">
-                          <TableHead className="text-center w-24">N° H</TableHead>
-                          <TableHead className="text-center w-40">Intervalle</TableHead>
-                          {DAYS_OF_WEEK.map((d) => (
-                            <TableHead key={d.value + "-sub"} className="text-center"></TableHead>
-                          ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {allIntervals.map((interval, idx) => (
-                          <TableRow key={interval}>
-                            <TableCell className="text-center font-semibold sticky left-0 bg-white z-10">{getHourLabel(idx)}</TableCell>
-                            <TableCell className="text-center sticky left-20 bg-white z-10">{interval}</TableCell>
-                            {DAYS_OF_WEEK.map((d) => {
-                              // On cherche le créneau pour ce jour et cet intervalle
-                              const cours = tts.find(
-                                (t) =>
-                                  t.day === d.value &&
-                                  `${t.start_time} - ${t.end_time}` === interval
-                              );
-                              if (!cours) {
-                                return <TableCell key={d.value} className="text-center text-gray-300">-</TableCell>;
-                              }
-                              // Conflit ?
-                              const isConflict = hasConflict(cours, tts);
-                              // Couleur personnalisée
-                              const bgColor = colorMode !== "aucune" ? getCellColor(cours) : undefined;
-                              return (
-                                <TableCell
-                                  key={d.value}
-                                  className={`text-center relative transition-all`}
-                                  style={{
-                                    background: bgColor,
-                                    border: isConflict ? "2px solid #ef4444" : undefined,
-                                    boxShadow: isConflict ? "0 0 0 2px #ef4444" : undefined,
-                                  }}
-                                >
-                                  <div className="font-semibold text-indigo-800">{cours.matter?.name || ""}</div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    {classes.find((c) => c.id.toString() === cours.class_id)?.label || ""}
-                                  </div>
-                                  <div className="text-xs text-skyblue-700 mt-1">
-                                    {cours.room ? `/${cours.room}` : ""}
-                                  </div>
-                                  {isConflict && (
-                                    <div className="absolute top-1 right-1 text-xs text-red-600 font-bold animate-pulse" title="Conflit d'horaire">
-                                      !
-                                    </div>
-                                  )}
-                                </TableCell>
-                              );
-                            })}
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-              );
-            });
-          })}
         </CardContent>
       </Card>
-    </div>
+
+      {/* Tableaux de statistiques détaillées */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Répartition par classes */}
+        <Card className="">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Répartition par classes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Classe</TableHead>
+                  <TableHead className="text-center">Cours</TableHead>
+                  <TableHead className="text-center">Heures</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {classesData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="text-center">{item.courses}</TableCell>
+                    <TableCell className="text-center">{item.hours.toFixed(1)}h</TableCell>
+                  </TableRow>
+                ))}
+                {classesData.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-gray-500 py-4">
+                      Aucune donnée disponible
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* Répartition par matières */}
+        <Card className="">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Répartition par matières
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Matière</TableHead>
+                  <TableHead className="text-center">Cours</TableHead>
+                  <TableHead className="text-center">Heures</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {mattersData.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="text-center">{item.courses}</TableCell>
+                    <TableCell className="text-center">{item.hours.toFixed(1)}h</TableCell>
+                  </TableRow>
+                ))}
+                {mattersData.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center text-gray-500 py-4">
+                      Aucune donnée disponible
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Légende */}
+      <Card className="">
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Légende
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-blue-100 border border-blue-300 rounded"></div>
+              <span>Cours programmé</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border border-gray-300 rounded"></div>
+              <span>Créneau libre</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-red-100 border-2 border-red-500 rounded"></div>
+              <span>Conflit d'horaire</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="inline-block h-4 w-4 text-gray-500 bg-gray-100 rounded p-0.5" />
+              <span>Salle de cours</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Card>
   );
 }

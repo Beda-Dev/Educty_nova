@@ -39,6 +39,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { sendAccountInfo } from "@/lib/fonction";
 import { FileUploader } from "./components/file-uploader";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // --- Ajout des champs au schéma ---
 const professorSchema = z.object({
@@ -205,8 +206,10 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
     <Dialog open={open}  onOpenChange={open => { if (!open) onClose(); }}>
       <DialogContent
         size="5xl"
-        className="rounded-xl border-0 bg-gradient-to-br from-white via-blue-50 to-blue-100 animate-fade-in overflow-y-auto"
+        className="rounded-xl border-0 bg-gradient-to-br from-white via-blue-50 to-blue-100 animate-fade-in overflow-y-auto max-h-screen p-0 "
       >
+        <div className="h-[300px] sm:h-[600px]  w-full">
+          <ScrollArea className="h-full p-5 ">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
             <span className="inline-block bg-blue-100 text-blue-700 rounded-full px-3 py-1 text-sm font-semibold mr-2">Nouveau professeur</span>
@@ -612,6 +615,8 @@ export default function ProfessorForm({ open, onClose, onSuccess }: ProfessorFor
             </DialogFooter>
           </form>
         </Form>
+        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

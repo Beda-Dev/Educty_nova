@@ -1,0 +1,22 @@
+
+compte Administrateur / Directeur
+
+   email : admin@gmail.com
+   paswword: password
+
+
+compte Professeur
+
+   email : bedaalex2003@gmail.com
+   password : digifaz@2025
+
+compte Caisse 
+ 
+  email : anohgerard@gmail.com
+  password : digifaz@2025
+
+compte Comptable/Comptabilité
+
+  email : kouassilaura3@gmail.com
+  password : digifaz@2025
+

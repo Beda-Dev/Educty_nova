@@ -1,568 +1,1741 @@
+// "use client"
+
+// import { useState, useEffect, useMemo } from "react"
+// import { useSchoolStore } from "@/store/index"
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
+// import { Label } from "@/components/ui/label"
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// import { Badge } from "@/components/ui/badge"
+// import { Alert, AlertDescription } from "@/components/ui/alert"
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+// import { Progress } from "@/components/ui/progress"
+// import { Separator } from "@/components/ui/separator"
+// import { toast } from "@/components/ui/use-toast"
+// import {
+//   BookOpen,
+//   Users,
+//   Calendar,
+//   TrendingUp,
+//   Award,
+//   AlertTriangle,
+//   Save,
+//   Plus,
+//   Eye,
+//   BarChart3,
+//   Calculator,
+// } from "lucide-react"
+// import type { Evaluation } from "@/lib/interface"
+
+// interface EvaluationFormData {
+//   period_id: number
+//   professor_id: number
+//   academic_id: number
+//   matter_id: number
+//   classe_id: number
+//   type_note_id: number
+//   maximum_note: string // changé de number à string
+//   coefficient: string  // changé de number à string
+//   date_evaluation: string
+// }
+
+// interface NoteFormData {
+//   evaluation_id: number
+//   registration_id: number
+//   value: number
+// }
+
+// interface StudentGrade {
+//   registration_id: number
+//   student_name: string
+//   student_first_name: string
+//   registration_number: string
+//   note: number
+//   coefficient_note: number
+// }
+
+// export default function TeacherNotesPage() {
+//   // Store data
+//   const {
+//     userOnline,
+//     professor,
+//     academicYearCurrent,
+//     matters,
+//     classes,
+//     typeEvaluations,
+//     periods,
+//     timetables,
+//     registrations,
+//     evaluations,
+//     notes,
+//     setEvaluations,
+//     setNotes,
+//   } = useSchoolStore()
+
+//   // States
+//   const [activeTab, setActiveTab] = useState("create-evaluation")
+//   const [evaluationForm, setEvaluationForm] = useState<EvaluationFormData>({
+//     period_id: 0,
+//     professor_id: 0,
+//     academic_id: 0,
+//     matter_id: 0,
+//     classe_id: 0,
+//     type_note_id: 0,
+//     maximum_note: "20", // string
+//     coefficient: "1",   // string
+//     date_evaluation: new Date().toISOString().split("T")[0],
+//   })
+//   const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null)
+//   const [studentGrades, setStudentGrades] = useState<StudentGrade[]>([])
+//   const [loading, setLoading] = useState(false)
+//   const [errors, setErrors] = useState<string[]>([])
+
+//   // Vérifier si l'utilisateur est un professeur
+//   const currentProfessor = useMemo(() => {
+//     if (!userOnline) return null
+//     return professor.find((p) => p.user_id === userOnline.id)
+//   }, [userOnline, professor])
+
+//   // Obtenir la période actuelle
+//   const currentPeriod = useMemo(() => {
+//     if (!academicYearCurrent?.periods) return null
+//     const today = new Date()
+//     return academicYearCurrent.periods.find((p) => {
+//       const startDate = new Date(p.pivot.start_date)
+//       const endDate = new Date(p.pivot.end_date)
+//       return today >= startDate && today <= endDate
+//     })
+//   }, [academicYearCurrent])
+
+//   // Obtenir les matières et classes disponibles pour le professeur
+//   const availableMattersAndClasses = useMemo(() => {
+//     if (!currentProfessor || !currentPeriod) return { matters: [], classes: [] }
+
+//     const professorTimetables = timetables.filter(
+//       (t) =>
+//         Number(t.professor_id) === Number(currentProfessor.id) &&
+//         Number(t.academic_year_id) === Number(academicYearCurrent.id) &&
+//         Number(t.period_id) === Number(currentPeriod.id),
+//     )
+
+//     const availableMatters = matters.filter(
+//       (m) => m.active === 1 && professorTimetables.some((t) => Number(t.matter_id) === Number(m.id)),
+//     )
+
+//     const availableClasses = classes.filter((c) => {
+//       const hasInTimetable = professorTimetables.some((t) => Number(t.class_id) === Number(c.id))
+//       const matterNotExcluded = evaluationForm.matter_id
+//         ? !c.not_studied_matters.some((nsm) => nsm.id === evaluationForm.matter_id)
+//         : true
+//       return hasInTimetable && matterNotExcluded
+//     })
+
+//     return { matters: availableMatters, classes: availableClasses }
+//   }, [currentProfessor, currentPeriod, timetables, matters, classes, academicYearCurrent, evaluationForm.matter_id])
+
+//   // Obtenir les évaluations du professeur
+//   const professorEvaluations = useMemo(() => {
+//     if (!currentProfessor) return []
+//     return evaluations.filter((e) => e.professor_id === currentProfessor.id)
+//   }, [evaluations, currentProfessor])
+
+//   // Initialiser le formulaire
+//   useEffect(() => {
+//     if (currentProfessor && currentPeriod && academicYearCurrent) {
+//       setEvaluationForm((prev) => ({
+//         ...prev,
+//         professor_id: currentProfessor.id,
+//         period_id: currentPeriod.id,
+//         academic_id: academicYearCurrent.id,
+//       }))
+//     }
+//   }, [currentProfessor, currentPeriod, academicYearCurrent])
+
+//   // Validation du formulaire d'évaluation
+//   const validateEvaluationForm = (): string[] => {
+//     const errors: string[] = []
+
+//     if (!currentProfessor) {
+//       errors.push("Vous devez être connecté en tant que professeur")
+//     }
+
+//     if (!evaluationForm.period_id) {
+//       errors.push("La période est requise")
+//     }
+
+//     if (!evaluationForm.matter_id) {
+//       errors.push("La matière est requise")
+//     }
+
+//     if (!evaluationForm.classe_id) {
+//       errors.push("La classe est requise")
+//     }
+
+//     if (!evaluationForm.type_note_id) {
+//       errors.push("Le type d'évaluation est requis")
+//     }
+
+//     if (Number(evaluationForm.maximum_note) <= 0) {
+//       errors.push("La note maximale doit être supérieure à 0")
+//     }
+
+//     if (Number(evaluationForm.coefficient) <= 0) {
+//       errors.push("Le coefficient doit être supérieur à 0")
+//     }
+
+//     if (!evaluationForm.date_evaluation) {
+//       errors.push("La date d'évaluation est requise")
+//     }
+
+//     // Vérifier que la matière est active
+//     const selectedMatter = matters.find((m) => m.id === evaluationForm.matter_id)
+//     if (selectedMatter && selectedMatter.active === 0) {
+//       errors.push("La matière sélectionnée n'est pas active")
+//     }
+
+//     // Vérifier que la matière n'est pas dans les matières non étudiées de la classe
+//     const selectedClass = classes.find((c) => c.id === evaluationForm.classe_id)
+//     if (selectedClass && selectedMatter) {
+//       const isExcluded = selectedClass.not_studied_matters.some((nsm) => nsm.id === selectedMatter.id)
+//       if (isExcluded) {
+//         errors.push("Cette matière n'est pas étudiée dans cette classe")
+//       }
+//     }
+
+//     return errors
+//   }
+
+//   // Créer une évaluation
+//   const handleCreateEvaluation = async () => {
+//     const validationErrors = validateEvaluationForm()
+//     if (validationErrors.length > 0) {
+//       setErrors(validationErrors)
+//       return
+//     }
+
+//     setLoading(true)
+//     setErrors([])
+
+//     try {
+//       // Conversion avant envoi à l'API
+//       const payload = {
+//         ...evaluationForm
+//       }
+
+//       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/evaluations`, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(payload),
+//       })
+
+//       if (!response.ok) {
+//         throw new Error("Erreur lors de la création de l'évaluation")
+//       }
+
+//       const newEvaluation = await response.json()
+
+//       // Mettre à jour le store
+//       setEvaluations([...evaluations, newEvaluation])
+
+//       toast({
+//         title: "Succès",
+//         description: "Évaluation créée avec succès",
+//       })
+
+//       // Réinitialiser le formulaire
+//       setEvaluationForm((prev) => ({
+//         ...prev,
+//         matter_id: 0,
+//         classe_id: 0,
+//         type_note_id: 0,
+//         maximum_note: "20", // string
+//         coefficient: "1",   // string
+//         date_evaluation: new Date().toISOString().split("T")[0],
+//       }))
+
+//       // Passer à l'onglet de saisie des notes
+//       setSelectedEvaluation(newEvaluation)
+//       setActiveTab("enter-grades")
+//     } catch (error) {
+//       console.error("Erreur:", error)
+//       toast({
+//         title: "Erreur",
+//         description: "Impossible de créer l'évaluation",
+//         color: "destructive",
+//       })
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   // Charger les élèves pour une évaluation
+//   const loadStudentsForEvaluation = (evaluation: Evaluation) => {
+//     const classRegistrations = registrations.filter(
+//       (r) => r.class_id === evaluation.classe_id && r.academic_year_id === evaluation.academic_id,
+//     )
+
+//     const students = classRegistrations.map((reg) => {
+//       const existingNote = notes.find((n) => n.evaluation_id === evaluation.id && n.registration_id === reg.id)
+
+//       return {
+//         registration_id: reg.id,
+//         student_name: reg.student.name,
+//         student_first_name: reg.student.first_name,
+//         registration_number: reg.student.registration_number,
+//         note: existingNote?.value || 0,
+//         coefficient_note: existingNote ? existingNote.value * evaluation.coefficient : 0,
+//       }
+//     })
+
+//     setStudentGrades(students)
+//   }
+
+//   // Sélectionner une évaluation pour saisir les notes
+//   const handleSelectEvaluation = (evaluation: Evaluation) => {
+//     setSelectedEvaluation(evaluation)
+//     loadStudentsForEvaluation(evaluation)
+//     setActiveTab("enter-grades")
+//   }
+
+//   // Mettre à jour une note d'élève
+//   const updateStudentGrade = (registrationId: number, value: number) => {
+//     if (!selectedEvaluation) return
+
+//     const maxNote = Number(selectedEvaluation.maximum_note)
+//     if (value < 0 || value > maxNote) {
+//       toast({
+//         title: "Erreur",
+//         description: `La note doit être entre 0 et ${maxNote}`,
+//         color: "destructive",
+//       })
+//       return
+//     }
+
+//     setStudentGrades((prev) =>
+//       prev.map((sg) =>
+//         sg.registration_id === registrationId
+//           ? {
+//               ...sg,
+//               note: value,
+//               coefficient_note: value * Number(selectedEvaluation.coefficient),
+//             }
+//           : sg,
+//       ),
+//     )
+//   }
+
+//   // Enregistrer toutes les notes
+//   const handleSaveAllGrades = async () => {
+//     if (!selectedEvaluation) return
+
+//     setLoading(true)
+
+//     try {
+//       const notesToSave = studentGrades.map((sg) => ({
+//         evaluation_id: selectedEvaluation.id,
+//         registration_id: sg.registration_id,
+//         value: sg.note,
+//       }))
+
+//       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/notes`, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//         },
+//         body: JSON.stringify(notesToSave),
+//       })
+
+//       if (!response.ok) {
+//         throw new Error("Erreur lors de l'enregistrement des notes")
+//       }
+
+//       const savedNotes = await response.json()
+
+//       // Mettre à jour le store
+//       const updatedNotes = notes.filter((n) => n.evaluation_id !== selectedEvaluation.id)
+//       setNotes([...updatedNotes, ...savedNotes])
+
+//       toast({
+//         title: "Succès",
+//         description: "Notes enregistrées avec succès",
+//       })
+
+//       setActiveTab("statistics")
+//     } catch (error) {
+//       console.error("Erreur:", error)
+//       toast({
+//         title: "Erreur",
+//         description: "Impossible d'enregistrer les notes",
+//         color: "destructive",
+//       })
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   // Calculer les statistiques
+//   const calculateStatistics = () => {
+//     if (!selectedEvaluation || studentGrades.length === 0) return null
+
+//     const validGrades = studentGrades.filter((sg) => sg.note > 0)
+//     if (validGrades.length === 0) return null
+
+//     const total = validGrades.reduce((sum, sg) => sum + sg.note, 0)
+//     const average = total / validGrades.length
+//     const maxGrade = Math.max(...validGrades.map((sg) => sg.note))
+//     const minGrade = Math.min(...validGrades.map((sg) => sg.note))
+
+//     const passGrade = Number(selectedEvaluation.maximum_note) * 0.5 // 50% pour réussir
+//     const passCount = validGrades.filter((sg) => sg.note >= passGrade).length
+//     const passRate = (passCount / validGrades.length) * 100
+
+//     return {
+//       average: average.toFixed(2),
+//       maxGrade,
+//       minGrade,
+//       passRate: passRate.toFixed(1),
+//       totalStudents: studentGrades.length,
+//       gradedStudents: validGrades.length,
+//     }
+//   }
+
+//   const stats = calculateStatistics()
+
+//   if (!currentProfessor) {
+//     return (
+//       <div className="container mx-auto p-6">
+//         <Alert>
+//           <AlertTriangle className="h-4 w-4" />
+//           <AlertDescription>
+//             Vous devez être connecté en tant que professeur pour accéder à cette page.
+//           </AlertDescription>
+//         </Alert>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <Card className="mx-auto container p-2">
+//       <CardHeader className="">
+//         <div>
+//           <h1 className="text-2xl font-bold">Gestion des Notes</h1>
+//           <p className="text-muted-foreground">Créez des évaluations et saisissez les notes de vos élèves</p>
+//         </div>
+//       </CardHeader>
+
+//       {/* Informations sur la période actuelle */}
+//       {currentPeriod && (
+//         <Card>
+//           <CardHeader>
+//             <CardTitle className="flex items-center gap-2">
+//               <Calendar className="h-5 w-5" />
+//               Période Actuelle
+//             </CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             <div className="flex items-center justify-between">
+//               <div>
+//                 <p className="font-medium">{currentPeriod.label}</p>
+//                 <p className="text-sm text-muted-foreground">
+//                   Du {new Date(currentPeriod.pivot.start_date).toLocaleDateString()}
+//                   au {new Date(currentPeriod.pivot.end_date).toLocaleDateString()}
+//                 </p>
+//               </div>
+//               <Badge color="secondary">Active</Badge>
+//             </div>
+//           </CardContent>
+//         </Card>
+//       )}
+
+//       <Tabs value={activeTab} onValueChange={setActiveTab}>
+//         <TabsList className="grid w-full grid-cols-4">
+//           <TabsTrigger color="indigodye" value="create-evaluation" className="flex items-center gap-2">
+//             <Plus className="h-4 w-4" />
+//             Créer Évaluation
+//           </TabsTrigger>
+//           <TabsTrigger color="indigodye" value="my-evaluations" className="flex items-center gap-2">
+//             <BookOpen className="h-4 w-4" />
+//             Mes Évaluations
+//           </TabsTrigger>
+//           <TabsTrigger color="indigodye" value="enter-grades" className="flex items-center gap-2">
+//             <Users className="h-4 w-4" />
+//             Saisir Notes
+//           </TabsTrigger>
+//           <TabsTrigger color="indigodye" value="statistics" className="flex items-center gap-2">
+//             <BarChart3 className="h-4 w-4" />
+//             Statistiques
+//           </TabsTrigger>
+//         </TabsList>
+
+//         {/* Créer une évaluation */}
+//         <TabsContent value="create-evaluation">
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Créer une Nouvelle Évaluation</CardTitle>
+//               <CardDescription>Définissez les paramètres de votre évaluation</CardDescription>
+//             </CardHeader>
+//             <CardContent className="space-y-4">
+//               {errors.length > 0 && (
+//                 <Alert color="destructive">
+//                   <AlertTriangle className="h-4 w-4" />
+//                   <AlertDescription>
+//                     <ul className="list-disc list-inside">
+//                       {errors.map((error, index) => (
+//                         <li key={index}>{error}</li>
+//                       ))}
+//                     </ul>
+//                   </AlertDescription>
+//                 </Alert>
+//               )}
+
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                 <div className="space-y-2">
+//                   <Label htmlFor="matter">Matière *</Label>
+//                   <Select
+//                     value={evaluationForm.matter_id.toString()}
+//                     onValueChange={(value) =>
+//                       setEvaluationForm((prev) => ({ ...prev, matter_id: Number.parseInt(value) }))
+//                     }
+//                   >
+//                     <SelectTrigger>
+//                       <SelectValue placeholder="Sélectionner une matière" />
+//                     </SelectTrigger>
+//                     <SelectContent>
+//                       {availableMattersAndClasses.matters.map((matter) => (
+//                         <SelectItem key={matter.id} value={matter.id.toString()}>
+//                           {matter.name}
+//                         </SelectItem>
+//                       ))}
+//                     </SelectContent>
+//                   </Select>
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="classe">Classe *</Label>
+//                   <Select
+//                     value={evaluationForm.classe_id.toString()}
+//                     onValueChange={(value) =>
+//                       setEvaluationForm((prev) => ({ ...prev, classe_id: Number.parseInt(value) }))
+//                     }
+//                   >
+//                     <SelectTrigger>
+//                       <SelectValue placeholder="Sélectionner une classe" />
+//                     </SelectTrigger>
+//                     <SelectContent>
+//                       {availableMattersAndClasses.classes.map((classe) => (
+//                         <SelectItem key={classe.id} value={classe.id.toString()}>
+//                           {classe.label}
+//                         </SelectItem>
+//                       ))}
+//                     </SelectContent>
+//                   </Select>
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="type_note">Type d'Évaluation *</Label>
+//                   <Select
+//                     value={evaluationForm.type_note_id.toString()}
+//                     onValueChange={(value) =>
+//                       setEvaluationForm((prev) => ({ ...prev, type_note_id: Number.parseInt(value) }))
+//                     }
+//                   >
+//                     <SelectTrigger>
+//                       <SelectValue placeholder="Sélectionner un type" />
+//                     </SelectTrigger>
+//                     <SelectContent>
+//                       {typeEvaluations.map((type) => (
+//                         <SelectItem key={type.id} value={type.id.toString()}>
+//                           {type.label}
+//                         </SelectItem>
+//                       ))}
+//                     </SelectContent>
+//                   </Select>
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="date_evaluation">Date d'Évaluation *</Label>
+//                   <Input
+//                     id="date_evaluation"
+//                     type="date"
+//                     value={evaluationForm.date_evaluation}
+//                     onChange={(e) => setEvaluationForm((prev) => ({ ...prev, date_evaluation: e.target.value }))}
+//                   />
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="maximum_note">Note Maximale </Label>
+//                   <Input
+//                     id="maximum_note"
+//                     type="number"
+//                     min="1"
+//                     max="100"
+//                     value={evaluationForm.maximum_note}
+//                     onChange={(e) =>
+//                       setEvaluationForm((prev) => ({ ...prev, maximum_note: e.target.value }))
+//                     }
+//                   />
+//                 </div>
+
+//                 <div className="space-y-2">
+//                   <Label htmlFor="coefficient">Coefficient </Label>
+//                   <Input
+//                     id="coefficient"
+//                     type="number"
+//                     min="0.1"
+//                     max="10"
+//                     step="0.1"
+//                     value={evaluationForm.coefficient}
+//                     onChange={(e) =>
+//                       setEvaluationForm((prev) => ({ ...prev, coefficient: e.target.value }))
+//                     }
+//                   />
+//                 </div>
+//               </div>
+
+//               <Button color="indigodye" onClick={handleCreateEvaluation} disabled={loading} className="w-full">
+//                 {loading ? "Création en cours..." : "Créer l'Évaluation"}
+//               </Button>
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Mes évaluations */}
+//         <TabsContent value="my-evaluations">
+//           <Card>
+//             <CardHeader>
+//               <CardTitle>Mes Évaluations</CardTitle>
+//               <CardDescription>Liste de toutes vos évaluations créées</CardDescription>
+//             </CardHeader>
+//             <CardContent>
+//               {professorEvaluations.length === 0 ? (
+//                 <div className="text-center py-8">
+//                   <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+//                   <p className="text-muted-foreground">Aucune évaluation créée</p>
+//                 </div>
+//               ) : (
+//                 <div className="space-y-4">
+//                   {professorEvaluations.map((evaluation) => {
+//                     const matter = matters.find((m) => m.id === evaluation.matter_id)
+//                     const classe = classes.find((c) => c.id === evaluation.classe_id)
+//                     const evaluationNotes = notes.filter((n) => n.evaluation_id === evaluation.id)
+
+//                     return (
+//                       <Card key={evaluation.id} className="p-4">
+//                         <div className="flex items-center justify-between">
+//                           <div className="space-y-1">
+//                             <div className="flex items-center gap-2">
+//                               <h3 className="font-medium">{matter?.name}</h3>
+//                               <Badge variant="outline">{classe?.label}</Badge>
+//                               <Badge >{evaluation.type_note.label}</Badge>
+//                             </div>
+//                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
+//                               <span>Date: {new Date(evaluation.date_evaluation).toLocaleDateString()}</span>
+//                               <span>Note max: {evaluation.maximum_note}</span>
+//                               <span>Coefficient: {evaluation.coefficient}</span>
+//                               <span>Notes saisies: {evaluationNotes.length}</span>
+//                             </div>
+//                           </div>
+//                           <Button variant="outline" size="sm" onClick={() => handleSelectEvaluation(evaluation)}>
+//                             <Eye className="h-4 w-4 mr-2" />
+//                             Voir/Modifier
+//                           </Button>
+//                         </div>
+//                       </Card>
+//                     )
+//                   })}
+//                 </div>
+//               )}
+//             </CardContent>
+//           </Card>
+//         </TabsContent>
+
+//         {/* Saisir les notes */}
+//         <TabsContent value="enter-grades">
+//           {selectedEvaluation ? (
+//             <Card>
+//               <CardHeader>
+//                 <CardTitle className="flex items-center justify-between">
+//                   <span>Saisie des Notes</span>
+//                   <div className="flex items-center gap-2">
+//                     <Badge variant="outline">{matters.find((m) => m.id === selectedEvaluation.matter_id)?.name}</Badge>
+//                     <Badge variant="outline">{classes.find((c) => c.id === selectedEvaluation.classe_id)?.label}</Badge>
+//                   </div>
+//                 </CardTitle>
+//                 <CardDescription>
+//                   Évaluation du {new Date(selectedEvaluation.date_evaluation).toLocaleDateString()}- Note sur{" "}
+//                   {selectedEvaluation.maximum_note} (Coefficient: {selectedEvaluation.coefficient})
+//                 </CardDescription>
+//               </CardHeader>
+//               <CardContent>
+//                 <div className="space-y-4">
+//                   <Table>
+//                     <TableHeader>
+//                       <TableRow>
+//                         <TableHead>N° Inscription</TableHead>
+//                         <TableHead>Nom</TableHead>
+//                         <TableHead>Prénom</TableHead>
+//                         <TableHead>Note /{selectedEvaluation.maximum_note}</TableHead>
+//                         <TableHead>Note Coefficientée</TableHead>
+//                       </TableRow>
+//                     </TableHeader>
+//                     <TableBody>
+//                       {studentGrades.map((student) => (
+//                         <TableRow key={student.registration_id}>
+//                           <TableCell className="font-medium">{student.registration_number}</TableCell>
+//                           <TableCell>{student.student_name}</TableCell>
+//                           <TableCell>{student.student_first_name}</TableCell>
+//                           <TableCell>
+//                             <Input
+//                               type="number"
+//                               min="0"
+//                               max={Number(selectedEvaluation.maximum_note)}
+//                               step="0.25"
+//                               value={student.note}
+//                               onChange={(e) =>
+//                                 updateStudentGrade(student.registration_id, Number.parseFloat(e.target.value) || 0)
+//                               }
+//                               className="w-20"
+//                             />
+//                           </TableCell>
+//                           <TableCell>
+//                             <Badge color="secondary">{student.coefficient_note.toFixed(2)}</Badge>
+//                           </TableCell>
+//                         </TableRow>
+//                       ))}
+//                     </TableBody>
+//                   </Table>
+
+//                   <div className="flex justify-end">
+//                     <Button onClick={handleSaveAllGrades} disabled={loading} className="flex items-center gap-2">
+//                       <Save className="h-4 w-4" />
+//                       {loading ? "Enregistrement..." : "Enregistrer toutes les notes"}
+//                     </Button>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           ) : (
+//             <Card>
+//               <CardContent className="text-center py-8">
+//                 <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+//                 <p className="text-muted-foreground">Sélectionnez une évaluation pour saisir les notes</p>
+//               </CardContent>
+//             </Card>
+//           )}
+//         </TabsContent>
+
+//         {/* Statistiques */}
+//         <TabsContent value="statistics">
+//           {selectedEvaluation && stats ? (
+//             <div className="space-y-6">
+//               <Card>
+//                 <CardHeader>
+//                   <CardTitle className="flex items-center gap-2">
+//                     <BarChart3 className="h-5 w-5" />
+//                     Statistiques de l'Évaluation
+//                   </CardTitle>
+//                   <CardDescription>
+//                     {matters.find((m) => m.id === selectedEvaluation.matter_id)?.name} -
+//                     {classes.find((c) => c.id === selectedEvaluation.classe_id)?.label}
+//                   </CardDescription>
+//                 </CardHeader>
+//                 <CardContent>
+//                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//                     <Card>
+//                       <CardContent className="p-4">
+//                         <div className="flex items-center gap-2">
+//                           <Calculator className="h-4 w-4 text-blue-500" />
+//                           <div>
+//                             <p className="text-sm text-muted-foreground">Moyenne</p>
+//                             <p className="text-2xl font-bold">{stats.average}</p>
+//                           </div>
+//                         </div>
+//                       </CardContent>
+//                     </Card>
+
+//                     <Card>
+//                       <CardContent className="p-4">
+//                         <div className="flex items-center gap-2">
+//                           <TrendingUp className="h-4 w-4 text-green-500" />
+//                           <div>
+//                             <p className="text-sm text-muted-foreground">Note Max</p>
+//                             <p className="text-2xl font-bold">{stats.maxGrade}</p>
+//                           </div>
+//                         </div>
+//                       </CardContent>
+//                     </Card>
+
+//                     <Card>
+//                       <CardContent className="p-4">
+//                         <div className="flex items-center gap-2">
+//                           <Award className="h-4 w-4 text-orange-500" />
+//                           <div>
+//                             <p className="text-sm text-muted-foreground">Taux de Réussite</p>
+//                             <p className="text-2xl font-bold">{stats.passRate}%</p>
+//                           </div>
+//                         </div>
+//                       </CardContent>
+//                     </Card>
+
+//                     <Card>
+//                       <CardContent className="p-4">
+//                         <div className="flex items-center gap-2">
+//                           <Users className="h-4 w-4 text-purple-500" />
+//                           <div>
+//                             <p className="text-sm text-muted-foreground">Élèves Notés</p>
+//                             <p className="text-2xl font-bold">
+//                               {stats.gradedStudents}/{stats.totalStudents}
+//                             </p>
+//                           </div>
+//                         </div>
+//                       </CardContent>
+//                     </Card>
+//                   </div>
+
+//                   <Separator className="my-6" />
+
+//                   <div className="space-y-4">
+//                     <h3 className="text-lg font-semibold">Répartition des Notes</h3>
+//                     <div className="space-y-2">
+//                       <div className="flex justify-between text-sm">
+//                         <span>Progression</span>
+//                         <span>
+//                           {stats.gradedStudents}/{stats.totalStudents} élèves
+//                         </span>
+//                       </div>
+//                       <Progress value={(stats.gradedStudents / stats.totalStudents) * 100} className="h-2" />
+//                     </div>
+//                   </div>
+
+//                   <div className="mt-6">
+//                     <h3 className="text-lg font-semibold mb-4">Classement des Élèves</h3>
+//                     <Table>
+//                       <TableHeader>
+//                         <TableRow>
+//                           <TableHead>Rang</TableHead>
+//                           <TableHead>Élève</TableHead>
+//                           <TableHead>Note</TableHead>
+//                           <TableHead>Note Coefficientée</TableHead>
+//                         </TableRow>
+//                       </TableHeader>
+//                       <TableBody>
+//                         {studentGrades
+//                           .filter((sg) => sg.note > 0)
+//                           .sort((a, b) => b.note - a.note)
+//                           .map((student, index) => (
+//                             <TableRow key={student.registration_id}>
+//                               <TableCell>
+//                                 <Badge variant={index < 3 ? "soft" : "outline"}>{index + 1}</Badge>
+//                               </TableCell>
+//                               <TableCell>
+//                                 {student.student_name} {student.student_first_name}
+//                               </TableCell>
+//                               <TableCell>
+//                                 <Badge
+//                                   color={
+//                                     student.note >= Number(selectedEvaluation.maximum_note) * 0.5 ? "default" : "destructive"
+//                                   }
+//                                 >
+//                                   {student.note}/{selectedEvaluation.maximum_note}
+//                                 </Badge>
+//                               </TableCell>
+//                               <TableCell>{student.coefficient_note.toFixed(2)}</TableCell>
+//                             </TableRow>
+//                           ))}
+//                       </TableBody>
+//                     </Table>
+//                   </div>
+//                 </CardContent>
+//               </Card>
+//             </div>
+//           ) : (
+//             <Card>
+//               <CardContent className="text-center py-8">
+//                 <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+//                 <p className="text-muted-foreground">
+//                   Sélectionnez une évaluation avec des notes pour voir les statistiques
+//                 </p>
+//               </CardContent>
+//             </Card>
+//           )}
+//         </TabsContent>
+//       </Tabs>
+//     </Card>
+//   )
+// }
+
+
 "use client"
 
-import { useState, useEffect } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect, useMemo } from "react"
+import { useSchoolStore } from "@/store/index"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
+import { toast } from "@/components/ui/use-toast"
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Save, FileEdit, ChevronDown, Book, Calculator, Mail, School, GraduationCap } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
+  BookOpen,
+  Users,
+  Calendar,
+  TrendingUp,
+  Award,
+  AlertTriangle,
+  Save,
+  Plus,
+  Eye,
+  BarChart3,
+  Calculator,
+} from "lucide-react"
+import type { Evaluation } from "@/lib/interface"
 
-// Types
-interface Classe {
-  id: string
-  nom: string
-  niveau: string
-  effectif: number
-  professeurPrincipal: string
+interface EvaluationFormData {
+  period_id: number
+  professor_id: number
+  academic_id: number
+  matter_id: number
+  classe_id: number
+  type_note_id: number
+  maximum_note: string // changé de number à string
+  coefficient: string  // changé de number à string
+  date_evaluation: string
 }
 
-interface Devoir {
-  id: string
-  titre: string
-  classeId: string
-  date: string
-  coefficient: number
-  matiere: string
-  description: string
+interface NoteFormData {
+  evaluation_id: number
+  registration_id: number
+  value: number
 }
 
-interface Eleve {
-  id: string
-  nom: string
-  prenom: string
-  classeId: string
-  dateNaissance: string
+interface StudentGrade {
+  registration_id: number
+  student_name: string
+  student_first_name: string
+  registration_number: string
+  note: number
+  coefficient_note: number
 }
 
-interface Note {
-  eleveId: string
-  devoirId: string
-  valeur: number | null
-}
+export default function TeacherNotesPage() {
+  // Store data
+  const {
+    userOnline,
+    professor,
+    academicYearCurrent,
+    matters,
+    classes,
+    typeEvaluations,
+    periods,
+    timetables,
+    registrations,
+    evaluations,
+    notes,
+    setEvaluations,
+    setNotes,
+  } = useSchoolStore()
 
-// Données de démonstration enrichies
-const classes: Classe[] = [
-  { id: "c1", nom: "6ème A", niveau: "6ème", effectif: 24, professeurPrincipal: "Mme. Dubois" },
-  { id: "c2", nom: "5ème B", niveau: "5ème", effectif: 28, professeurPrincipal: "M. Martin" },
-  { id: "c3", nom: "4ème C", niveau: "4ème", effectif: 26, professeurPrincipal: "Mme. Lambert" },
-  { id: "c4", nom: "3ème D", niveau: "3ème", effectif: 30, professeurPrincipal: "M. Durand" },
-  { id: "c5", nom: "2nde A", niveau: "Seconde", effectif: 32, professeurPrincipal: "Mme. Petit" },
-  { id: "c6", nom: "1ère B", niveau: "Première", effectif: 29, professeurPrincipal: "M. Leroy" },
-  { id: "c7", nom: "Terminale C", niveau: "Terminale", effectif: 27, professeurPrincipal: "Mme. Moreau" },
-]
+  // States
+  const [activeTab, setActiveTab] = useState("create-evaluation")
+  const [evaluationForm, setEvaluationForm] = useState<EvaluationFormData>({
+    period_id: 0,
+    professor_id: 0,
+    academic_id: 0,
+    matter_id: 0,
+    classe_id: 0,
+    type_note_id: 0,
+    maximum_note: "20", // string
+    coefficient: "1",   // string
+    date_evaluation: new Date().toISOString().split("T")[0],
+  })
+  const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null)
+  const [studentGrades, setStudentGrades] = useState<StudentGrade[]>([])
+  const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState<string[]>([])
 
-const devoirs: Devoir[] = [
-  { 
-    id: "d1", 
-    titre: "Contrôle de mathématiques", 
-    classeId: "c1", 
-    date: "2023-10-15", 
-    coefficient: 2,
-    matiere: "Mathématiques",
-    description: "Contrôle sur les fractions et les nombres décimaux"
-  },
-  { 
-    id: "d2", 
-    titre: "Interrogation surprise", 
-    classeId: "c1", 
-    date: "2023-10-22", 
-    coefficient: 1,
-    matiere: "Français",
-    description: "Analyse grammaticale de phrases complexes"
-  },
-  { 
-    id: "d3", 
-    titre: "Devoir maison", 
-    classeId: "c1", 
-    date: "2023-11-05", 
-    coefficient: 1.5,
-    matiere: "Histoire-Géographie",
-    description: "Rédaction sur la Révolution française"
-  },
-  { 
-    id: "d4", 
-    titre: "Examen trimestriel", 
-    classeId: "c2", 
-    date: "2023-10-18", 
-    coefficient: 3,
-    matiere: "Sciences Physiques",
-    description: "Examen couvrant les chapitres 1 à 3"
-  },
-  { 
-    id: "d5", 
-    titre: "Contrôle de français", 
-    classeId: "c2", 
-    date: "2023-11-02", 
-    coefficient: 2,
-    matiere: "Français",
-    description: "Commentaire de texte sur un extrait de Victor Hugo"
-  },
-  { 
-    id: "d6", 
-    titre: "Test d'histoire", 
-    classeId: "c3", 
-    date: "2023-10-20", 
-    coefficient: 1,
-    matiere: "Histoire",
-    description: "Dates clés de la Première Guerre mondiale"
-  },
-  { 
-    id: "d7", 
-    titre: "Évaluation de sciences", 
-    classeId: "c4", 
-    date: "2023-11-10", 
-    coefficient: 2,
-    matiere: "SVT",
-    description: "Génétique et hérédité"
-  },
-  { 
-    id: "d8", 
-    titre: "Devoir de philosophie", 
-    classeId: "c7", 
-    date: "2023-11-15", 
-    coefficient: 2,
-    matiere: "Philosophie",
-    description: "Dissertation sur le thème de la liberté"
-  },
-]
+  // Vérifier si l'utilisateur est un professeur
+  const currentProfessor = useMemo(() => {
+    if (!userOnline) return null
+    return professor.find((p) => p.user_id === userOnline.id)
+  }, [userOnline, professor])
 
-const eleves: Eleve[] = [
-  { id: "e1", nom: "Dupont", prenom: "Marie", classeId: "c1", dateNaissance: "2012-05-14" },
-  { id: "e2", nom: "Martin", prenom: "Thomas", classeId: "c1", dateNaissance: "2012-03-22" },
-  { id: "e3", nom: "Petit", prenom: "Sophie", classeId: "c1", dateNaissance: "2012-07-30" },
-  { id: "e4", nom: "Durand", prenom: "Lucas", classeId: "c1", dateNaissance: "2012-01-18" },
-  { id: "e5", nom: "Leroy", prenom: "Emma", classeId: "c1", dateNaissance: "2012-11-05" },
-  { id: "e6", nom: "Moreau", prenom: "Hugo", classeId: "c2", dateNaissance: "2011-09-12" },
-  { id: "e7", nom: "Simon", prenom: "Chloé", classeId: "c2", dateNaissance: "2011-04-25" },
-  { id: "e8", nom: "Michel", prenom: "Nathan", classeId: "c2", dateNaissance: "2011-08-17" },
-  { id: "e9", nom: "Lefebvre", prenom: "Léa", classeId: "c3", dateNaissance: "2010-02-28" },
-  { id: "e10", nom: "Garcia", prenom: "Maxime", classeId: "c3", dateNaissance: "2010-06-15" },
-  { id: "e11", nom: "Roux", prenom: "Camille", classeId: "c4", dateNaissance: "2009-12-03" },
-  { id: "e12", nom: "Fournier", prenom: "Théo", classeId: "c4", dateNaissance: "2009-10-22" },
-  { id: "e13", nom: "Bernard", prenom: "Manon", classeId: "c5", dateNaissance: "2008-07-19" },
-  { id: "e14", nom: "Girard", prenom: "Antoine", classeId: "c5", dateNaissance: "2008-03-11" },
-  { id: "e15", nom: "Bonnet", prenom: "Sarah", classeId: "c6", dateNaissance: "2007-05-08" },
-  { id: "e16", nom: "Dumont", prenom: "Alexandre", classeId: "c7", dateNaissance: "2006-09-27" },
-]
+  // Obtenir la période actuelle
+  const currentPeriod = useMemo(() => {
+    if (!academicYearCurrent?.periods) return null
+    const today = new Date()
+    return academicYearCurrent.periods.find((p) => {
+      const startDate = new Date(p.pivot.start_date)
+      const endDate = new Date(p.pivot.end_date)
+      return today >= startDate && today <= endDate
+    })
+  }, [academicYearCurrent])
 
-// Notes initiales enrichies
-const notesInitiales: Note[] = [
-  { eleveId: "e1", devoirId: "d1", valeur: 15 },
-  { eleveId: "e2", devoirId: "d1", valeur: 12 },
-  { eleveId: "e3", devoirId: "d1", valeur: 18 },
-  { eleveId: "e4", devoirId: "d1", valeur: 10 },
-  { eleveId: "e5", devoirId: "d1", valeur: 14 },
-  { eleveId: "e1", devoirId: "d2", valeur: 16 },
-  { eleveId: "e2", devoirId: "d2", valeur: 13 },
-  { eleveId: "e3", devoirId: "d2", valeur: null },
-  { eleveId: "e4", devoirId: "d2", valeur: 11 },
-  { eleveId: "e5", devoirId: "d2", valeur: null },
-  { eleveId: "e6", devoirId: "d4", valeur: 17 },
-  { eleveId: "e7", devoirId: "d4", valeur: 14 },
-  { eleveId: "e8", devoirId: "d4", valeur: 12 },
-  { eleveId: "e9", devoirId: "d6", valeur: 15 },
-  { eleveId: "e10", devoirId: "d6", valeur: 9 },
-  { eleveId: "e11", devoirId: "d7", valeur: 13 },
-  { eleveId: "e12", devoirId: "d7", valeur: 16 },
-  { eleveId: "e16", devoirId: "d8", valeur: 14 },
-]
+  // Obtenir les matières et classes disponibles pour le professeur
+  const availableMattersAndClasses = useMemo(() => {
+    if (!currentProfessor || !currentPeriod) return { matters: [], classes: [] }
 
-export default function GestionNotes() {
-  const [classeSelectionnee, setClasseSelectionnee] = useState<string>("")
-  const [devoirSelectionne, setDevoirSelectionne] = useState<string>("")
-  const [notes, setNotes] = useState<Note[]>(notesInitiales)
-  const [notesModifiees, setNotesModifiees] = useState<Note[]>([])
-  const [modeEdition, setModeEdition] = useState(false)
-  const [showSaveConfirmation, setShowSaveConfirmation] = useState(false)
-// Filtrer les devoirs et élèves
-const devoirsFiltres = devoirs.filter((devoir) => devoir.classeId === classeSelectionnee)
-const elevesFiltres = eleves.filter((eleve) => eleve.classeId === classeSelectionnee)
+    const professorTimetables = timetables.filter(
+      (t) =>
+        Number(t.professor_id) === Number(currentProfessor.id) &&
+        Number(t.academic_year_id) === Number(academicYearCurrent.id) &&
+        Number(t.period_id) === Number(currentPeriod.id),
+    )
 
-useEffect(() => {
-  setDevoirSelectionne("")
-  setModeEdition(false)
-}, [classeSelectionnee])
+    const availableMatters = matters.filter(
+      (m) => m.active === 1 && professorTimetables.some((t) => Number(t.matter_id) === Number(m.id)),
+    )
 
-const getNoteEleve = (eleveId: string): number | null => {
-  const note = notes.find((n) => n.eleveId === eleveId && n.devoirId === devoirSelectionne)
-  return note ? note.valeur : null
-}
+    const availableClasses = classes.filter((c) => {
+      const hasInTimetable = professorTimetables.some((t) => Number(t.class_id) === Number(c.id))
+      const matterNotExcluded = evaluationForm.matter_id
+        ? !c.not_studied_matters.some((nsm) => nsm.id === evaluationForm.matter_id)
+        : true
+      return hasInTimetable && matterNotExcluded
+    })
 
-const updateNote = (eleveId: string, valeur: string) => {
-  const noteValue = valeur === "" ? null : Number.parseFloat(valeur)
-  if (noteValue !== null && (isNaN(noteValue) || noteValue < 0 || noteValue > 20)) return
+    return { matters: availableMatters, classes: availableClasses }
+  }, [currentProfessor, currentPeriod, timetables, matters, classes, academicYearCurrent, evaluationForm.matter_id])
 
-  const notesCopy = [...notes]
-  const index = notesCopy.findIndex((n) => n.eleveId === eleveId && n.devoirId === devoirSelectionne)
+  // Obtenir les évaluations du professeur
+  const professorEvaluations = useMemo(() => {
+    if (!currentProfessor) return []
+    return evaluations.filter((e) => e.professor_id === currentProfessor.id)
+  }, [evaluations, currentProfessor])
 
-  if (index !== -1) {
-    notesCopy[index].valeur = noteValue
-  } else if (noteValue !== null) {
-    notesCopy.push({ eleveId, devoirId: devoirSelectionne, valeur: noteValue })
+  // Initialiser le formulaire
+  useEffect(() => {
+    if (currentProfessor && currentPeriod && academicYearCurrent) {
+      setEvaluationForm((prev) => ({
+        ...prev,
+        professor_id: currentProfessor.id,
+        period_id: currentPeriod.id,
+        academic_id: academicYearCurrent.id,
+      }))
+    }
+  }, [currentProfessor, currentPeriod, academicYearCurrent])
+
+  // Validation du formulaire d'évaluation
+  const validateEvaluationForm = (): string[] => {
+    const errors: string[] = []
+
+    if (!currentProfessor) {
+      errors.push("Vous devez être connecté en tant que professeur")
+    }
+
+    if (!evaluationForm.period_id) {
+      errors.push("La période est requise")
+    }
+
+    if (!evaluationForm.matter_id) {
+      errors.push("La matière est requise")
+    }
+
+    if (!evaluationForm.classe_id) {
+      errors.push("La classe est requise")
+    }
+
+    if (!evaluationForm.type_note_id) {
+      errors.push("Le type d'évaluation est requis")
+    }
+
+    if (Number(evaluationForm.maximum_note) <= 0) {
+      errors.push("La note maximale doit être supérieure à 0")
+    }
+
+    if (Number(evaluationForm.coefficient) <= 0) {
+      errors.push("Le coefficient doit être supérieur à 0")
+    }
+
+    if (!evaluationForm.date_evaluation) {
+      errors.push("La date d'évaluation est requise")
+    }
+
+    // Vérifier que la matière est active
+    const selectedMatter = matters.find((m) => m.id === evaluationForm.matter_id)
+    if (selectedMatter && selectedMatter.active === 0) {
+      errors.push("La matière sélectionnée n'est pas active")
+    }
+
+    // Vérifier que la matière n'est pas dans les matières non étudiées de la classe
+    const selectedClass = classes.find((c) => c.id === evaluationForm.classe_id)
+    if (selectedClass && selectedMatter) {
+      const isExcluded = selectedClass.not_studied_matters.some((nsm) => nsm.id === selectedMatter.id)
+      if (isExcluded) {
+        errors.push("Cette matière n'est pas étudiée dans cette classe")
+      }
+    }
+
+    return errors
   }
 
-  setNotes(notesCopy)
+  // Créer une évaluation
+  const handleCreateEvaluation = async () => {
+    const validationErrors = validateEvaluationForm()
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors)
+      return
+    }
 
-  const noteModifieeIndex = notesModifiees.findIndex((n) => n.eleveId === eleveId && n.devoirId === devoirSelectionne)
-  if (noteModifieeIndex !== -1) {
-    const notesModifieesCopy = [...notesModifiees]
-    notesModifieesCopy[noteModifieeIndex].valeur = noteValue
-    setNotesModifiees(notesModifieesCopy)
-  } else {
-    setNotesModifiees([...notesModifiees, { eleveId, devoirId: devoirSelectionne, valeur: noteValue }])
+    setLoading(true)
+    setErrors([])
+
+    try {
+      // Conversion avant envoi à l'API
+      const payload = {
+        ...evaluationForm
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/evaluations`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la création de l'évaluation")
+      }
+
+      const newEvaluation = await response.json()
+
+      // Mettre à jour le store
+      setEvaluations([...evaluations, newEvaluation])
+
+      toast({
+        title: "Succès",
+        description: "Évaluation créée avec succès",
+      })
+
+      // Réinitialiser le formulaire
+      setEvaluationForm((prev) => ({
+        ...prev,
+        matter_id: 0,
+        classe_id: 0,
+        type_note_id: 0,
+        maximum_note: "20", // string
+        coefficient: "1",   // string
+        date_evaluation: new Date().toISOString().split("T")[0],
+      }))
+
+      // Passer à l'onglet de saisie des notes
+      setSelectedEvaluation(newEvaluation)
+      setActiveTab("enter-grades")
+    } catch (error) {
+      console.error("Erreur:", error)
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer l'évaluation",
+        color: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }
-}
 
-const saveChanges = () => {
-  console.log("Notes sauvegardées:", notesModifiees)
-  setNotesModifiees([])
-  setModeEdition(false)
-  setShowSaveConfirmation(true)
-}
+  // Charger les élèves pour une évaluation
+  const loadStudentsForEvaluation = (evaluation: Evaluation) => {
+    const classRegistrations = registrations.filter(
+      (r) => r.class_id === evaluation.classe_id && r.academic_year_id === evaluation.academic_id,
+    )
 
-const calculerMoyenneClasse = (): string => {
-  const notesDevoir = notes.filter((n) => n.devoirId === devoirSelectionne && n.valeur !== null)
-  if (notesDevoir.length === 0) return "N/A"
-  const somme = notesDevoir.reduce((acc, note) => acc + (note.valeur || 0), 0)
-  return (somme / notesDevoir.length).toFixed(2)
-}
+    const students = classRegistrations.map((reg) => {
+      const existingNote = notes.find((n) => n.evaluation_id === evaluation.id && n.registration_id === reg.id)
 
-const devoirActuel = devoirs.find((d) => d.id === devoirSelectionne)
-const classeActuelle = classes.find((c) => c.id === classeSelectionnee)
+      return {
+        registration_id: reg.id,
+        student_name: reg.student.name,
+        student_first_name: reg.student.first_name,
+        registration_number: reg.student.registration_number,
+        note: existingNote?.value || 0,
+        coefficient_note: existingNote ? existingNote.value * evaluation.coefficient : 0,
+      }
+    })
 
-// Animations
-const fadeIn = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
-}
+    setStudentGrades(students)
+  }
 
-const slideIn = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.3 } }
-}
+  // Sélectionner une évaluation pour saisir les notes
+  const handleSelectEvaluation = (evaluation: Evaluation) => {
+    setSelectedEvaluation(evaluation)
+    loadStudentsForEvaluation(evaluation)
+    setActiveTab("enter-grades")
+  }
 
-const popIn = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.2 } }
-}
+  // Mettre à jour une note d'élève
+  const updateStudentGrade = (registrationId: number, value: number) => {
+    if (!selectedEvaluation) return
 
-return (
-  <div className="space-y-8">
-    {/* Titre de la page avec animation */}
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeIn}
-      className="flex items-center gap-4"
-    >
-      <GraduationCap className="h-8 w-8 text-skyblue" />
-      <h1 className="text-3xl font-bold tracking-tight">Gestion des Notes Scolaires</h1>
-    </motion.div>
+    const maxNote = Number(selectedEvaluation.maximum_note)
+    if (value < 0 || value > maxNote) {
+      toast({
+        title: "Erreur",
+        description: `La note doit être entre 0 et ${maxNote}`,
+        color: "destructive",
+      })
+      return
+    }
 
-    {/* Sélecteurs de classe et devoir */}
-    <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={fadeIn}
-      className="grid grid-cols-1 md:grid-cols-2 gap-6"
-    >
-      <motion.div variants={slideIn}>
-        <Card className="hover:shadow-md transition-shadow border-primary/20">
+    setStudentGrades((prev) =>
+      prev.map((sg) =>
+        sg.registration_id === registrationId
+          ? {
+              ...sg,
+              note: value,
+              coefficient_note: value * Number(selectedEvaluation.coefficient),
+            }
+          : sg,
+      ),
+    )
+  }
+
+  // Enregistrer toutes les notes
+  const handleSaveAllGrades = async () => {
+    if (!selectedEvaluation) return
+
+    setLoading(true)
+
+    try {
+      const notesToSave = studentGrades.map((sg) => ({
+        evaluation_id: selectedEvaluation.id,
+        registration_id: sg.registration_id,
+        value: sg.note,
+      }))
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(notesToSave),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'enregistrement des notes")
+      }
+
+      const savedNotes = await response.json()
+
+      // Mettre à jour le store
+      const updatedNotes = notes.filter((n) => n.evaluation_id !== selectedEvaluation.id)
+      setNotes([...updatedNotes, ...savedNotes])
+
+      toast({
+        title: "Succès",
+        description: "Notes enregistrées avec succès",
+      })
+
+      setActiveTab("statistics")
+    } catch (error) {
+      console.error("Erreur:", error)
+      toast({
+        title: "Erreur",
+        description: "Impossible d'enregistrer les notes",
+        color: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Calculer les statistiques
+  const calculateStatistics = () => {
+    if (!selectedEvaluation || studentGrades.length === 0) return null
+
+    const validGrades = studentGrades.filter((sg) => sg.note > 0)
+    if (validGrades.length === 0) return null
+
+    const total = validGrades.reduce((sum, sg) => sum + sg.note, 0)
+    const average = total / validGrades.length
+    const maxGrade = Math.max(...validGrades.map((sg) => sg.note))
+    const minGrade = Math.min(...validGrades.map((sg) => sg.note))
+
+    const passGrade = Number(selectedEvaluation.maximum_note) * 0.5 // 50% pour réussir
+    const passCount = validGrades.filter((sg) => sg.note >= passGrade).length
+    const passRate = (passCount / validGrades.length) * 100
+
+    return {
+      average: average.toFixed(2),
+      maxGrade,
+      minGrade,
+      passRate: passRate.toFixed(1),
+      totalStudents: studentGrades.length,
+      gradedStudents: validGrades.length,
+    }
+  }
+
+  const stats = calculateStatistics()
+
+  if (!currentProfessor) {
+    return (
+      <div className="container mx-auto p-6">
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Vous devez être connecté en tant que professeur pour accéder à cette page.
+          </AlertDescription>
+        </Alert>
+      </div>
+    )
+  }
+
+  return (
+    <Card className="mx-auto container p-2">
+      <CardHeader className="">
+        <div>
+          <h1 className="text-2xl font-bold">Gestion des Notes</h1>
+          <p className="text-muted-foreground">Créez des évaluations et saisissez les notes de vos élèves</p>
+        </div>
+      </CardHeader>
+
+      {/* Informations sur la période actuelle */}
+      {currentPeriod && (
+        <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <School className="h-5 w-5 text-skyblue" />
-              Sélection de la classe
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Période Actuelle
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={classeSelectionnee} onValueChange={setClasseSelectionnee}>
-              <SelectTrigger className="hover:border-primary/50 transition-colors">
-                <SelectValue placeholder="Sélectionner une classe" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((classe) => (
-                  <motion.div 
-                    key={classe.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <SelectItem value={classe.id}>
-                      <div className="flex flex-col">
-                        <span>{classe.nom}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {classe.niveau} • {classe.effectif} élèves • {classe.professeurPrincipal}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  </motion.div>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      <motion.div variants={slideIn}>
-        <Card className="hover:shadow-md transition-shadow border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Book className="h-5 w-5 text-skyblue" />
-              Sélection du devoir
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Select 
-              value={devoirSelectionne} 
-              onValueChange={setDevoirSelectionne} 
-              disabled={!classeSelectionnee}
-            >
-              <SelectTrigger className="hover:border-primary/50 transition-colors">
-                <SelectValue
-                  placeholder={classeSelectionnee ? "Sélectionner un devoir" : "Sélectionnez d'abord une classe"}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {devoirsFiltres.map((devoir) => (
-                  <motion.div
-                    key={devoir.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <SelectItem value={devoir.id}>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{devoir.titre}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {devoir.matiere} • Coef. {devoir.coefficient} • {new Date(devoir.date).toLocaleDateString()}
-                        </span>
-                        <span className="text-xs text-muted-foreground mt-1">{devoir.description}</span>
-                      </div>
-                    </SelectItem>
-                  </motion.div>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
-
-    {/* Tableau des notes */}
-    <AnimatePresence>
-      {classeSelectionnee && devoirSelectionne && (
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          variants={fadeIn}
-          transition={{ duration: 0.3 }}
-        >
-          <Card className="hover:shadow-lg transition-shadow border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-primary/5 to-background p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Calculator className="h-6 w-6" />
-                  Notes des élèves - {classeActuelle?.nom}
-                </CardTitle>
-                {devoirActuel && (
-                  <motion.div 
-                    initial="hidden"
-                    animate="visible"
-                    variants={fadeIn}
-                    className="mt-2 space-y-1"
-                  >
-                    <p className="text-sm font-medium">
-                      <span className="font-semibold">Matière:</span> {devoirActuel.matiere} • 
-                      <span className="font-semibold ml-2">Coefficient:</span> {devoirActuel.coefficient} • 
-                      <span className="font-semibold ml-2">Date:</span> {new Date(devoirActuel.date).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{devoirActuel.description}</p>
-                    <p className="text-sm font-medium text-skyblue mt-1">
-                      Moyenne de la classe: {calculerMoyenneClasse()}/20
-                    </p>
-                  </motion.div>
-                )}
+                <p className="font-medium">{currentPeriod.label}</p>
+                <p className="text-sm text-muted-foreground">
+                  Du {new Date(currentPeriod.pivot.start_date).toLocaleDateString()}
+                  au {new Date(currentPeriod.pivot.end_date).toLocaleDateString()}
+                </p>
               </div>
-              <div className="flex space-x-2">
-                {!modeEdition ? (
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setModeEdition(true)} 
-                      className="flex items-center gap-2 shadow-sm"
-                    >
-                      <FileEdit className="h-4 w-4" />
-                      Modifier les notes
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button className="flex items-center gap-2 shadow-sm bg-green-600 hover:bg-green-700">
-                          <Save className="h-4 w-4" />
-                          Enregistrer
-                        </Button>
-                      </motion.div>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <motion.div
-                        initial="hidden"
-                        animate="visible"
-                        variants={popIn}
-                      >
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="flex items-center gap-2">
-                            <Save className="h-5 w-5" />
-                            Confirmer l'enregistrement
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Êtes-vous sûr de vouloir enregistrer les modifications pour {devoirActuel?.titre} ?
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                          </motion.div>
-                          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                            <AlertDialogAction 
-                              onClick={saveChanges}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              Confirmer
-                            </AlertDialogAction>
-                          </motion.div>
-                        </AlertDialogFooter>
-                      </motion.div>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </div>
+              <Badge color="secondary">Active</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger color="indigodye" value="create-evaluation" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Créer Évaluation
+          </TabsTrigger>
+          <TabsTrigger color="indigodye" value="my-evaluations" className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            Mes Évaluations
+          </TabsTrigger>
+          <TabsTrigger color="indigodye" value="enter-grades" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Saisir Notes
+          </TabsTrigger>
+          <TabsTrigger color="indigodye" value="statistics" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Statistiques
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Créer une évaluation */}
+        <TabsContent value="create-evaluation">
+          <Card>
+            <CardHeader>
+              <CardTitle>Créer une Nouvelle Évaluation</CardTitle>
+              <CardDescription>Définissez les paramètres de votre évaluation</CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
-              <Table>
-                <TableCaption className="text-muted-foreground">
-                  Liste des {elevesFiltres.length} élèves de {classeActuelle?.nom} - Professeur principal: {classeActuelle?.professeurPrincipal}
-                </TableCaption>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-[150px]">Nom</TableHead>
-                    <TableHead className="w-[150px]">Prénom</TableHead>
-                    <TableHead className="text-right w-[120px]">Note (/20)</TableHead>
-                    {modeEdition && <TableHead className="text-right w-[50px]">Actions</TableHead>}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {elevesFiltres.map((eleve) => (
-                    <motion.tr 
-                      key={eleve.id}
-                      whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.03)" }}
-                      transition={{ duration: 0.2 }}
-                      className={cn(
-                        "border-t",
-                        modeEdition ? "bg-secondary/20" : "bg-transparent"
-                      )}
-                    >
-                      <TableCell className="font-medium">{eleve.nom}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{eleve.prenom}</span>
-                          <span className="text-xs text-muted-foreground">
-                            Né(e) le: {new Date(eleve.dateNaissance).toLocaleDateString()}
-                          </span>
+            <CardContent className="space-y-4">
+              {errors.length > 0 && (
+                <Alert color="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <ul className="list-disc list-inside">
+                      {errors.map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="matter">Matière *</Label>
+                  <Select
+                    value={evaluationForm.matter_id.toString()}
+                    onValueChange={(value) =>
+                      setEvaluationForm((prev) => ({ ...prev, matter_id: Number.parseInt(value) }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une matière" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMattersAndClasses.matters.map((matter) => (
+                        <SelectItem key={matter.id} value={matter.id.toString()}>
+                          {matter.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="classe">Classe *</Label>
+                  <Select
+                    value={evaluationForm.classe_id.toString()}
+                    onValueChange={(value) =>
+                      setEvaluationForm((prev) => ({ ...prev, classe_id: Number.parseInt(value) }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner une classe" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableMattersAndClasses.classes.map((classe) => (
+                        <SelectItem key={classe.id} value={classe.id.toString()}>
+                          {classe.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="type_note">Type d'Évaluation *</Label>
+                  <Select
+                    value={evaluationForm.type_note_id.toString()}
+                    onValueChange={(value) =>
+                      setEvaluationForm((prev) => ({ ...prev, type_note_id: Number.parseInt(value) }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {typeEvaluations.map((type) => (
+                        <SelectItem key={type.id} value={type.id.toString()}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="date_evaluation">Date d'Évaluation *</Label>
+                  <Input
+                    id="date_evaluation"
+                    type="date"
+                    value={evaluationForm.date_evaluation}
+                    onChange={(e) => setEvaluationForm((prev) => ({ ...prev, date_evaluation: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="maximum_note">Note Maximale </Label>
+                  <Input
+                    id="maximum_note"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={evaluationForm.maximum_note}
+                    onChange={(e) =>
+                      setEvaluationForm((prev) => ({ ...prev, maximum_note: e.target.value }))
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="coefficient">Coefficient </Label>
+                  <Input
+                    id="coefficient"
+                    type="number"
+                    min="0.1"
+                    max="10"
+                    step="0.1"
+                    value={evaluationForm.coefficient}
+                    onChange={(e) =>
+                      setEvaluationForm((prev) => ({ ...prev, coefficient: e.target.value }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <Button color="indigodye" onClick={handleCreateEvaluation} disabled={loading} className="w-full">
+                {loading ? "Création en cours..." : "Créer l'Évaluation"}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Mes évaluations */}
+        <TabsContent value="my-evaluations">
+          <Card>
+            <CardHeader>
+              <CardTitle>Mes Évaluations</CardTitle>
+              <CardDescription>Liste de toutes vos évaluations créées</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {professorEvaluations.length === 0 ? (
+                <div className="text-center py-8">
+                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">Aucune évaluation créée</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {professorEvaluations.map((evaluation) => {
+                    const matter = matters.find((m) => m.id === evaluation.matter_id)
+                    const classe = classes.find((c) => c.id === evaluation.classe_id)
+                    const evaluationNotes = notes.filter((n) => n.evaluation_id === evaluation.id)
+
+                    return (
+                      <Card key={evaluation.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium">{matter?.name}</h3>
+                              <Badge variant="outline">{classe?.label}</Badge>
+                              <Badge >{evaluation.type_note.label}</Badge>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>Date: {new Date(evaluation.date_evaluation).toLocaleDateString()}</span>
+                              <span>Note max: {evaluation.maximum_note}</span>
+                              <span>Coefficient: {evaluation.coefficient}</span>
+                              <span>Notes saisies: {evaluationNotes.length}</span>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => handleSelectEvaluation(evaluation)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Voir/Modifier
+                          </Button>
                         </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {modeEdition ? (
-                          <motion.div whileHover={{ scale: 1.05 }}>
+                      </Card>
+                    )
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Saisir les notes */}
+        <TabsContent value="enter-grades">
+          {selectedEvaluation ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Saisie des Notes</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">{matters.find((m) => m.id === selectedEvaluation.matter_id)?.name}</Badge>
+                    <Badge variant="outline">{classes.find((c) => c.id === selectedEvaluation.classe_id)?.label}</Badge>
+                  </div>
+                </CardTitle>
+                <CardDescription>
+                  Évaluation du {new Date(selectedEvaluation.date_evaluation).toLocaleDateString()}- Note sur{" "}
+                  {selectedEvaluation.maximum_note} (Coefficient: {selectedEvaluation.coefficient})
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>N° Inscription</TableHead>
+                        <TableHead>Nom</TableHead>
+                        <TableHead>Prénom</TableHead>
+                        <TableHead>Note /{selectedEvaluation.maximum_note}</TableHead>
+                        <TableHead>Note Coefficientée</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {studentGrades.map((student) => (
+                        <TableRow key={student.registration_id}>
+                          <TableCell className="font-medium">{student.registration_number}</TableCell>
+                          <TableCell>{student.student_name}</TableCell>
+                          <TableCell>{student.student_first_name}</TableCell>
+                          <TableCell>
                             <Input
                               type="number"
                               min="0"
-                              max="20"
-                              step="0.5"
-                              value={getNoteEleve(eleve.id) === null ? "" : getNoteEleve(eleve.id)!.toString()}
-                              onChange={(e) => updateNote(eleve.id, e.target.value)}
-                              className="w-24 text-right shadow-sm hover:border-primary/50 transition-colors"
+                              max={Number(selectedEvaluation.maximum_note)}
+                              step="0.25"
+                              value={student.note}
+                              onChange={(e) =>
+                                updateStudentGrade(student.registration_id, Number.parseFloat(e.target.value) || 0)
+                              }
+                              className="w-20"
                             />
-                          </motion.div>
-                        ) : (
-                          <motion.span 
-                            className={cn(
-                              "inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-medium",
-                              getNoteEleve(eleve.id) === null 
-                                ? "bg-muted text-muted-foreground" 
-                                : getNoteEleve(eleve.id)! >= 10 
-                                  ? "bg-green-100 text-green-800" 
-                                  : "bg-red-100 text-red-800"
-                            )}
-                            whileHover={{ scale: 1.05 }}
-                          >
-                            {getNoteEleve(eleve.id) === null ? "Non noté" : getNoteEleve(eleve.id)}
-                          </motion.span>
-                        )}
-                      </TableCell>
-                      {modeEdition && (
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => updateNote(eleve.id, "")}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Effacer
-                          </Button>
-                        </TableCell>
-                      )}
-                    </motion.tr>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-    </AnimatePresence>
+                          </TableCell>
+                          <TableCell>
+                            <Badge color="secondary">{student.coefficient_note.toFixed(2)}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
 
-    {/* Confirmation de sauvegarde */}
-    <AlertDialog open={showSaveConfirmation} onOpenChange={setShowSaveConfirmation}>
-      <AlertDialogContent>
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={popIn}
-        >
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Save className="h-5 w-5 text-green-500" />
-              Notes enregistrées avec succès
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Les modifications pour {devoirActuel?.titre} ont été sauvegardées dans le système.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <AlertDialogAction className="bg-green-600 hover:bg-green-700">
-                Continuer
-              </AlertDialogAction>
-            </motion.div>
-          </AlertDialogFooter>
-        </motion.div>
-      </AlertDialogContent>
-    </AlertDialog>
-  </div>
-)
+                  <div className="flex justify-end">
+                    <Button onClick={handleSaveAllGrades} disabled={loading} className="flex items-center gap-2">
+                      <Save className="h-4 w-4" />
+                      {loading ? "Enregistrement..." : "Enregistrer toutes les notes"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">Sélectionnez une évaluation pour saisir les notes</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Statistiques */}
+        <TabsContent value="statistics">
+          {selectedEvaluation && stats ? (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Statistiques de l'Évaluation
+                  </CardTitle>
+                  <CardDescription>
+                    {matters.find((m) => m.id === selectedEvaluation.matter_id)?.name} -
+                    {classes.find((c) => c.id === selectedEvaluation.classe_id)?.label}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Calculator className="h-4 w-4 text-blue-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">Moyenne</p>
+                            <p className="text-2xl font-bold">{stats.average}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-green-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">Note Max</p>
+                            <p className="text-2xl font-bold">{stats.maxGrade}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Award className="h-4 w-4 text-orange-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">Taux de Réussite</p>
+                            <p className="text-2xl font-bold">{stats.passRate}%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-purple-500" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">Élèves Notés</p>
+                            <p className="text-2xl font-bold">
+                              {stats.gradedStudents}/{stats.totalStudents}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Répartition des Notes</h3>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Progression</span>
+                        <span>
+                          {stats.gradedStudents}/{stats.totalStudents} élèves
+                        </span>
+                      </div>
+                      <Progress value={(stats.gradedStudents / stats.totalStudents) * 100} className="h-2" />
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4">Classement des Élèves</h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Rang</TableHead>
+                          <TableHead>Élève</TableHead>
+                          <TableHead>Note</TableHead>
+                          <TableHead>Note Coefficientée</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {studentGrades
+                          .filter((sg) => sg.note > 0)
+                          .sort((a, b) => b.note - a.note)
+                          .map((student, index) => (
+                            <TableRow key={student.registration_id}>
+                              <TableCell>
+                                <Badge variant={index < 3 ? "soft" : "outline"}>{index + 1}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                {student.student_name} {student.student_first_name}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  color={
+                                    student.note >= Number(selectedEvaluation.maximum_note) * 0.5 ? "default" : "destructive"
+                                  }
+                                >
+                                  {student.note}/{selectedEvaluation.maximum_note}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>{student.coefficient_note.toFixed(2)}</TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="text-center py-8">
+                <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  Sélectionnez une évaluation avec des notes pour voir les statistiques
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+    </Card>
+  )
 }
+

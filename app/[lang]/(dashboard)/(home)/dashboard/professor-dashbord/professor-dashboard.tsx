@@ -356,14 +356,12 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
           >
             <div>
               <h1
-                className="text-l md:text-xl lg:text-2xl font-bold bg-gradient-to-r bg-clip-text uppercase text-transparent"
+                className="text-l md:text-xl lg:text-2xl font-bold bg-gradient-to-r bg-clip-text uppercase mb-2 text-transparent"
                 style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}
               >
                 Tableau de bord
               </h1>
-              <p className="text-xs lowcase lg:text-base text-muted-foreground">
-                Bienvenue {currentProfessor.first_name} {currentProfessor.name}
-              </p>
+
             </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 lg:gap-3">
