@@ -144,7 +144,7 @@ const usePermissionCheck = () => {
       if (!userOnline || !permissionName) return false
 
       const userPermissions = getUserPermissions(userOnline)
-      return userPermissions.some((p) => p.name === permissionName)
+      return userPermissions.some((p) => p.name.toLowerCase() === permissionName.toLowerCase())
     },
     [userOnline, getUserPermissions],
   )
@@ -154,7 +154,7 @@ const usePermissionCheck = () => {
       if (!userOnline || !roleName) return false
 
       const userRoles = userOnline.roles || []
-      return userRoles.some((role) => role.name === roleName)
+      return userRoles.some((role) => role.name.toLowerCase() === roleName.toLowerCase())
     },
     [userOnline],
   )
@@ -222,8 +222,8 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
   const { hasPermission, hasRole, getUserPermissions, getUserRolesWithPermissions } = usePermissionCheck()
 
   // Vérifications de permissions
-  const canEditUser = hasPermission("modifier utilisateur") || hasRole("Administarteur")
-  const canViewUserDetails = hasPermission("voir utilisateur") || hasRole("Administarteur")
+  const canEditUser = hasPermission("modifier utilisateur") || hasRole("Administarteur") || hasRole("Directeur")
+  const canViewUserDetails = hasPermission("voir utilisateur") || hasRole("Administarteur")  || hasRole("Directeur")
 
   // Calculs mémorisés - utilisation du store pour récupérer les permissions
   const userPermissions = useMemo(() => getUserPermissions(user), [user, getUserPermissions])

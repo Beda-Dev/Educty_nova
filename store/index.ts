@@ -47,7 +47,9 @@ import {
   Office,
   Employee,
   Average ,
-  ReportCard
+  ReportCard,
+  CorrespondenceBooks,
+  CorrespondenceEntry
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -274,6 +276,12 @@ interface SchoolStore {
   employees: Employee[];
   setEmployees: (data: Employee[]) => void;
 
+  correspondencesBooks: CorrespondenceBooks[];
+  setCorrespondencesBooks: (data: CorrespondenceBooks[]) => void;
+
+  correspondencesEntries: CorrespondenceEntry[];
+  setCorrespondencesEntries: (data: CorrespondenceEntry[]) => void;
+
   currentStep: number;
   setCurrentStep: (step: number) => void;
 
@@ -470,6 +478,13 @@ export const useSchoolStore = create<SchoolStore>()(
       // Ajout des bulletins de notes
       reportCards: [],
       setReportCards: (data: ReportCard[]) => set({ reportCards: data }),
+      
+      // Ajout des correspondances
+      correspondencesBooks: [],
+      setCorrespondencesBooks: (data: CorrespondenceBooks[]) => set({ correspondencesBooks: data }),
+      
+      correspondencesEntries: [],
+      setCorrespondencesEntries: (data: CorrespondenceEntry[]) => set({ correspondencesEntries: data }),
       
       currentStep: 1,
       setCurrentStep: (step) => set({ currentStep: step }),

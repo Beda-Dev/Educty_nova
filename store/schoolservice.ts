@@ -960,6 +960,54 @@ export const fetchReportCards = async (opts: RequestInit = {}) => {
   }
 };
 
+export const fetchCorrespondencesBooks = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/correspondence-books`,
+      opts
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des carnet de correspondance :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log("carnet de correspondance récupérés depuis localStorage : ", parsedData.state.correspondencesBooks);
+        return parsedData.state.correspondencesBooks || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
+export const fetchCorrespondencesEntries = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/correspondence-entries`,
+      opts
+    );
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur lors de la récupération des contenue des correspondances :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        console.log("contenu des correspondances récupérés depuis localStorage : ", parsedData.state.correspondencesEntries);
+        return parsedData.state.correspondencesEntries || [];
+      } catch (error) {
+        console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
 export const refreshAllData = async () => {
   const refreshPromises = [
     fetchClasses(),

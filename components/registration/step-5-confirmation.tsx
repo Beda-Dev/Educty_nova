@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { Installment, PaymentFormData } from "@/lib/interface"
 import { useDocumentStorage } from "@/hooks/useDocumentStorage"
 import { useRegistrationStore } from "@/hooks/use-registration-store"
+import { fetchCorrespondenceBooks } from "@/lib/fonction"
 
 
 const padTo2Digits = (num: number): string => num.toString().padStart(2, '0')
@@ -285,6 +286,10 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         if (!registrationResponse.ok) {
           throw new Error("Erreur lors de l'inscription")
         }
+
+        const registrationResult = await registrationResponse.json();
+        createdEntities.registration = registrationResult.id;
+
       }
 
       for (const payment of payments) {
@@ -375,7 +380,15 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           continue;
         }
       }
-
+      
+      // Step 7: Fetch correspondences books , creation du carnet de correspondance
+      if (createdEntities.registration) {
+        const correspondencesBooks = await fetchCorrespondenceBooks(createdEntities.registration)
+        console.log("Correspondences books:", correspondencesBooks)
+      }else{
+        console.error("Registration ID is missing")
+      }
+      
       onComplete()
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error)

@@ -387,6 +387,30 @@ export async function sendAccountInfo(name: string, email: string) {
   return data;
 }
 
+/**
+ * Fetches correspondence books for a specific registration ID
+ * @param id - The registration ID to fetch correspondence books for
+ * @returns Promise with the response data or null if an error occurs
+ */
+export async function fetchCorrespondenceBooks(id: string | number) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/correspondence-books`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({ registration_id: id }),
+    });
 
+    if (!res.ok) {
+      console.warn(`Failed to fetch correspondence books: ${res.statusText}`);
+      return null;
+    }
 
-
+    return await res.json();
+  } catch (error) {
+    console.warn('Error in fetchCorrespondenceBooks:', error);
+    return null;
+  }
+}

@@ -775,6 +775,24 @@ export interface ReportCard {
   registration: Omit<Registration, 'classe' | 'academic_year' | 'student'>;
 
 }
+
+export interface CorrespondenceBooks {
+  id: number;
+  registration_id: number;
+  created_at: string;
+  updated_at: string;
+  registration: Omit<Registration, 'classe' | 'academic_year' | 'student'>;
+} 
+
+export interface CorrespondenceEntry {
+  id: number;
+  message_type: string;
+  content: string;
+  correspondence_book_id: number;
+  created_at: string;
+  updated_at: string;
+  correspondence_book: Omit<CorrespondenceBooks, 'registration'>;
+} 
  
 
 
