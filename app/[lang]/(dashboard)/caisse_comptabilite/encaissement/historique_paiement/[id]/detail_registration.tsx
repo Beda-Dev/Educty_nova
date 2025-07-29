@@ -70,14 +70,14 @@ const PaymentDetail = ({ payment, detail }: Props) => {
   const ReceiptCopy = () => (
     <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
       {/* Header */}
-      <div className="flex justify-between items-start border-b pb-3 mb-4">
+      <div className="flex justify-between items-start border-b pb-3 mb-1">
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
             <Image
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
-              width={80}
-              height={80}
+              width={60}
+              height={60}
               className="school-logo"
             />
           ) : (
@@ -107,10 +107,10 @@ const PaymentDetail = ({ payment, detail }: Props) => {
       </div>
 
       <Card className="print:shadow-none border-0">
-        <CardContent className="p-3 space-y-4">
+        <CardContent className="p-3 space-y-1">
           {/* Student Info */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE L'ÉLÈVE</h3>
+          <div className="mb-1">
+            <h3 className="text-sm font-semibold text-blue-800">INFORMATIONS DE L'ÉLÈVE</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <Info label="Nom complet" value={`${payment.student.name} ${payment.student.first_name}`} />
               <Info label="Matricule" value={payment.student.registration_number} />
@@ -124,7 +124,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
           <Separator className="" />
 
           {/* Payment Details */}
-          <div className="mb-4">
+          <div className="">
             <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center justify-between">
               <span>Détails du paiement</span>
               <span className="bg-blue-50 border border-blue-200 rounded-md px-3 py-1 text-sm font-medium flex items-center gap-2">
@@ -134,7 +134,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
                 </span>
               </span>
             </h3>
-            <div className="my-2">
+            <div className="">
               <PaymentTable
                 payments={paymentSummary}
                 totalAmount={totalAmount}
@@ -148,8 +148,8 @@ const PaymentDetail = ({ payment, detail }: Props) => {
           <Separator className="" />
 
           {/* Payment Method */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE PAIEMENT</h3>
+          <div className="">
+            <h3 className="text-xs font-semibold text-blue-800 mb-2">INFORMATIONS DE PAIEMENT</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               <Info label="Caissier" value={payment.cashier.name} />
               <Info label="Caisse" value={payment.cash_register.cash_register_number} />
@@ -159,7 +159,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
           <Separator className="" />
 
           {/* Signatures */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-2 gap-4 mt-1">
             <div className="text-xs text-gray-700 text-center space-y-2">
               <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
               <span>Signature du parent/tuteur</span>
@@ -171,7 +171,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
           </div>
 
           {/* Footer */}
-          <div className="text-center text-xs text-gray-600 mt-4 pt-4 border-t">
+          <div className="text-center text-xs text-gray-600 mt-1 pt-1 border-t">
             <p className="mb-1">Document officiel de {schoolInfo.name}</p>
             <p>Émis le {new Date(payment.created_at).toLocaleDateString("fr-FR")} à {new Date(payment.created_at).toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}</p>
           </div>
@@ -282,7 +282,7 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
 const Info = ({ label, value }: { label: string; value?: string | number | null }) => (
   <div className="flex items-start">
     <span className="font-semibold min-w-[100px]">{label}:</span>
-    <span className="text-gray-800 ml-2">{value || "N/A"}</span>
+    <span className="text-gray-800 ml-1">{value || "N/A"}</span>
   </div>
 );
 

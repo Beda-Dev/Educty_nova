@@ -152,7 +152,7 @@ export function Step4Documents({
     if (!docType) return
 
     try {
-      console.log("Adding document:", selectedFile.name, selectedFile.size, selectedFile.type)
+      // console.log("Adding document:", selectedFile.name, selectedFile.size, selectedFile.type)
 
       // Vérifier à nouveau que le fichier est valide
       if (selectedFile && selectedFile.size === 0) {

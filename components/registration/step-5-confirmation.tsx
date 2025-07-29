@@ -113,7 +113,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const { restoreFilesFromIndexedDB } = useRegistrationStore();
 
   useEffect(() => {
-    console.log("[DEBUG Step5] studentData au montage:", studentData);
+    // console.log("[DEBUG Step5] studentData au montage:", studentData);
 
     // Restauration automatique de la photo depuis IndexedDB si besoin
     const restorePhoto = async () => {
@@ -209,12 +209,12 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         studentFormData.append("sexe", studentData.sexe)
 
         if (studentData.photo) {
-          console.log("[DEBUG] Passing to getFileFromPath:", studentData.photo);
+          // console.log("[DEBUG] Passing to getFileFromPath:", studentData.photo);
           const photoFile = await getFileFromPath(studentData.photo);
-          console.log("[DEBUG] Result from getFileFromPath:", photoFile);
+          // console.log("[DEBUG] Result from getFileFromPath:", photoFile);
           if (photoFile) {
             studentFormData.append("photo", photoFile);
-            console.log("[DEBUG] Photo added to FormData:", photoFile.name, photoFile.size);
+            // console.log("[DEBUG] Photo added to FormData:", photoFile.name, photoFile.size);
           }
         }
       }

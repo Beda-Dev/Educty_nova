@@ -202,13 +202,13 @@ const DashboardView = ({ trans }: DashboardViewProps) => {
         color: "default",
       })
 
-      console.log("🔄 Données actualisées avec succès:", {
-        classes: freshData.classes?.length || 0,
-        registrations: freshData.registrations?.length || 0,
-        payments: freshData.payments?.length || 0,
-        students: freshData.students?.length || 0,
-        users: freshData.users?.length || 0,
-      })
+      // console.log("🔄 Données actualisées avec succès:", {
+      //   classes: freshData.classes?.length || 0,
+      //   registrations: freshData.registrations?.length || 0,
+      //   payments: freshData.payments?.length || 0,
+      //   students: freshData.students?.length || 0,
+      //   users: freshData.users?.length || 0,
+      // })
     } catch (error) {
       console.error("❌ Erreur lors de l'actualisation:", error)
 

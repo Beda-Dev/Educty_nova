@@ -146,7 +146,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
               const file = await getFileFromPath(value as any)
               if (file) {
                 studentFormData.append(key, file)
-                console.log("Photo added to FormData:", file.name, file.size)
+                // console.log("Photo added to FormData:", file.name, file.size)
               } else {
                 setSubmitError("Impossible de retrouver la photo de l'élève. Merci de la réimporter avant de confirmer la réinscription.");
                 setIsSubmitting(false);
@@ -331,7 +331,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       // Step 8: Fetch correspondences books , creation du carnet de correspondance
       if (createdEntities.registration) {
         const correspondencesBooks = await fetchCorrespondenceBooks(createdEntities.registration)
-        console.log("Correspondences books:", correspondencesBooks)
+        // console.log("Correspondences books:", correspondencesBooks)
       }else{
         console.error("Registration ID is missing")
       }

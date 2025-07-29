@@ -136,23 +136,23 @@ export default function Professors() {
   // Fonction utilitaire pour obtenir l'URL de l'avatar
   const getAvatarUrl = (professor: any) => {
     const url = professor.user?.avatar;
-    console.log("[getAvatarUrl] url récupérée:", url);
+    // console.log("[getAvatarUrl] url récupérée:", url);
     if (!url) {
-      console.log("[getAvatarUrl] Pas d'avatar, retourne undefined");
+      // console.log("[getAvatarUrl] Pas d'avatar, retourne undefined");
       return undefined;
     }
     if (url.startsWith("http://") || url.startsWith("https://")) {
-      console.log("[getAvatarUrl] URL complète détectée, retourne:", url);
+      // console.log("[getAvatarUrl] URL complète détectée, retourne:", url);
       return url;
     }
     if (process.env.NEXT_PUBLIC_API_BASE_URL_2) {
       const base = process.env.NEXT_PUBLIC_API_BASE_URL_2.replace(/\/+$/, "");
       const path = url.replace(/^\/+/, "");
       const fullUrl = `${base}/${path}`;
-      console.log("[getAvatarUrl] URL relative, retourne avec base:", fullUrl);
+      // console.log("[getAvatarUrl] URL relative, retourne avec base:", fullUrl);
       return fullUrl;
     }
-    console.log("[getAvatarUrl] URL relative sans base, retourne:", url);
+    // console.log("[getAvatarUrl] URL relative sans base, retourne:", url);
     return url;
   };
 

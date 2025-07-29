@@ -76,7 +76,7 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
     if (userOnline) {
       // Extraire les noms des rôles de l'utilisateur en minuscules
       const roles = userOnline.roles?.map(role => role.name.toLowerCase()) || []
-      console.log('Rôles de l\'utilisateur:', roles);
+      // console.log('Rôles de l\'utilisateur:', roles);
       setUserRoles(roles)
 
       // Vérifier si l'utilisateur est un professeur
@@ -87,12 +87,12 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
       
       if (isProfessor) {
         const newRoles = [...roles, 'professor', 'professeur', 'enseignant', 'teacher'];
-        console.log('Nouveaux rôles avec professeur:', newRoles);
+        // console.log('Nouveaux rôles avec professeur:', newRoles);
         setUserRoles(newRoles);
       }
 
       // Afficher les options de dashboard disponibles
-      console.log('Toutes les options de dashboard:', dashboardOptions);
+      // console.log('Toutes les options de dashboard:', dashboardOptions);
 
       // Trouver les dashboards disponibles pour cet utilisateur
       const available = dashboardOptions.filter(option =>
@@ -102,12 +102,12 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
         )
       )
 
-      console.log('Dashboards disponibles:', available.map(d => d.id));
+      // console.log('Dashboards disponibles:', available.map(d => d.id));
       setAvailableDashboards(available)
 
       // Si un seul dashboard disponible, le sélectionner automatiquement
       if (available.length === 1) {
-        console.log('Un seul dashboard disponible, sélection automatique:', available[0].id);
+        // console.log('Un seul dashboard disponible, sélection automatique:', available[0].id);
         setSelectedDashboard(available[0].id)
       }
     }

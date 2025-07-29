@@ -66,7 +66,7 @@ const EditModal: React.FC<EditModalProps> = ({
   academicYear,
   onUpdate,
 }) => {
-  console.log("EditModal", academicYear);
+  // console.log("EditModal", academicYear);
   // Préparation des périodes pour le formulaire
   const initialPeriods =
     academicYear.periods?.map((p) => ({

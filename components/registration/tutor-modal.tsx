@@ -253,7 +253,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
               value={sexe ?? ''}
               onChange={(val) => {
                 setValue('sexe', val as 'Masculin' | 'Feminin');
-                console.log('[TutorModal] Sexe sélectionné:', val);
+                // console.log('[TutorModal] Sexe sélectionné:', val);
               }}
               placeholder="Sélectionner le sexe"
             />

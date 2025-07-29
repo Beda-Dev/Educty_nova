@@ -67,7 +67,7 @@ const DataFetcher = () => {
     let isMounted = true;
 
     const loadData = async () => {
-      console.log("Début du chargement des données...");
+      // console.log("Début du chargement des données...");
 
       try {
         const classes = await fetchClasses();
@@ -157,7 +157,7 @@ const DataFetcher = () => {
     return () => {
       isMounted = false;
       abortController.abort();
-      console.log("Composant démonté - fetchs annulés");
+      // console.log("Composant démonté - fetchs annulés");
     };
   }, [
     setClasses,

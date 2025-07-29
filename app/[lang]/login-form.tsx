@@ -114,8 +114,8 @@ const LogInForm = () => {
           roles,
           permissions
         );
-        console.log("user" , userWithPermissions);
-        console.log("otheruser" , userData);
+        // console.log("user" , userWithPermissions);
+        // console.log("otheruser" , userData);
 
         setUserOnline(userWithPermissions || userData);
         // 💾 Enregistre dans IndexedDB

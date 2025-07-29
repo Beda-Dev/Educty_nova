@@ -151,7 +151,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       // Stocker immédiatement dans IndexedDB
       try {
         const fileId = await storeFileInIndexedDB(file)
-        console.log("Photo stored in IndexedDB with ID:", fileId)
+        // console.log("Photo stored in IndexedDB with ID:", fileId)
       } catch (error) {
         console.error("Error storing photo in IndexedDB:", error)
       }

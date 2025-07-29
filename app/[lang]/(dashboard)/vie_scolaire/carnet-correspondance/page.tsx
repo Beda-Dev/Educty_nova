@@ -178,13 +178,13 @@ const CorrespondenceBookPage = () => {
         setIsDropdownOpen(false);
       }
     };
-  
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-  
+
 
 
 
@@ -431,55 +431,55 @@ const CorrespondenceBookPage = () => {
                 placeholder="Rechercher un élève par nom ou matricule"
                 className="w-full"
               />
-{isDropdownOpen && (
-  <div
-    ref={dropdownRef}
-    className="absolute z-[9999] mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto"
-  >
-    {filteredRegistrations
-      .filter(registration => {
-        const searchLower = searchQuery.toLowerCase();
-        const studentName = `${registration.student.name} ${registration.student.first_name}`.toLowerCase();
-        const registrationNumber = registration.student.registration_number?.toLowerCase() || '';
-        return studentName.includes(searchLower) ||
-          registrationNumber.includes(searchLower) ||
-          registration.classe.label.toLowerCase().includes(searchLower);
-      })
-      .map((registration) => (
-        <div
-          key={registration.id}
-          role="button"
-          tabIndex={0}
-          className={`px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${selectedRegistration === registration.id.toString() ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
-          onClick={() => {
-            console.log("CLICK SUR :", registration); // ← À garder pour vérifier
-            setSelectedRegistration(registration.id.toString());
-            setSearchQuery(`${registration.student.name} ${registration.student.first_name} (${registration.classe.label})`);
-            setIsDropdownOpen(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              setSelectedRegistration(registration.id.toString());
-              setSearchQuery(`${registration.student.name} ${registration.student.first_name} (${registration.classe.label})`);
-              setIsDropdownOpen(false);
-            }
-          }}
-        >
-          <div className="font-medium">
-            {registration.student.name} {registration.student.first_name}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {registration.classe.label} • {registration.student.registration_number}
-          </div>
-        </div>
-      ))}
-    {filteredRegistrations.length === 0 && (
-      <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
-        Aucun élève trouvé
-      </div>
-    )}
-  </div>
-)}
+              {isDropdownOpen && (
+                <div
+                  ref={dropdownRef}
+                  className="absolute z-[9999] mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-auto"
+                >
+                  {filteredRegistrations
+                    .filter(registration => {
+                      const searchLower = searchQuery.toLowerCase();
+                      const studentName = `${registration.student.name} ${registration.student.first_name}`.toLowerCase();
+                      const registrationNumber = registration.student.registration_number?.toLowerCase() || '';
+                      return studentName.includes(searchLower) ||
+                        registrationNumber.includes(searchLower) ||
+                        registration.classe.label.toLowerCase().includes(searchLower);
+                    })
+                    .map((registration) => (
+                      <div
+                        key={registration.id}
+                        role="button"
+                        tabIndex={0}
+                        className={`px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer ${selectedRegistration === registration.id.toString() ? 'bg-blue-50 dark:bg-blue-900' : ''}`}
+                        onClick={() => {
+                          // console.log("CLICK SUR :", registration); // ← À garder pour vérifier
+                          setSelectedRegistration(registration.id.toString());
+                          setSearchQuery(`${registration.student.name} ${registration.student.first_name} (${registration.classe.label})`);
+                          setIsDropdownOpen(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setSelectedRegistration(registration.id.toString());
+                            setSearchQuery(`${registration.student.name} ${registration.student.first_name} (${registration.classe.label})`);
+                            setIsDropdownOpen(false);
+                          }
+                        }}
+                      >
+                        <div className="font-medium">
+                          {registration.student.name} {registration.student.first_name}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {registration.classe.label} • {registration.student.registration_number}
+                        </div>
+                      </div>
+                    ))}
+                  {filteredRegistrations.length === 0 && (
+                    <div className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                      Aucun élève trouvé
+                    </div>
+                  )}
+                </div>
+              )}
 
             </div>
           </CardContent>

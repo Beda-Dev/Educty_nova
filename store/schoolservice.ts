@@ -3,15 +3,15 @@ export const fetchClasses = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/classe`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des classes :", error);
+    // console.error("Erreur lors de la récupération des classes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log("classes récupérées depuis localStorage : ", parsedData);
+        // console.log("classes récupérées depuis localStorage : ", parsedData);
         return parsedData.state.classes || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -24,18 +24,18 @@ export const fetchLevels = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/level`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des niveaux :", error);
+    // console.error("Erreur lors de la récupération des niveaux :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "niveau récupérées depuis localStorage : ",
-          parsedData.state.levels
-        );
+        // console.log(
+        //   "niveau récupérées depuis localStorage : ",
+        //   parsedData.state.levels
+        // );
         return parsedData.state.levels || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -48,21 +48,21 @@ export const fetchAcademicYears = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/academicYear`, opts);
     return await response.json();
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des années académiques :",
-      error
-    );
+    // console.error(
+    //   "Erreur lors de la récupération des années académiques :",
+    //   error
+    // );
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "années académiques récupérées depuis localStorage : ",
-          parsedData.state.academicYear
-        );
+        // console.log(
+        //   "années académiques récupérées depuis localStorage : ",
+        //   parsedData.state.academicYear
+        // );
         return parsedData.state.academicYears || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -75,18 +75,18 @@ export const fetchStudents = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des élèves :", error);
+    // console.error("Erreur lors de la récupération des élèves :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "eleves récupérées depuis localStorage : ",
-          parsedData.state.students
-        );
+        // console.log(
+        //   "eleves récupérées depuis localStorage : ",
+        //   parsedData.state.students
+        // );
         return parsedData.state.students || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -99,15 +99,15 @@ export const fetchUsers = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des utilisateur :", error);
+    // console.error("Erreur lors de la récupération des utilisateur :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "utilisateur récupérées depuis localStorage : ",
-          parsedData.state.users
-        );
+        // console.log(
+        //   "utilisateur récupérées depuis localStorage : ",
+        //   parsedData.state.users
+        // );
         return parsedData.state.users || [];
       } catch (error) {
         console.error("Erreur lors du parsing des données : ", error);
@@ -128,13 +128,13 @@ export const fetchRoles = async (opts: RequestInit = {}) => {
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "roles récupérées depuis localStorage : ",
-          parsedData.state.roles
-        );
+        // console.log(
+        //   "roles récupérées depuis localStorage : ",
+        //   parsedData.state.roles
+        // );
         return parsedData.state.roles || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -152,13 +152,13 @@ export const fetchpricing = async (opts: RequestInit = {}) => {
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "tarification récupérées depuis localStorage : ",
-          parsedData.state.pricing
-        );
+        // console.log(
+        //   "tarification récupérées depuis localStorage : ",
+        //   parsedData.state.pricing
+        // );
         return parsedData.state.pricing || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -171,15 +171,15 @@ export const fetchRegistration = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registration`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des inscription :", error);
+    // console.error("Erreur lors de la récupération des inscription :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "inscription récupérées depuis localStorage : ",
-          parsedData.state.registrations
-        );
+        // console.log(
+        //   "inscription récupérées depuis localStorage : ",
+        //   parsedData.state.registrations
+        // );
         return parsedData.state.registrations || [];
       } catch (error) {
         console.error("Erreur lors du parsing des données : ", error);
@@ -205,10 +205,10 @@ export const fetchAssignmentType = async (opts: RequestInit = {}) => {
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "statut des eleve récupérées depuis localStorage : ",
-          parsedData.state.assigmentTypes
-        );
+        // console.log(
+        //   "statut des eleve récupérées depuis localStorage : ",
+        //   parsedData.state.assigmentTypes
+        // );
         return parsedData.state.assigmentTypes || [];
       } catch (error) {
         console.error("Erreur lors du parsing des données : ", error);
@@ -224,18 +224,18 @@ export const fetchFeeType = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/feeType`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des type de frais :", error);
+    // console.error("Erreur lors de la récupération des type de frais :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "type de frais récupérées depuis localStorage : ",
-          parsedData.state.feeTypes
-        );
+        // console.log(
+        //   "type de frais récupérées depuis localStorage : ",
+        //   parsedData.state.feeTypes
+        // );
         return parsedData.state.feeTypes || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -248,21 +248,21 @@ export const fetchDocumentType = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/documentType`, opts);
     return await response.json();
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des types de document :",
-      error
-    );
+    // console.error(
+    //   "Erreur lors de la récupération des types de document :",
+    //   error
+    // );
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "des types de document récupérées depuis localStorage : ",
-          parsedData.state.documentTypes
-        );
+        // console.log(
+        //   "des types de document récupérées depuis localStorage : ",
+        //   parsedData.state.documentTypes
+        // );
         return parsedData.state.documentTypes || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -275,18 +275,18 @@ export const fetchDocument = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/document`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des documents :", error);
+    // console.error("Erreur lors de la récupération des documents :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "documents récupérées depuis localStorage : ",
-          parsedData.state.documents
-        );
+        // console.log(
+        //   "documents récupérées depuis localStorage : ",
+        //   parsedData.state.documents
+        // );
         return parsedData.state.documents || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -299,18 +299,18 @@ export const fetchPayment = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/payment`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des payments :", error);
+    // console.error("Erreur lors de la récupération des payments :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "payments récupérées depuis localStorage : ",
-          parsedData.state.payments
-        );
+        // console.log(
+        //   "payments récupérées depuis localStorage : ",
+        //   parsedData.state.payments
+        // );
         return parsedData.state.payments || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -323,18 +323,18 @@ export const fetchInstallment = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/installment`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des versements :", error);
+    // console.error("Erreur lors de la récupération des versements :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "versements récupérées depuis localStorage : ",
-          parsedData.state.installements
-        );
-        return parsedData.state.installements || [];
+        // console.log(
+        //   "versements récupérées depuis localStorage : ",
+        //   parsedData.state.installments
+        // );
+        return parsedData.state.installments || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -347,18 +347,18 @@ export const fetchCashRegister = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cashRegister`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des caisse :", error);
+    // console.error("Erreur lors de la récupération des caisse :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "caisse  récupérées depuis localStorage : ",
-          parsedData.state.cashRegisters
-        );
+        // console.log(
+        //   "caisse  récupérées depuis localStorage : ",
+        //   parsedData.state.cashRegisters
+        // );
         return parsedData.state.cashRegisters || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -371,18 +371,18 @@ export const fetchSetting = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/setting`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des parametres :", error);
+    // console.error("Erreur lors de la récupération des parametres :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "parametres récupérées depuis localStorage : ",
-          parsedData.state.settings
-        );
+        // console.log(
+        //   "parametres récupérées depuis localStorage : ",
+        //   parsedData.state.settings
+        // );
         return parsedData.state.settings || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -395,21 +395,21 @@ export const fetchExpenseType = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/expenseType`, opts);
     return await response.json();
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des type de depense :",
-      error
-    );
+    // console.error(
+    //   "Erreur lors de la récupération des type de depense :",
+    //   error
+    // );
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "type de depense récupérées depuis localStorage : ",
-          parsedData.state.expenseTypes
-        );
+        // console.log(
+        //   "type de depense récupérées depuis localStorage : ",
+        //   parsedData.state.expenseTypes
+        // );
         return parsedData.state.expenseTypes || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -422,18 +422,18 @@ export const fetchExpenses = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/expense`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des depenses :", error);
+    // console.error("Erreur lors de la récupération des depenses :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "depenses récupérées depuis localStorage : ",
-          parsedData.state.expenses
-        );
+        // console.log(
+        //   "depenses récupérées depuis localStorage : ",
+        //   parsedData.state.expenses
+        // );
         return parsedData.state.expenses || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -446,18 +446,18 @@ export const fetchPermissions = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/permission`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des permission :", error);
+    // console.error("Erreur lors de la récupération des permission :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "permission récupérées depuis localStorage : ",
-          parsedData.state.permissions
-        );
+        // console.log(
+        //   "permission récupérées depuis localStorage : ",
+        //   parsedData.state.permissions
+        // );
         return parsedData.state.permissions || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -472,21 +472,21 @@ export const fetchPaymentMethods = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des methode de paiement :",
-      error
-    );
+    // console.error(
+    //   "Erreur lors de la récupération des methode de paiement :",
+    //   error
+    // );
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "methode de paiement récupérées depuis localStorage : ",
-          parsedData.state.methodPayment
-        );
+        // console.log(
+        //   "methode de paiement récupérées depuis localStorage : ",
+        //   parsedData.state.methodPayment
+        // );
         return parsedData.state.methodPayment || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -501,21 +501,21 @@ export const fetchValidationExpenses = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des validation de depenses :",
-      error
-    );
+    // console.error(
+    //   "Erreur lors de la récupération des validations de dépenses :",
+    //   error
+    // );
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "validation de depensest récupérées depuis localStorage : ",
-          parsedData.state.validationExpenses
-        );
+        // console.log(
+        //   "validations de dépenses récupérées depuis localStorage : ",
+        //   parsedData.state.validationExpenses
+        // );
         return parsedData.state.validationExpenses || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -528,18 +528,18 @@ export const fetchTutors = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des parents :", error);
+    // console.error("Erreur lors de la récupération des parents :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "parents récupérées depuis localStorage : ",
-          parsedData.state.tutors
-        );
+        // console.log(
+        //   "parents récupérées depuis localStorage : ",
+        //   parsedData.state.tutors
+        // );
         return parsedData.state.tutors || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -552,18 +552,18 @@ export const fetchTransactions = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/transaction`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des transactions :", error);
+    // console.error("Erreur lors de la récupération des transactions :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "transaction récupérées depuis localStorage : ",
-          parsedData.state.transactions
-        );
+        // console.log(
+        //   "transaction récupérées depuis localStorage : ",
+        //   parsedData.state.transactions
+        // );
         return parsedData.state.transactions || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -578,21 +578,21 @@ export const fetchCashRegisterSessions = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des sessions de caisse :",
-      error
-    );
+    // console.error(
+    //   "Erreur lors de la récupération des sessions de caisse :",
+    //   error
+    // );
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "sessions de caisse récupérées depuis localStorage : ",
-          parsedData.state.cashRegisterSessions
-        );
+        // console.log(
+        //   "sessions de caisse récupérées depuis localStorage : ",
+        //   parsedData.state.cashRegisterSessions
+        // );
         return parsedData.state.cashRegisterSessions || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -605,18 +605,18 @@ export const fetchMatters = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/matter`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des matieres :", error);
+    // console.error("Erreur lors de la récupération des matieres :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "matieres récupérées depuis localStorage : ",
-          parsedData.state.matters
-        );
+        // console.log(
+        //   "matieres récupérées depuis localStorage : ",
+        //   parsedData.state.matters
+        // );
         return parsedData.state.matters || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -629,18 +629,18 @@ export const fetchTypeEvaluations = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typeNote`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération type d'evaluation :", error);
+    // console.error("Erreur lors de la récupération type d'evaluation :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "type d'evaluation récupérées depuis localStorage : ",
-          parsedData.state.typeEvaluations
-        );
+        // console.log(
+        //   "type d'evaluation récupérées depuis localStorage : ",
+        //   parsedData.state.typeEvaluations
+        // );
         return parsedData.state.typeEvaluations || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -653,18 +653,18 @@ export const fetchTypePeriods = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/typePeriod`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des type de periodes :", error);
+    // console.error("Erreur lors de la récupération des type de periodes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "periodes récupérées depuis localStorage : ",
-          parsedData.state.typePeriods
-        );
+        // console.log(
+        //   "periodes récupérées depuis localStorage : ",
+        //   parsedData.state.typePeriods
+        // );
         return parsedData.state.typePeriods || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -677,18 +677,18 @@ export const fetchPeriods = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/period`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des periodes :", error);
+    // console.error("Erreur lors de la récupération des periodes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "periodes récupérées depuis localStorage : ",
-          parsedData.state.periods
-        );
+        // console.log(
+        //   "periodes récupérées depuis localStorage : ",
+        //   parsedData.state.periods
+        // );
         return parsedData.state.periods || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -701,18 +701,18 @@ export const fetchDemands = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/demand`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des demandes :", error);
+    // console.error("Erreur lors de la récupération des demandes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "demandes récupérées depuis localStorage : ",
-          parsedData.state.demands
-        );
+        // console.log(
+        //   "demandes récupérées depuis localStorage : ",
+        //   parsedData.state.demands
+        // );
         return parsedData.state.demands || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -725,18 +725,18 @@ export const fetchProfessor = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/professor`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des professeur :", error);
+    // console.error("Erreur lors de la récupération des professeurs :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "assignments récupérées depuis localStorage : ",
-          parsedData.state.professor
-        );
-        return parsedData.state.professor || [];
+        // console.log(
+        //   "professeurs récupérées depuis localStorage : ",
+        //   parsedData.state.professors
+        // );
+        return parsedData.state.professors || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -749,18 +749,18 @@ export const fetchSeries = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/serie`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des séries :", error);
+    // console.error("Erreur lors de la récupération des séries :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "séries récupérées depuis localStorage : ",
-          parsedData.state.series
-        );
+        // console.log(
+        //   "séries récupérées depuis localStorage : ",
+        //   parsedData.state.series
+        // );
         return parsedData.state.series || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -773,18 +773,18 @@ export const fetchTimetable = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/timetable`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des emploi du temps :", error);
+    // console.error("Erreur lors de la récupération des emploi du temps :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "assignments récupérées depuis localStorage : ",
-          parsedData.state.timetables
-        );
+        // console.log(
+        //   "assignments récupérées depuis localStorage : ",
+        //   parsedData.state.timetables
+        // );
         return parsedData.state.timetables || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -797,18 +797,18 @@ export const fetchNotes = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/note`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des notes :", error);
+    // console.error("Erreur lors de la récupération des notes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "notes récupérées depuis localStorage : ",
-          parsedData.state.notes
-        );
+        // console.log(
+        //   "notes récupérées depuis localStorage : ",
+        //   parsedData.state.notes
+        // );
         return parsedData.state.notes || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -821,18 +821,18 @@ export const fetchCoefficient = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/coefficient`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des coefficients :", error);
+    // console.error("Erreur lors de la récupération des coefficients :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "coefficients récupérées depuis localStorage : ",
-          parsedData.state.coefficients
-        );
+        // console.log(
+        //   "coefficients récupérées depuis localStorage : ",
+        //   parsedData.state.coefficients
+        // );
         return parsedData.state.coefficients || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -845,18 +845,18 @@ export const fetchEvaluations = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/evaluations`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des évaluations :", error);
+    // console.error("Erreur lors de la récupération des évaluations :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "évaluations récupérées depuis localStorage : ",
-          parsedData.state.evaluations
-        );
+        // console.log(
+        //   "évaluations récupérées depuis localStorage : ",
+        //   parsedData.state.evaluations
+        // );
         return parsedData.state.evaluations || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -869,18 +869,18 @@ export const fetchOffices = async (opts: RequestInit = {}) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/offices`, opts);
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des fonction :", error);
+    // console.error("Erreur lors de la récupération des fonction :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log(
-          "bureaux récupérés depuis localStorage : ",
-          parsedData.state.offices
-        );
+        // console.log(
+        //   "bureaux récupérés depuis localStorage : ",
+        //   parsedData.state.offices
+        // );
         return parsedData.state.offices || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -891,20 +891,20 @@ export const fetchOffices = async (opts: RequestInit = {}) => {
 export const fetchEmployees = async (opts: RequestInit = {}) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/employee`,
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/employees`,
       opts
     );
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des employés :", error);
+    // console.error("Erreur lors de la récupération des employés :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log("employés récupérés depuis localStorage : ", parsedData.state.employees);
+        // console.log("employés récupérés depuis localStorage : ", parsedData.state.employees);
         return parsedData.state.employees || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -920,15 +920,15 @@ export const fetchAverages = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des moyennes :", error);
+    // console.error("Erreur lors de la récupération des moyennes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log("moyennes récupérées depuis localStorage : ", parsedData.state.averages);
+        // console.log("moyennes récupérées depuis localStorage : ", parsedData.state.averages);
         return parsedData.state.averages || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -944,15 +944,15 @@ export const fetchReportCards = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des bulletins de notes :", error);
+    // console.error("Erreur lors de la récupération des bulletins de notes :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log("bulletins de notes récupérés depuis localStorage : ", parsedData.state.reportCards);
+        // console.log("bulletins de notes récupérés depuis localStorage : ", parsedData.state.reportCards);
         return parsedData.state.reportCards || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -968,15 +968,15 @@ export const fetchCorrespondencesBooks = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des carnet de correspondance :", error);
+    // console.error("Erreur lors de la récupération des carnet de correspondance :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log("carnet de correspondance récupérés depuis localStorage : ", parsedData.state.correspondencesBooks);
+        // console.log("carnet de correspondance récupérés depuis localStorage : ", parsedData.state.correspondencesBooks);
         return parsedData.state.correspondencesBooks || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
@@ -992,15 +992,15 @@ export const fetchCorrespondencesEntries = async (opts: RequestInit = {}) => {
     );
     return await response.json();
   } catch (error) {
-    console.error("Erreur lors de la récupération des contenue des correspondances :", error);
+    // console.error("Erreur lors de la récupération des contenue des correspondances :", error);
     const storedData = localStorage.getItem("school-store");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
-        console.log("contenu des correspondances récupérés depuis localStorage : ", parsedData.state.correspondencesEntries);
+        // console.log("contenu des correspondances récupérés depuis localStorage : ", parsedData.state.correspondencesEntries);
         return parsedData.state.correspondencesEntries || [];
       } catch (error) {
-        console.error("Erreur lors du parsing des données : ", error);
+        // console.error("Erreur lors du parsing des données : ", error);
       }
     } else {
       return [];
