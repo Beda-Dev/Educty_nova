@@ -48,7 +48,7 @@ const ResumeFinancieView = ({ params }: OverviewProps) => {
     setStudent(stu ?? null);
 
     setLoading(false);
-  }, [id, registrations, students]);
+  }, []);
 
   if (loading) {
     return (

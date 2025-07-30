@@ -64,7 +64,8 @@ const StudentTableStatus = ({
 }: {
   Register: RegistrationMerge[];
 }) => {
-  const { classes, assignmentTypes, academicYearCurrent } = useSchoolStore();
+  console.log(Register);
+  const { classes, assignmentTypes, academicYearCurrent , series } = useSchoolStore();
   const router = useRouter();
   const [selectedStudent, setSelectedStudent] =
     useState<RegistrationMerge | null>(null);
@@ -114,7 +115,7 @@ const StudentTableStatus = ({
           } else if (col === "student.registration_number") {
             formattedRow["Matricule"] = row.student.registration_number;
           } else if (col === "classe.label") {
-            formattedRow["Classe"] = row.classe.label;
+            formattedRow["Classe"] = `${row.classe.label} ${row.classe.serie_id ? `(${series.find((serie) => Number(serie.id) === Number(row.classe.serie_id))?.label})` : ""}`;
           } else if (col === "student.birth_date") {
             formattedRow["Date de naissance"] = row.student.birth_date;
           } else if (col === "student.sexe") {
@@ -130,18 +131,26 @@ const StudentTableStatus = ({
   };
 
   // Fonction de filtrage personnalisée pour les données imbriquées
- const nestedFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
-  if (!filterValue) return true; // Si pas de filtre, tout inclure
-  
-  const value = getNestedValue(row.original, columnId);
-  if (!value) return false;
-  
-  // Normaliser les valeurs pour la comparaison
-  const normalizedValue = String(value).trim().toLowerCase();
-  const normalizedFilter = String(filterValue).trim().toLowerCase();
-  
-  return normalizedValue === normalizedFilter;
-};
+  const nestedFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
+    if (filterValue === undefined || filterValue === null || filterValue === "") {
+      return true;
+    }
+    
+    const value = getNestedValue(row.original, columnId);
+    if (value === undefined || value === null) {
+      return false;
+    }
+    
+    // Si c'est un nombre, comparer en tant que nombre
+    const numValue = Number(value);
+    const numFilter = Number(filterValue);
+    if (!isNaN(numValue) && !isNaN(numFilter)) {
+      return numValue === numFilter;
+    }
+    
+    // Sinon, comparer en tant que chaîne
+    return String(value).trim().toLowerCase() === String(filterValue).trim().toLowerCase();
+  };
 
   // Helper pour accéder aux valeurs imbriquées
   const getNestedValue = (obj: any, path: string) => {
@@ -161,12 +170,12 @@ const StudentTableStatus = ({
               <Image
                 src={typeof student.photo === 'string' ? student.photo : ''}
                 alt={`${student.name} ${student.first_name}`}
-                width={40}
-                height={40}
+                width={30}
+                height={30}
                 className="rounded-full border border-gray-200 object-cover"
               />
             ) : (
-              <Avatar className="h-10 w-10">
+              <Avatar className="h-9 w-9">
                 <AvatarFallback className="bg-gray-100 text-sm font-medium">
                   {student.name[0]?.toUpperCase()}
                   {student.first_name[0]?.toUpperCase()}
@@ -188,9 +197,10 @@ const StudentTableStatus = ({
       filterFn: nestedFilterFn,
     },
     {
-      id: "classe.label",
-      accessorFn: (row) => row.classe.label,
+      id: "classe.id",
+      accessorFn: (row) => `${row.classe.label} ${row.classe.serie_id ? `(${series.find((serie) => Number(serie.id) === Number(row.classe.serie_id))?.label})` : ""}`,
       header: "Classe",
+      cell: ({ row }) => `${row.original.classe.label} ${row.original.classe.serie_id ? `(${series.find((serie) => Number(serie.id) === Number(row.original.classe.serie_id))?.label})` : ""}`,
       filterFn: nestedFilterFn,
     },
     {
@@ -270,7 +280,7 @@ const StudentTableStatus = ({
   // Gestion des filtres avec useEffect comme dans l'exemple fonctionnel
   const [statusFilter, setStatusFilter] = useState("");
   const [sexeFilter, setSexeFilter] = useState("");
-  const [classeFilter, setClasseFilter] = useState("");
+  const [classeFilter, setClasseFilter] = useState(0);
 
   useEffect(() => {
     const newFilters: ColumnFiltersState = [];
@@ -291,7 +301,7 @@ const StudentTableStatus = ({
 
     if (classeFilter) {
       newFilters.push({
-        id: "classe.label",
+        id: "classe.id",
         value: classeFilter,
       });
     }
@@ -387,15 +397,15 @@ const StudentTableStatus = ({
           <label className="block text-sm font-medium text-gray-700">
             Classe :
           </label>
-          <Select value={classeFilter} onValueChange={setClasseFilter}>
+          <Select value={classeFilter.toString()} onValueChange={(value) => setClasseFilter(Number(value))}>
             <SelectTrigger>
               <SelectValue placeholder="Classe" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Tous</SelectItem>
               {classes.map((classe) => (
-                <SelectItem key={classe.id} value={classe.label}>
-                  {classe.label}
+                <SelectItem key={classe.id} value={classe.id.toString()}>
+                  {classe.label} {classe.serie ? `(${classe.serie.label})` : ""}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -410,12 +420,14 @@ const StudentTableStatus = ({
               setGlobalFilter("");
               setStatusFilter("");
               setSexeFilter("");
-              setClasseFilter("");
+              setClasseFilter(0);
             }}
           >
             <RefreshCw color="blue" className="h-4 w-4" />
           </Button>
         </div>
+
+
         <div className="flex items-end justify-end">
           <Tooltip>
             <TooltipTrigger asChild>

@@ -146,14 +146,16 @@ export default function ExportModal({
         </div>
         
         <DialogFooter className="gap-4 sm:gap-0">
-          <Button variant="outline"  className="m-2"   onClick={onCloseAction}>
+          <div className="w-full justify-around">
+          <Button color='destructive'  className="m-2"   onClick={onCloseAction}>
             <X className="mr-2 h-4 w-4" />
             Annuler
           </Button>
-          <Button onClick={handleExport} className="m-2" disabled={selectedCount === 0}>
+          <Button color='success' onClick={handleExport} className="m-2" disabled={selectedCount === 0}>
             <FileSpreadsheet className="mr-2 h-4 w-4" />
             Exporter ({selectedCount})
           </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

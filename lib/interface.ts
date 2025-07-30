@@ -296,8 +296,8 @@ export interface Registration {
   registration_date: string;
   created_at: string;
   updated_at: string;
-  classe: Classe;
-  academic_year: AcademicYear;
+  classe: Omit<Classe, 'serie' | 'level'>;
+  academic_year: Omit<AcademicYear, 'periods'>;
   student: StudentOnly;
 }
 

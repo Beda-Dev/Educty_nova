@@ -168,7 +168,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
                   ) : (
                     classes.filter((classe) => classe.level_id === selectedLevelId).map((classe) => (
                       <SelectItem key={classe.id} value={classe.id.toString()}>
-                        {classe.label} ({classe.student_number}/{classe.max_student_number} élèves)
+                        {classe.label} ({classe.serie?.label || ''}) ({classe.student_number}/{classe.max_student_number} élèves)
                       </SelectItem>
                     ))
                   )}

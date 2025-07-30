@@ -25,7 +25,7 @@ function Page() {
     
     fetchTransactionsData();
     fetchPaymentData();
-  }, [setCashRegisterSessions , setTransactions , setPayments ]);
+  }, []);
 
   return <FinancialSummaryPage />;
 }

@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { BadgeCheck, Calendar, FileText, Phone, User, Eye, Users } from "lucide-react";
+import { BadgeCheck, Calendar, FileText, Phone, User, Eye, Users, BookOpen } from "lucide-react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -55,7 +55,11 @@ const formatCurrency = (amount: number) => {
 export default function StudentProfile({ data, pay }: StudentProfileProps) {
   const { academicYearCurrent, pricing } = useSchoolStore();
   const router = useRouter();
-
+  
+  // Trouver l'inscription de l'année académique en cours
+  const currentRegistration = data.registrations.find(
+    (registration) => registration.academic_year_id === academicYearCurrent?.id
+  );
   // Formatage de la date de naissance
   const formattedBirthDate = format(new Date(data.birth_date), "dd MMMM yyyy", {
     locale: fr,
@@ -186,6 +190,30 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                   <span>{data.assignment_type.label}</span>
                 </div>
 
+                {currentRegistration && (
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Classe ({academicYearCurrent?.label}):
+                    </span>
+                    <span className="font-medium">
+                      {currentRegistration.classe?.label}
+                    </span>
+                  </div>
+                )}
+
+                {currentRegistration && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Date d'inscription:
+                    </span>
+                    <span>
+                      {format(new Date(currentRegistration.registration_date), 'dd/MM/yyyy', { locale: fr })}
+                    </span>
+                  </div>
+                )}
+
                 <Separator className="my-3" />
 
                 {/* Informations du tuteur */}
@@ -235,16 +263,18 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                   Année académique {academicYearCurrent.label}
                 </CardDescription>
               </div>
+              {currentRegistration && (
               <Button
                 variant="outline"
                 size="sm"
                 className="text-skyblue-600 border-primary-300 "
                 onClick={() =>
-                  router.push(`/caisse_comptabilite/resume_financie/${data.id}`)
+                  router.push(`/caisse_comptabilite/resume_financie/${currentRegistration.id}`)
                 }
               >
                 Voir le résumé financier
-              </Button>
+              </Button>)
+              }
             </div>
           </CardHeader>
 

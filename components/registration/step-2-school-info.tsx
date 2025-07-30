@@ -182,7 +182,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
                     classes.filter((classe) => classe.level_id === selectedLevelId).map((classe) => (
                       <SelectItem key={classe.id} value={classe.id.toString()}>
                         <div className="flex items-center gap-2">
-                          <span>{classe.label}</span>
+                          <span>{classe.label} ({classe.serie?.label || ''})</span>
                           <Badge variant="outline">
                             {classe.student_number}/{classe.max_student_number}
                           </Badge>
