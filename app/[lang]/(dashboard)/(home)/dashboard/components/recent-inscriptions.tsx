@@ -352,9 +352,6 @@ const RecentInscriptions = ({ inscriptions, academicYear }: Props) => {
                               <div className="flex items-center gap-1">
                                 <School className="h-3 w-3" />
                                 <span className="font-medium text-primary">{inscription.classe.label}</span>
-                                {inscription.classe.level && (
-                                  <span className="text-muted-foreground">({inscription.classe.level.label})</span>
-                                )}
                               </div>
 
                               <div className="flex items-center gap-1">
