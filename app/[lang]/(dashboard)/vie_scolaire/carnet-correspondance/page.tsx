@@ -105,7 +105,8 @@ const CorrespondenceBookPage = () => {
     setRegistration,
     setCorrespondencesBooks,
     setCorrespondencesEntries,
-    setAcademicYears
+    setAcademicYears,
+    levels
   } = useSchoolStore();
 
   const [selectedAcademicYear, setSelectedAcademicYear] = useState<number>(
@@ -607,7 +608,7 @@ const CorrespondenceBookPage = () => {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Niveau</p>
-                        <p className="text-base dark:text-white">{selectedRegistrationData.classe.level?.label}</p>
+                        <p className="text-base dark:text-white">{selectedRegistrationData.classe.level_id ? levels.find((level) => Number(level.id) === Number(selectedRegistrationData.classe.level_id))?.label : ''}</p>
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Année académique</p>
