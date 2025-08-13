@@ -607,11 +607,11 @@ type ClassWithoutData = Omit<Classe, 'serie' | 'level'>;
 
 export interface Timetable {
   id: number;
-  academic_year_id: string;
-  class_id: string;
-  professor_id: string;
-  matter_id: string;
-  period_id: string;
+  academic_year_id: number;
+  class_id: number;
+  professor_id: number;
+  matter_id: number;
+  period_id: number;
   day: string;
   start_date: string; // Format: YYYY-MM-DD
   end_date: string;   // Format: YYYY-MM-DD
@@ -620,10 +620,10 @@ export interface Timetable {
   end_time: string;   // Format: HH:mm
   created_at: string;
   updated_at: string;
-  academic_year: AcademicYear;
-  professor: Professor;
+  academic_year: Omit<AcademicYear, 'periods'>;
+  professor: Omit<Professor, 'user'>;
   class: ClassWithoutData;
-  period: Period;
+  period: Omit<Period, 'type_period'>;
   matter: Matter;
 }
 
@@ -638,7 +638,7 @@ export interface Evaluation {
   maximum_note: number;
   coefficient : number;
   date_evaluation:string
-  period: Period;
+  period: Omit<Period, 'type_period'>;
   matter: Matter;
   type_note: TypeEvaluation;
 
@@ -753,6 +753,8 @@ export interface Average {
   professor: Omit<Professor, 'user'>;
   report_card: Omit<ReportCard, 'period' | 'registration' | 'academic_year'>;
 
+
+
 }
 
 export interface ReportCard {
@@ -793,6 +795,31 @@ export interface CorrespondenceEntry {
   updated_at: string;
   correspondence_book: Omit<CorrespondenceBooks, 'registration'>;
 } 
+
+export interface HomeroomTeacher {
+  id: number;
+  class_id: number;
+  professor_id: number;
+  academic_year_id: number;
+  created_at: string;
+  updated_at: string;
+  class: Omit<Classe, 'serie' | 'level'>;
+  professor: Omit<Professor, 'user'>;
+  academic_year: Omit<AcademicYear, 'periods'>;
+}
+
+export interface Presence {
+  id: number;
+  date: string;
+  status: 'present' | 'absent' | 'late' ;
+  registration_id: number;
+  justification: string;
+  timetable_id: number;
+  created_at: string;
+  updated_at: string;
+  registration: Omit<Registration, 'classe' | 'academic_year' | 'student'>;
+  timetable: Omit<Timetable, 'academic_year' | 'period' | 'matter' | 'professor' | 'class'>;
+}
  
 
 

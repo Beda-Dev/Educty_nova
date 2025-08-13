@@ -49,7 +49,9 @@ import {
   Average ,
   ReportCard,
   CorrespondenceBooks,
-  CorrespondenceEntry
+  CorrespondenceEntry,
+  HomeroomTeacher,
+  Presence
 } from "@/lib/interface";
 
 // Store pour le thème
@@ -282,6 +284,12 @@ interface SchoolStore {
   correspondencesEntries: CorrespondenceEntry[];
   setCorrespondencesEntries: (data: CorrespondenceEntry[]) => void;
 
+  homeroomTeachers: HomeroomTeacher[];
+  setHomeroomTeachers: (data: HomeroomTeacher[]) => void;
+  
+  presences: Presence[];
+  setPresences: (data: Presence[]) => void;
+
   currentStep: number;
   setCurrentStep: (step: number) => void;
 
@@ -485,6 +493,12 @@ export const useSchoolStore = create<SchoolStore>()(
       
       correspondencesEntries: [],
       setCorrespondencesEntries: (data: CorrespondenceEntry[]) => set({ correspondencesEntries: data }),
+
+      homeroomTeachers: [],
+      setHomeroomTeachers: (data) => set({ homeroomTeachers: data }),
+      
+      presences: [],
+      setPresences: (data) => set({ presences: data }),
       
       currentStep: 1,
       setCurrentStep: (step) => set({ currentStep: step }),

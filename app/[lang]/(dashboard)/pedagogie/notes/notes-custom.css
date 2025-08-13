@@ -1,0 +1,11 @@
+/* Masquer les flèches des champs de saisie numérique pour tous les navigateurs */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Optionnel : empêcher le zéro initial côté visuel (JS côté composant déjà fait) */

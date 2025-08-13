@@ -37,7 +37,7 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
   const { users } = useSchoolStore();
 
   const hierarchicalOptions = users
-    .filter(u => u.id !== user.id) // Exclure l'utilisateur actuel
+    .filter(u => u.id !== user.id && u.active === 1) // Exclure l'utilisateur actuel
     .map(user => ({
       value: user.id,
       label: user.name
@@ -94,7 +94,7 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
         hierarchical_id: data.hierarchical_id,
       };
 
-      const response = await fetch(`/api/user?id=${user.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -215,6 +215,8 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
               checked={isActive}
               onCheckedChange={setIsActive}
               id="active-status"
+              color="success"
+              className="data-[state=checked]:bg-success"
             />
             <Label htmlFor="active-status" className="cursor-pointer">
               {isActive ? "Actif" : "Inactif"}

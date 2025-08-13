@@ -18,7 +18,7 @@ import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil } from "lucide-react";
+import { Pencil, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Pagination,
@@ -78,9 +78,9 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
     setIsEditOpen(false);
   };
 
-  if (hasAdminAccessVoir === false) {
-    router.push("/dashboard");
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   router.push("/dashboard");
+  // }
 
   // etat pour la pagination
 
@@ -176,11 +176,18 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
                           {item.serie?.label ? item.serie.label : "-"}
                         </TableCell>
                         {true && (
-                          <TableCell className="flex justify-end">
+                          <TableCell className="flex justify-end gap-2">
                             <Button
-                              color="tyrian"
+                              
                               size="icon"
-                              className=""
+                              onClick={() => router.push(`/parametres/pedagogy/classe/${item.id}`)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              
+                              size="icon"
+                              color="tyrian"
                               onClick={() => handleEditClick(item)}
                             >
                               <Pencil className="h-4 w-4" />

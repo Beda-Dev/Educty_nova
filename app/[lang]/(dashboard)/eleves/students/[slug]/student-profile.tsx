@@ -53,7 +53,7 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function StudentProfile({ data, pay }: StudentProfileProps) {
-  const { academicYearCurrent, pricing } = useSchoolStore();
+  const { academicYearCurrent, pricing , levels , series } = useSchoolStore();
   const router = useRouter();
   
   // Trouver l'inscription de l'année académique en cours
@@ -197,7 +197,7 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                       Classe ({academicYearCurrent?.label}):
                     </span>
                     <span className="font-medium">
-                      {currentRegistration.classe?.label}
+                      {currentRegistration.classe?.label} ({currentRegistration.classe?.serie_id ? series.find((serie) => Number(serie.id) === Number(currentRegistration.classe.serie_id))?.label : ''})
                     </span>
                   </div>
                 )}

@@ -296,14 +296,14 @@ export const menusConfig = {
       ],
       // Accessible aux professeurs
     },
-    {
-      title: "Inventory",
-      icon: Note2,
-      href: "/inventaire",
-      allowedPermissions: [MENU_ACCESS_CONFIG.PERMISSIONS.MANAGE_INVENTORY],
-      allowedRoles: [MENU_ACCESS_CONFIG.ROLES.ADMIN, MENU_ACCESS_CONFIG.ROLES.DIRECTOR],
-      excludeForProfessor: true,
-    },
+    // {
+    //   title: "Inventory",
+    //   icon: Note2,
+    //   href: "/inventaire",
+    //   allowedPermissions: [MENU_ACCESS_CONFIG.PERMISSIONS.MANAGE_INVENTORY],
+    //   allowedRoles: [MENU_ACCESS_CONFIG.ROLES.ADMIN, MENU_ACCESS_CONFIG.ROLES.DIRECTOR],
+    //   excludeForProfessor: true,
+    // },
   ],
 
   sidebarNav: {
@@ -368,14 +368,14 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
         ],
       },
-      {
-        title: "Inventory",
-        icon: Note2,
-        href: "/inventaire",
-        allowedPermissions: [MENU_ACCESS_CONFIG.PERMISSIONS.MANAGE_INVENTORY],
-        allowedRoles: [MENU_ACCESS_CONFIG.ROLES.ADMIN, MENU_ACCESS_CONFIG.ROLES.DIRECTOR],
-        excludeForProfessor: true,
-      },
+      // {
+      //   title: "Inventory",
+      //   icon: Note2,
+      //   href: "/inventaire",
+      //   allowedPermissions: [MENU_ACCESS_CONFIG.PERMISSIONS.MANAGE_INVENTORY],
+      //   allowedRoles: [MENU_ACCESS_CONFIG.ROLES.ADMIN, MENU_ACCESS_CONFIG.ROLES.DIRECTOR],
+      //   excludeForProfessor: true,
+      // },
     ],
 
     classic: [
@@ -439,14 +439,14 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
         ],
       },
-      {
-        title: "Inventory",
-        icon: Note2,
-        href: "/inventaire",
-        allowedPermissions: [MENU_ACCESS_CONFIG.PERMISSIONS.MANAGE_INVENTORY],
-        allowedRoles: [MENU_ACCESS_CONFIG.ROLES.ADMIN, MENU_ACCESS_CONFIG.ROLES.DIRECTOR],
-        excludeForProfessor: true,
-      },
+      // {
+      //   title: "Inventory",
+      //   icon: Note2,
+      //   href: "/inventaire",
+      //   allowedPermissions: [MENU_ACCESS_CONFIG.PERMISSIONS.MANAGE_INVENTORY],
+      //   allowedRoles: [MENU_ACCESS_CONFIG.ROLES.ADMIN, MENU_ACCESS_CONFIG.ROLES.DIRECTOR],
+      //   excludeForProfessor: true,
+      // },
     ],
   },
 }

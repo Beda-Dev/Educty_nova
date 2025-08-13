@@ -17,7 +17,7 @@ function getLocale(request: Request) {
 export function middleware(request: any) {
   // Check if there is any supported locale in the pathname
   const pathname = request.nextUrl.pathname;
-
+  
   const pathnameIsMissingLocale = locales.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
@@ -25,12 +25,15 @@ export function middleware(request: any) {
   // Redirect if there is no locale
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request);
-
-    // e.g. incoming request is /products
-    // The new URL is now /en-US/products
-    return NextResponse.redirect(
-      new URL(`/${locale}/${pathname}`, request.url)
-    );
+    
+    // IMPORTANT: Préserver les paramètres de recherche lors de la redirection
+    const searchParams = request.nextUrl.search;
+    
+    // e.g. incoming request is /products?param=value
+    // The new URL is now /en-US/products?param=value
+    const redirectUrl = new URL(`/${locale}${pathname}${searchParams}`, request.url);
+    
+    return NextResponse.redirect(redirectUrl);
   }
 }
 

@@ -28,7 +28,12 @@ const schema = z.object({
   path: ["confirmPassword"],
 });
 
-const FormulaireNouveauMotDePasse = () => {
+interface CreatePasswordFormProps {
+  token: string;
+  email: string;
+}
+
+const FormulaireNouveauMotDePasse = ({ token, email }: CreatePasswordFormProps) => {
   const [isPending, startTransition] = React.useTransition();
   const [newPasswordType, setNewPasswordType] = React.useState<boolean>(false);
   const [confirmPasswordType, setConfirmPasswordType] = React.useState<boolean>(false);
@@ -45,37 +50,40 @@ const FormulaireNouveauMotDePasse = () => {
     mode: "all",
   });
 
-  const onSubmit = (data: { password: string }) => {
+  const onSubmit = (data: { password: string; confirmPassword: string }) => {
     startTransition(async () => {
       try {
-        const response = await fetch("/api/reset-password", {
-          method: "PUT",
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/reset-password`, {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            newPassword: data.password,
+            token,
+            email,
+            password: data.password,
+            password_confirmation: data.confirmPassword
           }),
         });
 
+        const result = await response.json();
+
         if (!response.ok) {
-          throw new Error("Échec de la réinitialisation du mot de passe");
+          throw new Error(result.message || 'Une erreur est survenue lors de la réinitialisation du mot de passe');
         }
 
-        const result = await response.json();
-        toast.success("Mot de passe réinitialisé avec succès");
-        reset();
-        router.push("/dashboard");
+        toast.success('Votre mot de passe a été réinitialisé avec succès !');
+        router.push('/');
       } catch (error) {
-        console.error("Erreur:", error);
-        toast.error("Une erreur est survenue lors de la réinitialisation");
+        console.error('Erreur lors de la réinitialisation du mot de passe:', error);
+        toast.error(error instanceof Error ? error.message : 'Une erreur inattendue est survenue');
       }
     });
   };
 
   return (
     <div className="w-full">
-      <Link href="/dashboard" className="inline-block">
+      <Link href="/" className="inline-block">
         <LogoComponent1 width={40} height={40} className="2xl:h-14 2xl:w-14"/>
       </Link>
       <div className="2xl:mt-8 mt-6 2xl:text-3xl lg:text-2xl text-xl font-bold text-default-900">
@@ -181,9 +189,17 @@ const FormulaireNouveauMotDePasse = () => {
           </Label>
         </div>
 
-        <Button className="w-full mt-8" size={!isDesktop2xl ? "lg" : "md"} disabled={isPending}>
-          {isPending && <Loader2 className="ltr:mr-2 rtl:ml-2 h-4 w-4 animate-spin" />}
-          {isPending ? "Réinitialisation en cours..." : "Réinitialiser le mot de passe"}
+        <Button
+          type="submit"
+          className="w-full mt-8"
+          disabled={isPending}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Traitement en cours...
+            </>
+          ) : 'Réinitialiser le mot de passe'}
         </Button>
       </form>
       <div className="mt-6 text-center text-base text-default-600">

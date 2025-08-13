@@ -38,7 +38,7 @@ interface StudentFinancialData {
 }
 
 export default function FinancialSummaryPage({ student, studentRegistration }: FinancialSummaryPageProps) {
-  const { registrations, students, pricing, installements, payments, academicYearCurrent, settings, levels , classes } =
+  const { registrations, students, pricing, installements, payments, academicYearCurrent, settings, levels , classes , series } =
     useSchoolStore()
   const router = useRouter()  
 
@@ -174,7 +174,7 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Classe</Label>
-                  <p className="text-lg font-semibold">{financialData.registration?.classe?.label ?? "-"}</p>
+                  <p className="text-lg font-semibold">{financialData.registration?.classe?.label ?? "-"} ({series.find((serie) => Number(serie.id) === Number(financialData.registration?.classe?.serie_id))?.label ?? "-"})</p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Niveau</Label>

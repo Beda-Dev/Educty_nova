@@ -516,8 +516,8 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
                       {todayClasses.length > 0 ? (
                         <div className="space-y-3">
                           {todayClasses.map((timetable) => {
-                            const classe = classes?.find((c) => c.id.toString() === timetable.class_id)
-                            const matter = matters?.find((m) => m.id.toString() === timetable.matter_id)
+                            const classe = classes?.find((c) => Number(c.id) === Number(timetable.class_id))
+                            const matter = matters?.find((m) => Number(m.id) === Number(timetable.matter_id))
                             return (
                               <div
                                 key={timetable.id}
@@ -649,8 +649,8 @@ const ProfessorDashboard = ({ trans }: ProfessorDashboardProps) => {
                 {professorClasses.map((classe) => {
                   const studentsInClass = professorStudents.filter((reg) => reg.class_id === classe.id)
                   const classMatters = professorTimetables
-                    .filter((t) => t.class_id === classe.id.toString())
-                    .map((t) => matters?.find((m) => m.id.toString() === t.matter_id))
+                    .filter((t) => Number(t.class_id) === Number(classe.id))
+                    .map((t) => matters?.find((m) => Number(m.id) === Number(t.matter_id)))
                     .filter(Boolean)
 
                   return (

@@ -71,17 +71,12 @@ export async function updateStudentCountByClass(
     const updatePromises = classesToUpdate.map(async (classe) => {
       const newCount = classCounts[classe.id];
       const updateData: any = {
-        id: classe.id,
-        level_id: classe.level_id,
-        label: classe.label,
         student_number: newCount.toString(),
         max_student_number: classe.max_student_number,
-        active: classe.active,
-        ...(classe.serie_id !== null ? { serie_id: classe.serie_id } : {}),
       };
 
       try {
-        const response = await fetch(`/api/classe?id=${classe.id}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/classe/${classe.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updateData),

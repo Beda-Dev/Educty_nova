@@ -1008,6 +1008,48 @@ export const fetchCorrespondencesEntries = async (opts: RequestInit = {}) => {
   }
 };
 
+export const fetchHomeroomTeachers = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/homeroom-teachers`, opts);
+    return await response.json();
+  } catch (error) {
+    // console.error("Erreur lors de la récupération des professeurs principaux :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        // console.log("professeurs principaux récupérés depuis localStorage : ", parsedData);
+        return parsedData.state.homeroomTeachers || [];
+      } catch (error) {
+        // console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
+export const fetchPresences = async (opts: RequestInit = {}) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/presences`, opts);
+    return await response.json();
+  } catch (error) {
+    // console.error("Erreur lors de la récupération des présences :", error);
+    const storedData = localStorage.getItem("school-store");
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        // console.log("Présences récupérées depuis localStorage : ", parsedData);
+        return parsedData.state.presences || [];
+      } catch (error) {
+        // console.error("Erreur lors du parsing des données : ", error);
+      }
+    } else {
+      return [];
+    }
+  }
+};
+
 export const refreshAllData = async () => {
   const refreshPromises = [
     fetchClasses(),

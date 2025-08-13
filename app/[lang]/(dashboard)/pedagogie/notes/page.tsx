@@ -3,18 +3,17 @@
 import React, { useEffect } from 'react'
 import GestionNotes from "./componant"
 import { useSchoolStore } from "@/store"
-import { fetchNotes, fetchProfessor, fetchStudents, fetchTypeEvaluations, fetchMatters } from "@/store/schoolservice"
+import { fetchNotes, fetchTypeEvaluations, fetchMatters, fetchEvaluations } from "@/store/schoolservice"
 
 function Page() {
-  const { setNotes, setProfessor, setStudents, setTypeEvaluations, setMatters } = useSchoolStore();
+  const { setNotes, setTypeEvaluations, setMatters, setEvaluations } = useSchoolStore();
 
   useEffect(() => {
     // Chargement initial, pas de dépendances pour éviter les requêtes en boucle
     fetchNotes().then(setNotes);
-    fetchProfessor().then(setProfessor);
-    fetchStudents().then(setStudents);
     fetchTypeEvaluations().then(setTypeEvaluations);
     fetchMatters().then(setMatters);
+    fetchEvaluations().then(setEvaluations);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
