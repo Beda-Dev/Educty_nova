@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type SubmitHandler, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -25,16 +25,20 @@ const ForgotForm = () => {
       .email({ message: "Veuillez entrer une adresse email valide" })
   });
 
+  type FormData = {
+    email: string;
+  };
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
     mode: "onChange",
   });
 
-  const onSubmit = async (data: { email: string }) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     startTransition(async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/password/forgot`, {
@@ -63,6 +67,7 @@ const ForgotForm = () => {
   // Correction: suppression de l'accolade fermante en trop
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
+      event.preventDefault();
       handleSubmit(onSubmit)();
     }
   };

@@ -186,7 +186,7 @@ export default function ProfessorTimetable() {
   const mattersData = useMemo(() => {
     const matterMap = new Map();
     professorTimetables.forEach(t => {
-      const matter = matters.find(m => m.id.toString() === t.matter_id);
+      const matter = matters.find(m => Number(m.id) === Number(t.matter_id));
       if (matter) {
         const key = matter.id.toString();
         if (!matterMap.has(key)) {
