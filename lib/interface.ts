@@ -590,11 +590,11 @@ export interface Serie {
 // interface liée à l'emploi du temps
 
 export interface TimetableFormData {
-  academic_year_id: string;
-  class_id: string;
-  professor_id: string;
-  matter_id: string;
-  period_id: string;
+  academic_year_id: number;
+  class_id: number;
+  professor_id: number;
+  matter_id: number;
+  period_id: number;
   day: string;
   start_date: string; // Format: YYYY-MM-DD
   end_date: string;   // Format: YYYY-MM-DD

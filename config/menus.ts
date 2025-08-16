@@ -37,6 +37,8 @@ export const MENU_ACCESS_CONFIG = {
     CASHIER: "caissier",
     DIRECTOR: "directeur",
     SECRETARY: "secretaire",
+    CENSEUR: "censeur",
+    EDUCATEUR: "educateur",
   },
 
   // Permissions système
@@ -55,6 +57,13 @@ export const MENU_ACCESS_CONFIG = {
   
   // Menus spécifiques aux caissiers
   CAISSE_ALLOWED_MENUS: ["Dashboard", "Students", "Cash Register"] as AllowedMenu[],
+
+  // Menus spécifiques aux censeurs
+  CENSEUR_ALLOWED_MENUS: ["Dashboard", "Students", "School Life", "Pedagogy" , "Cash Register"] as AllowedMenu[],
+
+  // Menus spécifiques aux éducateurs
+  EDUCATEUR_ALLOWED_MENUS: ["Dashboard", "Students", "School Life", "Cash Register"] as AllowedMenu[],
+
 
   // Rôles avec accès complet (administrateurs)
    FULL_ACCESS_ROLES: ["Administrateur", "directeur", "super-admin" , "Directeur"],
@@ -93,6 +102,32 @@ export const isCaissier = (userOnline: User | null): boolean => {
   
   return userOnline.roles?.some(
     (role) => role.name.toLowerCase() === "caisse" || role.name.toLowerCase() === "comptable"
+  ) || false
+}
+
+/**
+ * Fonction utilitaire pour vérifier si un utilisateur est censeur
+ * @param userOnline - Utilisateur connecté
+ * @returns boolean
+ */
+export const isCenseur = (userOnline: User | null): boolean => {
+  if (!userOnline) return false
+  
+  return userOnline.roles?.some(
+    (role) => role.name.toLowerCase() === "censeur" || role.name.toLowerCase() === "censure"
+  ) || false
+}
+
+/**
+ * Fonction utilitaire pour vérifier si un utilisateur est éducateur
+ * @param userOnline - Utilisateur connecté
+ * @returns boolean
+ */
+export const isEducateur = (userOnline: User | null): boolean => {
+  if (!userOnline) return false
+  
+  return userOnline.roles?.some(
+    (role) => role.name.toLowerCase() === "educateur" || role.name.toLowerCase() === "éducateur"
   ) || false
 }
 
@@ -261,6 +296,9 @@ export const menusConfig = {
         MENU_ACCESS_CONFIG.ROLES.ADMIN,
         MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
         MENU_ACCESS_CONFIG.ROLES.SECRETARY,
+        MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+        MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
+
       ],
       excludeForProfessor: true,
     },
@@ -281,6 +319,8 @@ export const menusConfig = {
         MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
         MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
         MENU_ACCESS_CONFIG.ROLES.SECRETARY,
+        MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+        MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
       ],
       // Accessible aux professeurs
     },
@@ -293,6 +333,7 @@ export const menusConfig = {
         MENU_ACCESS_CONFIG.ROLES.ADMIN,
         MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
         MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
+        MENU_ACCESS_CONFIG.ROLES.CENSEUR
       ],
       // Accessible aux professeurs
     },
@@ -335,6 +376,8 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.ADMIN,
           MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
           MENU_ACCESS_CONFIG.ROLES.SECRETARY,
+          MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+          MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
         ],
         excludeForProfessor: true,
       },
@@ -355,6 +398,8 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
           MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
           MENU_ACCESS_CONFIG.ROLES.SECRETARY,
+          MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+          MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
         ],
       },
       {
@@ -366,6 +411,8 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.ADMIN,
           MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
           MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
+          MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+          
         ],
       },
       // {
@@ -406,6 +453,8 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.ADMIN,
           MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
           MENU_ACCESS_CONFIG.ROLES.SECRETARY,
+          MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+          MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
         ],
         excludeForProfessor: true,
       },
@@ -426,6 +475,8 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
           MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
           MENU_ACCESS_CONFIG.ROLES.SECRETARY,
+          MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+          MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
         ],
       },
       {
@@ -437,6 +488,8 @@ export const menusConfig = {
           MENU_ACCESS_CONFIG.ROLES.ADMIN,
           MENU_ACCESS_CONFIG.ROLES.DIRECTOR,
           MENU_ACCESS_CONFIG.ROLES.PROFESSOR,
+          MENU_ACCESS_CONFIG.ROLES.CENSEUR,
+          MENU_ACCESS_CONFIG.ROLES.EDUCATEUR,
         ],
       },
       // {

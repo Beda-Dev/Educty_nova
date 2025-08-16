@@ -3,11 +3,11 @@ import { create } from "zustand";
 // Version stricte, identique à celle du composant
 export interface TimetableFormData {
   id?: number;
-  academic_year_id: string;
-  class_id: string;
-  professor_id: string;
-  matter_id: string;
-  period_id: string;
+  academic_year_id: number;
+  class_id: number;
+  professor_id: number;
+  matter_id: number;
+  period_id: number;
   day: string;
   start_date: string;
   end_date: string;

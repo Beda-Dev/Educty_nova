@@ -100,14 +100,14 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [view, setView] = useState<"timetable" | "profile" | "grid">("grid");
-  const [selectedYear, setSelectedYear] = useState<string>(academicYears[0]?.id?.toString() || "");
+  const [selectedYear, setSelectedYear] = useState<number>(academicYears[0]?.id || 0);
 
   const [formData, setFormData] = useState<TimetableFormData>({
-    academic_year_id: "",
-    class_id: "",
-    professor_id: professor.id.toString(),
-    matter_id: "",
-    period_id: "",
+    academic_year_id: 0,
+    class_id: 0,
+    professor_id: professor.id,
+    matter_id: 0,
+    period_id: 0,
     day: "",
     start_date: "",
     end_date: "",
@@ -120,7 +120,7 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
 
   // Filtrer les périodes selon l'année académique sélectionnée
   const periodsForSelectedYear = React.useMemo(() => {
-    const year = academicYears.find(y => y.id.toString() === formData.academic_year_id);
+    const year = academicYears.find(y => y.id === formData.academic_year_id);
     if (year && Array.isArray(year.periods)) {
       return year.periods;
     }
@@ -146,19 +146,34 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
       id: -(idx + 1),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      academic_year: academicYears.find(y => y.id.toString() === c.academic_year_id) || {} as any,
+      academic_year: academicYears.find(y => y.id === c.academic_year_id) || {} as any,
       professor: professor,
-      class: classes.find(cl => cl.id.toString() === c.class_id) || {} as any,
-      matter: matters.find(m => m.id.toString() === c.matter_id) || {} as any,
-      period: periods.find(p => p.id.toString() === c.period_id) || {} as any,
+      class: classes.find(cl => cl.id === c.class_id) || {} as any,
+      matter: matters.find(m => m.id === c.matter_id) || {} as any,
+      period: periods.find(p => p.id === c.period_id) || {} as any,
     }));
     
     setLocalTimetables([...updated, ...created]);
   }, [pendingChanges, initialTimetables, academicYears, classes, matters, periods, professor]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name.endsWith('_id') ? Number(value) : value
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: name.endsWith('_id') ? Number(value) : value
+    }));
+  };
+
   // Validation du formulaire
   const validateForm = (): boolean => {
-    const newErrors: Partial<TimetableFormData> = {};
+    const newErrors: Record<string, string> = {};
 
     if (!formData.academic_year_id) newErrors.academic_year_id = "Année académique requise";
     if (!formData.class_id) newErrors.class_id = "Classe requise";
@@ -210,16 +225,36 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
   // Vérification des conflits d'horaires
   const checkTimeConflict = (newTimetable: TimetableFormData, excludeId?: number): boolean => {
     return localTimetables.some(existing => {
-      if (excludeId && existing.id === excludeId) return false;
+      // Skip the current timetable being edited
+      if (excludeId !== undefined && Number(existing.id) === Number(excludeId)) return false;
       
-      return (
+      // Convert IDs to numbers for comparison
+      const existingYearId = Number(existing.academic_year_id);
+      const existingProfessorId = Number(existing.professor_id);
+      const newYearId = Number(newTimetable.academic_year_id);
+      const newProfessorId = Number(newTimetable.professor_id);
+      
+      // Check for time conflict only if it's the same day, year and professor
+      if (
         existing.day === newTimetable.day &&
-        existing.academic_year_id === newTimetable.academic_year_id &&
-        existing.professor_id === newTimetable.professor_id &&
-        ((newTimetable.start_time >= existing.start_time && newTimetable.start_time < existing.end_time) ||
-         (newTimetable.end_time > existing.start_time && newTimetable.end_time <= existing.end_time) ||
-         (newTimetable.start_time <= existing.start_time && newTimetable.end_time >= existing.end_time))
-      );
+        existingYearId === newYearId &&
+        existingProfessorId === newProfessorId
+      ) {
+        // Parse times to Date objects for comparison
+        const newStart = new Date(`2000-01-01T${newTimetable.start_time}`).getTime();
+        const newEnd = new Date(`2000-01-01T${newTimetable.end_time}`).getTime();
+        const existingStart = new Date(`2000-01-01T${existing.start_time}`).getTime();
+        const existingEnd = new Date(`2000-01-01T${existing.end_time}`).getTime();
+        
+        // Check for time overlap
+        return (
+          (newStart >= existingStart && newStart < existingEnd) ||
+          (newEnd > existingStart && newEnd <= existingEnd) ||
+          (newStart <= existingStart && newEnd >= existingEnd)
+        );
+      }
+      
+      return false;
     });
   };
 
@@ -319,11 +354,11 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
 
   const resetForm = () => {
     setFormData({
-      academic_year_id: "",
-      class_id: "",
-      professor_id: professor.id.toString(),
-      matter_id: "",
-      period_id: "",
+      academic_year_id: 0,
+      class_id: 0,
+      professor_id: professor.id,
+      matter_id: 0,
+      period_id: 0,
       day: "",
       start_date: "",
       end_date: "",
@@ -455,7 +490,7 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
 
   // Calculer le nombre total d'étudiants
   const totalStudents = uniqueClasses.reduce((total, classId) => {
-    const classe = classes.find(c => c.id.toString() === classId);
+    const classe = classes.find(c => c.id === classId);
     return total + (classe?.student_number ? Number(classe.student_number) : 0);
   }, 0);
 
@@ -649,7 +684,7 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
             <CardContent>
               <div className="space-y-2">
                 {uniqueMatters.map(matterId => {
-                  const matter = matters.find(m => m.id.toString() === matterId);
+                  const matter = matters.find(m => m.id === matterId);
                   const matterTimetables = localTimetables.filter(t => t.matter_id === matterId);
                   const hoursForMatter = matterTimetables.reduce((total, t) => {
                     const start = new Date(`2000-01-01T${t.start_time}`);
@@ -731,8 +766,8 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                             Année académique *
                           </Label>
                           <Select
-                            value={formData.academic_year_id}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, academic_year_id: value }))}
+                            value={formData.academic_year_id.toString()}
+                            onValueChange={(value) => handleSelectChange("academic_year_id", value)}
                           >
                             <SelectTrigger className={cn("h-11", errors.academic_year_id && "border-red-500")}>
                               <SelectValue placeholder="Sélectionner l'année académique" />
@@ -758,8 +793,8 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                             Classe *
                           </Label>
                           <Select
-                            value={formData.class_id}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, class_id: value }))}
+                            value={formData.class_id.toString()}
+                            onValueChange={(value) => handleSelectChange("class_id", value)}
                           >
                             <SelectTrigger className={cn("h-11", errors.class_id && "border-red-500")}>
                               <SelectValue placeholder="Sélectionner la classe" />
@@ -790,8 +825,8 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                             Matière *
                           </Label>
                           <Select
-                            value={formData.matter_id}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, matter_id: value }))}
+                            value={formData.matter_id.toString()}
+                            onValueChange={(value) => handleSelectChange("matter_id", value)}
                           >
                             <SelectTrigger className={cn("h-11", errors.matter_id && "border-red-500")}>
                               <SelectValue placeholder="Sélectionner la matière" />
@@ -820,8 +855,8 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                             Période *
                           </Label>
                           <Select
-                            value={formData.period_id}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, period_id: value }))}
+                            value={formData.period_id.toString()}
+                            onValueChange={(value) => handleSelectChange("period_id", value)}
                             disabled={!formData.academic_year_id}
                           >
                             <SelectTrigger className={cn("h-11", errors.period_id && "border-red-500")}>
@@ -849,7 +884,7 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                           </Label>
                           <Select
                             value={formData.day}
-                            onValueChange={(value) => setFormData(prev => ({ ...prev, day: value }))}
+                            onValueChange={(value) => handleSelectChange("day", value)}
                           >
                             <SelectTrigger className={cn("h-11", errors.day && "border-red-500")}>
                               <SelectValue placeholder="Sélectionner le jour" />
@@ -1025,7 +1060,7 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                   <Label htmlFor="year-select" className="text-sm font-medium">
                     Année académique :
                   </Label>
-                  <Select value={selectedYear} onValueChange={setSelectedYear}>
+                  <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(Number(value))} >
                     <SelectTrigger className="w-64">
                       <SelectValue placeholder="Sélectionner une année" />
                     </SelectTrigger>

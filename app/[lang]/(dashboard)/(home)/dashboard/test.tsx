@@ -10,8 +10,10 @@ import AccountingDashboard from "./acounting_dashbord/accounting-dashboard"
 import Loading from "./loading"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { RocketIcon, UserIcon, CalculatorIcon, WalletIcon, ShieldIcon } from "lucide-react"
+import { RocketIcon, UserIcon, CalculatorIcon, WalletIcon, ShieldIcon , EyeIcon, HeartIcon } from "lucide-react"
 import { motion } from "framer-motion"
+import CenseurDashboard from "./censeur_dashbord/censeur-dashbord"
+import EducateurDashboard from "./educateur_dashbord/educteur-dashbord"
 
 interface DashboardViewProps {
   trans?: {
@@ -69,6 +71,22 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
       icon: <UserIcon className="w-8 h-8" />,
       component: <ProfessorDashboard trans={trans} />,
       roles: ['professeur', 'enseignant', 'teacher', 'professor']
+    },
+    {
+      id: 'censeur',
+      name: 'Censeur',
+      description: 'Interface de supervision pédagogique et disciplinaire',
+      icon: <EyeIcon className="w-8 h-8" />,
+      component: <CenseurDashboard trans={trans} />,
+      roles: ['censeur', 'censure', 'supervisor']
+    },
+    {
+      id: 'educateur',
+      name: 'Éducateur',
+      description: 'Suivi du bien-être et accompagnement des élèves',
+      icon: <HeartIcon className="w-8 h-8" />,
+      component: <EducateurDashboard trans={trans} />,
+      roles: ['educateur', 'éducateur', 'educator', 'conseiller']
     }
   ]
 
