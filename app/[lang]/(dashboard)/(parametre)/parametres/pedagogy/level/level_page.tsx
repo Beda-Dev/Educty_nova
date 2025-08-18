@@ -152,13 +152,13 @@ const LevelPage = ({ data }: Props) => {
   }, [data]);
 
 
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return (
     <div className="w-full">

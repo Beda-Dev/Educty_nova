@@ -18,14 +18,6 @@ const FeesTypeComponant = () => {
     permissionRequisVoir
   );
 
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
-
   return <FeesTypePage data={feeTypes} />;
 };
 

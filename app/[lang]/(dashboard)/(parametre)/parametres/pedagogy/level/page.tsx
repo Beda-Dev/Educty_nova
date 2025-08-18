@@ -43,13 +43,13 @@ const LevelComponent = () => {
     setData(countClassesByLevel(levels, classes));
   }, [levels, classes]);
 
-  if (hasAdminAccessVoir === false) {
-    return (
-      <Card>
-        <ErrorPage />
-      </Card>
-    );
-  }
+  // if (hasAdminAccessVoir === false) {
+  //   return (
+  //     <Card>
+  //       <ErrorPage />
+  //     </Card>
+  //   );
+  // }
 
   return <LevelPage data={data} />;
 };
