@@ -136,7 +136,7 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
                   setCurrentPage(1);
                 }}
               />
-              {hasAdminAccessCreer ? (
+              {true ? (
                 <div className="flex flex-wrap items-center gap-4 mb-1">
                   <div className="flex-none">
                     <DialogForm />
