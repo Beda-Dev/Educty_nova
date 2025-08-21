@@ -54,23 +54,6 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
 
   const router = useRouter();
 
-  const permissionVoir = ["voir frais_Scolaires"];
-  const permissionModifier = ["modifier frais_Scolaires"];
-  const permissionCreer = ["creer frais_Scolaires"];
-
-  const canView = verificationPermission(
-    { permissionNames: userOnline?.permissionNames || [] },
-    permissionVoir
-  );
-  const canEdit = verificationPermission(
-    { permissionNames: userOnline?.permissionNames || [] },
-    permissionModifier
-  );
-  const canCreate = verificationPermission(
-    { permissionNames: userOnline?.permissionNames || [] },
-    permissionCreer
-  );
-
   // if (!canView) {
   //   router.push("/dashboard");
   //   return null;
@@ -125,7 +108,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
               className="w-full md:w-64"
             />
 
-            {canCreate && (
+            {true && (
               <Button
                 color="indigodye"
                 className="w-full md:w-auto"
@@ -157,7 +140,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                     <TableHead>Statut d'élève</TableHead>
                     <TableHead>Montant</TableHead>
                     <TableHead>Année académique</TableHead>
-                    {canEdit && (
+                    {true && (
                       <TableHead className="text-right">Actions</TableHead>
                     )}
                   </TableRow>
@@ -172,7 +155,7 @@ const FeeTable: React.FC<PricingTableProps> = ({ data }) => {
                       {formatNumber(item.amount)}{" "}{settings[0]?.currency || "FCFA"}
                       </TableCell>
                       <TableCell>{item.academic_year.label}</TableCell>
-                      {canEdit && (
+                      {true && (
                         <TableCell className="text-right">
                           <Button
                             onClick={() => handleEdit(item)}
