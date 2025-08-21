@@ -41,6 +41,7 @@ interface Step5Props {
 export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [restoredPhotoFile, setRestoredPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [photoRestored, setPhotoRestored] = useState(false); // Flag pour éviter les restaurations multiples
 
 
   const {
@@ -109,37 +110,55 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     paidAmount,
     getFileFromPath,
     getFileSize,
+    lastRestoreAttempt
   } = useRegistrationStore()
   const { restoreFilesFromIndexedDB } = useRegistrationStore();
 
+  // Optimiser la restauration de la photo
   useEffect(() => {
-    // console.log("[DEBUG Step5] studentData au montage:", studentData);
-
-    // Restauration automatique de la photo depuis IndexedDB si besoin
+    let isMounted = true; // Éviter les setState si le composant est démonté
+    
     const restorePhoto = async () => {
-      if (studentData?.photo?.file) {
-        setRestoredPhotoFile(studentData.photo.file);
-        // setPreviewUrl(URL.createObjectURL(studentData.photo.file));
-      } else if (studentData?.photo?.stored) {
-        const file = await getFileFromPath(studentData.photo);
-        if (file) {
-          setRestoredPhotoFile(file);
-          // setPreviewUrl(URL.createObjectURL(file));
-        } else {
-          setRestoredPhotoFile(null);
-          setPreviewUrl(null);
+      // Éviter les restaurations multiples
+      if (photoRestored) return;
+      
+      try {
+        if (studentData?.photo?.file) {
+          if (isMounted) {
+            setRestoredPhotoFile(studentData.photo.file);
+            setPhotoRestored(true);
+          }
+        } else if (studentData?.photo?.stored && !photoRestored) {
+          console.log("Attempting to restore photo from IndexedDB...");
+          const file = await getFileFromPath(studentData.photo);
+          
+          if (file && isMounted) {
+            setRestoredPhotoFile(file);
+            setPhotoRestored(true);
+            console.log("Photo successfully restored in Step5");
+          }
         }
-      } else {
-        setRestoredPhotoFile(null);
-        setPreviewUrl(null);
+      } catch (error) {
+        console.error("Error restoring photo in Step5:", error);
+        if (isMounted) {
+          setRestoredPhotoFile(null);
+        }
       }
     };
-    restorePhoto();
-    // Nettoyage de l'URL de preview
+
+    // Délai pour éviter les conflits avec d'autres restaurations
+    const timeoutId = setTimeout(restorePhoto, 200);
+    
     return () => {
-      // if (previewUrl) URL.revokeObjectURL(previewUrl);
+      isMounted = false;
+      clearTimeout(timeoutId);
     };
-  }, [studentData]);
+  }, [studentData?.photo, photoRestored, getFileFromPath]);
+
+  // Réinitialiser le flag si les données changent
+  useEffect(() => {
+    setPhotoRestored(false);
+  }, [studentData?.photo?.stored?.fileId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")

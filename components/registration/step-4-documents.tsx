@@ -34,24 +34,41 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Effet de surveillance des documents dans le store
-  useEffect(() => {
-    // Vérifier si nous avons des documents à restaurer
-    const hasStoredFiles = documents.some(doc => doc.path.stored?.fileId)
-    if (hasStoredFiles && !isRestoring) {
-      setIsRestoring(true)
-      restoreFilesFromIndexedDB()
-        .then(() => {
-          setDbStatus("Documents restaurés avec succès")
-        })
-        .catch(error => {
-          console.error("Erreur lors de la restauration des documents:", error)
-          setDbStatus("Erreur lors de la restauration des documents")
-        })
-        .finally(() => {
-          setIsRestoring(false)
-        })
+// Dans step-4-documents.tsx - Remplacer l'useEffect problématique
+
+useEffect(() => {
+  // Utiliser un délai pour éviter les restaurations multiples
+  let timeoutId: NodeJS.Timeout;
+  
+  const checkAndRestore = async () => {
+    const hasStoredFiles = documents.some(doc => doc.path.stored?.fileId);
+    const needsRestoration = documents.some(doc => 
+      doc.path.stored?.fileId && !doc.path.file && !doc.path.stored.isRestored
+    );
+    
+    if (hasStoredFiles && needsRestoration && !isRestoring) {
+      console.log("Initiating file restoration after delay...");
+      setIsRestoring(true);
+      
+      try {
+        await restoreFilesFromIndexedDB();
+        setDbStatus("Documents restaurés avec succès");
+      } catch (error) {
+        console.error("Erreur lors de la restauration des documents:", error);
+        setDbStatus("Erreur lors de la restauration des documents");
+      } finally {
+        setIsRestoring(false);
+      }
     }
-  }, [documents, restoreFilesFromIndexedDB, isRestoring])
+  };
+
+  // Débouncer la restauration pour éviter les appels multiples
+  timeoutId = setTimeout(checkAndRestore, 100);
+  
+  return () => {
+    if (timeoutId) clearTimeout(timeoutId);
+  };
+}, [documents.length, isRestoring]); // Dépendances simplifiées
 
   // Vérifier l'état d'IndexedDB au montage
   useEffect(() => {

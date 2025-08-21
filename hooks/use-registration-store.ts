@@ -79,6 +79,7 @@ interface RegistrationStore {
 
   // Global flag to prevent concurrent restores
   isRestoringFiles: boolean
+  lastRestoreAttempt?: number; // Nouveau champ pour le cooldown
 
   // Reset store
   reset: () => void
@@ -154,6 +155,7 @@ export const useRegistrationStore = create<RegistrationStore>()(
 
       // Guard to serialize file restoration
       isRestoringFiles: false,
+      lastRestoreAttempt: undefined,
 
       documents: [],
       setDocuments: (documents) => set({ documents }),
@@ -262,93 +264,109 @@ export const useRegistrationStore = create<RegistrationStore>()(
       },
 
       restoreFilesFromIndexedDB: async () => {
-        // Prevent concurrent restore executions
-        if (get().isRestoringFiles) {
-          console.log("Restore already in progress, skipping new call")
-          return
+        // Guard plus robuste avec timestamp
+        const state = get();
+        const now = Date.now();
+        const RESTORE_COOLDOWN = 1000; // 1 seconde de cooldown
+        
+        if (state.isRestoringFiles) {
+          console.log("Restore already in progress, skipping new call");
+          return;
         }
-        set({ isRestoringFiles: true })
+      
+        // Ajouter un cooldown basé sur le timestamp
+        if (state.lastRestoreAttempt && (now - state.lastRestoreAttempt) < RESTORE_COOLDOWN) {
+          console.log("Restore cooldown active, skipping");
+          return;
+        }
+      
+        set({ isRestoringFiles: true, lastRestoreAttempt: now });
+      
         try {
-          console.log("Starting file restoration from IndexedDB...")
-          const state = get()
-          let hasChanges = false
-
-          // Lister tous les fichiers dans IndexedDB pour le débogage
-          if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
-          // await fileStorage.listAllFiles()
-
+          console.log("Starting file restoration from IndexedDB...");
+          let hasChanges = false;
+      
+          if (!fileStorage) throw new Error("Stockage local non disponible");
+      
           // Restaurer la photo de l'élève si nécessaire
           if (state.studentData?.photo?.stored?.fileId && !state.studentData.photo.file) {
-            console.log(`Attempting to restore student photo: ${state.studentData.photo.stored.fileId}`)
             try {
-              const file = await fileStorage.getFile(state.studentData.photo.stored.fileId)
+              console.log(`Restoring student photo: ${state.studentData.photo.stored.fileId}`);
+              const file = await fileStorage.getFile(state.studentData.photo.stored.fileId);
+              
               if (file) {
-                console.log("Student photo successfully restored")
+                console.log("Student photo successfully restored");
                 set((state) => ({
                   studentData: {
                     ...state.studentData!,
                     photo: {
                       ...state.studentData!.photo,
-                      file: file, // Stocker également le fichier natif
+                      file: file,
                       stored: {
                         ...state.studentData!.photo!.stored!,
                         isRestored: true,
                       },
                     },
                   },
-                }))
-                hasChanges = true
-              } else {
-                console.warn("Failed to restore student photo - file not found")
+                }));
+                hasChanges = true;
               }
             } catch (error) {
-              console.error("Error restoring student photo:", error)
+              console.error("Error restoring student photo:", error);
             }
           }
-
-          // Restaurer les documents
-          const updatedDocuments = [...state.documents]
+      
+          // Restaurer les documents avec vérification plus stricte
+          const updatedDocuments = [...state.documents];
           for (let i = 0; i < updatedDocuments.length; i++) {
-            const doc = updatedDocuments[i]
-            if (doc.path.stored?.fileId && !doc.path.file) {
-              console.log(`Attempting to restore document: ${doc.label}, ID: ${doc.path.stored.fileId}`)
+            const doc = updatedDocuments[i];
+            
+            // Vérifier si le document a vraiment besoin d'être restauré
+            if (doc.path.stored?.fileId && !doc.path.file && !doc.path.stored.isRestored) {
               try {
-                const file = await fileStorage.getFile(doc.path.stored.fileId)
+                console.log(`Restoring document: ${doc.label}, ID: ${doc.path.stored.fileId}`);
+                const file = await fileStorage.getFile(doc.path.stored.fileId);
+                
                 if (file) {
-                  console.log(`Document successfully restored: ${doc.label}`)
+                  console.log(`Document successfully restored: ${doc.label}`);
                   updatedDocuments[i] = {
                     ...doc,
                     path: {
                       ...doc.path,
-                      file: file, // Stocker également le fichier natif
+                      file: file,
                       stored: {
                         ...doc.path.stored,
                         isRestored: true,
                       },
                     },
-                  }
-                  hasChanges = true
+                  };
+                  hasChanges = true;
                 } else {
-                  console.warn(`Failed to restore document: ${doc.label} - file not found`)
+                  console.warn(`Failed to restore document: ${doc.label} - file not found`);
                 }
               } catch (error) {
-                console.error(`Error restoring document ${doc.label}:`, error)
+                console.error(`Error restoring document ${doc.label}:`, error);
               }
             }
           }
-
+      
           if (hasChanges) {
-            set({ documents: updatedDocuments })
-            console.log("Files restoration completed with changes")
+            set({ documents: updatedDocuments });
+            console.log("Files restoration completed with changes");
           } else {
-            console.log("Files restoration completed with no changes")
+            console.log("Files restoration completed with no changes needed");
           }
+      
         } catch (error) {
-          console.error("Error in restoreFilesFromIndexedDB:", error)
+          console.error("Error in restoreFilesFromIndexedDB:", error);
         } finally {
-          set({ isRestoringFiles: false })
+          // Délai avant de permettre une nouvelle restauration
+          setTimeout(() => {
+            set({ isRestoringFiles: false });
+          }, 500);
         }
       },
+      
 
       reset: async () => {
         const state = get()
