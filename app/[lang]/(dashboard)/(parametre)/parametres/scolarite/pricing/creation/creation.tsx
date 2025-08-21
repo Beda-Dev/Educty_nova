@@ -331,6 +331,12 @@ if (echeancierValide) {
               <p className="text-sm font-semibold">Type d'affectation:</p>
               <p>{selectedAssignmentType?.label || "N/A"}</p>
             </div>
+            <div>
+              <p className="text-sm font-semibold">Type de frais:</p>
+              <p>{selectedFeeType?.label || "N/A"}</p>
+            </div>
+
+
           </div>
 
           {/* Tableau des paiements */}
