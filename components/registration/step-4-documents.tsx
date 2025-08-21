@@ -23,7 +23,7 @@ interface Step4Props {
 
 export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   const { documentTypes } = useSchoolStore()
-  const { documents, addDocument, removeDocument, getFileSize, restoreFilesFromIndexedDB } = useRegistrationStore()
+  const { documents, addDocument, removeDocument, getFileSize, restoreFilesFromIndexedDB, isRestoringFiles } = useRegistrationStore()
   const [selectedDocType, setSelectedDocType] = useState<number>(0)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -59,37 +59,7 @@ export function Step4Documents({ onNext, onPrevious }: Step4Props) {
   }, [])
 
   // Effet de surveillance des erreurs
-  useEffect(() => {
-    const handleStoreError = () => {
-      // En cas d'erreur, tenter de restaurer les documents
-      if (documents.some(doc => doc.path.stored?.fileId)) {
-        setIsRestoring(true)
-        restoreFilesFromIndexedDB()
-          .then(() => {
-            setDbStatus("Documents restaurés avec succès")
-          })
-          .catch(error => {
-            console.error("Erreur lors de la restauration des documents:", error)
-            setDbStatus("Erreur lors de la restauration des documents")
-          })
-          .finally(() => {
-            setIsRestoring(false)
-          })
-      }
-    }
-
-    // Ajouter un écouteur d'erreur sur le store
-    const unsubscribe = useRegistrationStore.subscribe(
-      (state) => {
-        const newDocuments = state.documents;
-        if (newDocuments.some(doc => doc.path.stored?.isRestored === false)) {
-          handleStoreError()
-        }
-      }
-    )
-
-    return () => unsubscribe()
-  }, [documents, restoreFilesFromIndexedDB])
+  // Note: abonnement supprimé pour éviter les restaurations concurrentes et répétées.
 
   const checkIndexedDBStatus = async () => {
     try {

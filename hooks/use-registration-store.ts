@@ -77,6 +77,9 @@ interface RegistrationStore {
   storeFileInIndexedDB: (file: File) => Promise<string>
   restoreFilesFromIndexedDB: () => Promise<void>
 
+  // Global flag to prevent concurrent restores
+  isRestoringFiles: boolean
+
   // Reset store
   reset: () => void
 }
@@ -148,6 +151,9 @@ export const useRegistrationStore = create<RegistrationStore>()(
       setPayments: (payments) => set({ payments }),
       paidAmount: 0,
       setPaidAmount: (amount) => set({ paidAmount: amount }),
+
+      // Guard to serialize file restoration
+      isRestoringFiles: false,
 
       documents: [],
       setDocuments: (documents) => set({ documents }),
@@ -256,6 +262,12 @@ export const useRegistrationStore = create<RegistrationStore>()(
       },
 
       restoreFilesFromIndexedDB: async () => {
+        // Prevent concurrent restore executions
+        if (get().isRestoringFiles) {
+          console.log("Restore already in progress, skipping new call")
+          return
+        }
+        set({ isRestoringFiles: true })
         try {
           console.log("Starting file restoration from IndexedDB...")
           const state = get()
@@ -333,6 +345,8 @@ export const useRegistrationStore = create<RegistrationStore>()(
           }
         } catch (error) {
           console.error("Error in restoreFilesFromIndexedDB:", error)
+        } finally {
+          set({ isRestoringFiles: false })
         }
       },
 

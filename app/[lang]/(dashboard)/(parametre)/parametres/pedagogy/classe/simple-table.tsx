@@ -78,11 +78,6 @@ const ClassTable: React.FC<ClassTableProps> = ({ data }) => {
     setIsEditOpen(false);
   };
 
-  // if (hasAdminAccessVoir === false) {
-  //   router.push("/dashboard");
-  // }
-
-  // etat pour la pagination
 
   const ITEMS_PER_PAGE = 10;
 

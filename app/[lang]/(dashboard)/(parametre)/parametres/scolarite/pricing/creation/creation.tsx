@@ -279,6 +279,7 @@ if (echeancierValide) {
   const selectedLevel = useSchoolStore.getState().levels.find(level => level.id === selectedLevelId);
   const selectedAssignmentType = useSchoolStore.getState().assignmentTypes.find(type => type.id === assignmentTypeId);
   const selectedAcademicYear = useSchoolStore.getState().academicYears.find(year => year.id === academicYearId);
+  const selectedFeeType = useSchoolStore.getState().feeTypes.find(ft => ft.id === feeTypeId);
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
