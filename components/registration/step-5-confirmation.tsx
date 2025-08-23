@@ -178,12 +178,12 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")
 
-  const handleSubmit = async () => {
+  const handleConfirm = async () => {
     if (!cashRegisterSessionCurrent) {
       toast({
         title: "Erreur de session",
         description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
-        variant: "destructive",
+        color: "destructive",
       })
       return
     }

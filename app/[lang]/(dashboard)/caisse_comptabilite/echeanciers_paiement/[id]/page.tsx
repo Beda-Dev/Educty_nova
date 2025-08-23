@@ -38,11 +38,6 @@ const staggerContainer = {
   },
 };
 
-// Fonction pour normaliser les valeurs d'affectation
-export function normalizeAffectation(value: string): string {
-  return value.toLowerCase().startsWith('affecté') ? 'affecté' : value;
-}
-
 export default function LevelInstallement({
   params,
 }: {
@@ -55,10 +50,7 @@ export default function LevelInstallement({
   const printRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [pricingData, setPricingData] = useState<Pricing[]>([]);
   const [levelInfo, setLevelInfo] = useState<Level | null>(null);
-  const [activeAssignmentType, setActiveAssignmentType] = useState<string>("affecté");
-
-  // Utiliser la version normalisée pour les comparaisons
-  const normalizedActiveAssignmentType = normalizeAffectation(activeAssignmentType);
+  const [activeAssignmentType, setActiveAssignmentType] = useState("affecté");
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -143,7 +135,7 @@ export default function LevelInstallement({
           "Date d'échéance": new Date(installment.due_date),
         }));
 
-        universalExportToExcel({
+         universalExportToExcel({
           source: {
             type: "array",
             data: excelData,
@@ -175,7 +167,7 @@ export default function LevelInstallement({
           <Skeleton className="h-9 w-64" />
         </div>
 
-        <Tabs value={normalizedActiveAssignmentType} onValueChange={setActiveAssignmentType}>
+        <Tabs defaultValue="affecté">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
@@ -201,6 +193,10 @@ export default function LevelInstallement({
         {/* Header Section */}
         <Card>
           <CardHeader>
+
+
+
+
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -243,6 +239,7 @@ export default function LevelInstallement({
                       ))}
                     </SelectContent>
                   </Select>
+
                 </div>
               </div>
 
@@ -250,8 +247,11 @@ export default function LevelInstallement({
             </div>
           </CardHeader>
           <CardContent>
+
+
+
             {/* Main Content */}
-            <Tabs value={normalizedActiveAssignmentType} onValueChange={setActiveAssignmentType} className="w-full">
+            <Tabs defaultValue="affecté" className="w-full">
               <TabsList className="grid w-full max-w-xs grid-cols-2 bg-muted/50">
                 <TabsTrigger value="affecté" className="gap-2">
                   <UserCheck className="h-4 w-4" />
@@ -265,174 +265,173 @@ export default function LevelInstallement({
 
               <div className="mt-6">
                 <AnimatePresence mode="wait">
-                  {["affecté", "non-affecté"].map((assignmentType) => {
-                    const normalizedType = normalizeAffectation(assignmentType);
-                    return (
-                      <TabsContent key={normalizedType} value={normalizedType}>
-                        {/* Summary Card */}
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="mb-8"
-                        >
-                          <Card className="border-0 shadow-sm">
-                            <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg">
-                              <CardTitle className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                  <FileSpreadsheet className="h-5 w-5" />
-                                </div>
-                                <div>
-                                  <div>Résumé des frais</div>
-                                  <CardDescription>
-                                    Total des montants pour {assignmentType.toLowerCase()}s
-                                  </CardDescription>
-                                </div>
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-6">
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {feeTypes.map((feeType) => {
-                                  const pricing = pricingData.find(
-                                    (p) =>
-                                      p.assignment_type.label === assignmentType &&
-                                      p.fee_type_id === feeType.id
-                                  );
+                  {["affecté", "non-affecté"].map((assignmentType) => (
+                    <TabsContent key={assignmentType} value={assignmentType}>
+                      {/* Summary Card */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="mb-8"
+                      >
+                        <Card className="border-0 shadow-sm">
+                          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg">
+                            <CardTitle className="flex items-center gap-3">
+                              <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                <FileSpreadsheet className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div>Résumé des frais</div>
+                                <CardDescription>
+                                  Total des montants pour {assignmentType.toLowerCase()}s
+                                </CardDescription>
+                              </div>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {feeTypes.map((feeType) => {
+                                const pricing = pricingData.find(
+                                  (p) =>
+                                    p.assignment_type.label === assignmentType &&
+                                    p.fee_type_id === feeType.id
+                                );
 
-                                  return (
-                                    <motion.div
-                                      key={feeType.id}
-                                      whileHover={{ y: -2 }}
-                                      className="cursor-pointer"
-                                    >
-                                      <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-                                        <CardContent className="p-4">
-                                          <div className="flex justify-between items-center">
-                                            <div>
-                                              <p className="text-sm font-medium text-muted-foreground">
-                                                {feeType.label}
-                                              </p>
-                                              <p className="text-xl font-semibold mt-1">
-                                                {pricing ? formatCurrency(Number(pricing.amount)) : "0 FCFA"}
-                                              </p>
-                                            </div>
-                                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                              {feeType.label.charAt(0)}
-                                            </div>
+                                return (
+                                  <motion.div
+                                    key={feeType.id}
+                                    whileHover={{ y: -2 }}
+                                    className="cursor-pointer"
+                                  >
+                                    <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+                                      <CardContent className="p-4">
+                                        <div className="flex justify-between items-center">
+                                          <div>
+                                            <p className="text-sm font-medium text-muted-foreground">
+                                              {feeType.label}
+                                            </p>
+                                            <p className="text-xl font-semibold mt-1">
+                                              {pricing ? formatCurrency(Number(pricing.amount)) : "0 FCFA"}
+                                            </p>
                                           </div>
-                                        </CardContent>
-                                      </Card>
-                                    </motion.div>
-                                  );
-                                })}
-                              </div>
+                                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                            {feeType.label.charAt(0)}
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </motion.div>
+                                );
+                              })}
+                            </div>
 
-                              <Separator className="my-6" />
+                            <Separator className="my-6" />
 
-                              <div className="bg-muted/30 p-4 rounded-lg">
-                                <div className="flex justify-between items-center">
-                                  <div>
-                                    <p className="text-sm font-medium text-muted-foreground">
-                                      Montant total
-                                    </p>
-                                    <p className="text-2xl font-bold text-primary mt-1">
-                                      {formatCurrency(calculateTotalByAssignmentType(assignmentType))}
-                                    </p>
-                                  </div>
+                            <div className="bg-muted/30 p-4 rounded-lg">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <p className="text-sm font-medium text-muted-foreground">
+                                    Montant total
+                                  </p>
+                                  <p className="text-2xl font-bold text-primary mt-1">
+                                    {formatCurrency(calculateTotalByAssignmentType(assignmentType))}
+                                  </p>
                                 </div>
                               </div>
-                            </CardContent>
-                          </Card>
-                        </motion.div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
 
-                        {/* Payment Schedules */}
-                        <div className="space-y-6">
-                          {feeTypes.map((feeType) => {
-                            const pricing = pricingData.find(
-                              (p) =>
-                                p.assignment_type.label === assignmentType &&
-                                p.fee_type_id === feeType.id
-                            );
+                      {/* Payment Schedules */}
+                      <div className="space-y-6">
+                        {feeTypes.map((feeType) => {
+                          const pricing = pricingData.find(
+                            (p) =>
+                              p.assignment_type.label === assignmentType &&
+                              p.fee_type_id === feeType.id
+                          );
 
-                            if (!pricing) return null;
+                          if (!pricing) return null;
 
-                            return (
-                              <motion.div
-                                key={feeType.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                <Card className="border-0 shadow-sm">
-                                  <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg">
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                      <div>
-                                        <CardTitle className="flex items-center gap-2">
-                                          {feeType.label}
-                                        </CardTitle>
-                                        <CardDescription>
-                                          Plan de paiement pour les étudiants {assignmentType.toLowerCase()}s
-                                        </CardDescription>
-                                      </div>
-                                      <div className="flex flex-wrap gap-2">
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleExport("print", assignmentType, feeType.id)}
-                                          className="gap-2 h-9"
-                                          disabled={isProcessing}
-                                        >
-                                          <Printer className="h-4 w-4" />
-                                          Imprimer
-                                        </Button>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleExport("download", assignmentType, feeType.id)}
-                                          className="gap-2 h-9"
-                                          disabled={isProcessing}
-                                        >
-                                          <Download className="h-4 w-4" />
-                                          PDF
-                                        </Button>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleExport("excel", assignmentType, feeType.id)}
-                                          className="gap-2 h-9"
-                                          disabled={isProcessing}
-                                        >
-                                          <FileSpreadsheet className="h-4 w-4" />
-                                          Excel
-                                        </Button>
-                                      </div>
+                          return (
+                            <motion.div
+                              key={feeType.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <Card className="border-0 shadow-sm">
+                                <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-t-lg">
+                                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div>
+                                      <CardTitle className="flex items-center gap-2">
+                                        {feeType.label}
+                                      </CardTitle>
+                                      <CardDescription>
+                                        Plan de paiement pour les étudiants {assignmentType.toLowerCase()}s
+                                      </CardDescription>
                                     </div>
-                                  </CardHeader>
-                                  <CardContent className="p-0">
-                                    <div
-                                      id={`schedule-${assignmentType}-${feeType.id}`}
-                                      ref={(el) => {
-                                        printRefs.current[`schedule-${assignmentType}-${feeType.id}`] = el;
-                                      }}
-                                      className=""
-                                    >
-                                      <PaymentSchedule pricing={pricing} />
+                                    <div className="flex flex-wrap gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleExport("print", assignmentType, feeType.id)}
+                                        className="gap-2 h-9"
+                                        disabled={isProcessing}
+                                      >
+                                        <Printer className="h-4 w-4" />
+                                        Imprimer
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleExport("download", assignmentType, feeType.id)}
+                                        className="gap-2 h-9"
+                                        disabled={isProcessing}
+                                      >
+                                        <Download className="h-4 w-4" />
+                                        PDF
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleExport("excel", assignmentType, feeType.id)}
+                                        className="gap-2 h-9"
+                                        disabled={isProcessing}
+                                      >
+                                        <FileSpreadsheet className="h-4 w-4" />
+                                        Excel
+                                      </Button>
                                     </div>
-                                  </CardContent>
-                                </Card>
-                              </motion.div>
-                            );
-                          })}
-                        </div>
-                      </TabsContent>
-                    );
-                  })}
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                  <div
+                                    id={`schedule-${assignmentType}-${feeType.id}`}
+                                    ref={(el) => {
+                                      printRefs.current[`schedule-${assignmentType}-${feeType.id}`] = el;
+                                    }}
+                                    className="p-6"
+                                  >
+                                    <PaymentSchedule pricing={pricing} />
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </TabsContent>
+                  ))}
                 </AnimatePresence>
               </div>
             </Tabs>
           </CardContent>
         </Card>
       </div>
+
+
     </motion.div>
   );
 }
