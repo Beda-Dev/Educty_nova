@@ -82,6 +82,8 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
   const hasPayments = data.payments.length > 0;
   const hasRegistrations = data.registrations.length > 0;
 
+  
+
   // fonction pour telecharger le document
 
   const handleDownload = async (filePath: string | null, fileName: string) => {
@@ -321,7 +323,8 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm font-medium text-gray-500">Paiements</p>
                 <p className="text-xl font-bold text-gray-900 mt-1">
-                  {paymentCurrent.length}
+                  {pay.detailsPaiements?.length || 0}
+                  
                 </p>
               </div>
 

@@ -111,9 +111,9 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
     }
   }, [selectedStudent, setExistingTutors, studentModifications])
 
-  const handleStudentChange = async (field: string, value: any) => {
+  const handleStudentChange = (field: keyof StudentFormData, value: any) => {
     const updatedData = { ...formData, [field]: value }
-    if (field === "name" || field === "first_name") {
+    if (field === "name" || field === "first_name" || field === "registration_number") {
       updatedData[field] = value.toUpperCase()
     }
     setFormData(updatedData)

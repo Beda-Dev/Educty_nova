@@ -75,7 +75,7 @@ const Header = ({ eleve }: HeaderProps) => {
       }
 
       const data = await response.json();
-      console.log("Photo téléchargée avec succès :", data);
+      // console.log("Photo téléchargée avec succès :", data);
     } catch (error) {
       console.error("Erreur lors du téléchargement de la photo :", error);
     }

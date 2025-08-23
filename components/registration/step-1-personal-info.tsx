@@ -23,14 +23,14 @@ import { isMatriculeUnique } from "@/lib/fonction"
 
 interface Step1Props {
   onNext: () => void
-  
+
 }
 
 export function Step1PersonalInfo({ onNext }: Step1Props) {
   const { assignmentTypes, tutors, students } =
     useSchoolStore()
 
-  const { studentData, setStudentData, selectedTutors, setSelectedTutors, newTutors, removeNewTutor , setNewTutors } =
+  const { studentData, setStudentData, selectedTutors, setSelectedTutors, newTutors, removeNewTutor, setNewTutors } =
     useRegistrationStore()
 
   const [formData, setFormData] = useState<StudentFormData>({
@@ -162,7 +162,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
   const handleStudentChange = (field: keyof StudentFormData, value: any) => {
     const updatedData = { ...formData, [field]: value }
-    if (field === "name" || field === "first_name") {
+    if (field === "name" || field === "first_name" || field === "registration_number") {
       updatedData[field] = value.toUpperCase()
     }
     setFormData(updatedData)
@@ -227,14 +227,14 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       return
     }
 
-      // Vérifie que chaque tuteur a un type sélectionné
-  const allTutors = [...selectedTutors, ...newTutors]; // ou juste newTutors selon le contexte
-  const missingType = allTutors.some(tutor => !tutor.type_tutor);
+    // Vérifie que chaque tuteur a un type sélectionné
+    const allTutors = [...selectedTutors, ...newTutors]; // ou juste newTutors selon le contexte
+    const missingType = allTutors.some(tutor => !tutor.type_tutor);
 
-  if (missingType) {
-    toast.error("Veuillez sélectionner un type pour chaque tuteur.");
-    return;
-  }
+    if (missingType) {
+      toast.error("Veuillez sélectionner un type pour chaque tuteur.");
+      return;
+    }
     try {
       // Les données sont déjà stockées dans le store via handlePhoto
       await setStudentData(formData)
@@ -527,62 +527,62 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                   <Label>Tuteurs sélectionnés</Label>
                   <div className="space-y-3">
                     {selectedTutors.map((tutor) => (
-  <motion.div
-    key={tutor.id}
-    layout
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors"
-  >
-    <div className="flex items-center gap-3">
-      <User className="w-5 h-5 text-skyblue" />
-      <div>
-        <span className="font-medium">
-          {tutor.name} {tutor.first_name} {tutor.type_tutor}
-        </span>
-        {tutor.is_tutor_legal && (
-          <Badge color="skyblue" className="ml-2">Tuteur légal</Badge>
-        )}
-        <div className="mt-1">
-          <Label className="mr-2">Type de tuteur :</Label>
-          <Select
-            value={tutor.type_tutor}
-            onValueChange={(val) => {
-              setSelectedTutors(selectedTutors.map(t => t.id === tutor.id ? { ...t, type_tutor: val } : t));
-            }}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {(tutor.sexe === "Masculin" ? ["Père", "Tuteur"] : tutor.sexe === "Feminin" ? ["Mère", "Tuteur"] : ["Tuteur"]).map(opt => (
-                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1">
-        <Checkbox
-          id={`legal-${tutor.id}`}
-          checked={tutor.is_tutor_legal}
-          onCheckedChange={() => toggleTutorLegal(tutor.id)}
-        />
-        <Label htmlFor={`legal-${tutor.id}`} className="text-sm cursor-pointer">Légal</Label>
-      </div>
-      <Button
-        color="destructive"
-        variant="outline"
-        size="sm"
-        onClick={() => removeTutor(tutor.id)}
-      >
-        <X className="w-4 h-4" />
-      </Button>
-    </div>
-  </motion.div>
-))}
+                      <motion.div
+                        key={tutor.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <User className="w-5 h-5 text-skyblue" />
+                          <div>
+                            <span className="font-medium">
+                              {tutor.name} {tutor.first_name} {tutor.type_tutor}
+                            </span>
+                            {tutor.is_tutor_legal && (
+                              <Badge color="skyblue" className="ml-2">Tuteur légal</Badge>
+                            )}
+                            <div className="mt-1">
+                              <Label className="mr-2">Type de tuteur :</Label>
+                              <Select
+                                value={tutor.type_tutor}
+                                onValueChange={(val) => {
+                                  setSelectedTutors(selectedTutors.map(t => t.id === tutor.id ? { ...t, type_tutor: val } : t));
+                                }}
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue placeholder="Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {(tutor.sexe === "Masculin" ? ["Père", "Tuteur"] : tutor.sexe === "Feminin" ? ["Mère", "Tuteur"] : ["Tuteur"]).map(opt => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1">
+                            <Checkbox
+                              id={`legal-${tutor.id}`}
+                              checked={tutor.is_tutor_legal}
+                              onCheckedChange={() => toggleTutorLegal(tutor.id)}
+                            />
+                            <Label htmlFor={`legal-${tutor.id}`} className="text-sm cursor-pointer">Légal</Label>
+                          </div>
+                          <Button
+                            color="destructive"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeTutor(tutor.id)}
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -593,55 +593,55 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                   <Label>Nouveaux tuteurs créés</Label>
                   <div className="space-y-3">
                     {newTutors.map((tutor, index) => (
-  <motion.div
-    key={index}
-    layout
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors"
-  >
-    <div className="flex items-center gap-3">
-      <User className="w-5 h-5 text-skyblue" />
-      <div>
-        <span className="font-medium">
-          {tutor.name} {tutor.first_name} {tutor.type_tutor}
-        </span>
-        {tutor.is_tutor_legal && (
-          <Badge color="skyblue" className="ml-2">Tuteur légal</Badge>
-        )}
-        <Badge variant="outline" className="ml-2">Nouveau</Badge>
-        <div className="mt-1">
-          <Label className="mr-2">Type de tuteur :</Label>
-          <Select
-            value={tutor.type_tutor}
-            onValueChange={(val) => {
-              const updated = [...newTutors];
-              updated[index] = { ...tutor, type_tutor: val };
-              setNewTutors(updated);
-            }}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              {(tutor.sexe === "Masculin" ? ["Père", "Tuteur"] : tutor.sexe === "Feminin" ? ["Mère", "Tuteur"] : ["Tuteur"]).map(opt => (
-                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </div>
-    <Button
-      color="destructive"
-      variant="outline"
-      size="sm"
-      onClick={() => removeNewTutor(index)}
-    >
-      <X className="w-4 h-4" />
-    </Button>
-  </motion.div>
-))}
+                      <motion.div
+                        key={index}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center justify-between p-3 border rounded-md bg-card hover:bg-accent/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <User className="w-5 h-5 text-skyblue" />
+                          <div>
+                            <span className="font-medium">
+                              {tutor.name} {tutor.first_name} {tutor.type_tutor} {tutor.phone_number}
+                            </span>
+                            {tutor.is_tutor_legal && (
+                              <Badge color="skyblue" className="ml-2">Tuteur légal</Badge>
+                            )}
+                            <Badge variant="outline" className="ml-2">Nouveau</Badge>
+                            <div className="mt-1">
+                              <Label className="mr-2">Type de tuteur :</Label>
+                              <Select
+                                value={tutor.type_tutor}
+                                onValueChange={(val) => {
+                                  const updated = [...newTutors];
+                                  updated[index] = { ...tutor, type_tutor: val };
+                                  setNewTutors(updated);
+                                }}
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue placeholder="Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {(tutor.sexe === "Masculin" ? ["Père", "Tuteur"] : tutor.sexe === "Feminin" ? ["Mère", "Tuteur"] : ["Tuteur"]).map(opt => (
+                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          color="destructive"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeNewTutor(index)}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               )}

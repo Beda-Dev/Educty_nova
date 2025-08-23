@@ -278,6 +278,10 @@ const handleAmountChange = (installmentId: number, amount: number | string) => {
   }
 
   const handleNext = () => {
+    if (!cashRegisterSessionCurrent) {
+      toast.error("Aucune caisse n'est ouverte. Veuillez ouvrir une caisse avant de continuer.")
+      return
+    }
     if (studentPaidAmount === 0) {
       toast.error("Veuillez saisir le montant versé par l'élève", {
         position: "top-center",
@@ -355,6 +359,8 @@ const handleAmountChange = (installmentId: number, amount: number | string) => {
     setPayments(paymentObjects)
     onNext()
   }
+
+  const totalTariffs = availablePricing.reduce((sum, p) => sum + Number.parseInt(p.amount), 0);
 
   return (
     <motion.div
@@ -599,7 +605,8 @@ const handleAmountChange = (installmentId: number, amount: number | string) => {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total à payer</p>
                   <p className="text-xl font-bold text-skyblue">
-                    {totalDistributedAmount.toLocaleString()} {currency}
+                    {/* {totalDistributedAmount.toLocaleString()} {currency} */}
+                    {totalTariffs.toLocaleString()} {currency}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -609,9 +616,13 @@ const handleAmountChange = (installmentId: number, amount: number | string) => {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
+                  {/* <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
                   <p className="text-xl font-bold">
                     0 {currency}
+                  </p> */}
+                  <p className="text-sm text-muted-foreground">Reste à payer</p>
+                  <p className="text-xl font-bold">
+                    {Math.max(totalTariffs - studentPaidAmount, 0).toLocaleString()} {currency}
                   </p>
                 </div>
               </div>

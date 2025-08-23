@@ -64,7 +64,6 @@ const StudentTableStatus = ({
 }: {
   Register: RegistrationMerge[];
 }) => {
-  console.log(Register);
   const { classes, assignmentTypes, academicYearCurrent , series } = useSchoolStore();
   const router = useRouter();
   const [selectedStudent, setSelectedStudent] =
@@ -320,9 +319,9 @@ const StudentTableStatus = ({
     }
   };
 
-  useEffect(() => {
-    console.log("Filtres appliqués :", table.getState().columnFilters);
-  }, [table.getState().columnFilters]);
+  // useEffect(() => {
+  //   console.log("Filtres appliqués :", table.getState().columnFilters);
+  // }, [table.getState().columnFilters]);
 
   const handleExport = () => {
     exportToExcel({

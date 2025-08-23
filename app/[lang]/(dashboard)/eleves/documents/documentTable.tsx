@@ -277,9 +277,9 @@ const DocumentTable = ({
     setIsEditOpen(true);
   };
 
-  useEffect(() => {
-    console.log("Filtres appliqués :", table.getState().columnFilters);
-  }, [table.getState().columnFilters]);
+  // useEffect(() => {
+  //   console.log("Filtres appliqués :", table.getState().columnFilters);
+  // }, [table.getState().columnFilters]);
 
   return (
     <>

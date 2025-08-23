@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useReinscriptionStore } from "@/hooks/use-reinscription-store"
@@ -20,7 +21,7 @@ interface Step2Props {
 
 export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
   const { selectedStudent, registrationData, setRegistrationData, setAvailablePricing } = useReinscriptionStore()
-  const { classes, levels, pricing, academicYearCurrent , registrations } = useSchoolStore()
+  const { classes, levels, pricing, academicYearCurrent , registrations , feeTypes } = useSchoolStore()
 
   const [formData, setFormData] = useState<RegistrationFormData>({
     class_id: 0,
@@ -196,16 +197,11 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
 
             <div className="space-y-2 md:col-span-2">
               <Label>Date de réinscription</Label>
-              <Select value={formData.registration_date} disabled>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={formData.registration_date}>
-                    {new Date(formData.registration_date).toLocaleDateString("fr-FR")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                type="date"
+                value={formData.registration_date}
+                onChange={(e) => setFormData({ ...formData, registration_date: e.target.value })}
+              />
             </div>
           </div>
         </CardContent>
@@ -222,7 +218,7 @@ export function Step2SchoolInfo({ onNext, onPrevious }: Step2Props) {
               {availablePricing.map((pricing) => (
                 <div key={pricing.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold">{pricing.label}</h4>
+                    <h4 className="font-semibold">{feeTypes.find((ft) => ft.id === pricing.fee_type_id)?.label || pricing.fee_type.label  || pricing.fee_type_id}</h4>
                     <span className="text-lg font-bold">{Number.parseInt(pricing.amount).toLocaleString()} FCFA</span>
                   </div>
                   {Array.isArray(pricing.installments) && pricing.installments.length > 0 && (

@@ -56,6 +56,26 @@ const nextConfig = {
         protocol: "https",
         hostname: "educty.digifaz.com",
         pathname: '/storage/**',
+      },
+      {
+        protocol: "https",
+        hostname: "les-ass-api.eductynova.com",
+        pathname: '/storage/**',
+      },
+      {
+        protocol: "http",
+        hostname: "les-ass-api.eductynova.com",
+        pathname: '/storage/**',
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+        pathname: '/**',
+      },
+      {
+        protocol: "http",
+        hostname: "**",
+        pathname: '/**',
       }
     ],
   },

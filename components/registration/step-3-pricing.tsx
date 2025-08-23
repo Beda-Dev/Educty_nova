@@ -75,7 +75,7 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
         total += prev;
       }
       newInstallmentAmounts[id] = newVal;
-    
+
       // Recalcule précisément l'erreur locale
       if (newVal < 0) {
         newInstallmentErrors[id] = "Montant négatif non autorisé.";
@@ -251,6 +251,10 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   }
 
   const handleNext = () => {
+    if (!cashRegisterSessionCurrent) {
+      toast.error("Aucune caisse n'est ouverte. Veuillez ouvrir une caisse avant de continuer.")
+      return
+    }
     if (selectedInstallments.length === 0) {
       toast.error("Veuillez sélectionner au moins une échéance", {
         position: "top-center",
@@ -333,6 +337,9 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
   }
 
   const noPaymentMethod = !methodPayment || methodPayment.length === 0;
+
+
+  const totalTariffs = availablePricing.reduce((sum, p) => sum + Number.parseInt(p.amount), 0);
 
   return (
     <motion.div
@@ -577,7 +584,8 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Total à payer</p>
                   <p className="text-xl font-bold text-skyblue">
-                    {totalPaidAmount.toLocaleString()} {currency}
+                    {/* {totalPaidAmount.toLocaleString()} {currency} Total à payer selectionner */}
+                    {totalTariffs.toLocaleString()} {currency}
                   </p>
                 </div>
                 <div className="space-y-1">
@@ -587,10 +595,15 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
+                  {/* <p className="text-sm text-muted-foreground">Monnaie à rendre</p>
                   <p className="text-xl font-bold">
                     0 {currency}
+                  </p> */}
+                  <p className="text-sm text-muted-foreground">Reste à payer</p>
+                  <p className="text-xl font-bold">
+                    {Math.max(totalTariffs - givenAmount, 0).toLocaleString()} {currency}
                   </p>
+
                 </div>
               </div>
               {/* Affiche un message si la monnaie à rendre n'est pas 0 */}
@@ -614,17 +627,17 @@ export function Step3Pricing({ onNext, onPrevious }: Step3Props) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-            <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
-              Précédent
-            </Button>
-            <Button onClick={handleNext} className="h-10 px-6" disabled={
-                !!globalError ||
-                Object.values(installmentErrors).some((err) => !!err) ||
-                givenAmount < totalPaidAmount ||
-                noPaymentMethod
-              }>
-                Suivant
-              </Button>
+          <Button variant="outline" onClick={onPrevious} className="h-10 px-6">
+            Précédent
+          </Button>
+          <Button onClick={handleNext} className="h-10 px-6" disabled={
+            !!globalError ||
+            Object.values(installmentErrors).some((err) => !!err) ||
+            givenAmount < totalPaidAmount ||
+            noPaymentMethod
+          }>
+            Suivant
+          </Button>
         </motion.div>
       ) : (
         <motion.div

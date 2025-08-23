@@ -315,7 +315,7 @@ router.push('/caisse_comptabilite/session_caisse');
     );
   }, [session, transactions, payments, expenses, sessionId, filteredTransactions, filteredPayment, filteredExpenses]);
 
-  console.log(sessionTransactions)
+  // console.log(sessionTransactions)
 
   // Statistiques
   const statistics = useMemo(() => {

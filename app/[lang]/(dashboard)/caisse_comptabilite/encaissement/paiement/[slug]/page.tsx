@@ -30,7 +30,7 @@ const DetailPaymentPage = ({ params }: Props) => {
 
   // Fonction pour charger les données complètes
   const loadData = useCallback(async () => {
-    console.log("Chargement des données pour le matricule:", slug);
+    // console.log("Chargement des données pour le matricule:", slug);
     try {
       setIsLoading(true);
       setError(null);

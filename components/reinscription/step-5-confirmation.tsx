@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useReinscriptionStore } from "@/hooks/use-reinscription-store"
 import { useSchoolStore } from "@/store/index"
 import { CheckCircle, AlertTriangle, Loader2, CreditCard, Calendar, Info, Hash, User, BookOpen, FileText, Shield } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import Image from "next/image"
@@ -64,6 +65,18 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [submitError, setSubmitError] = useState("")
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const transactionIds: number[] = []
+  const { toast } = useToast()
+
+  // Vérifier si une session de caisse est ouverte
+  useEffect(() => {
+    if (!cashRegisterSessionCurrent) {
+      toast({
+        title: "Erreur de session",
+        description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
+        color: "destructive",
+      })
+    }
+  }, [cashRegisterSessionCurrent])
 
   useEffect(() => {
     // Restaurer la photo si elle existe dans les modifications
@@ -122,8 +135,20 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     return results;
   }
 
-  const handleConfirm = async () => {
-    if (!selectedStudent) return
+  const handleSubmit = async () => {
+    if (!cashRegisterSessionCurrent) {
+      toast({
+        title: "Erreur de session",
+        description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!selectedStudent) {
+      setSubmitError("Aucun étudiant sélectionné")
+      return
+    }
 
     setIsSubmitting(true)
     setSubmitError("")

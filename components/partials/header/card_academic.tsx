@@ -73,7 +73,7 @@ const AcademicYearsDisplay: React.FC<AcademicYearsDisplayProps> = ({
       const updatedYear = activeAcademicYears.find(year => year.id.toString() === value);
       if (updatedYear) {
         setAcademicYearCurrent(updatedYear);
-        updateStudentCountByClass(registrations, updatedYear, classes);
+        await updateStudentCountByClass(registrations, updatedYear, classes);
         toast.success("Année académique mise à jour avec succès");
       } else {
         throw new Error("Année académique non trouvée");

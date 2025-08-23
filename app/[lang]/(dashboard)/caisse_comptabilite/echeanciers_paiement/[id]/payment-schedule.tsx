@@ -37,7 +37,7 @@ export function PaymentSchedule({ pricing }: PaymentScheduleProps) {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
+    <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "14px" }}>
       {/* Header */}
       <div className="flex justify-between items-start border-b pb-3 mb-4">
         <div className="flex items-start gap-3">
@@ -78,18 +78,18 @@ export function PaymentSchedule({ pricing }: PaymentScheduleProps) {
       {/* Détails de la tarification */}
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-blue-800 mb-2">DÉTAILS DES FRAIS</h3>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-base">
           <div className="flex items-start">
-            <span className="font-semibold min-w-[100px]">Type de frais:</span>
+            <span className="font-semibold min-w-[120px] text-gray-700">Type de frais:</span>
             <span className="text-gray-800 ml-2">{pricing.fee_type.label}</span>
           </div>
           <div className="flex items-start">
-            <span className="font-semibold min-w-[100px]">Statut:</span>
-            <span className="text-gray-800 ml-1">{pricing.assignment_type.label}</span>
+            <span className="font-semibold min-w-[120px] text-gray-700">Statut:</span>
+            <span className="text-gray-800 ml-2">{pricing.assignment_type.label}</span>
           </div>
           <div className="flex items-start">
-            <span className="font-semibold min-w-[100px]">Montant total:</span>
-            <span className="text-gray-800 ml-2 font-bold">
+            <span className="font-semibold min-w-[120px] text-gray-700">Montant total:</span>
+            <span className="text-gray-900 ml-2 font-bold text-lg">
               {totalAmount.toLocaleString("fr-FR")} {schoolInfo.currency}
             </span>
           </div>

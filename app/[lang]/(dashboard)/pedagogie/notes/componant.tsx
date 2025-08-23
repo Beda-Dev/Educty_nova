@@ -275,12 +275,12 @@ export default function TeacherNotesPage() {
 
   // Charger les élèves pour une évaluation
   const loadStudentsForEvaluation = (evaluation: Evaluation) => {
-    console.log(`evuluation ${evaluation.id}`)
+    // console.log(`evuluation ${evaluation.id}`)
     const classRegistrations = registrations.filter(
       (r) => Number(r.class_id) === Number(evaluation.classe_id) 
     )
     
-    console.log(classRegistrations)
+    // console.log(classRegistrations)
 
     const students = classRegistrations.map((reg) => {
       const existingNote = notes.find((n) => n.evaluation_id === evaluation.id && n.registration_id === reg.id)
@@ -294,7 +294,7 @@ export default function TeacherNotesPage() {
         coefficient_note: existingNote ? existingNote.value * evaluation.coefficient : 0,
       }
     })
-    console.log(`final ${students}`)
+    // console.log(`final ${students}`)
 
     setStudentGrades(students)
   }

@@ -231,6 +231,17 @@ export default function DisbursementRequestsPage() {
 
         const newValidation = await validationResponse.json()
         newDemand.validations = [newValidation]
+      } else {
+        // Aucun validateur trouvé: on annule la demande créée et on informe l'utilisateur
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/demand/${newDemand.id}`, {
+          method: 'DELETE',
+        })
+        toast({
+          title: "Aucun validateur",
+          description: "Aucun validateur n'a été trouvé. Veuillez contacter l'administrateur ou vérifier les paramètres d'approbation.",
+          color: "destructive",
+        })
+        return
       }
 
       const updatedDemands = await fetchDemands()

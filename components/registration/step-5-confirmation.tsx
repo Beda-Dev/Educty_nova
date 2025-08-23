@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useSchoolStore } from "@/store/index"
 import { CheckCircle, AlertTriangle, Loader2, CreditCard, Calendar, Info, Hash, User, BookOpen, FileText, Shield } from "lucide-react"
+import { useToast } from "@/components/ui/use-toast"
 import { motion, AnimatePresence } from "framer-motion"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import type { Installment, PaymentFormData } from "@/lib/interface"
@@ -42,6 +43,9 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [restoredPhotoFile, setRestoredPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [photoRestored, setPhotoRestored] = useState(false); // Flag pour éviter les restaurations multiples
+  const { toast } = useToast()
+
+
 
 
   const {
@@ -55,6 +59,17 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     installements,
   } = useSchoolStore()
   const transactionIds: number[] = []
+
+    // Vérifier si une session de caisse est ouverte
+    useEffect(() => {
+      if (!cashRegisterSessionCurrent) {
+        toast({
+          title: "Erreur de session",
+          description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
+          color: "destructive"
+        })
+      }
+    }, [cashRegisterSessionCurrent])
 
 
 
@@ -163,7 +178,21 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState("")
 
-  const handleConfirm = async () => {
+  const handleSubmit = async () => {
+    if (!cashRegisterSessionCurrent) {
+      toast({
+        title: "Erreur de session",
+        description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!studentData) {
+      setSubmitError("Aucune donnée d'étudiant trouvée");
+      return;
+    }
+
     setIsSubmitting(true)
     setSubmitError("")
 

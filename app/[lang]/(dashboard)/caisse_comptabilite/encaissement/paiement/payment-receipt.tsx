@@ -94,11 +94,11 @@ const PaymentReceipt = ({
     };
   });
 
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
+  const SingleReceipt = () => (
+    <div className="p-2 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
       {/* Header */}
-      <div className="flex justify-between items-start border-b pb-3 mb-4">
-        <div className="flex items-start gap-3">
+      <div className="flex justify-between items-start border-b pb-1 mb-2">
+        <div className="flex items-start gap-2">
           {schoolInfo.logo ? (
             <Image
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
@@ -108,37 +108,37 @@ const PaymentReceipt = ({
               className="school-logo"
             />
           ) : (
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs">
               Logo
             </div>
           )}
-          <div className="space-y-1">
-            <h1 className="text-sm font-bold leading-snug">{schoolInfo.name}</h1>
-            <p className="text-xs text-gray-600 leading-snug">
+          <div className="space-y-0">
+            <h1 className="text-xs font-bold leading-tight">{schoolInfo.name}</h1>
+            <p className="text-xs text-gray-600 leading-tight">
               {schoolInfo.address} | Tél: {schoolInfo.phone}
             </p>
-            <p className="text-xs text-gray-600 leading-snug">
+            <p className="text-xs text-gray-600 leading-tight">
               Année scolaire: {academicYearCurrent.label || "N/A"}
             </p>
           </div>
         </div>
-        <div className="text-right space-y-1">
-          <h2 className="text-sm font-semibold leading-snug">REÇU DE PAIEMENT</h2>
-          <p className="text-xs text-gray-600 leading-snug">
+        <div className="text-right space-y-0">
+          <h2 className="text-xs font-semibold leading-tight">REÇU DE PAIEMENT</h2>
+          <p className="text-xs text-gray-600 leading-tight">
             {generateReceiptNumber()}
           </p>
-          <p className="text-xs text-gray-600 leading-snug">
+          <p className="text-xs text-gray-600 leading-tight">
             Date: {new Date().toLocaleDateString("fr-FR")}
           </p>
         </div>
       </div>
 
       <Card className="print:shadow-none border-0">
-        <CardContent className="p-3 space-y-4">
+        <CardContent className="p-2 space-y-2">
           {/* Student Info */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE L'ÉLÈVE</h3>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+          <div className="mb-2">
+            <h3 className="text-xs font-semibold text-blue-800 mb-1">INFORMATIONS DE L'ÉLÈVE</h3>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1">
               <Info label="Nom complet" value={`${student?.first_name} ${student?.name}`} />
               <Info label="Matricule" value={student?.registration_number} />
               <Info label="Sexe" value={student?.sexe} />
@@ -150,17 +150,17 @@ const PaymentReceipt = ({
           <Separator className="" />
 
           {/* Payment Details */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-3 flex items-center justify-between">
+          <div className="mb-2">
+            <h3 className="text-xs font-semibold text-blue-800 mb-1 flex items-center justify-between">
               <span>Détails du paiement</span>
-              <span className="bg-blue-50 border border-blue-200 rounded-md px-3 py-1 text-sm font-medium flex items-center gap-2">
+              <span className="bg-blue-50 border border-blue-200 rounded-md px-2 py-1 text-xs font-medium flex items-center gap-1">
                 <span className="text-blue-700">Montant Versé :</span>
                 <span className="text-green-600 font-bold">
                   {formatAmount(totalPaid)} {currency}
                 </span>
               </span>
             </h3>
-            <div className="my-2">
+            <div className="my-1">
             <PaymentTable
               payments={paymentSummary || []}
               totalAmount={financialData?.totalDue || 0}
@@ -171,13 +171,12 @@ const PaymentReceipt = ({
             </div>
           </div>
 
-
           <Separator className="" />
 
           {/* Payment Method */}
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE PAIEMENT</h3>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+          <div className="mb-2">
+            <h3 className="text-xs font-semibold text-blue-800 mb-1">INFORMATIONS DE PAIEMENT</h3>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1">
               <Info label="Caissier" value={payments[0]?.cashier?.name || "N/A"} />
               <Info label="Caisse" value={payments[0]?.cash_register?.cash_register_number || "N/A"} />
             </div>
@@ -186,24 +185,32 @@ const PaymentReceipt = ({
           <Separator className="" />
 
           {/* Signatures */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="text-xs text-gray-700 text-center space-y-2">
-              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            <div className="text-xs text-gray-700 text-center space-y-1">
+              <div className="border-t border-gray-400 h-6 w-32 mx-auto"></div>
               <span>Signature du parent/tuteur</span>
             </div>
-            <div className="text-xs text-gray-700 text-center space-y-2">
-              <div className="border-t border-gray-400 h-10 w-40 mx-auto"></div>
+            <div className="text-xs text-gray-700 text-center space-y-1">
+              <div className="border-t border-gray-400 h-6 w-32 mx-auto"></div>
               <span>Cachet et signature de l'établissement</span>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-xs text-gray-600 mt-4 pt-4 border-t">
-            <p className="mb-1">Document officiel de {schoolInfo.name}</p>
+          <div className="text-center text-xs text-gray-600 mt-2 pt-2 border-t">
+            <p className="mb-0.5">Document officiel de {schoolInfo.name}</p>
             <p>Émis le {new Date().toLocaleDateString("fr-FR")} à {new Date().toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}</p>
           </div>
         </CardContent>
       </Card>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      <SingleReceipt />
+      <div className="border-t-2 border-dashed border-gray-400 my-2"></div>
+      <SingleReceipt />
     </div>
   )
 }
@@ -223,29 +230,29 @@ interface PaymentTableProps {
 const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, currency }: PaymentTableProps) => {
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full border-collapse" style={{ fontSize: "0.85rem" }}>
+      <table className="min-w-full border-collapse" style={{ fontSize: "0.75rem" }}>
         <thead>
           <tr>
-            <th className="border border-gray-300 p-2 text-left">Type de frais</th>
-            <th className="border border-gray-300 p-2 text-right">Montant total</th>
-            <th className="border border-gray-300 p-2 text-right">Montant payé</th>
-            <th className="border border-gray-300 p-2 text-right">Reste à payer</th>
+            <th className="border border-gray-300 p-1 text-left">Type de frais</th>
+            <th className="border border-gray-300 p-1 text-right">Montant total</th>
+            <th className="border border-gray-300 p-1 text-right">Montant payé</th>
+            <th className="border border-gray-300 p-1 text-right">Reste à payer</th>
           </tr>
         </thead>
         <tbody>
           {payments.length === 0 ? (
             <tr>
-              <td colSpan={4} className="border border-gray-300 p-2 text-center text-gray-500">
+              <td colSpan={4} className="border border-gray-300 p-1 text-center text-gray-500">
                 Aucun paiement enregistré
               </td>
             </tr>
           ) : (
             payments.map((payment, index) => (
               <tr key={index}>
-                <td className="border border-gray-300 p-2">{payment.label}</td>
-                <td className="border border-gray-300 p-2 text-right">{formatAmount(payment.total)} {currency}</td>
-                <td className="border border-gray-300 p-2 text-right">{formatAmount(payment.paid)} {currency}</td>
-                <td className={`border border-gray-300 p-2 text-right ${payment.total - payment.paid > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"}`}>
+                <td className="border border-gray-300 p-1">{payment.label}</td>
+                <td className="border border-gray-300 p-1 text-right">{formatAmount(payment.total)} {currency}</td>
+                <td className="border border-gray-300 p-1 text-right">{formatAmount(payment.paid)} {currency}</td>
+                <td className={`border border-gray-300 p-1 text-right ${payment.total - payment.paid > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"}`}>
                   {formatAmount(payment.total - payment.paid)} {currency}
                 </td>
               </tr>
@@ -254,14 +261,14 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
         </tbody>
         <tfoot>
           <tr>
-            <td className="border border-gray-300 p-2 font-semibold">Total</td>
-            <td className="border border-gray-300 p-2 font-semibold text-right">
+            <td className="border border-gray-300 p-1 font-semibold">Total</td>
+            <td className="border border-gray-300 p-1 font-semibold text-right">
               {formatAmount(totalAmount)} {currency}
             </td>
-            <td className={`border border-gray-300 p-2 font-semibold text-right text-green-600`}>
+            <td className={`border border-gray-300 p-1 font-semibold text-right text-green-600`}>
               {formatAmount(totalPaid)} {currency}
             </td>
-            <td className={`border border-gray-300 p-2 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
+            <td className={`border border-gray-300 p-1 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
               {formatAmount(remainingAmount)} {currency}
             </td>
           </tr>
@@ -273,8 +280,8 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
 
 const Info = ({ label, value }: { label: string; value?: string | number | null }) => (
   <div className="flex items-start">
-    <span className="font-semibold min-w-[100px]">{label}:</span>
-    <span className="text-gray-800 ml-2">{value || "N/A"}</span>
+    <span className="font-semibold min-w-[80px] text-xs">{label}:</span>
+    <span className="text-gray-800 ml-1 text-xs">{value || "N/A"}</span>
   </div>
 )
 
