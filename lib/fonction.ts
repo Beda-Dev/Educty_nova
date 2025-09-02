@@ -360,10 +360,10 @@ export function getLastOpenSessionForUser(
   return openSessions.length > 0 ? openSessions[0] : null;
 }
 
-export const isMatriculeUnique = (students : Student[], matricule: string): boolean => {
-  return !students.some(
-    (student) =>
-      student.registration_number.trim().toLowerCase() === matricule.trim().toLowerCase() 
+export const isMatriculeUnique = (Register : Registration[], matricule: string): boolean => {
+  return !Register.some(
+    (r) =>
+      r.student.registration_number.trim().toLowerCase() === matricule.trim().toLowerCase() 
   );
 };
 

@@ -84,15 +84,20 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
     name: string;
     active: boolean;
     hierarchical_id: number | null;
+    email?: string;
   }) => {
     setIsLoading(true);
     try {
-      const payload = {
+      const payload: any = {
         name: data.name || user.name,
-        email: user.email,
         active: data.active ? 1 : 0,
         hierarchical_id: data.hierarchical_id,
       };
+      
+      // Ajouter l'email uniquement s'il a été modifié
+      if (data.email && data.email !== user.email) {
+        payload.email = data.email;
+      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`, {
         method: 'PUT',
@@ -166,10 +171,12 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
           onSubmit={async (e) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
+            const formEmail = formData.get('email') as string
             await updateUser({
               name: formData.get('name') as string,
               active: isActive,
               hierarchical_id: selectedHierarchical?.value || null,
+              email: formEmail !== user.email ? formEmail : undefined
             });
           }}
         >
@@ -180,7 +187,6 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
               type="email"
               defaultValue={user.email}
               required
-              disabled
             />
           </div>
 

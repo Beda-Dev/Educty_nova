@@ -222,8 +222,8 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
   const { hasPermission, hasRole, getUserPermissions, getUserRolesWithPermissions } = usePermissionCheck()
 
   // Vérifications de permissions
-  const canEditUser = hasPermission("modifier utilisateur") || hasRole("Administarteur") || hasRole("Directeur")
-  const canViewUserDetails = hasPermission("voir utilisateur") || hasRole("Administarteur")  || hasRole("Directeur")
+  // const canEditUser = hasPermission("modifier utilisateur") || hasRole("Administarteur") || hasRole("Directeur")
+  // const canViewUserDetails = hasPermission("voir utilisateur") || hasRole("Administarteur")  || hasRole("Directeur")
 
   // Calculs mémorisés - utilisation du store pour récupérer les permissions
   const userPermissions = useMemo(() => getUserPermissions(user), [user, getUserPermissions])
@@ -336,7 +336,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
                   </Badge> */}
                   {user.hierarchical_id && (
                     <Badge color="secondary" className="h-5">
-                      Hiérarchie: {user.hierarchical_id}
+                      Supérieur Hiérarchique: {user.superior?.name}
                     </Badge>
                   )}
                 </div>
@@ -370,6 +370,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
 
                   <Badge color={user.active ? "success" : "destructive"}>{user.active ? "Actif" : "Inactif"}</Badge>
                 </div>
+                
               </div>
             </CardHeader>
 
@@ -411,7 +412,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
                 )}
               </div>
 
-              {showActions && canEditUser && (
+              {showActions && (
                 <div className="flex gap-2 mt-6 flex-wrap">
                   <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                     <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setEmailModalOpen(true)}>
@@ -665,7 +666,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
         </Tabs>
 
         {/* Modales */}
-        {canEditUser && (
+        {true && (
           <>
             <EditDialog title="Modifier l'email" open={emailModalOpen} onOpenChangeAction={setEmailModalOpen}>
               <EditEmailForm

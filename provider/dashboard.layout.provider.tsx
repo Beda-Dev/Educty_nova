@@ -15,6 +15,7 @@ import LayoutLoader from "@/components/layout-loader";
 import { useSchoolStore } from "@/store";
 import { CashRegisterSession } from '@/lib/interface'
 import { getCurrentUser , saveUser } from "@/lib/userStore";
+import { useSessionManager } from "@/hooks/useSessionManager";
 
 
 const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNode, trans: any }) => {
@@ -26,30 +27,27 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
   const isMobile = useMediaQuery("(min-width: 768px)");
   const mounted = useMounted();
   const router = useRouter();
+  const { logout, checkSession } = useSessionManager();
   const time = Number(process.env.NEXT_PUBLIC_SESSION_DURATION_MINUTES) || 60;
   const minutesToMs = (minutes: number): number => minutes * 60 * 1000;
 
 
   React.useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-  
-    const checkUserAuth = async () => {
-      
-      if (userOnline){
-        saveUser(userOnline);
-      }
-
+    const initializeUser = async () => {
       if (!userOnline) {
-        const user = await getCurrentUser(); 
-  
+        const user = await getCurrentUser();
         if (user) {
-          setUserOnline(user); 
+          setUserOnline(user);
         } else {
-          router.push("/"); 
+          router.push("/");
         }
       }
     };
-  
+
+    initializeUser();
+  }, [userOnline, setUserOnline, router]);
+
+  React.useEffect(() => {
     const checkCashRegisterSession = () => {
       if (cashRegisterSessions?.length && userOnline) {
         const currentSession = cashRegisterSessions.find(
@@ -59,22 +57,9 @@ const DashBoardLayoutProvider = ({ children, trans }: { children: React.ReactNod
         setCashRegisterSessionCurrent(currentSession ?? null);
       }
     };
-  
-    // 🔄 Boucle toutes les 60 minutes au moins
-    intervalId = setInterval(() => {
-      checkUserAuth();
-      checkCashRegisterSession();
-    }, minutesToMs(time)); 
-  
-    // Appel initial immédiat
-    checkUserAuth();
+
     checkCashRegisterSession();
-  
-    // Nettoyage à la destruction du composant
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [cashRegisterSessions]);
+  }, [cashRegisterSessions, userOnline, setCashRegisterSessionCurrent]);
   
   
 

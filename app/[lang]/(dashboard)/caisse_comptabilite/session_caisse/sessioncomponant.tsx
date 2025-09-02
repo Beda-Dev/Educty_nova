@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Download,
 } from "lucide-react"
 
 // Import des composants UI
@@ -43,6 +44,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import type { CashRegisterSession } from "@/lib/interface"
 import { useSchoolStore } from "@/store"
+import { universalExportToExcel } from "@/lib/utils"
+import { FULL_ACCESS_ROLES_LOWERCASE } from "../RoleFullAcess"
 
 const formatCurrency = (amount: string | number) => {
   const numericAmount = typeof amount === "string" ? Number.parseInt(amount, 10) : amount
@@ -60,7 +63,7 @@ export default function CashRegisterSessionsPage({
 }: {
   data: CashRegisterSession[]
 }) {
-  const { userOnline, users, cashRegisters, settings } = useSchoolStore()
+  const { userOnline, users, cashRegisters, settings, transactions } = useSchoolStore()
   const router = useRouter()
   const [sessions, setSessions] = useState<CashRegisterSession[]>(data)
   const [searchTerm, setSearchTerm] = useState("")
@@ -77,6 +80,27 @@ export default function CashRegisterSessionsPage({
   const [currentPage, setCurrentPage] = useState(1)
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Vérifier si l'utilisateur a les permissions d'export
+  const hasExportPermission = useMemo(() => {
+    if (!userOnline || !userOnline.roles) return false
+    return userOnline.roles.some(role => 
+      FULL_ACCESS_ROLES_LOWERCASE.includes(role.name.toLowerCase())
+    )
+  }, [userOnline])
+
+  // Calculer l'encaissement pour chaque session
+  const getSessionEncaissement = useCallback((sessionId: number) => {
+    const sessionTransactions = transactions.filter(
+      transaction => 
+        transaction.cash_register_session_id === sessionId && 
+        transaction.transaction_type === "encaissement"
+    )
+    
+    return sessionTransactions.reduce((total, transaction) => {
+      return total + Number(transaction.total_amount)
+    }, 0)
+  }, [transactions])
 
   // Map pour retrouver la dernière session fermée par utilisateur
   const lastClosedSessionByUser = useMemo(() => {
@@ -230,6 +254,28 @@ export default function CashRegisterSessionsPage({
     )
   }
 
+  // Fonction d'export
+  const handleExport = () => {
+    if (!hasExportPermission) return
+
+    const exportData = filteredSessions.map((session) => ({
+      "Caisse": `Caisse ${session.cash_register?.cash_register_number}`,
+      "Utilisateur": session.user?.name,
+      "Date d'ouverture": formatSessionDate(session.opening_date),
+      "Date de fermeture": session.status === "open" ? "—" : formatSessionDate(session.closing_date),
+      "Encaissement": `${formatCurrency(getSessionEncaissement(session.id))}`,
+      "Statut": session.status === "open" ? "Ouverte" : "Fermée",
+    }))
+
+    universalExportToExcel({
+      source: {
+        type: "array",
+        data: exportData,
+      },
+      fileName: `sessions_caisse_${format(new Date(), "yyyy-MM-dd")}.xlsx`,
+    })
+  }
+
   // Filtrage des sessions
   const filteredSessions = useMemo(() => {
     return sessions
@@ -256,7 +302,7 @@ export default function CashRegisterSessionsPage({
   }, [sessions, searchTerm, statusFilter, userFilter, registerFilter, dateRange])
 
   // Pagination
-  const ITEMS_PER_PAGE = 10
+  const ITEMS_PER_PAGE = 20
   const totalPages = Math.ceil(filteredSessions.length / ITEMS_PER_PAGE)
   const paginatedSessions = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE
@@ -380,6 +426,18 @@ export default function CashRegisterSessionsPage({
                     </TooltipTrigger>
                     <TooltipContent>Réinitialiser tous les filtres</TooltipContent>
                   </Tooltip>
+
+                  {hasExportPermission && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button color="success" size="sm" onClick={handleExport} className="h-9 px-3 bg-transparent">
+                          <Download className="h-4 w-4" />
+                          <span className="ml-2">Exporter</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Exporter vers Excel</TooltipContent>
+                    </Tooltip>
+                  )}
 
                   <Button onClick={handleAddSession} size="sm" className="h-9 px-3" color="indigodye">
                     <Plus className="h-4 w-4" />
@@ -506,8 +564,7 @@ export default function CashRegisterSessionsPage({
                     <TableHead>Utilisateur</TableHead>
                     <TableHead>Ouverture</TableHead>
                     <TableHead>Fermeture</TableHead>
-                    <TableHead >Montant initial</TableHead>
-                    <TableHead >Montant final</TableHead>
+                    <TableHead>Encaissement</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead className="w-[50px]">Actions</TableHead>
                   </TableRow>
@@ -515,7 +572,7 @@ export default function CashRegisterSessionsPage({
                 <TableBody>
                   {paginatedSessions.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center">
+                      <TableCell colSpan={7} className="h-24 text-center">
                         Aucune session trouvée
                       </TableCell>
                     </TableRow>
@@ -524,6 +581,7 @@ export default function CashRegisterSessionsPage({
                       {paginatedSessions.map((session) => {
                         const openingStatus = getOpeningAmountStatus(session)
                         const closingStatus = getClosingAmountStatus(session)
+                        const encaissement = getSessionEncaissement(session.id)
 
                         return (
                           <motion.tr
@@ -543,35 +601,8 @@ export default function CashRegisterSessionsPage({
                             <TableCell className="text-xs" >
                               {session.status === "open" ? "—" : formatSessionDate(session.closing_date)}
                             </TableCell>
-                            <TableCell className="text-xs" >
-                              <div>
-                                <span
-                                  className={cn(
-                                    openingStatus?.type === "lower" && "text-red-600 ",
-                                    openingStatus?.type === "higher" && "text-green-600",
-                                  )}
-                                >
-                                  {formatCurrency(session.opening_amount)} {settings?.[0]?.currency || "FCFA"}
-                                </span>
-                                <AmountInconsistencyIndicator status={openingStatus} type="opening" />
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-xs">
-                              {session.status === "open" ? (
-                                "—"
-                              ) : (
-                                <div className="">
-                                  <span
-                                    className={cn(
-                                      closingStatus?.type === "lower" && "text-red-600",
-                                      closingStatus?.type === "higher" && "text-green-600",
-                                    )}
-                                  >
-                                    {formatCurrency(session.closing_amount)} {settings?.[0]?.currency || "FCFA"}
-                                  </span>
-                                  <AmountInconsistencyIndicator status={closingStatus} type="closing" />
-                                </div>
-                              )}
+                            <TableCell className="text-xs font-medium text-green-600">
+                              {formatCurrency(encaissement)} {settings?.[0]?.currency || "FCFA"}
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">

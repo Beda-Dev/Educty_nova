@@ -12,7 +12,6 @@ import {
   fetchpricing,
   fetchRegistration,
   fetchAssignmentType,
-  fetchFeeType,
   fetchDocumentType,
   fetchDocument,
   fetchPayment,
@@ -25,6 +24,7 @@ import {
   fetchCashRegisterSessions,
   fetchPaymentMethods,
   fetchProfessor,
+  fetchFeeType
 } from "@/store/schoolservice";
 import {AcademicYear} from '@/lib/interface'
 import {updateStudentCountByClass} from "@/lib/fonction";
@@ -92,6 +92,7 @@ const DataFetcher = () => {
         const sessions = await fetchCashRegisterSessions()
         const methodPayment = await fetchPaymentMethods();
         const professor = await fetchProfessor();
+        
 
         await updateStudentCountByClass(registrations, academicYearCurrent, classes);
 

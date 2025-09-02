@@ -10,13 +10,13 @@ import { Step3Pricing } from "@/components/registration/step-3-pricing"
 import { Step4Documents } from "@/components/registration/step-4-documents"
 import { Step5Confirmation } from "@/components/registration/step-5-confirmation"
 import { RegistrationReceipt } from "@/components/registration/registration-receipt"
-import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment } from "@/store/schoolservice"
+import { fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment , fetchTutors } from "@/store/schoolservice"
 import { useRegistrationStore } from "@/hooks/use-registration-store"
 import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function InscriptionPage() {
   const { studentData } = useRegistrationStore();
-  const { setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations } = useSchoolStore()
+  const { setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations  } = useSchoolStore()
   const { currentStep, setCurrentStep, reset  } = useRegistrationStore()
 
   const [showReceipt, setShowReceipt] = useState(false)
@@ -46,6 +46,9 @@ export default function InscriptionPage() {
     setStudents(responseStudents)
     const responsePayments = await fetchPayment()
     setPayments(responsePayments)
+    const responseTutors = await fetchTutors()
+    setTutors(responseTutors)
+
 
     await updateStudentCountByClass(registrations, academicYearCurrent, classes);
     setShowReceipt(true)

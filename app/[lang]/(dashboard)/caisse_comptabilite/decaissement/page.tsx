@@ -10,7 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { HandCoins, ListChecks, CheckCircle } from "lucide-react";
+import { HandCoins, ListChecks, CheckCircle , FileText } from "lucide-react";
 import { useParams } from "next/navigation";
 
 const itemColors = [
@@ -44,7 +44,23 @@ export default function DecaissementPage() {
       icon: <HandCoins className="w-6 h-6" />,
       path: "caisse_comptabilite/decaissement/depense",
       color: itemColors[0]
-    }
+    },
+    {
+      id: "demandes",
+      title: "Demandes de décaissement",
+      description: "Gestion des demandes de décaissement",
+      icon: <FileText className="w-6 h-6" />,
+      path: "caisse_comptabilite/decaissement/demandes",
+      color: itemColors[3],
+    },
+    {
+      id: "validation",
+      title: "demandes en attente",
+      description: "Gestion de la validation des décaissements",
+      icon: <CheckCircle className="w-6 h-6" />,
+      path: "caisse_comptabilite/decaissement/validation",
+      color: itemColors[4],
+    },
   ];
 
   const containerVariants = {
@@ -72,7 +88,7 @@ export default function DecaissementPage() {
     hover: {
       scale: 1.05,
       boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-      transition: { 
+      transition: {
         duration: 0.3,
         ease: "easeOut"
       },
@@ -88,8 +104,8 @@ export default function DecaissementPage() {
               <HandCoins className="w-8 h-8 text-skyblue" />
             </div>
             <div>
-              <h1   className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-  style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}>
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                style={{ backgroundImage: "linear-gradient(90deg, skyblue, #ff6f61, #66023c)" }}>
                 Décaissements
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -135,7 +151,7 @@ export default function DecaissementPage() {
                           {item.description}
                         </p>
                       </div>
-                      <motion.div 
+                      <motion.div
                         className="absolute bottom-4 right-4 text-sm font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}

@@ -28,8 +28,8 @@ export default function ReinscriptionPage() {
     setSelectedStudent,
     reset,
   } = useReinscriptionStore();
-  const { students } = useSchoolStore();
-  const { setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations } = useSchoolStore()
+
+  const { students , setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations  } = useSchoolStore()
   const [showReceipt, setShowReceipt] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showStepper, setShowStepper] = useState(false);
@@ -62,6 +62,8 @@ export default function ReinscriptionPage() {
     setStudents(responseStudents)
     const responsePayments = await fetchPayment()
     setPayments(responsePayments)
+    const responseTutors = await fetchTutors()
+    setTutors(responseTutors)
 
     await updateStudentCountByClass(registrations, academicYearCurrent, classes);
     setShowReceipt(true);

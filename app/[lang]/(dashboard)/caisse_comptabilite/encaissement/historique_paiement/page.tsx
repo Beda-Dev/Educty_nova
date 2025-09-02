@@ -34,13 +34,13 @@ function PaymentPage() {
     }
   }, [canView, canViewAll, payments, userOnline])
 
-  if (!canView && !canViewAll) {
-    return (
-      <Card className="w-full h-full flex items-center justify-center">
-        <ErrorPage />
-      </Card>
-    )
-  }
+  // if (!canView && !canViewAll) {
+  //   return (
+  //     <Card className="w-full h-full flex items-center justify-center">
+  //       <ErrorPage />
+  //     </Card>
+  //   )
+  // }
 
   const dataToShow = canViewAll ? payments : paymentFiltered
 

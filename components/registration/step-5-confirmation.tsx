@@ -107,6 +107,16 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           results.registration = { id: createdEntities.registration, status: "rejected", reason: err };
         }
       }
+
+      if (createdEntities.student) {
+        try {
+          await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/student/${createdEntities.student}`, { method: "DELETE" });
+          results.student = { id: createdEntities.student, status: "fulfilled" };
+        } catch (err) {
+          results.student = { id: createdEntities.student, status: "rejected", reason: err };
+        }
+      }
+      
     } catch (error) {
       console.error("Erreur lors du rollback:", error);
       results.globalError = error;

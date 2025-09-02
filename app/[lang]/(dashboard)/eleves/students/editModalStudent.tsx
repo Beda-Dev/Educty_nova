@@ -253,7 +253,7 @@ export const EditStudentModal = ({
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le sexe" />
+                  <SelectValue>{formdata.sexe || "Sélectionner le sexe"}</SelectValue>
                 </SelectTrigger>
                 <SelectContent className="z-[9999]">
                   <SelectItem value="Masculin">Masculin</SelectItem>

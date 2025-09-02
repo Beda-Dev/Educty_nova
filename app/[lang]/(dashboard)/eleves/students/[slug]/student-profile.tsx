@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { BadgeCheck, Calendar, FileText, Phone, User, Eye, Users, BookOpen } from "lucide-react";
+import { BadgeCheck, Calendar, FileText, Phone, User, Eye, Users, BookOpen, Edit, Loader2, Mail, Smartphone, UserCheck } from "lucide-react";
+import { useState } from "react";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,8 +54,11 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function StudentProfile({ data, pay }: StudentProfileProps) {
-  const { academicYearCurrent, pricing , levels , series } = useSchoolStore();
+  const { academicYearCurrent, pricing, levels, series, setTutors } = useSchoolStore();
   const router = useRouter();
+  const [isEditingTutor, setIsEditingTutor] = useState(false);
+  const [currentTutor, setCurrentTutor] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Trouver l'inscription de l'année académique en cours
   const currentRegistration = data.registrations.find(
@@ -81,6 +85,58 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
   const hasDocuments = data.documents.length > 0;
   const hasPayments = data.payments.length > 0;
   const hasRegistrations = data.registrations.length > 0;
+
+  // Fonction pour ouvrir le formulaire d'édition du tuteur
+  const handleEditTutor = (tutor: any) => {
+    setCurrentTutor({
+      ...tutor,
+      is_tutor_legal: tutor.pivot?.is_tutor_legal === 1
+    });
+    setIsEditingTutor(true);
+  };
+
+  // Fonction pour sauvegarder les modifications du tuteur
+  const handleSaveTutor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentTutor) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/tutor/${currentTutor.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: currentTutor.name,
+          first_name: currentTutor.first_name,
+          phone_number: currentTutor.phone_number,
+          type_tutor: currentTutor.type_tutor,
+          is_tutor_legal: currentTutor.is_tutor_legal ? 1 : 0,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Erreur lors de la mise à jour du tuteur');
+
+      // Mettre à jour le store
+      const updatedTutors = data.tutors?.map(t => 
+        t.id === currentTutor.id ? { ...currentTutor, pivot: { ...t.pivot } } : t
+      ) || [];
+      
+      setTutors(updatedTutors);
+      
+      // Mettre à jour les données locales
+      data.tutors = updatedTutors;
+      
+      toast.success('Tuteur mis à jour avec succès');
+      setIsEditingTutor(false);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Erreur lors de la mise à jour du tuteur');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   
 
@@ -221,30 +277,141 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
                 {/* Informations du tuteur */}
                 {data.tutors && data.tutors.length > 0 && (
                   <div className="mt-4">
-                    <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground mb-2">
-                      <Users className="h-4 w-4" />
-                      Informations du tuteur
-                    </h4>
-                    {data.tutors.map((tutor, index) => (
-                      <div key={tutor.id} className="space-y-1 text-sm">
-                        <p className="font-medium">
-                          {tutor.first_name} {tutor.name}
-                          {tutor.pivot?.is_tutor_legal === 1 && (
-                            <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                              Tuteur légal
-                            </span>
-                          )}
-                        </p>
-                        <p className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="h-3.5 w-3.5" />
-                          {tutor.phone_number}
-                        </p>
-                        <p className="text-muted-foreground">
-                          Type: {tutor.type_tutor}
-                        </p>
-                        {data.tutors && index < data.tutors.length - 1 && <Separator className="my-2" />}
-                      </div>
-                    ))}
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+                        <Users className="h-4 w-4" />
+                        Informations des tuteurs
+                      </h4>
+                    </div>
+                    <div className="grid gap-4">
+                      {data.tutors.map((tutor, index) => (
+                        <Card key={tutor.id} className="relative overflow-hidden border border-gray-100 shadow-sm">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <UserCheck className="h-4 w-4 text-primary" />
+                                  <p className="font-medium text-base">
+                                    {tutor.first_name} {tutor.name}
+                                  </p>
+                                  {tutor.pivot?.is_tutor_legal === 1 && (
+                                    <Badge variant="outline" className="ml-2 text-xs bg-green-50 text-green-700 border-green-200">
+                                      Tuteur légal
+                                    </Badge>
+                                  )}
+                                </div>
+                                
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Smartphone className="h-3.5 w-3.5" />
+                                  <a href={`tel:${tutor.phone_number}`} className="hover:text-primary hover:underline">
+                                    {tutor.phone_number}
+                                  </a>
+                                </div>
+                                
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Mail className="h-3.5 w-3.5" />
+                                  <span>Type: </span>
+                                  <Badge className="text-xs bg-secondary text-secondary-foreground">
+                                    {tutor.type_tutor || 'Non spécifié'}
+                                  </Badge>
+                                </div>
+                              </div>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleEditTutor(tutor)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Modal d'édition du tuteur */}
+                {isEditingTutor && currentTutor && (
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg w-full max-w-md p-6 space-y-4">
+                      <h3 className="text-lg font-semibold">Modifier le tuteur</h3>
+                      <form onSubmit={handleSaveTutor} className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium leading-none">
+                            Nom
+                          </label>
+                          <input
+                            type="text"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={currentTutor.name}
+                            onChange={(e) => setCurrentTutor({...currentTutor, name: e.target.value})}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium leading-none">
+                            Prénom
+                          </label>
+                          <input
+                            type="text"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={currentTutor.first_name}
+                            onChange={(e) => setCurrentTutor({...currentTutor, first_name: e.target.value})}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium leading-none">
+                            Téléphone
+                          </label>
+                          <input
+                            type="tel"
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={currentTutor.phone_number}
+                            onChange={(e) => setCurrentTutor({...currentTutor, phone_number: e.target.value})}
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium leading-none">
+                            Type de tuteur
+                          </label>
+                          <select
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={currentTutor.type_tutor}
+                            onChange={(e) => setCurrentTutor({...currentTutor, type_tutor: e.target.value})}
+                          >
+                            <option value="Père">Père</option>
+                            <option value="Mère">Mère</option>
+                            <option value="Tuteur">Tuteur</option>
+                          </select>
+                        </div>
+                        
+                        <div className="flex justify-around space-x-2 pt-2">
+                          <Button
+                            type="button"
+                            onClick={() => setIsEditingTutor(false)}
+                            disabled={isSaving}
+                            color="destructive"
+                          >
+                            Annuler
+                          </Button>
+                          <Button type="submit" color='tyrian' disabled={isSaving}>
+                            {isSaving ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Enregistrement...
+                              </>
+                            ) : (
+                              'Enregistrer'
+                            )}
+                          </Button>
+                        </div>
+                      </form>
+                    </div>
                   </div>
                 )}
 

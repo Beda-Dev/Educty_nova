@@ -119,22 +119,22 @@ const LogInForm = () => {
 
         setUserOnline(userWithPermissions || userData);
         // 💾 Enregistre dans IndexedDB
-        await saveUser(userWithPermissions);
+        // await saveUser(userWithPermissions);
 
         
 
         // Attendre que roles, permissions et users soient chargés avant la redirection
-        const waitForData = async () => {
-          let tries = 0;
-          while (
-            (!roles?.length || !permissions?.length || !users?.length) &&
-            tries < 30 // max ~3s
-          ) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            tries++;
-          }
-        };
-        await waitForData();
+        // const waitForData = async () => {
+        //   let tries = 0;
+        //   while (
+        //     (!roles?.length || !permissions?.length || !users?.length) &&
+        //     tries < 30 // max ~3s
+        //   ) {
+        //     await new Promise((resolve) => setTimeout(resolve, 100));
+        //     tries++;
+        //   }
+        // };
+        // await waitForData();
 
         toast.success("Connexion réussie");
 
@@ -149,14 +149,6 @@ const LogInForm = () => {
     });
   };
 
-  // if (!users?.length || !roles?.length || !permissions?.length) {
-  //   return (
-  //     <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-background">
-  //       <Loader2 className="h-8 w-8 animate-spin text-skyblue" />
-  //       <span className="text-skyblue">Chargement des données...</span>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div

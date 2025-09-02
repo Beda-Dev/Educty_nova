@@ -22,21 +22,44 @@ interface Props {
 const PaymentDetail = ({ payment, detail }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
-  const { settings, pricing, installements , registrations } = useSchoolStore();
+  const { settings, pricing, installements , registrations, payments } = useSchoolStore();
   const inscription = registrations.find((re)=> Number(re.academic_year_id) === Number(detail.anneeAcademique.id) )
 
+  // Filtrer tous les paiements de l'étudiant antérieurs ou égaux au paiement actuel
+  const datePaiementActuel = new Date(payment.created_at);
+  
+  const studentPayments = payments.filter(p => {
+    // Vérifier si le paiement appartient à l'étudiant
+    if (p.student_id !== payment.student_id) return false;
+    
+    // Vérifier si le paiement est antérieur ou égal au paiement actuel
+    const datePaiement = new Date(p.created_at);
+    if (datePaiement.getTime() > datePaiementActuel.getTime()) return false;
+    
+    // Trouver l'installment associé au paiement
+    const installment = installements.find(inst => inst.id === p.installment_id);
+    if (!installment) return false;
+    
+    // Trouver le pricing associé à l'installment
+    const pricingItem = pricing.find(pr => pr.id === installment.pricing_id);
+    if (!pricingItem) return false;
+    
+    // Vérifier si le pricing appartient à l'année académique courante
+    return pricingItem.academic_years_id === detail.anneeAcademique.id;
+  });
 
-
-  // Get payment summary
+  // Get payment summary avec tous les paiements antérieurs ou égaux au paiement actuel
   const paymentSummary = getPaymentSummary(
     payment.student_id,
-    [payment], // Pass only the current payment
+    studentPayments, // Tous les paiements antérieurs ou égaux au paiement actuel
     pricing,
     installements,
     detail.anneeAcademique.id,
     Number(inscription?.classe.level_id),
     Number(payment.student.assignment_type_id)
   );
+
+  console.log("paymentSummary : ", paymentSummary);
 
   const { totalAmount, totalPaid, remainingAmount } = getTotalPaymentAmounts(paymentSummary);
 
@@ -151,7 +174,13 @@ const PaymentDetail = ({ payment, detail }: Props) => {
           <div className="">
             <h3 className="text-xs font-semibold text-blue-800 mb-2">INFORMATIONS DE PAIEMENT</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              <Info label="Caissier" value={payment.cashier.name} />
+              <Info 
+                label="Caissier(e)" 
+                value={payment.cashier.name
+                  .split(' ')
+                  .map(part => part[0]?.toUpperCase() || '')
+                  .join('')} 
+              />
               <Info label="Caisse" value={payment.cash_register.cash_register_number} />
             </div>
           </div>

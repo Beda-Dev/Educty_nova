@@ -99,22 +99,6 @@ export default function CaissePage() {
       color: itemColors[2],
     },
     {
-      id: "demandes",
-      title: "Demandes de décaissement",
-      description: "Gestion des demandes de décaissement",
-      icon: <FileText className="w-6 h-6" />,
-      path: "/caisse_comptabilite/demandes",
-      color: itemColors[3],
-    },
-    {
-      id: "validation",
-      title: "Validation des demandes de décaissement",
-      description: "Gestion de la validation des décaissements",
-      icon: <CheckCircle className="w-6 h-6" />,
-      path: "/caisse_comptabilite/validation",
-      color: itemColors[4],
-    },
-    {
       id: "resume",
       title: "Résumé financier des élèves",
       description: "Gestion et visualisation des paiements des élèves",

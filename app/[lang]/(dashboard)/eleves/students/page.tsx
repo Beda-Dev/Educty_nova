@@ -12,10 +12,18 @@ import {
 import { verificationPermission } from "@/lib/fonction";
 import ErrorPage from "@/app/[lang]/non-Autoriser";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { fetchSeries } from "@/store/schoolservice";
 
 export default function StudentsPage(): JSX.Element {
-  const { registrations, academicYears, students, userOnline , academicYearCurrent } =
-    useSchoolStore();
+  const { 
+    registrations, 
+    academicYears, 
+    students, 
+    userOnline, 
+    academicYearCurrent, 
+    series,
+    setSeries 
+  } = useSchoolStore();
   const [dataRegistrationsStudents, setdataRegistrationsStudents] =
     useState<RegistrationMerge[]>();
   const permissionRequis = ["voir eleve"];
@@ -23,6 +31,13 @@ export default function StudentsPage(): JSX.Element {
     { permissionNames: userOnline?.permissionNames || [] },
     permissionRequis
   );
+
+  // Charger les séries si elles ne sont pas déjà chargées
+  useEffect(() => {
+    if (series.length === 0) {
+      fetchSeries().then(data => setSeries(data));
+    }
+  }, [series.length, setSeries]);
 
   useEffect(() => {
     // j'applique le filtre sur les inscriptions
@@ -35,7 +50,7 @@ export default function StudentsPage(): JSX.Element {
     setdataRegistrationsStudents(
       filterRegistrationsByCurrentAcademicYear(academicYearCurrent, fusion)
     );
-  }, [registrations , academicYearCurrent]);
+  }, [registrations, academicYearCurrent, students]);
 
   // if (hasAdminAccess === false) {
   //   return (

@@ -52,10 +52,18 @@ export function filterSessionsByUserRole(
     return [...sessions];
   }
 
-  // Sinon, ne retourner que les sessions de l'utilisateur
-  return sessions.filter(session => 
-    session.user_id === userOnline.id
-  );
+  // Pour les utilisateurs sans accès complet, ne retourner que leurs sessions des 2 derniers jours
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  twoDaysAgo.setHours(0, 0, 0, 0); // Réinitialiser l'heure à minuit
+  
+  return sessions.filter(session => {
+    const sessionDate = new Date(session.created_at);
+    return (
+      session.user_id === userOnline.id && 
+      sessionDate >= twoDaysAgo
+    );
+  });
 }
 
 /**

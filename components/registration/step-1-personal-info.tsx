@@ -27,7 +27,7 @@ interface Step1Props {
 }
 
 export function Step1PersonalInfo({ onNext }: Step1Props) {
-  const { assignmentTypes, tutors, students } =
+  const { assignmentTypes, tutors, students , registrations } =
     useSchoolStore()
 
   const { studentData, setStudentData, selectedTutors, setSelectedTutors, newTutors, removeNewTutor, setNewTutors } =
@@ -222,7 +222,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       return
     }
 
-    if (!isMatriculeUnique(students, formData.registration_number)) {
+    if (!isMatriculeUnique(registrations, formData.registration_number)) {
       toast.error("ce matricule existe deja veuiller enregistrer un autre matricule")
       return
     }

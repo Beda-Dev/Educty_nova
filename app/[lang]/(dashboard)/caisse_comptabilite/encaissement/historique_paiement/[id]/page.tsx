@@ -14,7 +14,7 @@ interface Props {
 const DetailPaymentPage = ({ params }: Props) => {
   const [paiement , setPaiement] = useState<Payment | null>(null);
   const [detail , setDetail]= useState<DetailsPaiement | null>(null);
-  const { payments , students, registrations, pricing, installements, academicYears } = useSchoolStore();
+  const { students, registrations, pricing, installements, academicYears , payments } = useSchoolStore();
   const { id } = params;
 
   useEffect(() => {

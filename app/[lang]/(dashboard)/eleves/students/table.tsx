@@ -197,9 +197,20 @@ const StudentTableStatus = ({
     },
     {
       id: "classe.id",
-      accessorFn: (row) => `${row.classe.label} ${row.classe.serie_id ? `(${series.find((serie) => Number(serie.id) === Number(row.classe.serie_id))?.label})` : ""}`,
+      accessorFn: (row) => {
+        const serie = series.find(s => s?.id?.toString() === row.classe.serie_id?.toString());
+        return `${row.classe.label}${serie?.label ? ` (${serie.label})` : ''}`;
+      },
       header: "Classe",
-      cell: ({ row }) => `${row.original.classe.label} ${row.original.classe.serie_id ? `(${series.find((serie) => Number(serie.id) === Number(row.original.classe.serie_id))?.label})` : ""}`,
+      cell: ({ row }) => {
+        try {
+          const serie = series.find(s => s?.id?.toString() === row.original.classe.serie_id?.toString());
+          return `${row.original.classe.label}${serie?.label ? ` (${serie.label})` : ''}`;
+        } catch (error) {
+          console.error('Erreur lors de l\'affichage de la classe :', error);
+          return row.original.classe.label; // Retourne au moins le libellé de la classe en cas d'erreur
+        }
+      },
       filterFn: nestedFilterFn,
     },
     {

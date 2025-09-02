@@ -13,6 +13,8 @@ import {
 import { CreditCard, History } from "lucide-react";
 import { ShoppingCart } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useSchoolStore } from "@/store";
+import { RoleWithFullAccessCaisse } from "../RoleFullAcess";
 
 const itemColors = [
   "bg-tyrian-100 dark:bg-tyrian-900/50 text-tyrian-700 dark:text-tyrian-200",
@@ -27,11 +29,18 @@ const itemColors = [
   "bg-whitesmoke-200 dark:bg-whitesmoke-800/50 text-whitesmoke-800 dark:text-whitesmoke-100"
 ];
 
-
 export default function EncaissementPage() {
   const router = useRouter();
   const params = useParams();
   const lang = params.lang as string;
+  const { userOnline } = useSchoolStore();
+
+  // Vérifier si l'utilisateur a un rôle avec accès complet (insensible à la casse)
+  const hasFullAccess = userOnline?.roles?.some(role => 
+    RoleWithFullAccessCaisse.some(allowedRole => 
+      allowedRole.toLowerCase() === role.name.toLowerCase()
+    )
+  ) || false;
 
   const getLocalizedPath = (path: string) => {
     return `/${lang}/${path}`;
@@ -44,7 +53,8 @@ export default function EncaissementPage() {
       description: "Enregistrer un nouveau paiement",
       icon: <CreditCard className="w-6 h-6" />,
       path: "caisse_comptabilite/encaissement/paiement",
-      color: itemColors[0]
+      color: itemColors[0],
+      requiresFullAccess: false
     },
     {
       id: "historique",
@@ -52,9 +62,10 @@ export default function EncaissementPage() {
       description: "Consulter les paiements enregistrés",
       icon: <History className="w-6 h-6" />,
       path: "caisse_comptabilite/encaissement/historique_paiement",
-      color: itemColors[1]
+      color: itemColors[1],
+      requiresFullAccess: true
     }
-  ];
+  ].filter(item => !item.requiresFullAccess || hasFullAccess);
 
   const containerVariants = {
     hidden: { opacity: 0 },

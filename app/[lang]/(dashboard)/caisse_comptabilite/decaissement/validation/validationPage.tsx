@@ -127,7 +127,7 @@ export default function ExpenseValidationsPage() {
     });
 
   // Pagination
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 20;
   const totalPages = Math.ceil(filteredValidations.length / ITEMS_PER_PAGE);
   const paginatedValidations = filteredValidations.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -196,11 +196,11 @@ export default function ExpenseValidationsPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-skyblue" />
-            <CardTitle>Validations des demandes de décaissement</CardTitle>
+            <CardTitle>demandes en attente</CardTitle>
           </div>
           <Badge variant="outline">
             {filteredValidations.length}{" "}
-            {filteredValidations.length > 1 ? "validations" : "validation"}
+            {filteredValidations.length > 1 ? "demandes" : "demande"}
           </Badge>
         </CardHeader>
 
@@ -369,7 +369,7 @@ export default function ExpenseValidationsPage() {
                                     size="sm"
                                     onClick={() =>
                                       router.push(
-                                        `/caisse_comptabilite/validation/${validation.id}`
+                                        `/caisse_comptabilite/decaissement/validation/${validation.id}`
                                       )
                                     }
                                   >

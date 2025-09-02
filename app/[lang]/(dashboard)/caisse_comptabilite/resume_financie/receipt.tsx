@@ -6,6 +6,7 @@ import type { Payment, Student, Transaction } from "@/lib/interface"
 import { Phone, Mail, MapPin, Calendar, CreditCard, User, FileText, CheckCircle } from "lucide-react"
 import dayjs from "dayjs"
 import { formatCurrency } from "../echeanciers_paiement/[id]/fonction"
+import { useSchoolStore } from "@/store"
 
 interface ReceiptProps {
   transaction: Transaction
@@ -36,6 +37,7 @@ const Receipt = forwardRef<HTMLDivElement, ReceiptProps>(
     },
     ref,
   ) => {
+    const {pricing , installements } = useSchoolStore();
     // Calculer le montant total
     const totalAmount = payments.reduce((sum, payment) => sum + Number(payment.amount), 0)
 
@@ -126,9 +128,15 @@ const Receipt = forwardRef<HTMLDivElement, ReceiptProps>(
             <tbody>
               {payments.map((payment, index) => (
                 <tr key={index} className="border-b border-dashed">
-                  <td className="py-3 px-2 text-sm">{payment.installment?.pricing?.label || "Frais scolaires"}</td>
+                  <td className="py-3 px-2 text-sm">{pricing.find(p => p.id === payment.installment.pricing_id)?.fee_type?.label || "Frais scolaires"}</td>
                   <td className="py-3 px-2 text-sm">
-                    {payment.installment?.due_date ? formatDate(payment.installment.due_date) : "-"}
+                    {payment.installment_id ? 
+                      (() => {
+                        const installment = installements.find(i => i.id === payment.installment_id);
+                        return installment?.due_date ? formatDate(installment.due_date) : "-";
+                      })()
+                      : "-"
+                    }
                   </td>
                   <td className="py-3 px-2 text-sm text-right font-medium">{formatCurrency(Number(payment.amount))}</td>
                 </tr>

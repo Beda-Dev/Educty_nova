@@ -42,6 +42,7 @@ function SessionCaissePage() {
 
         // Filtrer les sessions selon les droits de l'utilisateur
         const filtered = filterSessionsByUserRole(sessions, userOnline);
+        
         setFilteredSessions(filtered);
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err);

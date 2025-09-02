@@ -355,6 +355,18 @@ const menuItems: MenuCategory = {
           path: "/caisse_comptabilite/decaissement/depense",
           icon: <DollarSign className="w-4 h-4" />,
         },
+        {
+          id: "demandes",
+          title: "Demandes de décaissement",
+          icon: <FileText className="w-6 h-6" />,
+          path: "/caisse_comptabilite/decaissement/demandes",
+        },
+        {
+          id: "validation-decaissement",
+          title: "demandes en attente",
+          icon: <CheckCircle className="w-6 h-6" />,
+          path: "/caisse_comptabilite/decaissement/validation",
+        },
       ],
     },
     {
@@ -378,18 +390,6 @@ const menuItems: MenuCategory = {
           hidden: false,
         },
       ],
-    },
-    {
-      id: "demandes",
-      title: "Demandes de décaissement",
-      icon: <FileText className="w-6 h-6" />,
-      path: "/caisse_comptabilite/demandes",
-    },
-    {
-      id: "validation-decaissement",
-      title: "Validation des demandes",
-      icon: <CheckCircle className="w-6 h-6" />,
-      path: "/caisse_comptabilite/validation",
     },
     {
       id: "finance",

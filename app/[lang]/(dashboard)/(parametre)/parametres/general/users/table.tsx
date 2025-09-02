@@ -228,7 +228,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                         <Avatar className="h-6 w-6">
                           {item.superior.avatar ? (
                             <Image
-                              src={item.superior.avatar.includes('http') ? item.superior.avatar : `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${item.superior.avatar}`}
+                              src={item.superior.avatar.includes('http') ? item.superior.avatar : `${process.env.NEXT_PUBLIC_API_BASE_URL_2 || ''}${item.superior.avatar}`}
                               alt={item.superior.name}
                               width={24}
                               height={24}

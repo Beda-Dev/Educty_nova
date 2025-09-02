@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "react-hot-toast";
+import { useSchoolStore } from "@/store";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -23,6 +24,8 @@ interface DeleteUserModalProps {
 
 export const DeleteUserModal = ({ userId, onSuccess }: DeleteUserModalProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const { userOnline } = useSchoolStore();
+  const isCurrentUser = userOnline?.id === userId;
 
   const deleteUser = async () => {
     setIsDeleting(true);
@@ -41,6 +44,14 @@ export const DeleteUserModal = ({ userId, onSuccess }: DeleteUserModalProps) => 
       setIsDeleting(false);
     }
   };
+
+  if (isCurrentUser) {
+    return (
+      <Button size="icon" variant="ghost" disabled className="h-7 w-7 opacity-50 cursor-not-allowed">
+        <Icon icon="heroicons:trash" className="h-4 w-4" />
+      </Button>
+    );
+  }
 
   return (
     <AlertDialog>

@@ -363,12 +363,12 @@ export interface Payment {
   amount: string;
   created_at: string;
   updated_at: string;
-  student: Student;
-  installment: Installment;
+  student: Omit<Student, 'assignment_type' | 'registrations' | 'payments' | 'documents' | 'tutors' | 'installments'>;
+  installment: Omit<Installment, 'pricing'>;
   cash_register: CashRegister;
   cashier: UserSingle;
   transaction_id?: number;
-  transaction?: Transaction;
+  transaction?: Omit<Transaction, 'payment_methods'>;
   payment_methods: {
     id: number;
     name: string;
@@ -407,7 +407,7 @@ export interface Expense {
   cash_register: CashRegister;
   transaction_id?: number;
   validation_expense_id?: number;
-  transaction?: Transaction;
+  transaction?: Omit<Transaction, 'payment_methods'>;
 }
 
 export interface InterfaceOTP {

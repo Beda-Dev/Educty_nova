@@ -1,6 +1,6 @@
 import { User } from "@/lib/interface"
 import { ValidationExpense } from "@/lib/interface"
-import { RoleWithFullAccessCaisse } from "../RoleFullAcess"
+import { RoleWithFullAccessCaisse } from "../../RoleFullAcess"
 
 /**
  * Vérifie si un utilisateur a un rôle avec accès complet

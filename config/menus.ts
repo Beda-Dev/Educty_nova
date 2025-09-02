@@ -56,7 +56,7 @@ export const MENU_ACCESS_CONFIG = {
   PROFESSOR_ALLOWED_MENUS: ["Dashboard", "Pedagogy", "School Life", "Cash Register"] as AllowedMenu[],
   
   // Menus spécifiques aux caissiers
-  CAISSE_ALLOWED_MENUS: ["Dashboard", "Students", "Cash Register"] as AllowedMenu[],
+  CAISSE_ALLOWED_MENUS: ["Students", "Cash Register"] as AllowedMenu[],
 
   // Menus spécifiques aux censeurs
   CENSEUR_ALLOWED_MENUS: ["Dashboard", "Students", "School Life", "Pedagogy" , "Cash Register"] as AllowedMenu[],

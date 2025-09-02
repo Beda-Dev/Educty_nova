@@ -177,7 +177,15 @@ const PaymentReceipt = ({
           <div className="mb-2">
             <h3 className="text-xs font-semibold text-blue-800 mb-1">INFORMATIONS DE PAIEMENT</h3>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-              <Info label="Caissier" value={payments[0]?.cashier?.name || "N/A"} />
+              <Info 
+                label="Caissier(e)" 
+                value={payments[0]?.cashier?.name 
+                  ? payments[0].cashier.name
+                      .split(' ')
+                      .map(part => part[0]?.toUpperCase() || '')
+                      .join('')
+                  : "N/A"} 
+              />
               <Info label="Caisse" value={payments[0]?.cash_register?.cash_register_number || "N/A"} />
             </div>
           </div>

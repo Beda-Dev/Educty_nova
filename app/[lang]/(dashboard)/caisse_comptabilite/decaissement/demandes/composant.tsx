@@ -55,7 +55,7 @@ export default function DisbursementRequestsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const requests = demands || []
-  const ITEMS_PER_PAGE = 10
+  const ITEMS_PER_PAGE = 20
 
   useEffect(() => {
     setFilteredRequests(requests)

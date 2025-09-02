@@ -1,5 +1,6 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useSchoolStore } from "@/store"
 import type { Professor } from "@/lib/interface"
 import { useEffect, useState } from "react"
@@ -37,6 +38,7 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
   const [availableDashboards, setAvailableDashboards] = useState<DashboardOption[]>([])
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const router = useRouter()
 
   // Définition des différents dashboards disponibles
   const dashboardOptions: DashboardOption[] = [
@@ -96,6 +98,16 @@ const Dashboard = ({ trans }: DashboardViewProps) => {
       const roles = userOnline.roles?.map(role => role.name.toLowerCase()) || []
       // console.log('Rôles de l\'utilisateur:', roles);
       setUserRoles(roles)
+
+      // Rediriger automatiquement si l'utilisateur a le rôle 'caisse' (insensible à la casse)
+      const hasCashierRole = roles.some(role => 
+        ['caisse', 'caissier', 'cashier'].includes(role.toLowerCase())
+      );
+      
+      if (hasCashierRole) {
+        router.push('/eleves')
+        return
+      }
 
       // Vérifier si l'utilisateur est un professeur
       const isProfessor = professor.some(
