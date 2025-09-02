@@ -1,16 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserPlus, RotateCcw, GraduationCap, BookOpen, ShieldCheck, Clock, ChevronRight } from "lucide-react";
+import { UserPlus, RotateCcw, BookOpen, ShieldCheck, Clock, ChevronRight } from "lucide-react";
 import { useSchoolStore } from "@/store";
 import { verificationPermission } from "@/lib/fonction";
-import ErrorPage from "@/app/[lang]/non-Autoriser";
 
-const containerVariants = {
+const containerVariants : Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -21,7 +19,7 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants : Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
