@@ -1,6 +1,5 @@
 import { faker } from "@faker-js/faker";
 import { formatDate } from "@/lib/utils";
-import { subTasks } from "../tasks/data";
 
 function generateComments(numItems: number) {
   const data = [];
@@ -11,8 +10,7 @@ function generateComments(numItems: number) {
       avatar: faker.image.avatarLegacy(),
       name: faker.person.fullName({ sex: "male" }),
       text: faker.lorem.paragraph(2),
-      date: formatDate(new Date()),
-      subTaskId: subTasks[0].id,
+      date: formatDate(new Date())
     };
     data.push(newItem);
   }

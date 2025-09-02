@@ -109,6 +109,7 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
   const [globalError, setGlobalError] = useState<string>("")
   const [createdTransaction, setCreatedTransaction] = useState<Transaction | null>(null)
   const [createdPayments, setCreatedPayments] = useState<Payment[]>([])
+  const isProcessingRef = useRef(false)
 
   const currency = settings && settings[0]?.currency ? settings[0].currency : "FCFA"
   const printRef = useRef<HTMLDivElement>(null)
@@ -234,6 +235,14 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
     const total = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0)
     setTotalPaidAmount(total)
   }, [installmentAmounts])
+
+  // 7. Ajout d'un effet pour cleanup
+useEffect(() => {
+  // Cleanup au démontage du composant
+  return () => {
+    isProcessingRef.current = false
+  }
+}, [])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR")
@@ -394,6 +403,7 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
 
   const rollbackTransaction = async (transactionId: number) => {
     try {
+      console.log(`🔄 Rollback de la transaction ${transactionId}`)
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/transaction/${transactionId}`, {
         method: "DELETE",
         headers: {
@@ -413,6 +423,15 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
   }
 
   const handlePayment = async () => {
+      // Protection contre les doubles clics
+  if (isProcessingRef.current) {
+    toast({
+      title: "Information",
+      description: "Un paiement est déjà en cours de traitement...",
+      color: "warning",
+    })
+    return
+  }
     if (!cashRegisterSessionCurrent) {
       toast({
         title: "Erreur",
@@ -461,6 +480,7 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
     }
 
     setIsProcessing(true)
+    isProcessingRef.current = true
 
     try {
       const paymentResults = []
@@ -469,11 +489,15 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
 
       // Traiter chaque échéance sélectionnée individuellement
       for (const installmentId of selectedInstallments) {
+        console.log(`💳 Traitement de l'échéance ${installmentId}`)
         const installmentDetail = financialData?.installmentDetails.find(
           (detail) => detail.installment.id === installmentId,
         )
 
-        if (!installmentDetail) continue
+        if (!installmentDetail) {
+          console.warn(`⚠️ Échéance ${installmentId} non trouvée`)
+          continue
+        }
 
         const methods = paymentMethods[installmentId].map((method) => ({
           id: method.id,
@@ -570,8 +594,12 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
         description: errorMessage,
         color: "destructive",
       })
+    } finally {
+      // Toujours remettre à zéro les états
+      setIsProcessing(false)
+      isProcessingRef.current = false
     }
-  }
+}
 
   const resetPaymentForm = () => {
     setSelectedInstallments([])
@@ -1241,7 +1269,8 @@ const paymentMethodsSummary = useMemo(() => {
                       givenAmount < totalPaidAmount ||
                       !!globalError ||
                       Object.values(installmentErrors).some((err) => !!err) ||
-                      selectedInstallments.some((id) => !validatePaymentMethods(id))
+                      selectedInstallments.some((id) => !validatePaymentMethods(id))||
+                      isProcessing 
                     }
                   >
                     Effectuer le paiement
