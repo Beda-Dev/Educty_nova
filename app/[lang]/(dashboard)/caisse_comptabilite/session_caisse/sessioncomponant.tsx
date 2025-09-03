@@ -58,6 +58,16 @@ const formatSessionDate = (dateString: string | null) => {
   return format(new Date(dateString), "dd MMM yyyy, HH:mm", { locale: fr })
 }
 
+// Ajoutez cette fonction utilitaire avant le composant principal
+function splitDateTime(dateTimeStr: string | null): { date: string, time: string } {
+  if (!dateTimeStr) return { date: "—", time: "—" }
+  const [date, time] = dateTimeStr.split(" ")
+  return {
+    date: date || "—",
+    time: time ? time.slice(0, 5) : "—", // HH:mm
+  }
+}
+
 export default function CashRegisterSessionsPage({
   data,
 }: {
@@ -258,14 +268,20 @@ export default function CashRegisterSessionsPage({
   const handleExport = () => {
     if (!hasExportPermission) return
 
-    const exportData = filteredSessions.map((session) => ({
-      "Caisse": `Caisse ${session.cash_register?.cash_register_number}`,
-      "Utilisateur": session.user?.name,
-      "Date d'ouverture": formatSessionDate(session.opening_date),
-      "Date de fermeture": session.status === "open" ? "—" : formatSessionDate(session.closing_date),
-      "Encaissement": `${formatCurrency(getSessionEncaissement(session.id))}`,
-      "Statut": session.status === "open" ? "Ouverte" : "Fermée",
-    }))
+    const exportData = filteredSessions.map((session) => {
+      const opening = splitDateTime(session.opening_date)
+      const closing = session.status === "open" ? { date: "—", time: "—" } : splitDateTime(session.closing_date)
+      return {
+        "Caisse": `Caisse ${session.cash_register?.cash_register_number}`,
+        "Utilisateur": session.user?.name,
+        "Date d'ouverture": opening.date,
+        "Heure d'ouverture": opening.time,
+        "Date de fermeture": closing.date,
+        "Heure de fermeture": closing.time,
+        "Encaissement": `${formatCurrency(getSessionEncaissement(session.id))}`,
+        "Statut": session.status === "open" ? "Ouverte" : "Fermée",
+      }
+    })
 
     universalExportToExcel({
       source: {
@@ -430,7 +446,7 @@ export default function CashRegisterSessionsPage({
                   {hasExportPermission && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button color="success" size="sm" onClick={handleExport} className="h-9 px-3 bg-transparent">
+                        <Button color="success" size="sm" onClick={handleExport} className="h-9 px-3">
                           <Download className="h-4 w-4" />
                           <span className="ml-2">Exporter</span>
                         </Button>

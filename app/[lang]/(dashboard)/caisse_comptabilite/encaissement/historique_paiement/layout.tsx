@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "Histoique de paiement",
+  title: "Historique de paiement",
 };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
