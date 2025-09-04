@@ -463,12 +463,10 @@ export default function SettingsPage() {
                                 transition: "transform 0.3s ease",
                               }}
                             >
-                              <Image
+                              <img
                                 src={previewUrl || "/placeholder.svg"}
                                 alt="Logo de l'établissement"
-                                fill
-                                className="object-contain p-2"
-                                sizes="256px"
+                                className="object-contain p-2 w-full h-full"
                                 style={{
                                   objectFit: "contain",
                                 }}

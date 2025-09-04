@@ -298,11 +298,18 @@ export default function ClassDetailsPage({ classe }: { classe: Classe }) {
                           className="flex items-center space-x-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                         >
                           <Avatar>
-                            <AvatarImage src={typeof student.photo === "string" ? student.photo : undefined} />
-                            <AvatarFallback>
-                              {student.name.charAt(0)}
-                              {student.first_name.charAt(0)}
-                            </AvatarFallback>
+                            {student.photo && typeof student.photo === "string" ? (
+                              <img
+                                src={student.photo}
+                                alt={`${student.name} ${student.first_name}`}
+                                className="rounded-full object-cover w-10 h-10"
+                              />
+                            ) : (
+                              <AvatarFallback>
+                                {student.name.charAt(0)}
+                                {student.first_name.charAt(0)}
+                              </AvatarFallback>
+                            )}
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">

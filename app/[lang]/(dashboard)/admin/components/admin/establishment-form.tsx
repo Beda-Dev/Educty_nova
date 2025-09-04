@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Image from "next/image"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -251,11 +251,10 @@ export default function EstablishmentForm() {
                             animate={{ opacity: 1 }}
                             className="relative h-32 w-32"
                           >
-                            <Image
+                            <img
                               src={logoPreview}
                               alt="Logo preview"
-                              fill
-                              className="object-contain rounded-md"
+                              className="object-contain rounded-md w-32 h-32"
                             />
                             <motion.button
                               type="button"

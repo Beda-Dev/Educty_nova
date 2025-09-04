@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Image from "next/image"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle , CardFooter } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -255,7 +255,7 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
             <div className="flex items-center gap-4">
               <Avatar className="w-12 h-12">
                 <AvatarImage asChild src={getAvatarUrl(demande.applicant.avatar)}>
-                  <Image
+                  <img
                     src={getAvatarUrl(demande.applicant.avatar) || ""}
                     alt={`Avatar de ${demande.applicant.name}`}
                     width={48}
@@ -290,21 +290,23 @@ export default function DemandDetailsPage({ demande, validation }: Props) {
             <div className="space-y-4">
               <div className="flex items-start gap-4">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage asChild src={getAvatarUrl(validation.user?.avatar)}>
-                    <Image
+                  {getAvatarUrl(validation.user?.avatar) ? (
+                    <img
                       src={getAvatarUrl(validation.user?.avatar) || ""}
                       alt={`Avatar de ${validation.user?.name}`}
                       width={40}
                       height={40}
+                      className="rounded-full object-cover w-10 h-10"
                     />
-                  </AvatarImage>
-                  <AvatarFallback>
-                    {validation.user?.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .toUpperCase()}
-                  </AvatarFallback>
+                  ) : (
+                    <AvatarFallback>
+                      {validation.user?.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="flex-1 space-y-2">
                   <div className="flex items-center justify-between">

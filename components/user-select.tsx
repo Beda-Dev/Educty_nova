@@ -5,7 +5,7 @@ import { Check, ChevronDown, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useSchoolStore } from "@/store"
@@ -115,10 +115,17 @@ export default function UserSelect({
               {selectedUser ? (
                 <>
                   <Avatar className="h-8 w-8 flex-shrink-0">
-                    <AvatarImage src={selectedUser.avatar || undefined} />
-                    <AvatarFallback className="text-xs font-medium">
-                      {getInitials(selectedUser.name)}
-                    </AvatarFallback>
+                    {selectedUser.avatar ? (
+                      <img
+                        src={selectedUser.avatar}
+                        alt={selectedUser.name}
+                        className="rounded-full object-cover w-8 h-8"
+                      />
+                    ) : (
+                      <AvatarFallback className="text-xs font-medium">
+                        {getInitials(selectedUser.name)}
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                   <div className="flex flex-col items-start overflow-hidden">
                     <span className="font-medium truncate max-w-[180px]">
@@ -232,10 +239,17 @@ export default function UserSelect({
                           >
                             <div className="flex items-center gap-3 w-full">
                               <Avatar className="h-8 w-8 flex-shrink-0">
-                                <AvatarImage src={user.avatar || undefined} />
-                                <AvatarFallback className="text-xs font-medium">
-                                  {getInitials(user.name)}
-                                </AvatarFallback>
+                                {user.avatar ? (
+                                  <img
+                                    src={user.avatar}
+                                    alt={user.name}
+                                    className="rounded-full object-cover w-8 h-8"
+                                  />
+                                ) : (
+                                  <AvatarFallback className="text-xs font-medium">
+                                    {getInitials(user.name)}
+                                  </AvatarFallback>
+                                )}
                               </Avatar>
                               <div className="flex flex-col flex-1 min-w-0">
                                 <span className="font-medium truncate">{user.name}</span>

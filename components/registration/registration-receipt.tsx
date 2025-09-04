@@ -89,7 +89,7 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
       <div className="flex justify-between items-start border-b pb-3 mb-4">
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
-            <Image
+            <img
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
               width={80}

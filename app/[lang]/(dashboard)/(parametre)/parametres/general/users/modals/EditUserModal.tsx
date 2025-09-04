@@ -20,7 +20,7 @@ import { User, Role } from "@/lib/interface";
 import { Edit, Loader2 } from 'lucide-react';
 import { useSchoolStore } from "@/store";
 import { Switch } from "@/components/ui/switch";
-import Image from "next/image";
+
 
 interface EditUserModalProps {
   user: User;
@@ -204,7 +204,7 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
             <div className="space-y-2">
               <Label>Photo de profil actuelle</Label>
               <div className="relative w-32 h-32 mx-auto rounded-full overflow-hidden border">
-                <Image
+                <img
                   src={user.avatar}
                   alt="Avatar actuel"
                   width={128}

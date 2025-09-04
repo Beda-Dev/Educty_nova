@@ -94,12 +94,10 @@ export function FileUploader({
         {preview ? (
           <div className="relative group flex items-center justify-center" >
             <div className=" bg-red-700 relative h-48 w-48 rounded-full overflow-hidden flex items-center justify-center">
-              <Image
+              <img
                 src={preview}
                 alt="Preview"
-                fill
-                className="object-cover"
-                sizes="(max-width: 128px) 100vw, (max-width: 128px) 50vw, 33vw"
+                className="object-cover w-48 h-48 rounded-full"
               />
             </div>
             <Button

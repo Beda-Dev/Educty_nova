@@ -216,6 +216,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
   const [passwordModalOpen, setPasswordModalOpen] = useState(false)
   const [showAllPermissions, setShowAllPermissions] = useState(false)
   const [activeTab, setActiveTab] = useState("permissions")
+  const url = process.env.NEXT_PUBLIC_API_BASE_URL_2 || ""
 
   const router = useRouter()
   const { userOnline } = useSchoolStore()
@@ -313,7 +314,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
               <div className="relative">
                 <Avatar className={cn("h-16 w-16", compact && "h-12 w-12")}>
                   {user.avatar ? (
-                    <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name || "Avatar"} />
+                    <img src={`${url}/${user.avatar}`} alt={user.name || "Avatar"} />
                   ) : null}
                   <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
                     {getInitials(user.name)}

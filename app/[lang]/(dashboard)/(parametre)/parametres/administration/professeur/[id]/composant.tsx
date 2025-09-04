@@ -539,10 +539,17 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
-                  <AvatarImage src={professor?.user?.avatar || ""} />
-                  <AvatarFallback className="bg-blue-100 text-blue-600 text-xl font-bold">
-                    {(professor?.name?.charAt(0) || "") + (professor?.first_name?.charAt(0) || "")}
-                  </AvatarFallback>
+                  {professor?.user?.avatar ? (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${professor.user.avatar}`}
+                      alt={`${professor?.name || ""} ${professor?.first_name || ""}`}
+                      className="rounded-full object-cover w-20 h-20"
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xl font-bold">
+                      {(professor?.name?.charAt(0) || "") + (professor?.first_name?.charAt(0) || "")}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div>
                   <CardTitle className="text-3xl text-gray-900 flex items-center gap-2">
@@ -1298,10 +1305,17 @@ export default function ProfessorTimetable({ professor, timetables: initialTimet
                       <div className="lg:col-span-1">
                         <div className="text-center">
                           <Avatar className="h-32 w-32 mx-auto mb-4 border-4 border-blue-200">
-                            <AvatarImage src={professor?.user?.avatar || ""} />
-                            <AvatarFallback className="bg-blue-100 text-blue-600 text-3xl font-bold">
-                              {(professor?.name?.charAt(0) || "") + (professor?.first_name?.charAt(0) || "")}
-                            </AvatarFallback>
+                            {professor?.user?.avatar ? (
+                              <img
+                                src={professor.user.avatar}
+                                alt={`${professor?.name || ""} ${professor?.first_name || ""}`}
+                                className="rounded-full object-cover w-32 h-32"
+                              />
+                            ) : (
+                              <AvatarFallback className="bg-blue-100 text-blue-600 text-3xl font-bold">
+                                {(professor?.name?.charAt(0) || "") + (professor?.first_name?.charAt(0) || "")}
+                              </AvatarFallback>
+                            )}
                           </Avatar>
                           <h2 className="text-2xl font-bold text-gray-900 mb-2">
                             {professor.name} {professor.first_name}

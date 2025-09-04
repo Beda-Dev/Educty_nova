@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import type { Student, Payment, PaymentMethod, Pricing, Installment } from "@/lib/interface"
-import Image from "next/image"
 import { useSchoolStore } from "@/store"
 import { generationNumero } from "@/lib/fonction"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -100,7 +99,7 @@ const PaymentReceipt = ({
       <div className="flex justify-between items-start border-b pb-1 mb-2">
         <div className="flex items-start gap-2">
           {schoolInfo.logo ? (
-            <Image
+            <img
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
               width={80}

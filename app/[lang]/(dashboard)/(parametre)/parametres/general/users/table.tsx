@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { User, Role } from "@/lib/interface";
 import { Users } from "lucide-react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -185,7 +184,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                     <div className="flex gap-3 items-center">
                       <Avatar className="rounded-full">
                         {item.avatar ? (
-                          <Image
+                          <img
                             src={item.avatar.includes('http') ? item.avatar : `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}${item.avatar}`}
                             alt={item.name}
                             width={40}
@@ -227,7 +226,7 @@ const TableUser = ({ users, roles }: { users: User[]; roles: Role[] }) => {
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
                           {item.superior.avatar ? (
-                            <Image
+                            <img
                               src={item.superior.avatar.includes('http') ? item.superior.avatar : `${process.env.NEXT_PUBLIC_API_BASE_URL_2 || ''}${item.superior.avatar}`}
                               alt={item.superior.name}
                               width={24}

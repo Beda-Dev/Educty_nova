@@ -189,15 +189,6 @@ const ChangePassword = () => {
                     key={`device-row-${index}`}
                     className="border-default-200"
                   >
-                    <TableCell
-                      className="py-2">
-                      <div className="flex items-center gap-2 text-sm font-medium text-default-600 whitespace-nowrap">
-                        <div className="h-5 w-5 grid place-content-center rounded bg-default-100 dark:bg-default-50">
-                          <Image className="w-3.5 h-3.5" src={item.image} alt={item.browser} priority={true} />
-                        </div>
-                        {item.browser}
-                      </div>
-                    </TableCell>
                     <TableCell className="text-sm  text-default-600 py-2 whitespace-nowrap">{item.device}</TableCell>
                     <TableCell className="text-sm  text-default-600 capitalize py-2 whitespace-nowrap">{item.location}</TableCell>
                     <TableCell className="text-sm  text-default-600 capitalize py-2 whitespace-nowrap">{item.recent_activites}</TableCell>

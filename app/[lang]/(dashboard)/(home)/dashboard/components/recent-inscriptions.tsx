@@ -313,18 +313,18 @@ const RecentInscriptions = ({ inscriptions, academicYear }: Props) => {
                         <div className="flex items-center gap-3">
                           <div className="relative">
                             <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
-                              <AvatarImage
-                                src={
-                                  inscription.student.photo && typeof inscription.student.photo === "string"
-                                    ? `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${inscription.student.photo}`
-                                    : undefined
-                                }
-                                alt={`${inscription.student.first_name} ${inscription.student.name}`}
-                              />
-                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
-                                {inscription.student.first_name.charAt(0).toUpperCase()}
-                                {inscription.student.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
+                              {inscription.student.photo && typeof inscription.student.photo === "string" ? (
+                                <img
+                                  src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${inscription.student.photo}`}
+                                  alt={`${inscription.student.first_name} ${inscription.student.name}`}
+                                  className="rounded-full object-cover w-12 h-12"
+                                />
+                              ) : (
+                                <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+                                  {inscription.student.first_name.charAt(0).toUpperCase()}
+                                  {inscription.student.name.charAt(0).toUpperCase()}
+                                </AvatarFallback>
+                              )}
                             </Avatar>
                             {priority === "high" && (
                               <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">

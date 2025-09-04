@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef } from "react";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -74,7 +73,7 @@ const ExpenseReceipt = ({ expense, demand, validation, cashier }: Props) => {
       <div className="flex justify-between items-start border-b pb-2 mb-2">
         <div className="flex items-start gap-2">
           {schoolInfo.logo ? (
-            <Image
+            <img
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
               width={60}

@@ -17,7 +17,6 @@ import { fetchExpenses, fetchTransactions } from "@/store/schoolservice"
 import type { ValidationExpense, Transaction, Expense, User, Role, Setting } from "@/lib/interface"
 import { toast } from "sonner"
 import { generatePDFfromRef } from "@/lib/utils"
-import Image from "next/image"
 import { generationNumero } from "@/lib/fonction";
 
 interface DecaissementPageProps {
@@ -587,7 +586,7 @@ const ReceiptCopy = ({
       <div className="flex justify-between items-start border-b pb-2 mb-2">
         <div className="flex items-start gap-2">
           {schoolInfo.logo ? (
-            <Image
+            <img
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
               width={60}

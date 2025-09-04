@@ -404,11 +404,10 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
                 {previewImage ? (
                   <div className="flex flex-col items-center gap-4">
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-primary/20 group">
-                      <Image
+                      <img
                         src={previewImage}
                         alt="Preview"
-                        fill
-                        className="object-cover"
+                        className="object-cover w-32 h-32 rounded-lg"
                         onLoad={() => URL.revokeObjectURL(previewImage)}
                       />
                       <Button

@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef } from "react";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -96,7 +95,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
       <div className="flex justify-between items-start border-b pb-3 mb-1">
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
-            <Image
+            <img
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
               width={60}

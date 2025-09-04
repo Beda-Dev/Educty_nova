@@ -11,7 +11,6 @@ import { findStudentById } from "./fonction";
 import { toast } from "sonner";
 import { generationNumero } from "@/lib/fonction";
 import { Registration, Student, Payment, Pricing, Installment, Setting } from "@/lib/interface";
-import Image from "next/image";
 import { generatePDFfromRef } from "@/lib/utils"
 
 interface DataProps {
@@ -147,7 +146,7 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
       <div className="flex justify-between items-start border-b pb-3 mb-4">
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
-            <Image
+            <img
               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
               alt="Logo"
               width={80}

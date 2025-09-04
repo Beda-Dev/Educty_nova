@@ -92,7 +92,7 @@ const Header = ({ eleve }: HeaderProps) => {
           <div className="flex items-center gap-4 absolute ltr:left-10 rtl:right-10 -bottom-2 lg:-bottom-8">
             <div>
               {/* Afficher la photo de l'étudiant ou une image par défaut */}
-              <Image
+              <img
                 src={photo || User.src} // Utilise la photo de l'étudiant ou l'image par défaut
                 alt={`${eleve.name} ${eleve.first_name}`}
                 className="h-20 w-20 lg:w-32 lg:h-32 rounded-full"

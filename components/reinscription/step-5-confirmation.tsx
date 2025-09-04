@@ -526,11 +526,10 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                 <div className="mt-4 flex flex-col items-center">
                   <h4 className="text-sm font-medium mb-2">Nouvelle photo de l'élève</h4>
                   <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-blue-200">
-                    <Image
+                    <img
                       src={previewUrl}
                       alt="Nouvelle photo de l'élève"
-                      fill
-                      className="object-cover"
+                      className="object-cover w-32 h-32 rounded-full"
                     />
                   </div>
                 </div>

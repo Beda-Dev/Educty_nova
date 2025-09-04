@@ -826,9 +826,10 @@ const InteractiveNotifications = ({
                       <div className="flex items-center gap-3">
                         {item.photo && (
                           <Avatar className="h-10 w-10">
-                            <AvatarImage
+                            <img
                               src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${item.photo}`}
                               alt={item.name || item.studentName}
+                              className="rounded-full object-cover w-10 h-10"
                             />
                             <AvatarFallback>{(item.name || item.studentName)?.charAt(0)?.toUpperCase()}</AvatarFallback>
                           </Avatar>

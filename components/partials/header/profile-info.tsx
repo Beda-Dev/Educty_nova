@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
-import Image from "next/image";
 import { useSchoolStore } from "@/store";
 import { cn } from "@/lib/utils";
 import { deleteUser } from "@/lib/userStore";
@@ -69,12 +68,10 @@ const ProfileInfo = () => {
           <Avatar className="h-8 w-8">
             {userOnline?.avatar ? (
               <div className="relative h-full w-full">
-                <Image
+                <img
                   src={getAvatarUrl(userOnline.avatar) || ''}
                   alt={userOnline?.name || "Utilisateur"}
-                  fill
-                  className="object-cover"
-                  sizes="32px"
+                  className="object-cover w-full h-full rounded-full"
                 />
               </div>
             ) : <AvatarFallback className="bg-skyblue text-primary-foreground">

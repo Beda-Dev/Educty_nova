@@ -53,7 +53,6 @@ import {
   TooltipTrigger,
   TooltipProvider
 } from "@/components/ui/tooltip";
-import Image from "next/image";
 
 interface ColumnConfig {
   id: string;
@@ -124,7 +123,7 @@ export function PaymentTable({ data }: { data: Payment[] }) {
         return (
           <div className="flex items-center gap-3">
             {student.photo && student.photo !== "null" ? (
-              <Image
+              <img
                 src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${student.photo}`}
                 alt={`${student.name} ${student.first_name}`}
                 width={30}

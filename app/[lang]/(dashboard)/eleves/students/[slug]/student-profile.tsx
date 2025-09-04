@@ -2,7 +2,6 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { BadgeCheck, Calendar, FileText, Phone, User, Eye, Users, BookOpen, Edit, Loader2, Mail, Smartphone, UserCheck } from "lucide-react";
 import { useState } from "react";
-import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -210,7 +209,7 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
               <div className="flex-shrink-0">
                 <Avatar className="h-24 w-24">
                   {data.photo ? (
-                    <Image
+                    <img
                       src={typeof data.photo === 'string' ? data.photo : ''}
                       alt={`${data.name} ${data.first_name}`}
                       width={80}

@@ -338,7 +338,7 @@ export default function Professors() {
                           <div className="flex items-center space-x-3">
                             <Avatar className="h-12 w-12">
                               {getAvatarUrl(professor) ? (
-                                <Image
+                                <img
                                   src={getAvatarUrl(professor)}
                                   alt={`${professor.first_name} ${professor.name}`}
                                   width={48}

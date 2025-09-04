@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSchoolStore } from "@/store";
 import { Icon } from "@iconify/react";
@@ -166,7 +165,7 @@ const StudentTableStatus = ({
         return (
           <div className="flex items-center gap-3">
             {student.photo ? (
-              <Image
+              <img
                 src={typeof student.photo === 'string' ? student.photo : ''}
                 alt={`${student.name} ${student.first_name}`}
                 width={30}
