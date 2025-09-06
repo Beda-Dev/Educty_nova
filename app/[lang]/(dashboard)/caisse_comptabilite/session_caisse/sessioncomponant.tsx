@@ -90,6 +90,8 @@ export default function CashRegisterSessionsPage({
   const [currentPage, setCurrentPage] = useState(1)
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  // Ajout d'un état pour le modale d'heure d'ouverture
+  const [showLoginTimeModal, setShowLoginTimeModal] = useState(false)
 
   // Vérifier si l'utilisateur a les permissions d'export
   const hasExportPermission = useMemo(() => {
@@ -355,6 +357,12 @@ export default function CashRegisterSessionsPage({
   }, [])
 
   const handleAddSession = () => {
+    // Vérification de l'heure d'ouverture
+    const loginTime = settings?.[0]?.login_time ?? null
+    if (loginTime && isBeforeLoginTime(loginTime)) {
+      setShowLoginTimeModal(true)
+      return
+    }
     const hasOpenSession = sessions.some((session) => session.user_id === userOnline?.id && session.status === "open")
     hasOpenSession ? setShowModal(true) : router.push("/caisse_comptabilite/open-session")
   }
@@ -369,6 +377,18 @@ export default function CashRegisterSessionsPage({
 
   const handlePreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1)
   const handleNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1)
+
+  // Fonction utilitaire pour comparer l'heure actuelle à l'heure d'ouverture
+  function isBeforeLoginTime(loginTime: string | null): boolean {
+    if (!loginTime) return false
+    const [loginHour, loginMinute] = loginTime.split(":").map(Number)
+    const now = new Date()
+    const nowHour = now.getHours()
+    const nowMinute = now.getMinutes()
+    if (nowHour < loginHour) return true
+    if (nowHour === loginHour && nowMinute < loginMinute) return true
+    return false
+  }
 
   return (
     <div className="container mx-auto py-6">
@@ -453,6 +473,13 @@ export default function CashRegisterSessionsPage({
                       </TooltipTrigger>
                       <TooltipContent>Exporter vers Excel</TooltipContent>
                     </Tooltip>
+                  )}
+
+                  {/* Ajout du Badge pour l'heure d'ouverture */}
+                  {settings?.[0]?.login_time && (
+                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                      Heure d'ouverture : {settings[0].login_time}
+                    </Badge>
                   )}
 
                   <Button onClick={handleAddSession} size="sm" className="h-9 px-3" color="indigodye">
@@ -736,7 +763,7 @@ export default function CashRegisterSessionsPage({
         </Card>
       </motion.div>
 
-      {/* Modal */}
+      {/* Modal session déjà ouverte */}
       <AnimatePresence>
         {showModal && (
           <Dialog open={showModal} onOpenChange={setShowModal}>
@@ -769,6 +796,36 @@ export default function CashRegisterSessionsPage({
                       }}
                     >
                       Voir la session
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* Modal heure d'ouverture non atteinte */}
+      <AnimatePresence>
+        {showLoginTimeModal && (
+          <Dialog open={showLoginTimeModal} onOpenChange={setShowLoginTimeModal}>
+            <DialogContent className="sm:max-w-md">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <div className="space-y-4">
+                  <div className="text-center space-y-2">
+                    <h3 className="text-lg font-semibold text-orange-600">Ouverture non autorisée</h3>
+                    <p className="text-sm text-muted-foreground">
+                      L'ouverture de la session de caisse n'est autorisée qu'à partir de {settings?.[0]?.login_time}.<br />
+                      Veuillez patienter avant d'ouvrir une nouvelle session.
+                    </p>
+                  </div>
+                  <div className="flex justify-center gap-3 pt-2">
+                    <Button color="destructive" variant="outline" onClick={() => setShowLoginTimeModal(false)}>
+                      Fermer
                     </Button>
                   </div>
                 </div>

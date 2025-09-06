@@ -17,9 +17,9 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useDropzone } from "react-dropzone"
-import Image from "next/image"
 import { useRegistrationStore } from "@/hooks/use-registration-store"
 import { isMatriculeUnique } from "@/lib/fonction"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 
 interface Step1Props {
   onNext: () => void
@@ -51,6 +51,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
   const [hasRestoredPhoto, setHasRestoredPhoto] = useState(false)
   const [isPhotoLoading, setIsPhotoLoading] = useState(false)
   const [fileError, setFileError] = useState("")
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   // Nettoyer les URLs d'images lors du démontage du composant
   useEffect(() => {
@@ -227,23 +228,28 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       return
     }
 
-    // Vérifie que chaque tuteur a un type sélectionné
-    const allTutors = [...selectedTutors, ...newTutors]; // ou juste newTutors selon le contexte
+    const allTutors = [...selectedTutors, ...newTutors];
     const missingType = allTutors.some(tutor => !tutor.type_tutor);
 
     if (missingType) {
       toast.error("Veuillez sélectionner un type pour chaque tuteur.");
       return;
     }
+
+    // Afficher le modale de confirmation avant de continuer
+    setShowConfirmModal(true)
+  }
+
+  // Fonction appelée après confirmation
+  const confirmNext = async () => {
     try {
-      // Les données sont déjà stockées dans le store via handlePhoto
       await setStudentData(formData)
+      setShowConfirmModal(false)
       onNext()
     } catch (error) {
       console.error("Error saving student data:", error)
       toast.error("Une erreur s'est produite lors de la sauvegarde des données")
     }
-
   }
 
   return (
@@ -392,7 +398,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
 
             {/* Zone de téléchargement de photo */}
             <div className="space-y-2 md:col-span-2 mt-4">
-              <Label>Photo (optionnel - max 3Mo)</Label>
+              <Label>Photo (optionnel - max 10Mo)</Label>
               <div
                 {...getRootProps()}
                 className={cn(
@@ -663,6 +669,31 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
           </Button>
         </motion.div>
       </motion.div>
+      {/* Modale de confirmation */}
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <div className="space-y-4 text-center">
+            <h3 className="text-lg font-semibold">Confirmer le type d'affectation</h3>
+            <p className="text-sm text-muted-foreground">
+              Êtes-vous sûr du type d'affectation sélectionné pour cet élève ?
+            </p>
+            <div className="mt-2 text-base">
+              <strong>Nom :</strong> {formData.name}<br />
+              <strong>Prénom :</strong> {formData.first_name}<br />
+              <strong>Type d'affectation :</strong>{" "}
+              {assignmentTypes.find(a => a.id === formData.assignment_type_id)?.label || ""}
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <Button color="destructive" variant="outline" onClick={() => setShowConfirmModal(false)}>
+                Annuler
+              </Button>
+              <Button onClick={confirmNext}>
+                Oui, continuer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   )
 }

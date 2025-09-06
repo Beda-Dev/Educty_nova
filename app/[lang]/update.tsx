@@ -30,6 +30,7 @@ import {AcademicYear} from '@/lib/interface'
 import {updateStudentCountByClass} from "@/lib/fonction";
 import { useRegistrationStore } from "@/hooks/use-registration-store";
 import { useReinscriptionStore } from "@/hooks/use-reinscription-store";
+import {checkAndBlockSessions} from "@/lib/utils"
 
 const DataFetcher = () => {
   const {reset} = useRegistrationStore();
@@ -57,6 +58,7 @@ const DataFetcher = () => {
   const setCashRegisterSessions = useSchoolStore((state) => state.setCashRegisterSessions);
   const setmethodPayment = useSchoolStore((state) => state.setmethodPayment);
   const setProfessor = useSchoolStore((state) => state.setProfessor);
+  const setExpenses = useSchoolStore((state) => state.setExpenses);
 
 
 
@@ -94,33 +96,33 @@ const DataFetcher = () => {
         const professor = await fetchProfessor();
         
 
-        await updateStudentCountByClass(registrations, academicYearCurrent, classes);
+        
 
         reset();
         resetReinscription();
-        console.log("Données chargées avec succès :", {
-          classes,
-          levels,
-          academicYears,
-          students,
-          users,
-          roles,
-          pricing,
-          registrations,
-          assigmentTypes,
-          feeTypes,
-          userOnline,
-          documentTypes,
-          documents,
-          payments,
-          installments,
-          cashRegisters,
-          expenseTypes,
-          expenses,
-          settings,
-          permissions,
-          sessions
-        });
+        // console.log("Données chargées avec succès :", {
+        //   classes,
+        //   levels,
+        //   academicYears,
+        //   students,
+        //   users,
+        //   roles,
+        //   pricing,
+        //   registrations,
+        //   assigmentTypes,
+        //   feeTypes,
+        //   userOnline,
+        //   documentTypes,
+        //   documents,
+        //   payments,
+        //   installments,
+        //   cashRegisters,
+        //   expenseTypes,
+        //   expenses,
+        //   settings,
+        //   permissions,
+        //   sessions
+        // });
 
         setClasses(classes);
         setLevels(levels);
@@ -139,14 +141,19 @@ const DataFetcher = () => {
         setDocumentTypes(documentTypes);
         setDocuments(documents)
         setPayments(payments);
+        setExpenses(expenses)
         setInstallments(installments);
         setCashRegisters(cashRegisters);
         setExpenseTypes(expenseTypes);
         setSettings(settings);
         setPermission(permissions);
-        setCashRegisterSessions(sessions);
         setmethodPayment(methodPayment);
         setProfessor(professor);
+
+        await updateStudentCountByClass(registrations, academicYearCurrent, classes);
+        await checkAndBlockSessions(sessions, settings?.[0]?.session_closure_time)
+        const sessionAfterBlock = await fetchCashRegisterSessions()
+        setCashRegisterSessions(sessionAfterBlock);
       } catch (error) {
         console.error("Erreur lors du chargement des données :", error);
       }

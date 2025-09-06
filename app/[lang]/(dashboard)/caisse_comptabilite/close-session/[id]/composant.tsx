@@ -284,7 +284,8 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
           ...session,
           closing_amount: closingAmount.toString(),
           status: 'closed',
-          closing_date: closingDate
+          closing_date: closingDate,
+          is_blocked: 0
         })
       })
 
@@ -353,6 +354,17 @@ export default function CloseSessionPage({ session, isLoading, error, params }: 
 
   return (
     <div className="container mx-auto py-4 px-2 max-w-7xl">
+      {/* Message de session bloquée */}
+      {session.is_blocked === 1 && session.status === "open" && (
+        <Alert color="destructive" className="mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Session bloquée</AlertTitle>
+          <AlertDescription>
+            Cette session de caisse est bloquée car elle n'a pas été fermée à temps.<br />
+            Veuillez entrer le montant de fermeture et clôturer la session pour débloquer la caisse.
+          </AlertDescription>
+        </Alert>
+      )}
       {/* Animation de succès */}
       <AnimatePresence>
         {showSuccess && <SuccessAnimation amount={form.getValues("closing_amount")} currency={currency} />}

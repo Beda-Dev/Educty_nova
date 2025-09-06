@@ -49,6 +49,8 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
     );
   }
 
+  const isBlocked = cashRegisterSessionCurrent.is_blocked === 1;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -65,12 +67,14 @@ export function LastOpenSessionPopover({ sessions }: { sessions: CashRegisterSes
           <motion.span
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="mr-2 h-2 w-2 rounded-full bg-green-500"
+            className={cn(
+              "mr-2 h-2 w-2 rounded-full",
+              isBlocked ? "bg-red-500" : "bg-green-500"
+            )}
           />
-          Session active
+          {isBlocked ? "Session bloquée" : "Session active"}
         </Button>
       </PopoverTrigger>
-
       <AnimatePresence>
         {open && (
           <PopoverContent 

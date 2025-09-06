@@ -10,7 +10,7 @@ const ACTIVITY_UPDATE_INTERVAL = 15000; // 15 secondes
 
 export const useSessionManager = () => {
   const router = useRouter();
-  const { userOnline, setUserOnline } = useSchoolStore();
+  const { userOnline, setUserOnline , settings } = useSchoolStore();
   const sessionCheckRef = useRef<NodeJS.Timeout | null>(null);
   const activityUpdateRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -21,13 +21,15 @@ export const useSessionManager = () => {
     ) || false;
   }, [userOnline]);
 
+  const loginTimeCash : number  = settings?.[0]?.login_session_duration ?? 3
+
   // Calculer le temps restant avant expiration
   const calculateRemainingTime = useCallback((user: any) => {
     const now = Date.now();
     
     if (user.requiresInactivityCheck) {
       // Pour les rôles standards, calculer basé sur la dernière activité
-      const inactivityThreshold = 3 * 60 * 1000; // 3 minutes
+      const inactivityThreshold = loginTimeCash * 60 * 1000; 
       const timeSinceLastActivity = now - user.lastActivity;
       return Math.max(0, inactivityThreshold - timeSinceLastActivity);
     } else {
@@ -46,7 +48,6 @@ export const useSessionManager = () => {
 
   // Fonction de déconnexion
   const logout = useCallback(async (reason: string = '') => {
-    console.log(`🔒 Tentative de déconnexion: ${reason}`);
     console.trace('Stack trace de la déconnexion');
     
     // Nettoyer les intervalles
@@ -74,7 +75,6 @@ export const useSessionManager = () => {
     try {
       // console.log('🔍 Vérification de la session en cours...');
       const user = await getCurrentUser();
-      console.log('Utilisateur actuel:', user ? 'Connecté' : 'Non connecté');
       
       if (!user && userOnline) {
         console.log('🚨 Déconnexion nécessaire: utilisateur non trouvé mais toujours connecté dans le store');
@@ -178,7 +178,7 @@ export const useSessionManager = () => {
     }
 
     return () => {
-      console.log('🛑 Surveillance arrêtée');
+     
       if (sessionCheckRef.current) {
         clearInterval(sessionCheckRef.current);
       }

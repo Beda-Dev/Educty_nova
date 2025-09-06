@@ -20,6 +20,7 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 import { useDropzone } from "react-dropzone"
 import Image from "next/image"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 
 interface Step1Props {
   onNext: () => void
@@ -58,7 +59,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [tutorSearch, setTutorSearch] = useState("")
   const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([])
-  
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (files) => handleFileChange(files[0]),
@@ -240,20 +241,25 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       return
     }
 
-      // Vérifie que chaque tuteur a un type sélectionné
-      const allTutors = [...existingTutors, ...newTutors];
-      const missingType = allTutors.some(tutor => !tutor.type_tutor);
+    const allTutors = [...existingTutors, ...newTutors];
+    const missingType = allTutors.some(tutor => !tutor.type_tutor);
 
-      if (missingType) {
-        toast.error("Veuillez sélectionner un type pour chaque tuteur.");
-        return;
-      }
+    if (missingType) {
+      toast.error("Veuillez sélectionner un type pour chaque tuteur.");
+      return;
+    }
 
     if (fileError) {
       toast.error("Veuillez corriger l'erreur de fichier avant de continuer")
       return
     }
 
+    // Afficher le modale de confirmation avant de continuer
+    setShowConfirmModal(true)
+  }
+
+  // Fonction appelée après confirmation
+  const confirmNext = async () => {
     try {
       // Prepare modifications data
       const modifications: any = {}
@@ -288,6 +294,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       }
 
       setStudentModifications(modifications)
+      setShowConfirmModal(false)
       onNext()
     } catch (error) {
       console.error("Error processing modifications:", error)
@@ -720,6 +727,31 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
           </Button>
         </motion.div>
       </motion.div>
+      {/* Modale de confirmation */}
+      <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+        <DialogContent className="sm:max-w-md">
+          <div className="space-y-4 text-center">
+            <h3 className="text-lg font-semibold">Confirmer le type d'affectation</h3>
+            <p className="text-sm text-muted-foreground">
+              Êtes-vous sûr du type d'affectation sélectionné pour cet élève ?
+            </p>
+            <div className="mt-2 text-base">
+              <strong>Nom :</strong> {formData.name}<br />
+              <strong>Prénom :</strong> {formData.first_name}<br />
+              <strong>Type d'affectation :</strong>{" "}
+              {assignmentTypes.find(a => a.id === formData.assignment_type_id)?.label || ""}
+            </div>
+            <div className="flex justify-center gap-3 pt-2">
+              <Button color="destructive" variant="outline" onClick={() => setShowConfirmModal(false)}>
+                Annuler
+              </Button>
+              <Button onClick={confirmNext}>
+                Oui, continuer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   )
 }

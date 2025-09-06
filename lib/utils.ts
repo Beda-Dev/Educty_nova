@@ -6,6 +6,8 @@ import { toast } from "sonner"
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { Table } from "@tanstack/react-table";
+import { Registration , AcademicYear  , Classe  , User , Role, Permission , CashRegisterSession , Student} from "./interface";
+
 
 type DataSource<T> =
   | { type: "tanstack"; table: Table<T>; formatRow: (row: T) => Record<string, any> }
@@ -379,6 +381,71 @@ export function universalExportToExcel<T extends Record<string, any>>({
     toast.error("Erreur lors de l'export du fichier Excel");
   }
 }
+
+
+export async function checkAndBlockSessions(
+  sessions: CashRegisterSession[],
+  session_closure_time?: string | null
+): Promise<void> {
+  if (!session_closure_time) return;
+
+  // Vérification format HH:mm strict
+  const closureMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(session_closure_time);
+  if (!closureMatch) {
+    console.error("Format de session_closure_time invalide (attendu HH:mm).");
+    return;
+  }
+
+  const [hours, minutes] = closureMatch.slice(1).map(Number);
+  const now = new Date();
+
+  // On construit la date/heure limite avec la date du jour courant
+  const closureDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes,
+    0
+  );
+
+  for (const session of sessions) {
+    if (session.status !== "open") continue;
+
+    // Si la session est déjà bloquée, on ignore
+    if (session.is_blocked === 1) continue;
+
+    // Vérif stricte de la date d'ouverture
+    const opening = new Date(session.opening_date.replace(" ", "T"));
+    if (isNaN(opening.getTime())) {
+      console.warn(`Date d'ouverture invalide pour la session ${session.id}`);
+      continue;
+    }
+
+    // Condition : heure actuelle > heure limite
+    if (now > closureDate) {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/cashRegisterSession/${session.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ is_blocked: 1 }),
+        });
+
+        if (!response.ok) {
+          console.error(`Échec du blocage de la session ${session.id}`);
+          continue;
+        }
+
+        console.log(`Session ${session.id} bloquée (is_blocked=1).`);
+      } catch (error) {
+        console.error(`Erreur réseau pour la session ${session.id}:`, error);
+      }
+    }
+  }
+}
+
 
 
 // EXEMPLE D'UTILISATION

@@ -427,6 +427,7 @@ export interface CashRegisterSession {
   status: "closed" | "open";
   created_at: string;
   updated_at: string;
+  is_blocked?: 0 | 1 ;
   user: UserSingle;
   cash_register: CashRegister;
 }
@@ -508,6 +509,9 @@ export interface Setting {
   expense_approval_level?: number; // niveau de validation des depenses dans select
   primary_validator?: string | null;
   currency?: string | null;
+  login_time?: string | null; // heure de connexion
+  session_closure_time?: string | null; // heure de fermeture de session
+  login_session_duration?: number | null; // durée de session en minutes
 }
 
 export interface Matter {
