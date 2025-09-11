@@ -12,6 +12,7 @@ import { useSchoolStore } from "@/store";
 import { generatePDFfromRef } from "@/lib/utils";
 import { Payment } from "@/lib/interface";
 import { getPaymentSummary, getTotalPaymentAmounts } from "./fonction";
+import {FeeType , Registration} from "@/lib/interface"
 
 interface Props {
   payment: Payment;
@@ -21,8 +22,8 @@ interface Props {
 const PaymentDetail = ({ payment, detail }: Props) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
-  const { settings, pricing, installements , registrations, payments } = useSchoolStore();
-  const inscription = registrations.find((re)=> Number(re.academic_year_id) === Number(detail.anneeAcademique.id) )
+  const { settings, pricing, installements, registrations, payments , feeTypes } = useSchoolStore();
+  const inscription = registrations.find((re) => Number(re.academic_year_id) === Number(detail.anneeAcademique.id) && re.student_id === payment.student_id);
 
   // Filtrer tous les paiements de l'étudiant antérieurs ou égaux au paiement actuel
   const datePaiementActuel = new Date(payment.created_at);
@@ -58,9 +59,60 @@ const PaymentDetail = ({ payment, detail }: Props) => {
     Number(payment.student.assignment_type_id)
   );
 
-  console.log("paymentSummary : ", paymentSummary);
-
+  // Calculer les montants avec réduction si applicable
   const { totalAmount, totalPaid, remainingAmount } = getTotalPaymentAmounts(paymentSummary);
+  
+  // Vérifier s'il y a une réduction sur l'inscription
+  const hasDiscount = !!(inscription && (inscription.discount_percentage || inscription.discount_amount));
+  // console.log('=== DEBUG DISCOUNT CALCULATION ===');
+  // console.log('Inscription:', inscription);
+  // console.log('Has discount:', hasDiscount);
+  // console.log('Original total amount:', totalAmount);
+  // console.log('Discount percentage from DB:', inscription?.discount_percentage);
+  // console.log('Discount amount from DB:', inscription?.discount_amount);
+  
+  // Calculer le montant total après réduction
+  let totalAfterDiscount = totalAmount;
+  let discountAmount = 0;
+  let discountPercentage = inscription?.discount_percentage ? parseFloat(inscription.discount_percentage) : 0;
+  
+  if (hasDiscount && inscription) {
+    console.log('Processing discount for inscription:', {
+      discount_amount: inscription.discount_amount,
+      discount_percentage: inscription.discount_percentage
+    });
+    
+    if (inscription.discount_amount) {
+      discountAmount = parseFloat(inscription.discount_amount);
+      totalAfterDiscount = totalAmount - discountAmount;
+      console.log(`Applied fixed discount: ${discountAmount} (New total: ${totalAfterDiscount})`);
+      // Si on a un pourcentage, on le calcule pour l'affichage
+      if (inscription.discount_percentage) {
+        discountPercentage = parseFloat(inscription.discount_percentage);
+        console.log(`Also has percentage discount: ${discountPercentage}%`);
+      }
+    } else if (inscription.discount_percentage) {
+      // Convertir la chaîne "20.00" en nombre décimal
+      discountPercentage = parseFloat(inscription.discount_percentage);
+      if (!isNaN(discountPercentage)) {
+        discountAmount = (totalAmount * discountPercentage) / 100;
+        totalAfterDiscount = totalAmount - discountAmount;
+        console.log(`Applied percentage discount: ${discountPercentage}% (${discountAmount.toFixed(2)} off, New total: ${totalAfterDiscount.toFixed(2)})`);
+      } else {
+        console.error('Invalid discount percentage format:', inscription.discount_percentage);
+      }
+    }
+  } else {
+    console.log('No discount applied');
+  }
+  
+  console.log('Final values:', {
+    totalAmount,
+    discountAmount,
+    discountPercentage,
+    totalAfterDiscount,
+    hasDiscount
+  });
 
   const generatePDF = async (action: "print" | "download") => {
     if (!printRef.current) return;
@@ -87,7 +139,6 @@ const PaymentDetail = ({ payment, detail }: Props) => {
     phone: `${settings?.[0]?.establishment_phone_1 || ""} ${settings?.[0]?.establishment_phone_2 ? "/ " + settings?.[0]?.establishment_phone_2 : ""}`.trim(),
     currency: settings?.[0]?.currency || "FCFA"
   };
-
 
   const ReceiptCopy = () => (
     <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
@@ -163,6 +214,12 @@ const PaymentDetail = ({ payment, detail }: Props) => {
                 totalPaid={totalPaid}
                 remainingAmount={remainingAmount}
                 currency={schoolInfo.currency}
+                hasDiscount={hasDiscount}
+                discountAmount={discountAmount}
+                discountPercentage={discountPercentage}
+                totalAfterDiscount={totalAfterDiscount}
+                feeTypes={feeTypes}
+                registration={inscription as Registration}
               />
             </div>
           </div>
@@ -210,7 +267,7 @@ const PaymentDetail = ({ payment, detail }: Props) => {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <div ref={printRef} className="space-y-6">
+      <div ref={printRef} className="space-y-2">
         <ReceiptCopy />
         <div className="text-xs text-center text-gray-500">---------------------------- ---------------------------- ----------------------------</div>
         <ReceiptCopy />
@@ -254,9 +311,27 @@ interface PaymentTableProps {
   totalPaid: number;
   remainingAmount: number;
   currency: string;
+  hasDiscount: boolean;
+  discountAmount: number;
+  discountPercentage: number;
+  totalAfterDiscount: number;
+  feeTypes: FeeType[];
+  registration: Registration;
 }
 
-const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, currency }: PaymentTableProps) => {
+const PaymentTable = ({ 
+  payments, 
+  totalAmount, 
+  totalPaid, 
+  remainingAmount, 
+  currency, 
+  hasDiscount, 
+  discountAmount, 
+  discountPercentage, 
+  totalAfterDiscount,
+  feeTypes,
+  registration 
+}: PaymentTableProps) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse" style={{ fontSize: "0.85rem" }}>
@@ -289,16 +364,39 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
           )}
         </tbody>
         <tfoot>
+          {hasDiscount && (
+            <>
+              <tr className="border-t border-gray-200">
+                <td className="border border-gray-300 p-1 font-medium" colSpan={3}>Total avant remise</td>
+                <td className="border border-gray-300 p-1 text-right">
+                  {/* {totalAmount.toLocaleString()} {currency} */}
+                  {remainingAmount.toLocaleString()} {currency}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <td className="border border-gray-300 p-1" colSpan={3}>
+                  Remise sur {feeTypes.find((fee)=>fee.id === registration.pricing?.fee_type_id)?.label} {hasDiscount ? `(${discountPercentage}%)` : '(0%)'}
+                </td>
+                <td className="border border-gray-300 p-1 text-right text-red-600">
+                  -{discountAmount.toLocaleString()} {currency}
+                </td>
+              </tr>
+            </>
+          )}
           <tr>
-            <td className="border border-gray-300 p-2 font-semibold">Total</td>
-            <td className="border border-gray-300 p-2 font-semibold text-right">
-              {totalAmount.toLocaleString()} {currency}
+            <td className="border border-gray-300 p-1 font-medium">
+              {hasDiscount ? "Total après remise" : "Total"}
+            </td>
+            <td className="border border-gray-300 p-1 text-right">
+              {hasDiscount ? totalAfterDiscount.toLocaleString() : totalAmount.toLocaleString()} {currency}
             </td>
             <td className={`border border-gray-300 p-2 font-semibold text-right text-green-600`}>
               {totalPaid.toLocaleString()} {currency}
             </td>
             <td className={`border border-gray-300 p-2 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
-              {remainingAmount.toLocaleString()} {currency}
+              {hasDiscount 
+                ? (totalAfterDiscount - totalPaid).toLocaleString() 
+                : remainingAmount.toLocaleString()} {currency}
             </td>
           </tr>
         </tfoot>

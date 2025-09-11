@@ -152,6 +152,11 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
               width={80}
               height={80}
               className="school-logo"
+              crossOrigin="anonymous" // Ajoutez cette ligne
+              onError={(e) => {
+                // Gérer les erreurs de chargement d'image
+                e.currentTarget.src = 'public\images\default-logo.png'
+              }}
             />
           ) : (
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">

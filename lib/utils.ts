@@ -259,50 +259,50 @@ export const translate = (title: string, trans: Translations): string => {
  * @param fileName Nom du fichier à télécharger (si mode "download")
  * @param mode "print" ou "download"
  */
-export async function generatePDFfromRef(
-  elementRef: React.RefObject<HTMLElement>,
-  fileName: string,
-  mode: "print" | "download"
-): Promise<void> {
-  if (!elementRef.current) return
+// export async function generatePDFfromRef(
+//   elementRef: React.RefObject<HTMLElement>,
+//   fileName: string,
+//   mode: "print" | "download"
+// ): Promise<void> {
+//   if (!elementRef.current) return
 
-  const toastId = toast.loading("Génération du PDF...")
-  try {
-    const canvas = await html2canvas(elementRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: "#ffffff",
-    })
+//   const toastId = toast.loading("Génération du PDF...")
+//   try {
+//     const canvas = await html2canvas(elementRef.current, {
+//       scale: 2,
+//       useCORS: true,
+//       backgroundColor: "#ffffff",
+//     })
 
-    const pdf = new jsPDF("p", "mm", "a4" , true)
-    const imgData = canvas.toDataURL("image/png")
-    const { width, height } = canvas
-    const pdfWidth = 190
-    const pdfHeight = (height * pdfWidth) / width
+//     const pdf = new jsPDF("p", "mm", "a4" , true)
+//     const imgData = canvas.toDataURL("image/png")
+//     const { width, height } = canvas
+//     const pdfWidth = 190
+//     const pdfHeight = (height * pdfWidth) / width
 
-    pdf.addImage(imgData, "PNG", 10, 10, pdfWidth, pdfHeight)
+//     pdf.addImage(imgData, "PNG", 10, 10, pdfWidth, pdfHeight)
 
-    if (mode === "download") {
-      pdf.save(`${fileName}.pdf`)
-      toast.success("PDF téléchargé avec succès", { id: toastId })
-    } else {
-      const blob = pdf.output("blob")
-      const url = URL.createObjectURL(blob)
-      const printWindow = window.open(url, "_blank")
-      if (printWindow) {
-        printWindow.onload = () => {
-          printWindow.print()
-          toast.success("Impression prête", { id: toastId })
-        }
-      } else {
-        toast.error("Impossible d'ouvrir la fenêtre d'impression", { id: toastId })
-      }
-    }
-  } catch (error) {
-    toast.error("Erreur lors de la génération du PDF", { id: toastId })
-    console.error("PDF generation error:", error)
-  }
-}
+//     if (mode === "download") {
+//       pdf.save(`${fileName}.pdf`)
+//       toast.success("PDF téléchargé avec succès", { id: toastId })
+//     } else {
+//       const blob = pdf.output("blob")
+//       const url = URL.createObjectURL(blob)
+//       const printWindow = window.open(url, "_blank")
+//       if (printWindow) {
+//         printWindow.onload = () => {
+//           printWindow.print()
+//           toast.success("Impression prête", { id: toastId })
+//         }
+//       } else {
+//         toast.error("Impossible d'ouvrir la fenêtre d'impression", { id: toastId })
+//       }
+//     }
+//   } catch (error) {
+//     toast.error("Erreur lors de la génération du PDF", { id: toastId })
+//     console.error("PDF generation error:", error)
+//   }
+// }
 
 // import { generatePDFfromRef } from "@/utils/pdf-utils"
 
@@ -315,6 +315,152 @@ export async function generatePDFfromRef(
 // <Button onClick={() => handlePDF("print")}>Imprimer</Button>
 
 
+/**
+ * Convertit une image distante en base64
+ */
+async function convertImageToBase64(imageUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    
+    // Configuration CORS
+    img.crossOrigin = 'anonymous'
+    
+    img.onload = function() {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      if (!ctx) {
+        reject(new Error('Canvas context not available'))
+        return
+      }
+      
+      canvas.width = img.naturalWidth || img.width
+      canvas.height = img.naturalHeight || img.height
+      
+      ctx.drawImage(img, 0, 0)
+      
+      try {
+        const base64 = canvas.toDataURL('image/png')
+        resolve(base64)
+      } catch (error) {
+        reject(error)
+      }
+    }
+    
+    img.onerror = function() {
+      // Si l'image ne charge pas, utiliser une image placeholder
+      const placeholderSvg = `
+        <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+          <rect width="80" height="80" fill="#f0f0f0"/>
+          <text x="40" y="45" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Image</text>
+        </svg>
+      `
+      const base64Placeholder = 'data:image/svg+xml;base64,' + btoa(placeholderSvg)
+      resolve(base64Placeholder)
+    }
+    
+    img.src = imageUrl
+  })
+}
+
+/**
+ * Prépare toutes les images d'un élément pour le PDF
+ */
+async function prepareImagesForPDF(element: HTMLElement): Promise<HTMLElement> {
+  // Cloner l'élément pour ne pas modifier l'original
+  const clonedElement = element.cloneNode(true) as HTMLElement
+  const images = clonedElement.querySelectorAll('img')
+  
+  // Traiter chaque image
+  const imagePromises = Array.from(images).map(async (img) => {
+    const originalSrc = img.src
+    
+    if (originalSrc && !originalSrc.startsWith('data:')) {
+      try {
+        const base64Image = await convertImageToBase64(originalSrc)
+        img.src = base64Image
+      } catch (error) {
+        console.warn('Failed to convert image:', originalSrc, error)
+        // L'image d'erreur sera déjà définie par la fonction convertImageToBase64
+      }
+    }
+  })
+  
+  await Promise.all(imagePromises)
+  return clonedElement
+}
+
+/**
+ * Version améliorée de la génération PDF
+ */
+export async function generatePDFfromRef(
+  elementRef: React.RefObject<HTMLElement>,
+  fileName: string,
+  mode: "print" | "download"
+): Promise<void> {
+  if (!elementRef.current) return
+  
+  const toastId = toast.loading("Préparation des images...")
+  
+  try {
+    // Préparer les images
+    const preparedElement = await prepareImagesForPDF(elementRef.current)
+    
+    // Ajouter temporairement l'élément préparé au DOM (invisible)
+    preparedElement.style.position = 'fixed'
+    preparedElement.style.top = '-9999px'
+    preparedElement.style.left = '-9999px'
+    preparedElement.style.width = elementRef.current.offsetWidth + 'px'
+    preparedElement.style.zIndex = '-1'
+    document.body.appendChild(preparedElement)
+    
+    toast.loading("Génération du PDF...", { id: toastId })
+    
+    try {
+      const canvas = await html2canvas(preparedElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: "#ffffff",
+        logging: false,
+        imageTimeout: 0, // Pas de timeout car les images sont déjà en base64
+        removeContainer: true
+      })
+      
+      const pdf = new jsPDF("p", "mm", "a4", true)
+      const imgData = canvas.toDataURL("image/png")
+      const { width, height } = canvas
+      const pdfWidth = 190
+      const pdfHeight = (height * pdfWidth) / width
+      
+      pdf.addImage(imgData, "PNG", 10, 10, pdfWidth, pdfHeight)
+      
+      if (mode === "download") {
+        pdf.save(`${fileName}.pdf`)
+        toast.success("PDF téléchargé avec succès", { id: toastId })
+      } else {
+        const blob = pdf.output("blob")
+        const url = URL.createObjectURL(blob)
+        const printWindow = window.open(url, "_blank")
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print()
+            toast.success("Impression prête", { id: toastId })
+            URL.revokeObjectURL(url) // Libérer la mémoire
+          }
+        } else {
+          toast.error("Impossible d'ouvrir la fenêtre d'impression", { id: toastId })
+        }
+      }
+    } finally {
+      // Nettoyer l'élément temporaire
+      document.body.removeChild(preparedElement)
+    }
+  } catch (error) {
+    toast.error("Erreur lors de la génération du PDF", { id: toastId })
+    console.error("PDF generation error:", error)
+  }
+}
 
 
 

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { X, Info, User, User2, Calendar, Hash, Image as ImageIcon, VenusAndMars, Upload } from "lucide-react"
+import { X, Info, User, User2, Calendar, Hash, Image as ImageIcon, VenusAndMars, Upload , CheckCircle2, AlertCircle, Tag } from "lucide-react"
 import { toast } from "react-hot-toast"
 import { useSchoolStore } from "@/store/index"
 import { TutorModal } from "./tutor-modal"
@@ -52,6 +52,7 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
   const [isPhotoLoading, setIsPhotoLoading] = useState(false)
   const [fileError, setFileError] = useState("")
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [isVisible, setIsVisible] = useState(false);
 
   // Nettoyer les URLs d'images lors du démontage du composant
   useEffect(() => {
@@ -61,6 +62,19 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       }
     }
   }, [previewImage])
+
+  useEffect(() => {
+    if (showConfirmModal) {
+      setIsVisible(true);
+    }
+  }, [showConfirmModal]);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => setShowConfirmModal(false), 200);
+  };
+
+  
 
   const handlePhoto = async (file: File | null) => {
     setFileError("")
@@ -671,29 +685,83 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
       </motion.div>
       {/* Modale de confirmation */}
       <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-        <DialogContent className="sm:max-w-md">
-          <div className="space-y-4 text-center">
-            <h3 className="text-lg font-semibold">Confirmer le type d'affectation</h3>
-            <p className="text-sm text-muted-foreground">
+      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
+        <div className={`relative transition-all duration-300 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+          {/* En-tête avec icône et fond coloré */}
+          <div className="bg-primary px-4 py-5 text-primary-foreground relative">
+            <div className="absolute right-3 top-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-full text-primary-foreground/80 hover:bg-primary-foreground/20 hover:text-primary-foreground"
+                onClick={handleClose}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="flex items-center justify-center mb-2">
+              <div className="bg-primary-foreground/20 p-3 rounded-full">
+                <CheckCircle2 className="h-8 w-8" />
+              </div>
+            </div>
+            
+            <h3 className="text-lg font-semibold text-center">Confirmer le type d'affectation</h3>
+          </div>
+          
+          {/* Corps de la modal */}
+          <div className="px-6 py-5 space-y-5">
+            <p className="text-sm text-muted-foreground text-center flex items-center justify-center gap-1.5">
+              <AlertCircle className="h-4 w-4" />
               Êtes-vous sûr du type d'affectation sélectionné pour cet élève ?
             </p>
-            <div className="mt-2 text-base">
-              <strong>Nom :</strong> {formData.name}<br />
-              <strong>Prénom :</strong> {formData.first_name}<br />
-              <strong>Type d'affectation :</strong>{" "}
-              {assignmentTypes.find(a => a.id === formData.assignment_type_id)?.label || ""}
+            
+            <div className="space-y-3 bg-muted/40 p-4 rounded-lg border">
+              <div className="flex items-center gap-2 text-base">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <strong>Nom :</strong> 
+                <span className="ml-1">{formData.name}</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-base">
+                <User className="h-4 w-4 text-muted-foreground" />
+                <strong>Prénom :</strong> 
+                <span className="ml-1">{formData.first_name}</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-base">
+                <Tag className="h-4 w-4 text-muted-foreground" />
+                <strong>Type d'affectation :</strong> 
+                <span className="ml-1 font-medium text-primary">
+                  {assignmentTypes.find(a => a.id === formData.assignment_type_id)?.label || ""}
+                </span>
+              </div>
             </div>
+            
             <div className="flex justify-center gap-3 pt-2">
-              <Button color="destructive" variant="outline" onClick={() => setShowConfirmModal(false)}>
+              <Button 
+                variant="outline" 
+                color="destructive"
+                onClick={handleClose}
+                className="flex items-center gap-1.5 transition-all hover:scale-105"
+              >
+                <X className="h-4 w-4" />
                 Annuler
               </Button>
-              <Button onClick={confirmNext}>
+              
+              <Button 
+                onClick={confirmNext}
+                color="success"
+                className="flex items-center gap-1.5 transition-all hover:scale-105"
+              >
+                <CheckCircle2 className="h-4 w-4" />
                 Oui, continuer
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </DialogContent>
+    </Dialog>
     </TooltipProvider>
   )
 }

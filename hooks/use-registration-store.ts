@@ -55,6 +55,13 @@ interface RegistrationStore {
   registrationData: RegistrationFormData | null
   setRegistrationData: (data: RegistrationFormData) => void
 
+  // Discounts
+  setDiscountAmount: (amount: string | null) => void
+  setDiscountPercentage: (percentage: string | null) => void
+  setPricingId: (id: number | null) => void
+  setDiscounts: (amount?: string | null, percentage?: string | null , id?: number | null) => void
+
+
   // Pricing data
   availablePricing: Pricing[]
   setAvailablePricing: (pricing: Pricing[]) => void
@@ -144,6 +151,52 @@ export const useRegistrationStore = create<RegistrationStore>()(
 
       registrationData: null,
       setRegistrationData: (data) => set({ registrationData: data }),
+
+      setPricingId: (id: number | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({ registrationData: { ...currentData, pricing_id: id } });
+        }
+      },
+
+      // Setters pour les discounts
+      setDiscountAmount: (amount: string | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({
+            registrationData: {
+              ...currentData,
+              discount_amount: amount
+            }
+          });
+        }
+      },
+
+      setDiscountPercentage: (percentage: string | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({
+            registrationData: {
+              ...currentData,
+              discount_percentage: percentage
+            }
+          });
+        }
+      },
+
+      setDiscounts: (amount?: string | null, percentage?: string | null , id?: number | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({
+            registrationData: {
+              ...currentData,
+              discount_amount: amount ?? null,
+              discount_percentage: percentage ?? null,
+              pricing_id: id ?? null
+            }
+          });
+        }
+      },
 
       availablePricing: [],
       setAvailablePricing: (pricing) => set({ availablePricing: pricing }),
@@ -268,32 +321,32 @@ export const useRegistrationStore = create<RegistrationStore>()(
         const state = get();
         const now = Date.now();
         const RESTORE_COOLDOWN = 1000; // 1 seconde de cooldown
-        
+
         if (state.isRestoringFiles) {
           console.log("Restore already in progress, skipping new call");
           return;
         }
-      
+
         // Ajouter un cooldown basé sur le timestamp
         if (state.lastRestoreAttempt && (now - state.lastRestoreAttempt) < RESTORE_COOLDOWN) {
           console.log("Restore cooldown active, skipping");
           return;
         }
-      
+
         set({ isRestoringFiles: true, lastRestoreAttempt: now });
-      
+
         try {
           console.log("Starting file restoration from IndexedDB...");
           let hasChanges = false;
-      
+
           if (!fileStorage) throw new Error("Stockage local non disponible");
-      
+
           // Restaurer la photo de l'élève si nécessaire
           if (state.studentData?.photo?.stored?.fileId && !state.studentData.photo.file) {
             try {
               console.log(`Restoring student photo: ${state.studentData.photo.stored.fileId}`);
               const file = await fileStorage.getFile(state.studentData.photo.stored.fileId);
-              
+
               if (file) {
                 console.log("Student photo successfully restored");
                 set((state) => ({
@@ -315,18 +368,18 @@ export const useRegistrationStore = create<RegistrationStore>()(
               console.error("Error restoring student photo:", error);
             }
           }
-      
+
           // Restaurer les documents avec vérification plus stricte
           const updatedDocuments = [...state.documents];
           for (let i = 0; i < updatedDocuments.length; i++) {
             const doc = updatedDocuments[i];
-            
+
             // Vérifier si le document a vraiment besoin d'être restauré
             if (doc.path.stored?.fileId && !doc.path.file && !doc.path.stored.isRestored) {
               try {
                 console.log(`Restoring document: ${doc.label}, ID: ${doc.path.stored.fileId}`);
                 const file = await fileStorage.getFile(doc.path.stored.fileId);
-                
+
                 if (file) {
                   console.log(`Document successfully restored: ${doc.label}`);
                   updatedDocuments[i] = {
@@ -349,14 +402,14 @@ export const useRegistrationStore = create<RegistrationStore>()(
               }
             }
           }
-      
+
           if (hasChanges) {
             set({ documents: updatedDocuments });
             console.log("Files restoration completed with changes");
           } else {
             console.log("Files restoration completed with no changes needed");
           }
-      
+
         } catch (error) {
           console.error("Error in restoreFilesFromIndexedDB:", error);
         } finally {
@@ -366,7 +419,7 @@ export const useRegistrationStore = create<RegistrationStore>()(
           }, 500);
         }
       },
-      
+
 
       reset: async () => {
         const state = get()

@@ -11,9 +11,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check, ChevronDown, Search, User, Calendar, CreditCard, AlertCircle, Printer } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Student, Pricing, Installment, Payment , Registration} from "@/lib/interface"
+import type { Student, Pricing, Installment, Payment, Registration } from "@/lib/interface"
 import { useRouter } from "next/navigation"
-
 
 interface StudentFinancialData {
   student: Student
@@ -30,20 +29,34 @@ interface StudentFinancialData {
     amountPaid: number
     remainingAmount: number
     isOverdue: boolean
+    discountAmount?: number
+    discountPercentage?: number
+    originalAmount: number
+    hasDiscount: boolean
   }[]
 }
 
 export default function FinancialSummaryPage() {
-  const { registrations, students, pricing, installements, payments, academicYearCurrent, settings, levels , classes , series } =
-    useSchoolStore()
-  const router = useRouter()  
+  const {
+    registrations,
+    students,
+    pricing,
+    installements,
+    payments,
+    academicYearCurrent,
+    settings,
+    levels,
+    classes,
+    series,
+  } = useSchoolStore()
+  const router = useRouter()
 
   // Fonction utilitaire pour formater les montants avec devise
   function formatAmount(amount: number | string) {
     const currency = settings[0]?.currency || "FCFA"
-    const num = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
-    if (isNaN(num)) return `0 ${currency}`;
-    return `${num.toLocaleString('fr-FR').replace(/,/g, ' ')} ${currency}`;
+    const num = typeof amount === "string" ? Number.parseFloat(amount.replace(/\s/g, "")) : amount
+    if (isNaN(num)) return `0 ${currency}`
+    return `${num.toLocaleString("fr-FR").replace(/,/g, " ")} ${currency}`
   }
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -113,7 +126,24 @@ export default function FinancialSummaryPage() {
         )
 
         const amountPaid = installmentPayments.reduce((sum, payment) => sum + Number.parseFloat(payment.amount), 0)
-        const amountDue = Number.parseFloat(installment.amount_due)
+        const originalAmount = Number.parseFloat(installment.amount_due)
+
+        const hasDiscount = studentRegistration.pricing_id === pricingItem.id
+        let discountAmount = 0
+        let discountPercentage = 0
+        let amountDue = originalAmount
+
+        if (hasDiscount && (studentRegistration.discount_percentage || studentRegistration.discount_amount)) {
+          if (studentRegistration.discount_percentage) {
+            discountPercentage = Number.parseFloat(studentRegistration.discount_percentage)
+            discountAmount = (originalAmount * discountPercentage) / 100
+          } else if (studentRegistration.discount_amount) {
+            discountAmount = Number.parseFloat(studentRegistration.discount_amount)
+            discountPercentage = (discountAmount / originalAmount) * 100
+          }
+          amountDue = originalAmount - discountAmount
+        }
+
         const remainingAmount = amountDue - amountPaid
         const isOverdue = new Date(installment.due_date) < new Date() && remainingAmount > 0
 
@@ -131,6 +161,10 @@ export default function FinancialSummaryPage() {
           amountPaid,
           remainingAmount,
           isOverdue,
+          discountAmount: hasDiscount ? discountAmount : undefined,
+          discountPercentage: hasDiscount ? discountPercentage : undefined,
+          originalAmount,
+          hasDiscount,
         })
       }
     }
@@ -147,15 +181,12 @@ export default function FinancialSummaryPage() {
     }
   }, [selectedStudent, registrations, academicYearCurrent, pricing, installements, payments])
 
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR")
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-
-
       {/* Recherche d'élève */}
       <Card>
         <CardHeader>
@@ -171,7 +202,12 @@ export default function FinancialSummaryPage() {
               <Label htmlFor="search">Recherche</Label>
               <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="w-full justify-between bg-transparent"
+                  >
                     {selectedStudent
                       ? `${selectedStudent.registration_number} - ${selectedStudent.first_name} ${selectedStudent.name}`
                       : "Sélectionner un élève..."}
@@ -252,7 +288,12 @@ export default function FinancialSummaryPage() {
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Classe</Label>
-                  <p className="text-lg font-semibold">{financialData.registration?.classe?.label ?? "-"} ({series.find((serie) => Number(serie.id) === Number(financialData.registration?.classe?.serie_id))?.label ?? "-"})</p>
+                  <p className="text-lg font-semibold">
+                    {financialData.registration?.classe?.label ?? "-"} (
+                    {series.find((serie) => Number(serie.id) === Number(financialData.registration?.classe?.serie_id))
+                      ?.label ?? "-"}
+                    )
+                  </p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Niveau</Label>
@@ -335,6 +376,8 @@ export default function FinancialSummaryPage() {
                   <TableRow>
                     <TableHead>Type de frais</TableHead>
                     <TableHead>Échéance</TableHead>
+                    <TableHead>Montant original</TableHead>
+                    <TableHead>Réduction</TableHead>
                     <TableHead>Montant dû</TableHead>
                     <TableHead>Montant payé</TableHead>
                     <TableHead>Reste</TableHead>
@@ -351,7 +394,23 @@ export default function FinancialSummaryPage() {
                         </div>
                       </TableCell>
                       <TableCell>{formatDate(detail.installment.due_date)}</TableCell>
-                      <TableCell>{formatAmount(Number.parseFloat(detail.installment.amount_due))}</TableCell>
+                      <TableCell>{formatAmount(detail.originalAmount)}</TableCell>
+                      <TableCell>
+                        {detail.hasDiscount ? (
+                          <div className="text-green-600">
+                            {detail.discountPercentage && detail.discountPercentage > 0 ? (
+                              <span>
+                                -{detail.discountPercentage.toFixed(1)}% ({formatAmount(detail.discountAmount || 0)})
+                              </span>
+                            ) : (
+                              <span>-{formatAmount(detail.discountAmount || 0)}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{formatAmount(detail.originalAmount - (detail.discountAmount || 0))}</TableCell>
                       <TableCell className="text-green-600">{formatAmount(detail.amountPaid)}</TableCell>
                       <TableCell className={detail.remainingAmount > 0 ? "text-orange-600" : "text-green-600"}>
                         {formatAmount(detail.remainingAmount)}
@@ -412,8 +471,9 @@ export default function FinancialSummaryPage() {
                           <TableCell>
                             <Button
                               variant="outline"
-                              onClick={() => router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`)}
-                              
+                              onClick={() =>
+                                router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`)
+                              }
                             >
                               <Printer className="mr-2 h-4 w-4" />
                               Imprimer
@@ -426,56 +486,6 @@ export default function FinancialSummaryPage() {
               </CardContent>
             </Card>
           )}
-
-          {/* Boutons d'impression pour les paiements existants */}
-          {/* {financialData.installmentDetails.some((detail) => detail.payments.length > 0) && (
-            <div className="mt-4">
-              <h4 className="text-sm font-medium mb-2">Imprimer les reçus</h4>
-              <div className="flex flex-wrap gap-2">
-                {financialData.installmentDetails
-                  .flatMap((detail) => detail.payments)
-                  .filter((payment, index, self) =>
-                    // Filtrer les paiements uniques par transaction_id s'il existe
-                    payment.transaction_id
-                      ? self.findIndex((p) => p.transaction_id === payment.transaction_id) === index
-                      : true,
-                  )
-                  .map((payment, index) => {
-                    // Regrouper les paiements par transaction si possible
-                    const relatedPayments = payment.transaction_id
-                      ? financialData.installmentDetails
-                        .flatMap((detail) => detail.payments)
-                        .filter((p) => p.transaction_id === payment.transaction_id)
-                      : [payment]
-
-                    const transaction = {
-                      id: payment.transaction_id || payment.id,
-                      user_id: payment.cashier_id,
-                      cash_register_session_id: payment.cash_register_id,
-                      transaction_date: payment.created_at,
-                      total_amount: relatedPayments.reduce((sum, p) => sum + Number(p.amount), 0).toString(),
-                      transaction_type: "encaissement",
-                      created_at: payment.created_at,
-                      updated_at: payment.updated_at,
-                    }
-
-
-
-                    return (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                        onClick={() => { router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`) }}
-                      >
-                        Reçu #{payment.transaction_id || payment.id}
-                      </Button>
-                    )
-                  })}
-              </div>
-            </div>
-          )} */}
         </div>
       )}
 

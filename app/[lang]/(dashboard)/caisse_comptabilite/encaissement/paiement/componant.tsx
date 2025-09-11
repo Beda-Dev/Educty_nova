@@ -44,7 +44,6 @@ import { fetchPayment, fetchTransactions } from "@/store/schoolservice"
 import { formatDateYMDHIS } from "./fonction"
 import { generatePDFfromRef } from "@/lib/utils"
 import PaymentReceipt from "./payment-receipt"
-import { motion } from "framer-motion"
 
 interface StudentFinancialData {
   student: Student
@@ -54,6 +53,8 @@ interface StudentFinancialData {
   totalRemaining: number
   overdueAmount: number
   registration?: Registration
+  discountAmount: number // Nouveau champ pour le montant total de réduction
+  discountPercentage: number // Nouveau champ pour le pourcentage total de réduction
   installmentDetails: {
     installment: Installment
     pricing: Pricing
@@ -61,6 +62,9 @@ interface StudentFinancialData {
     amountPaid: number
     remainingAmount: number
     isOverdue: boolean
+    originalAmountDue: number // Montant original avant réduction
+    discountedAmountDue: number // Montant après réduction
+    hasDiscount?: boolean
   }[]
 }
 
@@ -84,6 +88,7 @@ export default function PaymentManagementPage() {
     setTransactions,
     levels,
     classes,
+    feeTypes
   } = useSchoolStore()
 
   const [searchTerm, setSearchTerm] = useState("")
@@ -100,9 +105,9 @@ export default function PaymentManagementPage() {
   const [paymentMethods, setPaymentMethods] = useState<Record<number, Array<{ id: number; amount: number }>>>({})
   const [givenAmount, setGivenAmount] = useState(0)
   const [totalPaidAmount, setTotalPaidAmount] = useState(0)
-  const principalPaymentMethod = methodPayment.find(method => method.isPrincipal === 1);
-const defaultPaymentMethod = principalPaymentMethod?.id || methodPayment[0]?.id || 0;
-const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defaultPaymentMethod);
+  const principalPaymentMethod = methodPayment.find((method) => method.isPrincipal === 1)
+  const defaultPaymentMethod = principalPaymentMethod?.id || methodPayment[0]?.id || 0
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defaultPaymentMethod)
   const [openConfirmModal, setOpenConfirmModal] = useState(false)
   const [openSuccessModal, setOpenSuccessModal] = useState(false)
   const [installmentErrors, setInstallmentErrors] = useState<Record<number, string>>({})
@@ -113,7 +118,6 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
 
   const currency = settings && settings[0]?.currency ? settings[0].currency : "FCFA"
   const printRef = useRef<HTMLDivElement>(null)
-
 
   // Filtrer les élèves inscrits pour l'année académique courante
   const currentYearStudents = useMemo(() => {
@@ -141,7 +145,7 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
   }, [currentYearStudents, searchTerm])
 
   // Calculer les données financières de l'élève sélectionné
-  const financialData = useMemo((): StudentFinancialData | null => {
+  const financialData = useMemo(() => {
     if (!selectedStudent) return null
 
     const studentRegistration = registrations.find(
@@ -149,20 +153,20 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
     )
 
     if (!studentRegistration) return null
-    // mis a jour des classe et niveau
-    setCurrentClass(studentRegistration.classe.label)
-    const niveauCurrent = levels.find((level) => Number(level.id) === Number(studentRegistration.classe.level_id))
-    setCurrentLevel(niveauCurrent?.label || "")
 
-    // Trouver les pricing applicables
-    const applicablePricing = pricing.filter(
-      (p) =>
+    // Récupérer les informations de réduction
+    const discountPercentage = Number.parseFloat(studentRegistration.discount_percentage || "0") || 0
+    const discountAmount = Number.parseFloat(studentRegistration.discount_amount || "0") || 0
+
+    // Filtrer les tarifications applicables pour cet élève
+    const applicablePricing = pricing.filter((p) => {
+      return (
         p.assignment_type_id === selectedStudent.assignment_type_id &&
         p.academic_years_id === academicYearCurrent.id &&
-        p.level_id === studentRegistration.classe.level_id,
-    )
+        p.level_id === studentRegistration.classe.level_id
+      )
+    })
 
-    // Calculer les détails des échéances
     const installmentDetails = []
     let totalDue = 0
     let totalPaid = 0
@@ -172,6 +176,21 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
       const pricingInstallments = installements.filter((inst) => inst.pricing_id === pricingItem.id)
 
       for (const installment of pricingInstallments) {
+        // Vérifier si cette tarification bénéficie d'une réduction
+        const hasDiscount = studentRegistration.pricing_id === pricingItem.id
+
+        // Calculer le montant dû après réduction
+        const originalAmountDue = Number.parseFloat(installment.amount_due) || 0
+        let discountedAmountDue = originalAmountDue
+
+        if (hasDiscount) {
+          if (discountPercentage > 0) {
+            discountedAmountDue = originalAmountDue * (1 - discountPercentage / 100)
+          } else if (discountAmount > 0) {
+            discountedAmountDue = Math.max(0, originalAmountDue - discountAmount)
+          }
+        }
+
         // Filtrer les paiements pour cette échéance ET cet élève
         const installmentPayments = Array.isArray(payments)
           ? payments.filter((p) => p.installment_id === installment.id && p.student_id === selectedStudent.id)
@@ -183,11 +202,10 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
           return sum + paymentAmount
         }, 0)
 
-        const amountDue = Number.parseFloat(installment.amount_due) || 0
-        const remainingAmount = Math.max(0, amountDue - amountPaid)
+        const remainingAmount = Math.max(0, discountedAmountDue - amountPaid)
         const isOverdue = new Date(installment.due_date) < new Date() && remainingAmount > 0
 
-        totalDue += amountDue
+        totalDue += discountedAmountDue
         totalPaid += amountPaid
 
         if (isOverdue) {
@@ -201,6 +219,9 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
           amountPaid,
           remainingAmount,
           isOverdue,
+          originalAmountDue,
+          discountedAmountDue,
+          hasDiscount, // Add hasDiscount flag for UI display
         })
       }
     }
@@ -212,12 +233,12 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
       totalPaid,
       totalRemaining: totalDue - totalPaid,
       overdueAmount,
+      discountAmount,
+      discountPercentage,
       registration: studentRegistration,
       installmentDetails,
     }
   }, [selectedStudent, registrations, academicYearCurrent, pricing, installements, payments])
-  
-  
 
   useEffect(() => {
     setSelectedInstallments([])
@@ -237,12 +258,12 @@ const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number>(defau
   }, [installmentAmounts])
 
   // 7. Ajout d'un effet pour cleanup
-useEffect(() => {
-  // Cleanup au démontage du composant
-  return () => {
-    isProcessingRef.current = false
-  }
-}, [])
+  useEffect(() => {
+    // Cleanup au démontage du composant
+    return () => {
+      isProcessingRef.current = false
+    }
+  }, [])
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR")
@@ -311,9 +332,16 @@ useEffect(() => {
       const maxAmount = installmentDetail.remainingAmount
       const newErrors = { ...installmentErrors }
 
-      // Vérifier si le montant dépasse le maximum
       if (numericAmount > maxAmount) {
-        newErrors[installmentId] = `Le montant ne peut pas dépasser ${formatAmount(maxAmount)} ${currency}`
+        const discountInfo = installmentDetail.hasDiscount
+          ? ` (après réduction de ${
+              financialData?.discountPercentage && financialData.discountPercentage > 0
+                ? `${financialData.discountPercentage}%`
+                : `${formatAmount(financialData?.discountAmount || 0)} ${currency}`
+            })`
+          : ""
+        newErrors[installmentId] =
+          `Le montant ne peut pas dépasser ${formatAmount(maxAmount)} ${currency}${discountInfo}`
         setInstallmentErrors(newErrors)
         return
       }
@@ -423,15 +451,15 @@ useEffect(() => {
   }
 
   const handlePayment = async () => {
-      // Protection contre les doubles clics
-  if (isProcessingRef.current) {
-    toast({
-      title: "Information",
-      description: "Un paiement est déjà en cours de traitement...",
-      color: "warning",
-    })
-    return
-  }
+    // Protection contre les doubles clics
+    if (isProcessingRef.current) {
+      toast({
+        title: "Information",
+        description: "Un paiement est déjà en cours de traitement...",
+        color: "warning",
+      })
+      return
+    }
     if (!cashRegisterSessionCurrent) {
       toast({
         title: "Erreur",
@@ -599,7 +627,7 @@ useEffect(() => {
       setIsProcessing(false)
       isProcessingRef.current = false
     }
-}
+  }
 
   const resetPaymentForm = () => {
     setSelectedInstallments([])
@@ -634,30 +662,30 @@ useEffect(() => {
   }
 
   // Ajout : calcul du résumé des méthodes de paiement pour le reçu
-const paymentMethodsSummary = useMemo(() => {
-  if (!createdPayments.length || !methodPayment.length) return []
-  const summary: { id: number; name: string; amount: number }[] = []
-  createdPayments.forEach((payment) => {
-    if (Array.isArray(payment.payment_methods) && payment.payment_methods.length > 0) {
-      payment.payment_methods.forEach((m: any) => {
-        const methodId = Number(m.id)
-        const amount = Number(m.pivot?.montant) || 0
-        const existing = summary.find((s) => s.id === methodId)
-        if (existing) {
-          existing.amount += amount
-        } else {
-          const methodObj = methodPayment.find((mp) => mp.id === methodId)
-          summary.push({
-            id: methodId,
-            name: methodObj?.name || `Méthode #${methodId}`,
-            amount,
-          })
-        }
-      })
-    }
-  })
-  return summary
-}, [createdPayments, methodPayment])
+  const paymentMethodsSummary = useMemo(() => {
+    if (!createdPayments.length || !methodPayment.length) return []
+    const summary: { id: number; name: string; amount: number }[] = []
+    createdPayments.forEach((payment) => {
+      if (Array.isArray(payment.payment_methods) && payment.payment_methods.length > 0) {
+        payment.payment_methods.forEach((m: any) => {
+          const methodId = Number(m.id)
+          const amount = Number(m.pivot?.montant) || 0
+          const existing = summary.find((s) => s.id === methodId)
+          if (existing) {
+            existing.amount += amount
+          } else {
+            const methodObj = methodPayment.find((mp) => mp.id === methodId)
+            summary.push({
+              id: methodId,
+              name: methodObj?.name || `Méthode #${methodId}`,
+              amount,
+            })
+          }
+        })
+      }
+    })
+    return summary
+  }, [createdPayments, methodPayment])
 
   const paymentMethodsTotal = paymentMethodsSummary.reduce((sum, m) => sum + m.amount, 0)
 
@@ -687,7 +715,12 @@ const paymentMethodsSummary = useMemo(() => {
                 <Label htmlFor="search">Recherche</Label>
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-full justify-between bg-transparent"
+                    >
                       {selectedStudent
                         ? `${selectedStudent.registration_number} - ${selectedStudent.first_name} ${selectedStudent.name}`
                         : "Sélectionner un élève..."}
@@ -880,10 +913,38 @@ const paymentMethodsSummary = useMemo(() => {
                             <div>
                               <p className="font-medium">{detail.pricing.label}</p>
                               <p className="text-sm text-muted-foreground">{detail.pricing.fee_type.label}</p>
+                              {/* Afficher la réduction si applicable */}
+                              {financialData.registration?.pricing_id === detail.pricing.id &&
+                                (financialData.discountPercentage > 0 || financialData.discountAmount > 0) && (
+                                  <Badge variant="outline" className="mt-1 bg-amber-100 text-amber-800">
+                                    Réduction:
+                                    {financialData.discountPercentage > 0
+                                      ? ` ${financialData.discountPercentage}%`
+                                      : ` ${formatAmount(financialData.discountAmount)} ${currency}`}
+                                  </Badge>
+                                )}
                             </div>
                           </TableCell>
                           <TableCell>{formatDate(detail.installment.due_date)}</TableCell>
-                          <TableCell>{`${formatAmount(Number.parseFloat(detail.installment.amount_due))} ${currency}`}</TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              {/* Afficher le prix barré si réduit */}
+                              {detail.originalAmountDue !== detail.discountedAmountDue ? (
+                                <>
+                                  <span className="line-through text-muted-foreground text-sm">
+                                    {formatAmount(detail.originalAmountDue)} {currency}
+                                  </span>
+                                  <span className="font-medium text-green-600">
+                                    {formatAmount(detail.discountedAmountDue)} {currency}
+                                  </span>
+                                </>
+                              ) : (
+                                <span>
+                                  {formatAmount(detail.discountedAmountDue)} {currency}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
                           <TableCell className="text-green-600">{`${formatAmount(detail.amountPaid)} ${currency}`}</TableCell>
                           <TableCell className={detail.remainingAmount > 0 ? "text-orange-600" : "text-green-600"}>
                             {`${formatAmount(detail.remainingAmount)} ${currency}`}
@@ -1080,8 +1141,8 @@ const paymentMethodsSummary = useMemo(() => {
                                         {/* {installmentDetail
                                           ? `${formatAmount(installmentDetail.remainingAmount)} ${currency}`
                                           : `${formatAmount(Number.parseInt(installment.amount_due))} ${currency}`} */}
-
-                                          Montant à payer : {`${formatAmount(Number.parseInt(installment.amount_due))} ${currency}`}
+                                        Montant à payer :{" "}
+                                        {`${formatAmount(Number.parseInt(installment.amount_due))} ${currency}`}
                                       </span>
                                     </div>
                                     <p className="text-sm text-muted-foreground">
@@ -1110,8 +1171,8 @@ const paymentMethodsSummary = useMemo(() => {
                                           value={
                                             installmentAmounts[installment.id]
                                               ? installmentAmounts[installment.id]
-                                                .toLocaleString("fr-FR")
-                                                .replace(/,/g, " ")
+                                                  .toLocaleString("fr-FR")
+                                                  .replace(/,/g, " ")
                                               : ""
                                           }
                                           onChange={(e) => {
@@ -1269,8 +1330,8 @@ const paymentMethodsSummary = useMemo(() => {
                       givenAmount < totalPaidAmount ||
                       !!globalError ||
                       Object.values(installmentErrors).some((err) => !!err) ||
-                      selectedInstallments.some((id) => !validatePaymentMethods(id))||
-                      isProcessing 
+                      selectedInstallments.some((id) => !validatePaymentMethods(id)) ||
+                      isProcessing
                     }
                   >
                     Effectuer le paiement
@@ -1326,6 +1387,12 @@ const paymentMethodsSummary = useMemo(() => {
                     paymentMethods={paymentMethods}
                     methodPayment={methodPayment}
                     currency={currency}
+                    discountAmount={financialData?.discountAmount || 0}
+                    discountPercentage={financialData?.discountPercentage || 0}
+                    pricingId={financialData?.registration.pricing_id || null}
+                    registration={financialData?.registration}
+                    feeTypes={feeTypes}
+                    
                   />
                 </div>
               </div>
@@ -1342,10 +1409,12 @@ const paymentMethodsSummary = useMemo(() => {
                   </Button>
                 </div>
                 <div className="flex gap-1 mt-2">
-                  <Button size="sm" color='destructive' onClick={resetPaymentForm}>
+                  <Button size="sm" color="destructive" onClick={resetPaymentForm}>
                     Fermer
                   </Button>
-                  <Button size="sm" color="indigodye" onClick={resetPaymentForm}>Nouveau paiement</Button>
+                  <Button size="sm" color="indigodye" onClick={resetPaymentForm}>
+                    Nouveau paiement
+                  </Button>
                 </div>
               </DialogFooter>
             </div>

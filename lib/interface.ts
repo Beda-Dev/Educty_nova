@@ -296,9 +296,13 @@ export interface Registration {
   registration_date: string;
   created_at: string;
   updated_at: string;
+  discount_percentage?:string | null;
+  discount_amount?:string | null;
+  pricing_id?: number | null;
   classe: Omit<Classe, 'serie' | 'level'>;
   academic_year: Omit<AcademicYear, 'periods'>;
   student: StudentOnly;
+  pricing?: Omit<Pricing, 'installments' | 'academic_year' | 'level' | 'fee_type' | 'assignment_type'> | null;
 }
 
 export interface RegistrationMerge {
@@ -868,6 +872,9 @@ export interface RegistrationFormData {
   academic_year_id: number
   student_id: number
   registration_date: string
+  discount_percentage?: string | null
+  discount_amount?: string | null
+  pricing_id?: number | null;
 }
 
 export interface PaymentFormData {

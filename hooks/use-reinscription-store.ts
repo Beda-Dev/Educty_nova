@@ -59,6 +59,11 @@ interface ReinscriptionStore {
   registrationData: RegistrationFormData | null
   setRegistrationData: (data: RegistrationFormData) => void
 
+  setDiscountAmount: (amount: string | null) => void
+  setDiscountPercentage: (percentage: string | null) => void
+  setPricingId: (id: number | null) => void
+  setDiscounts: (amount?: string | null, percentage?: string | null, id?: number | null) => void
+
   // Pricing data
   availablePricing: Pricing[]
   setAvailablePricing: (pricing: Pricing[]) => void
@@ -126,6 +131,51 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
 
       registrationData: null,
       setRegistrationData: (data) => set({ registrationData: data }),
+
+      setPricingId: (id: number | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({ registrationData: { ...currentData, pricing_id: id } });
+        }
+      },
+
+      setDiscountAmount: (amount: string | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({
+            registrationData: {
+              ...currentData,
+              discount_amount: amount
+            }
+          });
+        }
+      },
+
+      setDiscountPercentage: (percentage: string | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({
+            registrationData: {
+              ...currentData,
+              discount_percentage: percentage
+            }
+          });
+        }
+      },
+
+      setDiscounts: (amount?: string | null, percentage?: string | null, id?: number | null) => {
+        const currentData = get().registrationData;
+        if (currentData) {
+          set({
+            registrationData: {
+              ...currentData,
+              discount_amount: amount ?? null,
+              discount_percentage: percentage ?? null,
+              pricing_id: id ?? null
+            }
+          });
+        }
+      },
 
       availablePricing: [],
       setAvailablePricing: (pricing) => set({ availablePricing: pricing }),
@@ -393,6 +443,7 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
             documents: [],
             registration: null,
           },
+          
         })
       },
     }),

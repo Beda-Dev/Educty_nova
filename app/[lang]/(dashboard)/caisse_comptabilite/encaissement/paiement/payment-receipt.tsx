@@ -1,12 +1,10 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import type { Student, Payment, PaymentMethod, Pricing, Installment } from "@/lib/interface"
-import { useSchoolStore } from "@/store"
-import { generationNumero } from "@/lib/fonction"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import type { Student, Payment, PaymentMethod, Pricing, Installment, FeeType, Registration } from "@/lib/interface";
+import { useSchoolStore } from "@/store";
+import { generationNumero } from "@/lib/fonction";
 
 interface InstallmentDetail {
   installment: Installment;
@@ -18,16 +16,21 @@ interface InstallmentDetail {
 }
 
 interface PaymentReceiptProps {
-  student?: Student
-  payments: Payment[]
-  financialData: any
-  settings: any[]
-  classe: string
-  niveau: string
-  installmentAmounts: Record<number, number>
-  paymentMethods: Record<number, Array<{ id: number; amount: number }>>
-  methodPayment: PaymentMethod[]
-  currency: string
+  student?: Student;
+  payments: Payment[];
+  financialData: any;
+  settings: any[];
+  classe: string;
+  niveau: string;
+  installmentAmounts: Record<number, number>;
+  paymentMethods: Record<number, Array<{ id: number; amount: number }>>;
+  methodPayment: PaymentMethod[];
+  currency: string;
+  discountAmount: number;
+  discountPercentage: number;
+  pricingId: number | null;
+  registration?: Registration;
+  feeTypes: FeeType[];
 }
 
 const PaymentReceipt = ({
@@ -41,55 +44,59 @@ const PaymentReceipt = ({
   paymentMethods,
   methodPayment,
   currency,
+  discountAmount,
+  discountPercentage,
+  registration,
+  feeTypes,
 }: PaymentReceiptProps) => {
-  const {academicYearCurrent}= useSchoolStore();
+  const { academicYearCurrent } = useSchoolStore();
   const schoolInfo = {
     logo: settings?.[0]?.establishment_logo || "",
     name: settings?.[0]?.establishment_name || "Nom Établissement",
     address: settings?.[0]?.address || "Adresse établissement",
-    phone: `${settings?.[0]?.establishment_phone_1 || ""} ${settings?.[0]?.establishment_phone_2 ? "/ " + settings?.[0]?.establishment_phone_2 : ""}`.trim(),
-    currency: settings?.[0]?.currency || "FCFA"
-  }
+    phone:
+      `${settings?.[0]?.establishment_phone_1 || ""} ${settings?.[0]?.establishment_phone_2 ? "/ " + settings?.[0]?.establishment_phone_2 : ""}`.trim(),
+    currency: settings?.[0]?.currency || "FCFA",
+  };
 
   const formatAmount = (amount: number) => {
-    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-  }
+    return amount.toLocaleString('fr-FR');
+  };
 
   const generateReceiptNumber = () => {
-    return generationNumero(payments[0]?.id, payments[0]?.created_at || new Date().toISOString(), "encaissement")
-  }
+    return generationNumero(payments[0]?.id, payments[0]?.created_at || new Date().toISOString(), "encaissement");
+  };
 
   // Calcul des totaux
-  const totalPaid = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0)
-  const totalDue = financialData?.totalDue || 0
-  const totalRemaining = financialData?.totalRemaining || 0
-  const totalPaidOverall = financialData?.totalPaid || 0
+  const totalPaid = Object.values(installmentAmounts).reduce((sum, amount) => sum + amount, 0);
+  const totalDue = financialData?.totalDue || 0;
+  const totalRemaining = financialData?.totalRemaining || 0;
+  const totalPaidOverall = financialData?.totalPaid || 0;
 
   const { payments: allPayments } = useSchoolStore();
 
-  // Créer un résumé des paiements par type de frais en vérifiant tous les paiements de l'élève
+  // Vérifier s'il y a une réduction
+  const hasDiscount = discountAmount > 0 || discountPercentage > 0;
+
+  // Créer un résumé des paiements par type de frais
   const paymentSummary = financialData?.applicablePricing.map((pricing: Pricing) => {
     const feeTypeLabel = pricing.fee_type.label;
-    
-    // Trouver tous les installments pour ce pricing avec typage explicite
-    const installmentDetails = financialData.installmentDetails
-      .filter((detail: InstallmentDetail) => detail.pricing.id === pricing.id);
-    
-    // Calculer le total dû et payé avec typage explicite
+
+    const installmentDetails = financialData.installmentDetails.filter(
+      (detail: InstallmentDetail) => detail.pricing.id === pricing.id,
+    );
+
     const totalDue = installmentDetails.reduce(
-      (sum: number, detail: InstallmentDetail) => sum + Number(detail.installment.amount_due), 
-      0
+      (sum: number, detail: InstallmentDetail) => sum + Number(detail.installment.amount_due),
+      0,
     );
-    
-    const totalPaid = installmentDetails.reduce(
-      (sum: number, detail: InstallmentDetail) => sum + detail.amountPaid, 
-      0
-    );
-  
+
+    const totalPaid = installmentDetails.reduce((sum: number, detail: InstallmentDetail) => sum + detail.amountPaid, 0);
+
     return {
       label: feeTypeLabel,
       total: totalDue,
-      paid: totalPaid
+      paid: totalPaid,
     };
   });
 
@@ -116,19 +123,13 @@ const PaymentReceipt = ({
             <p className="text-xs text-gray-600 leading-tight">
               {schoolInfo.address} | Tél: {schoolInfo.phone}
             </p>
-            <p className="text-xs text-gray-600 leading-tight">
-              Année scolaire: {academicYearCurrent.label || "N/A"}
-            </p>
+            <p className="text-xs text-gray-600 leading-tight">Année scolaire: {academicYearCurrent.label || "N/A"}</p>
           </div>
         </div>
         <div className="text-right space-y-0">
           <h2 className="text-xs font-semibold leading-tight">REÇU DE PAIEMENT</h2>
-          <p className="text-xs text-gray-600 leading-tight">
-            {generateReceiptNumber()}
-          </p>
-          <p className="text-xs text-gray-600 leading-tight">
-            Date: {new Date().toLocaleDateString("fr-FR")}
-          </p>
+          <p className="text-xs text-gray-600 leading-tight">{generateReceiptNumber()}</p>
+          <p className="text-xs text-gray-600 leading-tight">Date: {new Date().toLocaleDateString("fr-FR")}</p>
         </div>
       </div>
 
@@ -159,14 +160,34 @@ const PaymentReceipt = ({
                 </span>
               </span>
             </h3>
+
+            {hasDiscount && (
+              <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-green-700">Réduction appliquée:</span>
+                  <span className="text-xs font-bold text-green-600">
+                    {discountPercentage > 0
+                      ? `${discountPercentage}% (${formatAmount(discountAmount)} ${currency})`
+                      : `${formatAmount(discountAmount)} ${currency}`}
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="my-1">
-            <PaymentTable
-              payments={paymentSummary || []}
-              totalAmount={financialData?.totalDue || 0}
-              totalPaid={financialData?.totalPaid || 0}
-              remainingAmount={financialData?.totalRemaining || 0}
-              currency={currency}
-            />
+              <PaymentTable
+                payments={paymentSummary || []}
+                totalAmount={financialData?.totalDue || 0}
+                totalPaid={financialData?.totalPaid || 0}
+                remainingAmount={financialData?.totalRemaining || 0}
+                currency={currency}
+                hasDiscount={hasDiscount}
+                discountAmount={discountAmount}
+                discountPercentage={discountPercentage}
+                totalAfterDiscount={financialData?.totalDue - discountAmount}
+                feeTypes={feeTypes}
+                registration={registration}
+              />
             </div>
           </div>
 
@@ -176,14 +197,16 @@ const PaymentReceipt = ({
           <div className="mb-2">
             <h3 className="text-xs font-semibold text-blue-800 mb-1">INFORMATIONS DE PAIEMENT</h3>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-              <Info 
-                label="Caissier(e)" 
-                value={payments[0]?.cashier?.name 
-                  ? payments[0].cashier.name
-                      .split(' ')
-                      .map(part => part[0]?.toUpperCase() || '')
-                      .join('')
-                  : "N/A"} 
+              <Info
+                label="Caissier(e)"
+                value={
+                  payments[0]?.cashier?.name
+                    ? payments[0].cashier.name
+                        .split(" ")
+                        .map((part) => part[0]?.toUpperCase() || "")
+                        .join("")
+                    : "N/A"
+                }
               />
               <Info label="Caisse" value={payments[0]?.cash_register?.cash_register_number || "N/A"} />
             </div>
@@ -206,12 +229,15 @@ const PaymentReceipt = ({
           {/* Footer */}
           <div className="text-center text-xs text-gray-600 mt-2 pt-2 border-t">
             <p className="mb-0.5">Document officiel de {schoolInfo.name}</p>
-            <p>Émis le {new Date().toLocaleDateString("fr-FR")} à {new Date().toLocaleTimeString("fr-FR", { hour: '2-digit', minute: '2-digit' })}</p>
+            <p>
+              Émis le {new Date().toLocaleDateString("fr-FR")} à{" "}
+              {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </p>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 
   return (
     <div className="space-y-4">
@@ -219,8 +245,8 @@ const PaymentReceipt = ({
       <div className="border-t-2 border-dashed border-gray-400 my-2"></div>
       <SingleReceipt />
     </div>
-  )
-}
+  );
+};
 
 interface PaymentTableProps {
   payments: {
@@ -232,9 +258,31 @@ interface PaymentTableProps {
   totalPaid: number;
   remainingAmount: number;
   currency: string;
+  hasDiscount: boolean;
+  discountAmount: number;
+  discountPercentage: number;
+  totalAfterDiscount: number;
+  feeTypes: FeeType[];
+  registration?: Registration;
 }
 
-const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, currency }: PaymentTableProps) => {
+const PaymentTable = ({ 
+  payments, 
+  totalAmount, 
+  totalPaid, 
+  remainingAmount, 
+  currency, 
+  hasDiscount, 
+  discountAmount, 
+  discountPercentage, 
+  totalAfterDiscount,
+  feeTypes,
+  registration 
+}: PaymentTableProps) => {
+  const formatAmount = (amount: number) => {
+    return amount.toLocaleString('fr-FR');
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse" style={{ fontSize: "0.75rem" }}>
@@ -257,9 +305,15 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
             payments.map((payment, index) => (
               <tr key={index}>
                 <td className="border border-gray-300 p-1">{payment.label}</td>
-                <td className="border border-gray-300 p-1 text-right">{formatAmount(payment.total)} {currency}</td>
-                <td className="border border-gray-300 p-1 text-right">{formatAmount(payment.paid)} {currency}</td>
-                <td className={`border border-gray-300 p-1 text-right ${payment.total - payment.paid > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"}`}>
+                <td className="border border-gray-300 p-1 text-right">
+                  {formatAmount(payment.total)} {currency}
+                </td>
+                <td className="border border-gray-300 p-1 text-right">
+                  {formatAmount(payment.paid)} {currency}
+                </td>
+                <td
+                  className={`border border-gray-300 p-1 text-right ${payment.total - payment.paid > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"}`}
+                >
                   {formatAmount(payment.total - payment.paid)} {currency}
                 </td>
               </tr>
@@ -267,33 +321,52 @@ const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, curre
           )}
         </tbody>
         <tfoot>
+          {hasDiscount && (
+            <>
+              <tr className="border-t border-gray-200">
+                <td className="border border-gray-300 p-1 font-medium" colSpan={3}>Total avant remise</td>
+                <td className="border border-gray-300 p-1 text-right">
+                  {formatAmount(totalAmount)} {currency}
+                </td>
+              </tr>
+              <tr className="border-b border-gray-200">
+                <td className="border border-gray-300 p-1" colSpan={3}>
+                  Remise sur {feeTypes.find((fee) => fee.id === registration?.pricing?.fee_type_id)?.label || "frais"} 
+                  {discountPercentage > 0 ? ` (${discountPercentage}%)` : ''}
+                </td>
+                <td className="border border-gray-300 p-1 text-right text-red-600">
+                  -{formatAmount(discountAmount)} {currency}
+                </td>
+              </tr>
+            </>
+          )}
           <tr>
-            <td className="border border-gray-300 p-1 font-semibold">Total</td>
+            <td className="border border-gray-300 p-1 font-semibold">
+              {hasDiscount ? "Total après remise" : "Total"}
+            </td>
             <td className="border border-gray-300 p-1 font-semibold text-right">
-              {formatAmount(totalAmount)} {currency}
+              {hasDiscount ? formatAmount(totalAfterDiscount) : formatAmount(totalAmount)} {currency}
             </td>
             <td className={`border border-gray-300 p-1 font-semibold text-right text-green-600`}>
               {formatAmount(totalPaid)} {currency}
             </td>
-            <td className={`border border-gray-300 p-1 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
+            <td
+              className={`border border-gray-300 p-1 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}
+            >
               {formatAmount(remainingAmount)} {currency}
             </td>
           </tr>
         </tfoot>
       </table>
     </div>
-  )
-}
+  );
+};
 
 const Info = ({ label, value }: { label: string; value?: string | number | null }) => (
   <div className="flex items-start">
     <span className="font-semibold min-w-[80px] text-xs">{label}:</span>
     <span className="text-gray-800 ml-1 text-xs">{value || "N/A"}</span>
   </div>
-)
+);
 
-function formatAmount(amount: number): string {
-  return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ")
-}
-
-export default PaymentReceipt
+export default PaymentReceipt;

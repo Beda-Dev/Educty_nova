@@ -1,11 +1,11 @@
 import {
-    AcademicYear,
-    Registration,
-    Pricing,
-    Student,
-    Installment,
-    Payment,
-  } from "@/lib/interface";
+  AcademicYear,
+  Registration,
+  Pricing,
+  Student,
+  Installment,
+  Payment,
+} from "@/lib/interface";
 import { toast } from 'react-hot-toast';
 
 export function formatDateYMDHIS(date: Date): string {
@@ -72,7 +72,7 @@ export async function postPayment(data: PaymentData): Promise<boolean> {
     return false;
   }
 }
-  
+
 export interface DonneesEtudiantFusionnees {
   informationsEtudiant: Student;
   informationsInscription?: Registration;
@@ -172,21 +172,21 @@ export function obtenirDonneesCompletesEtudiant(
     const echeancesTarif = echeancesApplicables.filter(
       echeance => echeance.pricing_id === tarif.id
     );
-    
+
     const montantDu = echeancesTarif.reduce(
       (somme, echeance) => somme + parseFloat(echeance.amount_due),
       0
     );
-    
+
     const paiementsTarif = paiementsEtudiant.filter(paiement =>
       echeancesTarif.some(echeance => echeance.id === paiement.installment_id)
     );
-    
+
     const montantPaye = paiementsTarif.reduce(
       (somme, paiement) => somme + parseFloat(paiement.amount),
       0
     );
-    
+
     return {
       typeFrais: tarif.fee_type.label,
       montantDu,
@@ -214,35 +214,46 @@ export function obtenirDonneesCompletesEtudiant(
   return donneesFusionnees;
 }
 
-    interface TarificationResult {
-      fees: { label: string; amount: number }[];
-      total: number;
-    }
-    
-    export const getTarificationData = (
-      tarifications: Pricing[],
-      level_id: number,
-      assignmenttype_id: number,
-      academicyear_id: number
-    ): TarificationResult => {
-      // Filtrer les tarifications selon les paramètres donnés
-      const filteredTarifications = tarifications.filter(
-        (tarif) =>
-          tarif.level_id === level_id &&
-          tarif.assignment_type_id === assignmenttype_id &&
-          tarif.academic_years_id === academicyear_id
-      );
-    
-      // Transformer les données au format requis
-      const fees = filteredTarifications.map((tarif) => ({
-        label: tarif.fee_type.label,
-        amount: Number(tarif.amount),
-      }));
-    
-      // Calculer le total
-      const total = fees.reduce((acc, fee) => acc + fee.amount, 0);
-    
-      return { fees, total };
-    };
-    
-    export default getTarificationData;
+interface TarificationResult {
+  fees: { label: string; amount: number }[];
+  total: number;
+}
+
+export const getTarificationData = (
+  tarifications: Pricing[],
+  level_id: number,
+  assignmenttype_id: number,
+  academicyear_id: number
+): TarificationResult => {
+  // Filtrer les tarifications selon les paramètres donnés
+  const filteredTarifications = tarifications.filter(
+    (tarif) =>
+      tarif.level_id === level_id &&
+      tarif.assignment_type_id === assignmenttype_id &&
+      tarif.academic_years_id === academicyear_id
+  );
+
+  // Transformer les données au format requis
+  const fees = filteredTarifications.map((tarif) => ({
+    label: tarif.fee_type.label,
+    amount: Number(tarif.amount),
+  }));
+
+  // Calculer le total
+  const total = fees.reduce((acc, fee) => acc + fee.amount, 0);
+
+  return { fees, total };
+};
+
+export default getTarificationData;
+
+export const formatAmount = (amount: number | string): string => {
+  try {
+    const num = typeof amount === 'string'
+      ? parseFloat(amount.replace(/\s/g, ''))
+      : amount
+    return isNaN(num) ? '0' : num.toLocaleString('fr-FR', { maximumFractionDigits: 0 })
+  } catch {
+    return '0'
+  }
+}

@@ -7,11 +7,8 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Check, User, Calendar, CreditCard, AlertCircle, Printer } from "lucide-react"
-import { cn } from "@/lib/utils"
-import type { Student, Pricing, Installment, Payment , Registration} from "@/lib/interface"
+import type { Student, Pricing, Installment, Payment, Registration } from "@/lib/interface"
 import { useRouter } from "next/navigation"
 
 interface FinancialSummaryPageProps {
@@ -34,20 +31,34 @@ interface StudentFinancialData {
     amountPaid: number
     remainingAmount: number
     isOverdue: boolean
+    discountAmount: number
+    discountPercentage: number
+    originalAmount: number
+    hasDiscount: boolean
   }[]
 }
 
 export default function FinancialSummaryPage({ student, studentRegistration }: FinancialSummaryPageProps) {
-  const { registrations, students, pricing, installements, payments, academicYearCurrent, settings, levels , classes , series } =
-    useSchoolStore()
-  const router = useRouter()  
+  const {
+    registrations,
+    students,
+    pricing,
+    installements,
+    payments,
+    academicYearCurrent,
+    settings,
+    levels,
+    classes,
+    series,
+  } = useSchoolStore()
+  const router = useRouter()
 
   // Fonction utilitaire pour formater les montants avec devise
   function formatAmount(amount: number | string) {
     const currency = settings[0]?.currency || "FCFA"
-    const num = typeof amount === 'string' ? parseFloat(amount.replace(/\s/g, '')) : amount;
-    if (isNaN(num)) return `0 ${currency}`;
-    return `${num.toLocaleString('fr-FR').replace(/,/g, ' ')} ${currency}`;
+    const num = typeof amount === "string" ? Number.parseFloat(amount.replace(/\s/g, "")) : amount
+    if (isNaN(num)) return `0 ${currency}`
+    return `${num.toLocaleString("fr-FR").replace(/,/g, " ")} ${currency}`
   }
 
   const [currentClass, setCurrentClass] = useState("")
@@ -64,8 +75,6 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
       })
       .filter(Boolean) as (Student & { registration: any })[]
   }, [registrations, students, academicYearCurrent])
-
-
 
   // Calculer les données financières de l'élève sélectionné
   const financialData = useMemo((): StudentFinancialData | null => {
@@ -103,7 +112,23 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
         )
 
         const amountPaid = installmentPayments.reduce((sum, payment) => sum + Number.parseFloat(payment.amount), 0)
-        const amountDue = Number.parseFloat(installment.amount_due)
+
+        let amountDue = Number.parseFloat(installment.amount_due)
+        let discountAmount = 0
+        let discountPercentage = 0
+
+        // Check if this pricing has a discount applied
+        const hasDiscount = studentRegistration.pricing_id === pricingItem.id
+        if (hasDiscount) {
+          if (studentRegistration.discount_percentage && Number(studentRegistration.discount_percentage) > 0) {
+            discountPercentage = Number(studentRegistration.discount_percentage)
+            discountAmount = (amountDue * discountPercentage) / 100
+          } else if (studentRegistration.discount_amount && Number(studentRegistration.discount_amount) > 0) {
+            discountAmount = Number(studentRegistration.discount_amount)
+          }
+          amountDue = amountDue - discountAmount
+        }
+
         const remainingAmount = amountDue - amountPaid
         const isOverdue = new Date(installment.due_date) < new Date() && remainingAmount > 0
 
@@ -121,6 +146,10 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
           amountPaid,
           remainingAmount,
           isOverdue,
+          discountAmount,
+          discountPercentage,
+          originalAmount: Number.parseFloat(installment.amount_due),
+          hasDiscount,
         })
       }
     }
@@ -137,14 +166,12 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
     }
   }, [registrations, academicYearCurrent, pricing, installements, payments])
 
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR")
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-
       {/* Résumé financier */}
       {financialData && (
         <div className="space-y-6">
@@ -174,7 +201,12 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Classe</Label>
-                  <p className="text-lg font-semibold">{financialData.registration?.classe?.label ?? "-"} ({series.find((serie) => Number(serie.id) === Number(financialData.registration?.classe?.serie_id))?.label ?? "-"})</p>
+                  <p className="text-lg font-semibold">
+                    {financialData.registration?.classe?.label ?? "-"} (
+                    {series.find((serie) => Number(serie.id) === Number(financialData.registration?.classe?.serie_id))
+                      ?.label ?? "-"}
+                    )
+                  </p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-muted-foreground">Niveau</Label>
@@ -257,6 +289,8 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
                   <TableRow>
                     <TableHead>Type de frais</TableHead>
                     <TableHead>Échéance</TableHead>
+                    <TableHead>Montant original</TableHead>
+                    <TableHead>Réduction</TableHead>
                     <TableHead>Montant dû</TableHead>
                     <TableHead>Montant payé</TableHead>
                     <TableHead>Reste</TableHead>
@@ -273,7 +307,24 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
                         </div>
                       </TableCell>
                       <TableCell>{formatDate(detail.installment.due_date)}</TableCell>
-                      <TableCell>{formatAmount(Number.parseFloat(detail.installment.amount_due))}</TableCell>
+                      <TableCell>{formatAmount(detail.originalAmount)}</TableCell>
+                      <TableCell>
+                        {detail.hasDiscount ? (
+                          <div className="text-green-600">
+                            {detail.discountPercentage > 0 ? (
+                              <div>
+                                <div className="text-sm font-medium">-{detail.discountPercentage}%</div>
+                                <div className="text-xs">({formatAmount(detail.discountAmount)})</div>
+                              </div>
+                            ) : (
+                              <div className="text-sm font-medium">-{formatAmount(detail.discountAmount)}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{formatAmount(detail.originalAmount - detail.discountAmount)}</TableCell>
                       <TableCell className="text-green-600">{formatAmount(detail.amountPaid)}</TableCell>
                       <TableCell className={detail.remainingAmount > 0 ? "text-orange-600" : "text-green-600"}>
                         {formatAmount(detail.remainingAmount)}
@@ -334,8 +385,11 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
                           <TableCell>
                             <Button
                               variant="outline"
-                              onClick={() => router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`)}
-                              
+                              size="sm"
+                              className="gap-2 bg-transparent"
+                              onClick={() => {
+                                router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`)
+                              }}
                             >
                               <Printer className="mr-2 h-4 w-4" />
                               Imprimer
@@ -388,7 +442,7 @@ export default function FinancialSummaryPage({ student, studentRegistration }: F
                         key={index}
                         variant="outline"
                         size="sm"
-                        className="gap-2"
+                        className="gap-2 bg-transparent"
                         onClick={() => { router.push(`/caisse_comptabilite/encaissement/historique_paiement/${payment.id}`) }}
                       >
                         Reçu #{payment.transaction_id || payment.id}
