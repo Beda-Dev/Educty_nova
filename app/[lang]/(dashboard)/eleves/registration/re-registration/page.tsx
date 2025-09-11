@@ -27,6 +27,7 @@ export default function ReinscriptionPage() {
     selectedStudent,
     setSelectedStudent,
     reset,
+    setDiscountAmount,setDiscountPercentage , setDiscounts
   } = useReinscriptionStore();
 
   const { students , setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations  } = useSchoolStore()
@@ -45,6 +46,9 @@ export default function ReinscriptionPage() {
     setSelectedStudent(student);
     setShowStepper(true);
     setCurrentStep(1);
+    setDiscountAmount(null);
+    setDiscountPercentage(null);
+    setDiscounts(null , null , null);
   };
 
   const handleNext = () => {

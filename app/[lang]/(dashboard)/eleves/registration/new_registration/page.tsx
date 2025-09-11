@@ -17,7 +17,7 @@ import { updateStudentCountByClass } from "@/lib/fonction";
 export default function InscriptionPage() {
   const { studentData } = useRegistrationStore();
   const { setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations  } = useSchoolStore()
-  const { currentStep, setCurrentStep, reset  } = useRegistrationStore()
+  const { currentStep, setCurrentStep, reset , setDiscountAmount,setDiscountPercentage , setDiscounts  } = useRegistrationStore()
 
   const [showReceipt, setShowReceipt] = useState(false)
 
@@ -57,6 +57,9 @@ export default function InscriptionPage() {
   const handleNewRegistration = () => {
     reset()
     setShowReceipt(false)
+    setDiscountAmount(null);
+    setDiscountPercentage(null);
+    setDiscounts(null , null , null);
   }
 
   if (showReceipt) {
