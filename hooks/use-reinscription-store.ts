@@ -425,6 +425,7 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
           console.error("Error cleaning up IndexedDB files:", error)
         }
 
+        // Réinitialiser tous les champs, y compris les réductions et la tarification
         set({
           currentStep: 1,
           selectedStudent: null,
@@ -443,7 +444,6 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
             documents: [],
             registration: null,
           },
-          
         })
       },
     }),

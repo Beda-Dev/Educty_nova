@@ -165,9 +165,9 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
                 availablePricing={availablePricing}
                 paidAmount={paidAmount}
                 settings={settings}
-                discount_amount={inscription?.discount_amount}
-                discount_percentage={inscription?.discount_percentage}
-                pricing_id={inscription?.pricing_id}
+                discount_amount={inscription?.discount_amount? inscription.discount_amount : null}
+                discount_percentage={inscription?.discount_percentage? inscription.discount_percentage : null}
+                pricing_id={inscription?.pricing_id? inscription.pricing_id : null}
               />
             </div>
           </div>

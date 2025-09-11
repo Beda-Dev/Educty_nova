@@ -43,12 +43,13 @@ export default function ReinscriptionPage() {
   );
 
   const handleStudentSelect = (student: Student) => {
+    reset(); // Réinitialise tous les champs, y compris les réductions
     setSelectedStudent(student);
     setShowStepper(true);
     setCurrentStep(1);
-    setDiscountAmount(null);
-    setDiscountPercentage(null);
-    setDiscounts(null , null , null);
+    setDiscountAmount(null)
+    setDiscountPercentage(null)
+    setDiscounts(null , null , null)
   };
 
   const handleNext = () => {

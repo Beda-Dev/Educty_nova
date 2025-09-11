@@ -51,12 +51,12 @@ export const TableauPaiement: React.FC<TableauPaiementProps> = ({
     let total = Number(pricing.amount) || 0;
     let reduction = 0;
     
-    // Appliquer la réduction si ce pricing est concerné
-    if (pricing_id === pricing.id) {
+    // Appliquer la réduction si ce pricing est concerné et qu'une réduction est spécifiée
+    if (Number(pricing_id) === Number(pricing.id) && (discountPercentage > 0 || discountAmount > 0)) {
       if (discountPercentage > 0) {
         reduction = total * (discountPercentage / 100);
       } else if (discountAmount > 0) {
-        reduction = discountAmount;
+        reduction = Math.min(discountAmount, total); // Ne pas dépasser le montant total
       }
       total = Math.max(0, total - reduction);
     }

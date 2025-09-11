@@ -57,9 +57,10 @@ export default function InscriptionPage() {
   const handleNewRegistration = () => {
     reset()
     setShowReceipt(false)
-    setDiscountAmount(null);
-    setDiscountPercentage(null);
-    setDiscounts(null , null , null);
+    setDiscountAmount(null)
+    setDiscountPercentage(null)
+    setDiscounts(null , null , null)
+    // Les champs de réduction sont maintenant réinitialisés dans la fonction reset() du store
   }
 
   if (showReceipt) {

@@ -445,6 +445,7 @@ export const useRegistrationStore = create<RegistrationStore>()(
           console.error("Error cleaning up IndexedDB files:", error)
         }
 
+        // Réinitialiser tous les champs, y compris les réductions et la tarification
         set({
           currentStep: 1,
           studentData: null,
