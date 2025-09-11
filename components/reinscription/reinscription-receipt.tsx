@@ -151,9 +151,9 @@ export function ReinscriptionReceipt({ onNewReinscription }: ReinscriptionReceip
                 availablePricing={availablePricing}
                 paidAmount={paidAmount}
                 settings={settings}
-                discount_amount={reinscription?.discount_amount}
-                discount_percentage={reinscription?.discount_percentage}
-                pricing_id={reinscription?.pricing_id}
+                discount_amount={registrationData?.discount_amount || null}
+                discount_percentage={registrationData?.discount_percentage || null}
+                pricing_id={registrationData?.pricing_id || null}
               />
             </div>
           </div>

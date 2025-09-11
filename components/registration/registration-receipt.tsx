@@ -30,6 +30,7 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
     registration.class_id === registrationData?.class_id && 
     registration.academic_year_id === academicYearCurrent.id && 
     registration.registration_date === registrationData?.registration_date
+    && registration.student.registration_number.trim() === studentData?.registration_number.trim()
   )
   const receiptNumber = inscription ? generationNumero(inscription.id, inscription.created_at, "inscription") : ""
 
@@ -165,9 +166,9 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
                 availablePricing={availablePricing}
                 paidAmount={paidAmount}
                 settings={settings}
-                discount_amount={inscription?.discount_amount? inscription.discount_amount : null}
-                discount_percentage={inscription?.discount_percentage? inscription.discount_percentage : null}
-                pricing_id={inscription?.pricing_id? inscription.pricing_id : null}
+                discount_amount={registrationData?.discount_amount || null}
+                discount_percentage={registrationData?.discount_percentage || null}
+                pricing_id={registrationData?.pricing_id || null}
               />
             </div>
           </div>
