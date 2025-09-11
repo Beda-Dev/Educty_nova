@@ -223,6 +223,7 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
                 totalPaid={totalPaid}
                 remainingAmount={remainingAmount}
                 currency={schoolInfo.currency}
+                registration={registration}
               />
             </div>
           </div>
@@ -290,60 +291,130 @@ interface PaymentTableProps {
     label: string;
     total: number;
     paid: number;
+    pricingId?: number;
   }[];
   totalAmount: number;
   totalPaid: number;
   remainingAmount: number;
   currency: string;
+  registration: Registration; // Ajout de l'inscription pour accéder aux remises
 }
 
-const PaymentTable = ({ payments, totalAmount, totalPaid, remainingAmount, currency }: PaymentTableProps) => {
+const PaymentTable = ({
+  payments,
+  totalAmount,
+  totalPaid,
+  remainingAmount,
+  currency,
+  registration
+}: PaymentTableProps) => {
+  // Calcul des remises
+  const discountAmount = registration.discount_amount ? parseFloat(registration.discount_amount) : 0;
+  const discountPercentage = registration.discount_percentage ? parseFloat(registration.discount_percentage) : 0;
+  const hasDiscount = discountAmount > 0 || discountPercentage > 0;
+
+  // Préparation des lignes avec gestion des remises
+  const paymentRows = payments.map(payment => {
+    let originalAmount = payment.total;
+    let discountApplied = 0;
+    let finalAmount = originalAmount;
+
+    // Appliquer la remise si ce pricing est concerné
+    if (registration.pricing_id === payment.pricingId) {
+      if (discountPercentage > 0) {
+        discountApplied = originalAmount * (discountPercentage / 100);
+      } else if (discountAmount > 0) {
+        discountApplied = Math.min(discountAmount, originalAmount);
+      }
+      finalAmount = Math.max(0, originalAmount - discountApplied);
+    }
+
+    return {
+      ...payment,
+      originalAmount,
+      discountApplied,
+      finalAmount,
+      remainingAmount: finalAmount - payment.paid
+    };
+  });
+
+  // Calculs globaux
+  const totalOriginalAmount = paymentRows.reduce((sum, row) => sum + row.originalAmount, 0);
+  const totalDiscountApplied = paymentRows.reduce((sum, row) => sum + row.discountApplied, 0);
+  const totalFinalAmount = paymentRows.reduce((sum, row) => sum + row.finalAmount, 0);
+  const totalRemainingAmount = totalFinalAmount - totalPaid;
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse" style={{ fontSize: "0.85rem" }}>
         <thead>
           <tr>
             <th className="border border-gray-300 p-2 text-left">Type de frais</th>
-            <th className="border border-gray-300 p-2 text-right">Montant total</th>
+            <th className="border border-gray-300 p-2 text-right">Montant initial</th>
+            {hasDiscount && (
+              <th className="border border-gray-300 p-2 text-right">Remise</th>
+            )}
+            <th className="border border-gray-300 p-2 text-right">Montant à payer</th>
             <th className="border border-gray-300 p-2 text-right">Montant payé</th>
             <th className="border border-gray-300 p-2 text-right">Reste à payer</th>
-
           </tr>
         </thead>
         <tbody>
-          {payments.length === 0 ? (
+          {paymentRows.length === 0 ? (
             <tr>
-              <td colSpan={4} className="border border-gray-300 p-2 text-center text-gray-500">
+              <td colSpan={hasDiscount ? 6 : 5} className="border border-gray-300 p-2 text-center text-gray-500">
                 Aucun paiement enregistré
               </td>
             </tr>
           ) : (
-            payments.map((payment, index) => (
+            paymentRows.map((payment, index) => (
               <tr key={index}>
                 <td className="border border-gray-300 p-2">{payment.label}</td>
-                <td className="border border-gray-300 p-2 text-right">{payment.total.toLocaleString()} {currency}</td>
-                <td className="border border-gray-300 p-2 text-right">{payment.paid.toLocaleString()} {currency}</td>
-                <td className={`border border-gray-300 p-2 text-right ${payment.total - payment.paid > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"}`}>
-                  {(payment.total - payment.paid).toLocaleString()} {currency}
+                <td className="border border-gray-300 p-2 text-right">
+                  {payment.originalAmount.toLocaleString()} {currency}
+                </td>
+                {hasDiscount && (
+                  <td className="border border-gray-300 p-2 text-right text-red-600 font-medium">
+                    {payment.discountApplied > 0
+                      ? `-${payment.discountApplied.toLocaleString()} ${currency}`
+                      : '-'
+                    }
+                  </td>
+                )}
+                <td className="border border-gray-300 p-2 text-right font-semibold">
+                  {payment.finalAmount.toLocaleString()} {currency}
+                </td>
+                <td className="border border-gray-300 p-2 text-right">
+                  {payment.paid.toLocaleString()} {currency}
+                </td>
+                <td className={`border border-gray-300 p-2 text-right ${payment.remainingAmount > 0 ? "text-red-600 font-medium" : "text-green-600 font-semibold"
+                  }`}>
+                  {payment.remainingAmount.toLocaleString()} {currency}
                 </td>
               </tr>
             ))
           )}
-
         </tbody>
         <tfoot>
           <tr>
-            <td className="border border-gray-300 p-2 font-semibold">
-              Total
-            </td>
+            <td className="border border-gray-300 p-2 font-semibold">Total</td>
             <td className="border border-gray-300 p-2 font-semibold text-right">
-              {totalAmount.toLocaleString()} {currency}
+              {totalOriginalAmount.toLocaleString()} {currency}
+            </td>
+            {hasDiscount && (
+              <td className="border border-gray-300 p-2 font-semibold text-right text-red-600">
+                -{totalDiscountApplied.toLocaleString()} {currency}
+              </td>
+            )}
+            <td className="border border-gray-300 p-2 font-semibold text-right">
+              {totalFinalAmount.toLocaleString()} {currency}
             </td>
             <td className={`border border-gray-300 p-2 font-semibold text-right text-green-600`}>
               {totalPaid.toLocaleString()} {currency}
             </td>
-            <td className={`border border-gray-300 p-2 font-semibold text-right ${remainingAmount > 0 ? "text-red-600" : "text-green-600"}`}>
-              {remainingAmount.toLocaleString()} {currency}
+            <td className={`border border-gray-300 p-2 font-semibold text-right ${totalRemainingAmount > 0 ? "text-red-600" : "text-green-600"
+              }`}>
+              {totalRemainingAmount.toLocaleString()} {currency}
             </td>
           </tr>
         </tfoot>

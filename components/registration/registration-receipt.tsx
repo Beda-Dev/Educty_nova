@@ -98,7 +98,7 @@ export function RegistrationReceipt({ onNewRegistration }: RegistrationReceiptPr
               crossOrigin="anonymous" // Ajoutez cette ligne
               onError={(e) => {
                 // Gérer les erreurs de chargement d'image
-                e.currentTarget.src = 'public\images\default-logo.png'
+                e.currentTarget.src = '/images/default-logo.png'
               }}
             />
           ) : (
