@@ -112,12 +112,21 @@ const PaymentReceipt = ({
               width={80}
               height={80}
               className="school-logo"
+              crossOrigin="anonymous"
+              onError={(e) => {
+                e.currentTarget.src = "/images/default-logo.png" // placé dans public/images
+              }}
             />
           ) : (
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs">
-              Logo
-            </div>
+            <img
+              src="/images/default-logo.png"
+              alt="Logo par défaut"
+              width={80}
+              height={80}
+              className="school-logo"
+            />
           )}
+
           <div className="space-y-0">
             <h1 className="text-xs font-bold leading-tight">{schoolInfo.name}</h1>
             <p className="text-xs text-gray-600 leading-tight">
@@ -161,7 +170,7 @@ const PaymentReceipt = ({
               </span>
             </h3>
 
-            {hasDiscount && (
+            {/* {hasDiscount && (
               <div className="mb-2 p-2 bg-green-50 border border-green-200 rounded-md">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-green-700">Réduction appliquée:</span>
@@ -172,7 +181,7 @@ const PaymentReceipt = ({
                   </span>
                 </div>
               </div>
-            )}
+            )} */}
 
             <div className="my-1">
               <PaymentTable
@@ -202,9 +211,9 @@ const PaymentReceipt = ({
                 value={
                   payments[0]?.cashier?.name
                     ? payments[0].cashier.name
-                        .split(" ")
-                        .map((part) => part[0]?.toUpperCase() || "")
-                        .join("")
+                      .split(" ")
+                      .map((part) => part[0]?.toUpperCase() || "")
+                      .join("")
                     : "N/A"
                 }
               />
@@ -266,18 +275,18 @@ interface PaymentTableProps {
   registration?: Registration;
 }
 
-const PaymentTable = ({ 
-  payments, 
-  totalAmount, 
-  totalPaid, 
-  remainingAmount, 
-  currency, 
-  hasDiscount, 
-  discountAmount, 
-  discountPercentage, 
+const PaymentTable = ({
+  payments,
+  totalAmount,
+  totalPaid,
+  remainingAmount,
+  currency,
+  hasDiscount,
+  discountAmount,
+  discountPercentage,
   totalAfterDiscount,
   feeTypes,
-  registration 
+  registration
 }: PaymentTableProps) => {
   const formatAmount = (amount: number) => {
     return amount.toLocaleString('fr-FR');
@@ -331,7 +340,7 @@ const PaymentTable = ({
               </tr>
               <tr className="border-b border-gray-200">
                 <td className="border border-gray-300 p-1" colSpan={3}>
-                  Remise sur {feeTypes.find((fee) => fee.id === registration?.pricing?.fee_type_id)?.label || "frais"} 
+                  Remise sur {feeTypes.find((fee) => fee.id === registration?.pricing?.fee_type_id)?.label || "frais"}
                   {discountPercentage > 0 ? ` (${discountPercentage}%)` : ''}
                 </td>
                 <td className="border border-gray-300 p-1 text-right text-red-600">
