@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Input } from "@/components/ui/input"
@@ -58,7 +58,6 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
   const [isPhotoLoading, setIsPhotoLoading] = useState(false)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [tutorSearch, setTutorSearch] = useState("")
-  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([])
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [isVisible, setIsVisible] = useState(false);
 
@@ -222,18 +221,15 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
     setTutorSearch("")
   }
 
-  useEffect(() => {
-    if (tutorSearch) {
-      const filtered = tutors.filter(
-        (tutor) =>
-          tutor.name.toLowerCase().includes(tutorSearch.toLowerCase()) ||
-          tutor.first_name.toLowerCase().includes(tutorSearch.toLowerCase()),
-      )
-      setFilteredTutors(filtered)
-    } else {
-      setFilteredTutors([])
-    }
-  }, [tutorSearch, tutors])
+  const filteredTutors = useMemo(() => {
+    if (!tutorSearch) return [];
+    return tutors.filter(
+      (tutor) =>
+        tutor.name.toLowerCase().includes(tutorSearch.toLowerCase()) ||
+        tutor.first_name.toLowerCase().includes(tutorSearch.toLowerCase()) ||
+        tutor.phone_number?.toLowerCase().includes(tutorSearch.toLowerCase())
+    );
+  }, [tutorSearch, tutors]);
 
   const handleNext = async () => {
     if (

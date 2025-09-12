@@ -316,78 +316,251 @@ export const translate = (title: string, trans: Translations): string => {
 
 
 /**
- * Convertit une image distante en base64
+ * Convertit une image distante en base64 avec gestion des erreurs améliorée
+ * @param imageUrl - URL de l'image à convertir
+ * @param options - Options de configuration
+ * @returns Promesse résolue avec la chaîne base64 de l'image
  */
-async function convertImageToBase64(imageUrl: string): Promise<string> {
+async function convertImageToBase64(
+  imageUrl: string,
+  options: {
+    timeout?: number;
+    maxSizeMB?: number;
+    placeholderOnError?: boolean;
+  } = {}
+): Promise<string> {
+  const {
+    timeout = 10000, // 10 secondes par défaut
+    maxSizeMB = 5, // 5MB par défaut
+    placeholderOnError = true
+  } = options;
+
+  // Validation de l'URL
+  try {
+    new URL(imageUrl);
+  } catch (e) {
+    throw new Error('URL d\'image invalide');
+  }
+
   return new Promise((resolve, reject) => {
-    const img = new Image()
-    
-    // Configuration CORS
-    img.crossOrigin = 'anonymous'
-    
+    const img = new Image();
+    let canvas: HTMLCanvasElement | null = null;
+    let timeoutId: NodeJS.Timeout;
+
+    const cleanup = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      img.onload = null;
+      img.onerror = null;
+      img.src = '';
+      if (canvas) {
+        canvas.width = 0;
+        canvas.height = 0;
+      }
+    };
+
+    const handleError = (error: Error) => {
+      cleanup();
+      if (placeholderOnError) {
+        resolve(getPlaceholderImage());
+      } else {
+        reject(error);
+      }
+    };
+
+    // Timeout pour éviter les requêtes bloquantes
+    timeoutId = setTimeout(() => {
+      handleError(new Error('Le chargement de l\'image a pris trop de temps'));
+    }, timeout);
+
+    img.crossOrigin = 'anonymous';
+
     img.onload = function() {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      
-      if (!ctx) {
-        reject(new Error('Canvas context not available'))
-        return
-      }
-      
-      canvas.width = img.naturalWidth || img.width
-      canvas.height = img.naturalHeight || img.height
-      
-      ctx.drawImage(img, 0, 0)
-      
       try {
-        const base64 = canvas.toDataURL('image/png')
-        resolve(base64)
+        // Vérification de la taille de l'image
+        const sizeInMB = (img.src.length * 2) / (1024 * 1024);
+        if (sizeInMB > maxSizeMB) {
+          throw new Error(`L'image est trop volumineuse (${sizeInMB.toFixed(2)}MB > ${maxSizeMB}MB)`);
+        }
+
+        canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('Contexte Canvas non disponible');
+        }
+
+        // Définition de la taille du canvas
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        
+        // Vérification des dimensions
+        if (width === 0 || height === 0) {
+          throw new Error('Dimensions d\'image invalides');
+        }
+
+        // Limite la taille maximale pour éviter les problèmes de mémoire
+        const MAX_DIMENSION = 4096;
+        let newWidth = width;
+        let newHeight = height;
+        
+        if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+          if (width > height) {
+            newWidth = MAX_DIMENSION;
+            newHeight = (height / width) * MAX_DIMENSION;
+          } else {
+            newHeight = MAX_DIMENSION;
+            newWidth = (width / height) * MAX_DIMENSION;
+          }
+        }
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        // Dessiner l'image redimensionnée
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+        // Convertir en base64
+        const base64 = canvas.toDataURL('image/jpeg', 0.85); // Meilleure compression que PNG
+        
+        cleanup();
+        resolve(base64);
       } catch (error) {
-        reject(error)
+        handleError(error instanceof Error ? error : new Error('Erreur lors du traitement de l\'image'));
       }
-    }
-    
-    img.onerror = function() {
-      // Si l'image ne charge pas, utiliser une image placeholder
-      const placeholderSvg = `
-        <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-          <rect width="80" height="80" fill="#f0f0f0"/>
-          <text x="40" y="45" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">Image</text>
-        </svg>
-      `
-      const base64Placeholder = 'data:image/svg+xml;base64,' + btoa(placeholderSvg)
-      resolve(base64Placeholder)
-    }
-    
-    img.src = imageUrl
-  })
+    };
+
+    img.onerror = () => {
+      handleError(new Error('Impossible de charger l\'image'));
+    };
+
+    // Charger l'image
+    img.src = imageUrl;
+  });
 }
 
 /**
- * Prépare toutes les images d'un élément pour le PDF
+ * Génère une image de remplacement en cas d'erreur
  */
-async function prepareImagesForPDF(element: HTMLElement): Promise<HTMLElement> {
+function getPlaceholderImage(): string {
+  const placeholderSvg = `
+    <svg width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+      <rect width="80" height="80" fill="#f0f0f0"/>
+      <text x="40" y="45" text-anchor="middle" font-family="Arial" font-size="10" fill="#666">
+        
+      </text>
+    </svg>
+  `;
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(placeholderSvg.replace(/\s+/g, ' ').trim())));
+}
+
+/**
+ * Prépare toutes les images d'un élément pour le PDF avec gestion améliorée des erreurs et des performances
+ * @param element - L'élément HTML contenant les images à préparer
+ * @param options - Options de configuration pour la conversion des images
+ * @returns Une promesse résolue avec l'élément cloné contenant les images converties
+ */
+async function prepareImagesForPDF(
+  element: HTMLElement,
+  options: {
+    /** Temps d'attente maximum pour le chargement d'une image (en ms) */
+    imageLoadTimeout?: number;
+    /** Taille maximale des images (en MB) */
+    maxImageSizeMB?: number;
+    /** Afficher un placeholder en cas d'erreur */
+    showPlaceholderOnError?: boolean;
+    /** Préserve les attributs de l'image (alt, class, style, etc.) */
+    preserveImageAttributes?: boolean;
+  } = {}
+): Promise<HTMLElement> {
+  const {
+    imageLoadTimeout = 10000,
+    maxImageSizeMB = 5,
+    showPlaceholderOnError = true,
+    preserveImageAttributes = true
+  } = options;
+
   // Cloner l'élément pour ne pas modifier l'original
-  const clonedElement = element.cloneNode(true) as HTMLElement
-  const images = clonedElement.querySelectorAll('img')
+  const clonedElement = element.cloneNode(true) as HTMLElement;
+  const images = clonedElement.querySelectorAll('img');
   
-  // Traiter chaque image
-  const imagePromises = Array.from(images).map(async (img) => {
-    const originalSrc = img.src
+  if (images.length === 0) {
+    return clonedElement;
+  }
+  
+  // Créer un élément de chargement pour le suivi de la progression
+  const loadingIndicator = document.createElement('div');
+  loadingIndicator.style.position = 'fixed';
+  loadingIndicator.style.top = '10px';
+  loadingIndicator.style.right = '10px';
+  loadingIndicator.style.padding = '10px';
+  loadingIndicator.style.background = 'rgba(0,0,0,0.7)';
+  loadingIndicator.style.color = 'white';
+  loadingIndicator.style.borderRadius = '4px';
+  loadingIndicator.style.zIndex = '10000';
+  document.body.appendChild(loadingIndicator);
+  
+  // Traiter chaque image avec gestion de la progression
+  const updateProgress = (processed: number, total: number) => {
+    loadingIndicator.textContent = `Préparation des images... ${processed}/${total}`;
+  };
+  
+  const imagePromises = Array.from(images).map(async (img, index, array) => {
+    const originalSrc = img.getAttribute('src');
     
-    if (originalSrc && !originalSrc.startsWith('data:')) {
-      try {
-        const base64Image = await convertImageToBase64(originalSrc)
-        img.src = base64Image
-      } catch (error) {
-        console.warn('Failed to convert image:', originalSrc, error)
-        // L'image d'erreur sera déjà définie par la fonction convertImageToBase64
-      }
+    if (!originalSrc || originalSrc.startsWith('data:')) {
+      updateProgress(index + 1, array.length);
+      return;
     }
-  })
+    
+    try {
+      // Sauvegarder les attributs si nécessaire
+      const originalAttributes = preserveImageAttributes 
+        ? Array.from(img.attributes).reduce((acc, attr) => {
+            acc[attr.name] = attr.value;
+            return acc;
+          }, {} as Record<string, string>)
+        : null;
+      
+      // Convertir l'image en base64 avec les options
+      const base64Image = await convertImageToBase64(originalSrc, {
+        timeout: imageLoadTimeout,
+        maxSizeMB: maxImageSizeMB,
+        placeholderOnError: showPlaceholderOnError
+      });
+      
+      // Mettre à jour l'image avec la nouvelle source
+      img.src = base64Image;
+      
+      // Restaurer les attributs si nécessaire
+      if (originalAttributes) {
+        Object.entries(originalAttributes).forEach(([name, value]) => {
+          if (name !== 'src') {
+            img.setAttribute(name, value);
+          }
+        });
+      }
+      
+      // Ajouter une classe pour indiquer que l'image est chargée
+      img.classList.add('pdf-image-loaded');
+    } catch (error) {
+      console.warn(`Échec de la conversion de l'image: ${originalSrc}`, error);
+      img.classList.add('pdf-image-error');
+    } finally {
+      updateProgress(index + 1, array.length);
+    }
+  });
   
-  await Promise.all(imagePromises)
-  return clonedElement
+  try {
+    await Promise.all(imagePromises);
+    return clonedElement;
+  } catch (error) {
+    console.error('Erreur lors de la préparation des images:', error);
+    return clonedElement; // Retourner quand même l'élément même en cas d'erreur partielle
+  } finally {
+    // Nettoyer l'indicateur de chargement
+    if (document.body.contains(loadingIndicator)) {
+      document.body.removeChild(loadingIndicator);
+    }
+  }
 }
 
 /**

@@ -17,7 +17,7 @@ import { ReinscriptionReceipt } from "@/components/reinscription/reinscription-r
 import type { Student } from "@/lib/interface";
 import { Search, User, AlertTriangle } from "lucide-react";
 import { useSchoolStore } from "@/store/index";
-import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment } from "@/store/schoolservice"
+import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment , fetchClasses } from "@/store/schoolservice"
 import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function ReinscriptionPage() {
@@ -30,7 +30,7 @@ export default function ReinscriptionPage() {
     setDiscountAmount,setDiscountPercentage , setDiscounts
   } = useReinscriptionStore();
 
-  const { students , setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, classes, registrations  } = useSchoolStore()
+  const { students , setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, setClasses, classes, registrations  } = useSchoolStore()
   const [showReceipt, setShowReceipt] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showStepper, setShowStepper] = useState(false);
@@ -69,8 +69,10 @@ export default function ReinscriptionPage() {
     setPayments(responsePayments)
     const responseTutors = await fetchTutors()
     setTutors(responseTutors)
+    const responseClasses = await fetchClasses()
+    setClasses(responseClasses)
 
-    await updateStudentCountByClass(registrations, academicYearCurrent, classes);
+    await updateStudentCountByClass(response, academicYearCurrent, responseClasses);
     setShowReceipt(true);
   };
 

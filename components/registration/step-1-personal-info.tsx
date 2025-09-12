@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -45,7 +45,6 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
   })
 
   const [tutorSearch, setTutorSearch] = useState("")
-  const [filteredTutors, setFilteredTutors] = useState<Tutor[]>([])
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const [hasRestoredPhoto, setHasRestoredPhoto] = useState(false)
@@ -141,18 +140,15 @@ export function Step1PersonalInfo({ onNext }: Step1Props) {
     }
   }, [studentData])
 
-  useEffect(() => {
-    if (tutorSearch) {
-      const filtered = tutors.filter(
-        (tutor) =>
-          tutor.name.toLowerCase().includes(tutorSearch.toLowerCase()) ||
-          tutor.first_name.toLowerCase().includes(tutorSearch.toLowerCase()),
-      )
-      setFilteredTutors(filtered)
-    } else {
-      setFilteredTutors([])
-    }
-  }, [tutorSearch])
+  const filteredTutors = useMemo(() => {
+    if (!tutorSearch) return [];
+    return tutors.filter(
+      (tutor) =>
+        tutor.name.toLowerCase().includes(tutorSearch.toLowerCase()) ||
+        tutor.first_name.toLowerCase().includes(tutorSearch.toLowerCase()) ||
+        tutor.phone_number?.toLowerCase().includes(tutorSearch.toLowerCase())
+    );
+  }, [tutorSearch, tutors]);
 
   // Gérer la restauration de la photo depuis le store
   useEffect(() => {

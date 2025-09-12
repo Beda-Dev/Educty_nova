@@ -59,7 +59,7 @@ const ErrorMessage = memo(({ message }: { message?: string }) => {
 
 export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
   const [open, setOpen] = useState(false);
-  const { tutors } = useSchoolStore()
+  const { tutors , setTutors } = useSchoolStore()
   const { addNewTutor, selectedTutors, newTutors } = useRegistrationStore()
   const {
     register,
@@ -85,7 +85,7 @@ export const TutorModal = memo(({ isNew = true }: { isNew?: boolean }) => {
     const map: Record<string, any> = {}
     tutors.forEach(t => { if (t.phone_number) map[t.phone_number] = t })
     return map
-  }, [tutors])
+  }, [tutors , setTutors])
 
   const sexe = watch("sexe")
   const isTutorLegal = watch("is_tutor_legal")
