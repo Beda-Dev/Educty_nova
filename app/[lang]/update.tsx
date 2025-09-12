@@ -29,6 +29,7 @@ import {updateStudentCountByClass} from "@/lib/fonction";
 import { useRegistrationStore } from "@/hooks/use-registration-store";
 import { useReinscriptionStore } from "@/hooks/use-reinscription-store";
 import {checkAndBlockSessions} from "@/lib/utils"
+import { initializeApp } from '@/lib/app-initialization';
 
 // Utilitaire pour créer un délai
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -238,7 +239,7 @@ const DataFetcher = () => {
         // (votre logique existante dans chaque fetch function)
       }
     };
-
+    initializeApp();
     // Charger les données immédiatement au montage du composant
     loadData();
 

@@ -53,6 +53,7 @@ import {
   HomeroomTeacher,
   Presence
 } from "@/lib/interface";
+import { createIndexedDBStorage } from "@/lib/indexedDB-store";
 
 // Store pour le thème
 interface ThemeStoreState {
@@ -551,7 +552,10 @@ export const useSchoolStore = create<SchoolStore>()(
     }),
     {
       name: "school-store",
-      storage: createJSONStorage(() => localStorage),
+      storage: createIndexedDBStorage<SchoolStore>(), // Utilise IndexedDB
+      partialize: (state) => ({
+        ...state,
+      }),
     }
   )
 );
