@@ -100,7 +100,7 @@ export const EditUserModal = ({ user, roles, onSuccess }: EditUserModalProps) =>
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${user.id}`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },

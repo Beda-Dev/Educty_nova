@@ -20,10 +20,8 @@ import {
   fetchExpenseType,
   fetchExpenses,
   fetchSetting,
-  fetchPermissions,
   fetchCashRegisterSessions,
   fetchPaymentMethods,
-  fetchProfessor,
   fetchFeeType
 } from "@/store/schoolservice";
 import {AcademicYear} from '@/lib/interface'
@@ -47,17 +45,14 @@ const DataFetcher = () => {
   const setAssigmentTypes = useSchoolStore((state) => state.setAssignmentTypes);
   const setFeeTypes = useSchoolStore((state) => state.setFeeTypes);
   const setDocumentTypes = useSchoolStore((state) => state.setDocumentTypes);
-  const setDocuments = useSchoolStore((state) => state.setDocuments);
   const setPayments = useSchoolStore((state) => state.setPayments);
   const setInstallments = useSchoolStore((state) => state.setInstallments);
   const setCashRegisters = useSchoolStore((state) => state.setCashRegisters);
   const setExpenseTypes = useSchoolStore((state) => state.setExpenseTypes);
   const setSettings = useSchoolStore((state) => state.setSettings);
   const setAcademicYearCurrent = useSchoolStore((state) => state.setAcademicYearCurrent);
-  const setPermission = useSchoolStore((state) => state.setPermission);
   const setCashRegisterSessions = useSchoolStore((state) => state.setCashRegisterSessions);
   const setmethodPayment = useSchoolStore((state) => state.setmethodPayment);
-  const setProfessor = useSchoolStore((state) => state.setProfessor);
   const setExpenses = useSchoolStore((state) => state.setExpenses);
 
 
@@ -83,17 +78,14 @@ const DataFetcher = () => {
         const assigmentTypes = await fetchAssignmentType();
         const feeTypes = await fetchFeeType();
         const documentTypes = await fetchDocumentType();
-        const documents = await fetchDocument();
         const payments = await fetchPayment();
         const installments = await fetchInstallment();
         const cashRegisters = await fetchCashRegister();
         const expenseTypes = await fetchExpenseType();
         const expenses = await fetchExpenses();
         const settings = await fetchSetting();
-        const permissions = await fetchPermissions();
         const sessions = await fetchCashRegisterSessions()
         const methodPayment = await fetchPaymentMethods();
-        const professor = await fetchProfessor();
         
 
         
@@ -139,16 +131,13 @@ const DataFetcher = () => {
         setAssigmentTypes(assigmentTypes);
         setFeeTypes(feeTypes);
         setDocumentTypes(documentTypes);
-        setDocuments(documents)
         setPayments(payments);
         setExpenses(expenses)
         setInstallments(installments);
         setCashRegisters(cashRegisters);
         setExpenseTypes(expenseTypes);
         setSettings(settings);
-        setPermission(permissions);
         setmethodPayment(methodPayment);
-        setProfessor(professor);
 
         await updateStudentCountByClass(registrations, academicYearCurrent, classes);
         await checkAndBlockSessions(sessions, settings?.[0]?.session_closure_time)
@@ -167,27 +156,7 @@ const DataFetcher = () => {
       abortController.abort();
       // console.log("Composant démonté - fetchs annulés");
     };
-  }, [
-    setClasses,
-    setLevels,
-    setAcademicYears,
-    setStudents,
-    setUsers,
-    setRoles,
-    setPricing,
-    setRegistration,
-    setAssigmentTypes,
-    setFeeTypes,
-    setDocumentTypes,
-    setDocuments,
-    setPayments,
-    setInstallments,
-    setCashRegisters,
-    setExpenseTypes,
-    setSettings,
-    setPermission,
-    setProfessor
-  ]);
+  }, []);
 
   return null;
 };
