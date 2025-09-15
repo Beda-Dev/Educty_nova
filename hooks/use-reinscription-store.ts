@@ -34,6 +34,10 @@ interface DocumentFormDataWithFile {
 }
 
 interface ReinscriptionStore {
+  // Indique si le processus de réinscription est terminé
+  isCompleted: boolean
+  setIsCompleted: (value: boolean) => void
+  
   // Current step
   currentStep: number
   setCurrentStep: (step: number) => void
@@ -104,6 +108,9 @@ interface ReinscriptionStore {
 export const useReinscriptionStore = create<ReinscriptionStore>()(
   persist(
     (set, get) => ({
+      isCompleted: false,
+      setIsCompleted: (value) => set({ isCompleted: value }),
+      
       currentStep: 1,
       setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -416,18 +423,17 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
           for (const doc of state.newDocuments) {
             if (doc.path.stored?.fileId) {
               if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
-              await fileStorage.removeFile(doc.path.stored.fileId)
+              await fileStorage.removeFile(doc.path.stored.fileId);
             }
           }
-
-          console.log("IndexedDB files cleaned up")
         } catch (error) {
-          console.error("Error cleaning up IndexedDB files:", error)
+          console.error("Erreur lors de la réinitialisation du store:", error);
         }
 
-        // Réinitialiser tous les champs, y compris les réductions et la tarification
+        // Réinitialiser l'état
         set({
           currentStep: 1,
+          isCompleted: false,
           selectedStudent: null,
           studentModifications: null,
           existingTutors: [],
@@ -444,7 +450,7 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
             documents: [],
             registration: null,
           },
-        })
+        });
       },
     }),
     {
@@ -452,8 +458,8 @@ export const useReinscriptionStore = create<ReinscriptionStore>()(
       // Utiliser localStorage uniquement pour les données non-fichiers
       storage: {
         getItem: (name) => {
-          const str = localStorage.getItem(name)
-          if (!str) return null
+          const str = localStorage.getItem(name);
+          if (!str) return null;
 
           try {
             const data = JSON.parse(str)

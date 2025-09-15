@@ -35,6 +35,10 @@ interface DocumentFormDataWithFile extends Omit<DocumentFormData, "path"> {
 }
 
 interface RegistrationStore {
+  // Indique si le processus d'inscription est terminé
+  isCompleted: boolean
+  setIsCompleted: (value: boolean) => void
+  
   // Current step
   currentStep: number
   setCurrentStep: (step: number) => void
@@ -97,6 +101,9 @@ import { createJSONStorage } from "zustand/middleware"
 export const useRegistrationStore = create<RegistrationStore>()(
   persist(
     (set, get) => ({
+      isCompleted: false,
+      setIsCompleted: (value) => set({ isCompleted: value }),
+      
       currentStep: 1,
       setCurrentStep: (step) => set({ currentStep: step }),
 
@@ -436,18 +443,17 @@ export const useRegistrationStore = create<RegistrationStore>()(
           for (const doc of state.documents) {
             if (doc.path.stored?.fileId) {
               if (!fileStorage) throw new Error("Stockage local non disponible sur ce navigateur ou en SSR");
-              await fileStorage.removeFile(doc.path.stored.fileId)
+              await fileStorage.removeFile(doc.path.stored.fileId);
             }
           }
-
-          console.log("IndexedDB files cleaned up")
         } catch (error) {
-          console.error("Error cleaning up IndexedDB files:", error)
+          console.error("Erreur lors de la réinitialisation du store:", error);
         }
-
-        // Réinitialiser tous les champs, y compris les réductions et la tarification
+        
+        // Réinitialiser l'état
         set({
           currentStep: 1,
+          isCompleted: false,
           studentData: null,
           selectedTutors: [],
           newTutors: [],
@@ -456,6 +462,8 @@ export const useRegistrationStore = create<RegistrationStore>()(
           payments: [],
           paidAmount: 0,
           documents: [],
+          isRestoringFiles: false,
+          lastRestoreAttempt: undefined,
         })
       },
     }),
