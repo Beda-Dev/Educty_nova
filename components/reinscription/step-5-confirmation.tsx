@@ -49,6 +49,8 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     setCreatedEntities,
     getFileFromPath,
     getFileSize,
+    isCompleted,
+    setIsCompleted
   } = useReinscriptionStore()
 
   const { 
@@ -371,7 +373,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       }
 
       setCreatedEntities(createdEntities)
-
+      setIsCompleted(true)
       onComplete()
     } catch (error) {
       console.error("Erreur lors de la réinscription:", error)
@@ -852,14 +854,14 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           <Button
             variant="outline"
             onClick={onPrevious}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCompleted}
           >
             Précédent
           </Button>
 
           <Button
             onClick={handleConfirm}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCompleted}
             color="indigodye"
           >
             {isSubmitting ? (

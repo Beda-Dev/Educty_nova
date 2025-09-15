@@ -15,9 +15,9 @@ import { Step4Documents } from "@/components/reinscription/step-4-documents";
 import { Step5Confirmation } from "@/components/reinscription/step-5-confirmation";
 import { ReinscriptionReceipt } from "@/components/reinscription/reinscription-receipt";
 import type { Student } from "@/lib/interface";
-import { Search, User, AlertTriangle } from "lucide-react";
+import { Search, User, AlertTriangle, Loader2 } from "lucide-react";
 import { useSchoolStore } from "@/store/index";
-import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment , fetchClasses } from "@/store/schoolservice"
+import { fetchTutors, fetchPaymentMethods, fetchStudents, fetchRegistration, fetchPayment, fetchClasses } from "@/store/schoolservice"
 import { updateStudentCountByClass } from "@/lib/fonction";
 
 export default function ReinscriptionPage() {
@@ -27,10 +27,10 @@ export default function ReinscriptionPage() {
     selectedStudent,
     setSelectedStudent,
     reset,
-    setDiscountAmount,setDiscountPercentage , setDiscounts
+    setDiscountAmount, setDiscountPercentage, setDiscounts , setIsCompleted ,  isCompleted
   } = useReinscriptionStore();
 
-  const { students , setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, setClasses, classes, registrations  } = useSchoolStore()
+  const { students, setTutors, methodPayment, setmethodPayment, setRegistration, setStudents, setPayments, academicYearCurrent, setClasses, classes, registrations } = useSchoolStore()
   const [showReceipt, setShowReceipt] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showStepper, setShowStepper] = useState(false);
@@ -49,7 +49,7 @@ export default function ReinscriptionPage() {
     setCurrentStep(1);
     setDiscountAmount(null)
     setDiscountPercentage(null)
-    setDiscounts(null , null , null)
+    setDiscounts(null, null, null)
   };
 
   const handleNext = () => {
@@ -61,6 +61,9 @@ export default function ReinscriptionPage() {
   };
 
   const handleComplete = async () => {
+    // Marquer comme terminé (déclenche le loader)
+    setIsCompleted(true)
+    
     const response = await fetchRegistration()
     setRegistration(response)
     const responseStudents = await fetchStudents()
@@ -73,8 +76,11 @@ export default function ReinscriptionPage() {
     setClasses(responseClasses)
 
     await updateStudentCountByClass(response, academicYearCurrent, responseClasses);
+    
+    // Afficher le reçu
     setShowReceipt(true);
-  };
+    // Le loader sera masqué automatiquement quand ReinscriptionReceipt s'affiche
+  }
 
   const handleNewReinscription = () => {
     reset();
@@ -161,7 +167,8 @@ export default function ReinscriptionPage() {
   }
 
   return (
-    <Card>
+    <>
+      <Card>
       <CardHeader>
         <h1 className="text-3xl font-bold text-center mb-2">
           Réinscription d'un élève
@@ -193,5 +200,38 @@ export default function ReinscriptionPage() {
         </div>
       </CardContent>
     </Card>
+
+    {/* Overlay de chargement */}
+    {isCompleted && !showReceipt && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        {/* Arrière-plan flouté et grisé */}
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+        
+        {/* Contenu du loader */}
+        <div className="relative z-10 flex flex-col items-center justify-center bg-white rounded-lg shadow-2xl p-8 mx-4">
+          <div className="mb-6">
+            <Loader2 className="w-16 h-16 text-indigo-600 animate-spin" />
+          </div>
+          
+          <div className="text-center space-y-2">
+            <h3 className="text-xl font-semibold text-gray-800">
+              Réinscription en cours...
+            </h3>
+            <p className="text-gray-600 max-w-md">
+              Veuillez patienter pendant que nous finalisons la réinscription de l'élève.
+              Cette opération peut prendre quelques instants.
+            </p>
+          </div>
+          
+          {/* Animation de points */}
+          <div className="flex space-x-1 mt-6">
+            <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" style={{animationDelay: '0ms'}}></div>
+            <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" style={{animationDelay: '150ms'}}></div>
+            <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" style={{animationDelay: '300ms'}}></div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

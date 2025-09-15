@@ -42,11 +42,8 @@ interface Step5Props {
 export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   const [restoredPhotoFile, setRestoredPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [photoRestored, setPhotoRestored] = useState(false); // Flag pour éviter les restaurations multiples
+  const [photoRestored, setPhotoRestored] = useState(false);
   const { toast } = useToast()
-
-
-
 
   const {
     documentTypes,
@@ -60,18 +57,16 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
   } = useSchoolStore()
   const transactionIds: number[] = []
 
-    // Vérifier si une session de caisse est ouverte
-    useEffect(() => {
-      if (!cashRegisterSessionCurrent) {
-        toast({
-          title: "Erreur de session",
-          description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
-          color: "destructive"
-        })
-      }
-    }, [cashRegisterSessionCurrent])
-
-
+  // Vérifier si une session de caisse est ouverte
+  useEffect(() => {
+    if (!cashRegisterSessionCurrent) {
+      toast({
+        title: "Erreur de session",
+        description: "Aucune session de caisse n'est ouverte. Veuillez ouvrir une session de caisse avant de continuer.",
+        color: "destructive"
+      })
+    }
+  }, [cashRegisterSessionCurrent])
 
   const rollbackCreatedEntities = async (createdEntities: any) => {
     const results: Record<string, any> = {};
@@ -135,16 +130,17 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
     paidAmount,
     getFileFromPath,
     getFileSize,
-    lastRestoreAttempt
+    lastRestoreAttempt,
+    isCompleted,
+    setIsCompleted
   } = useRegistrationStore()
   const { restoreFilesFromIndexedDB } = useRegistrationStore();
 
   // Optimiser la restauration de la photo
   useEffect(() => {
-    let isMounted = true; // Éviter les setState si le composant est démonté
+    let isMounted = true;
     
     const restorePhoto = async () => {
-      // Éviter les restaurations multiples
       if (photoRestored) return;
       
       try {
@@ -171,7 +167,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
       }
     };
 
-    // Délai pour éviter les conflits avec d'autres restaurations
     const timeoutId = setTimeout(restorePhoto, 200);
     
     return () => {
@@ -249,6 +244,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           }))
           : [],
       });
+
       // Step 1: Create student
       const studentFormData = new FormData()
       if (studentData) {
@@ -258,21 +254,12 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         studentFormData.append("first_name", studentData.first_name)
         studentFormData.append("birth_date", studentData.birth_date)
         studentFormData.append("status", studentData.status)
-        // if (photo) {
-        //   console.log("Photo ajoutée:", photo.name)
-        //   studentFormData.append("photo", photo)
-        // }else{
-        //   console.log("pas de photo" , photo )
-        // }
         studentFormData.append("sexe", studentData.sexe)
 
         if (studentData.photo) {
-          // console.log("[DEBUG] Passing to getFileFromPath:", studentData.photo);
           const photoFile = await getFileFromPath(studentData.photo);
-          // console.log("[DEBUG] Result from getFileFromPath:", photoFile);
           if (photoFile) {
             studentFormData.append("photo", photoFile);
-            // console.log("[DEBUG] Photo added to FormData:", photoFile.name, photoFile.size);
           }
         }
       }
@@ -347,7 +334,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
         const registrationResult = await registrationResponse.json();
         createdEntities.registration = registrationResult.id;
-
       }
 
       for (const payment of payments) {
@@ -389,7 +375,7 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
         createdEntities.payments.push(paymentData.id);
       }
 
-      // Step 6: Upload documents (ne bloque pas la continuité si erreur)
+      // Step 6: Upload documents
       for (const doc of documents) {
         try {
           const docFormData = new FormData()
@@ -421,7 +407,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                   errorText = "Impossible de lire le corps de la réponse"
                 }
               }
-              // Log l'erreur mais ne bloque pas la suite
               console.error(`Document upload failed (${docResponse.status}):`, errorText)
               continue;
             }
@@ -434,20 +419,22 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           }
         } catch (error) {
           console.error("Erreur lors de l'envoi du document:", error)
-          // Ne bloque pas la continuité
           continue;
         }
       }
       
-      // Step 7: Fetch correspondences books , creation du carnet de correspondance
+      // Step 7: Fetch correspondences books
       if (createdEntities.registration) {
         const correspondencesBooks = await fetchCorrespondenceBooks(createdEntities.registration)
         console.log("Correspondences books:", correspondencesBooks)
-      }else{
+      } else {
         console.error("Registration ID is missing")
       }
       
+      // Marquer comme terminé et appeler onComplete
+      setIsCompleted(true)
       onComplete()
+      
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error)
       setSubmitError(error instanceof Error ? error.message : "Une erreur inattendue s'est produite")
@@ -787,30 +774,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
 
             <Separator className="bg-gray-200" />
 
-            {/* Photo Preview
-            {photo && (
-              <motion.section
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.45 }}
-                className="mb-6"
-              >
-                <div className="flex items-center space-x-2 mb-4">
-                  <User className="w-5 h-5 text-bittersweet" />
-                  <h4 className="font-semibold text-lg text-tyrian">
-                    Photo de l'élève
-                  </h4>
-                </div>
-                <div className="flex items-center justify-center">
-                  <img
-                    src={URL.createObjectURL(photo)}
-                    alt="Prévisualisation photo"
-                    className="rounded-lg shadow-md max-h-48"
-                  />
-                </div>
-              </motion.section>
-            )} */}
-
             {/* Documents Information */}
             <motion.section
               initial={{ opacity: 0 }}
@@ -844,11 +807,6 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
                           <span className="text-sm text-gray-500">
                             {formatFileSize(getFileSize(doc.path))}
                           </span>
-                          {/* {doc.path?.stored?.isRestored && (
-                            <Badge variant="outline" className="text-xs">
-                              Restauré automatiquement
-                            </Badge>
-                          )} */}
                         </div>
                       </motion.div>
                     ))}
@@ -891,17 +849,15 @@ export function Step5Confirmation({ onPrevious, onComplete }: Step5Props) {
           <Button
             variant="outline"
             onClick={onPrevious}
-            disabled={isSubmitting}
-
+            disabled={isSubmitting || isCompleted}
           >
             Précédent
           </Button>
 
           <Button
             onClick={handleConfirm}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCompleted}
             color="indigodye"
-
           >
             {isSubmitting ? (
               <>
