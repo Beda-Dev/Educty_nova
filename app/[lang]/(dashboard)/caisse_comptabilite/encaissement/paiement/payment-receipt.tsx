@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import type { Student, Payment, PaymentMethod, Pricing, Installment, FeeType, Registration } from "@/lib/interface";
 import { useSchoolStore } from "@/store";
 import { generationNumero } from "@/lib/fonction";
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy";
 
 interface InstallmentDetail {
   installment: Installment;
@@ -106,17 +107,19 @@ const PaymentReceipt = ({
       <div className="flex justify-between items-start border-b pb-1 mb-2">
         <div className="flex items-start gap-2">
           {schoolInfo.logo ? (
-            <img
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
-              alt="Logo"
-              width={80}
-              height={80}
-              className="school-logo"
-              crossOrigin="anonymous"
-              onError={(e) => {
-                e.currentTarget.src = "/images/default-logo.png" // placé dans public/images
-              }}
-            />
+            <ProxiedImage
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
+            alt="Logo"
+            width={80}
+            height={80}
+            className="school-logo object-contain"
+            style={{ maxWidth: '80px', maxHeight: '80px' }}
+            fallbackComponent={
+              <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center text-white text-sm">
+               
+              </div>
+            }
+          />
           ) : (
             <img
               src="/images/default-logo.png"

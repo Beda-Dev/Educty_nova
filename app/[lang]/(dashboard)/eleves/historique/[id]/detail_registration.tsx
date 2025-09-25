@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { generationNumero } from "@/lib/fonction";
 import { Registration, Student, Payment, Pricing, Installment, Setting } from "@/lib/interface";
 import { generatePDFfromRef } from "@/lib/utils"
+import {ProxiedImage} from "@/components/ImagesLogO/imageProxy"
 
 interface DataProps {
   registration: Registration;
@@ -141,40 +142,41 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
   };
 
   const ReceiptCopy = () => (
-    <div className="p-4 bg-white rounded-lg shadow-sm" style={{ fontSize: "12px" }}>
+    <div className="p-3 bg-white rounded-lg shadow-sm" style={{ fontSize: "11px" }}>
       {/* Header */}
-      <div className="flex justify-between items-start border-b pb-3 mb-4">
+      <div className="flex justify-between items-start border-b pb-2 mb-2">
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
-            <img
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
-              alt="Logo"
-              width={80}
-              height={80}
-              className="school-logo"
-              crossOrigin="anonymous" // Ajoutez cette ligne
-              onError={(e) => {
-                // Gérer les erreurs de chargement d'image
-                e.currentTarget.src = '/images/default-logo.png'
-              }}
-            />
+            <ProxiedImage
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
+            alt="Logo"
+            width={80}
+            height={80}
+            className="school-logo object-contain"
+            style={{ maxWidth: '80px', maxHeight: '80px' }}
+            fallbackComponent={
+              <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs">
+                
+              </div>
+            }
+          />
           ) : (
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">
               Logo
             </div>
           )}
-          <div className="space-y-1">
-            <h1 className="text-sm font-bold leading-snug">{schoolInfo.name}</h1>
-            <p className="text-xs text-gray-600 leading-snug">
+          <div className="space-y-0.5">
+            <h1 className="text-xs font-bold leading-tight">{schoolInfo.name}</h1>
+            <p className="text-[10px] text-gray-600 leading-tight">
               {schoolInfo.address} | Tél: {schoolInfo.phone}
             </p>
-            <p className="text-xs text-gray-600 leading-snug">
+            <p className="text-[10px] text-gray-600 leading-tight">
               Année scolaire: {academicYear?.label}
             </p>
           </div>
         </div>
-        <div className="text-right space-y-1">
-          <h2 className="text-sm font-semibold leading-snug">REÇU D'INSCRIPTION</h2>
+        <div className="text-right space-y-0.5">
+          <h2 className="text-xs font-semibold leading-tight">REÇU D'INSCRIPTION</h2>
           <p className="text-xs text-gray-600 leading-snug">
             N° {generationNumero(registration.id, registration.created_at, "inscription")}
           </p>
@@ -185,12 +187,12 @@ export const RegistrationFinal = ({ registration, payments, settings }: DataProp
       </div>
 
       <Card className="print:shadow-none border-0">
-        <CardContent className="p-3 space-y-4">
+        <CardContent className="p-2 space-y-2">
           {/* Student Info */}
           {student && (
             <div className="mb-4">
-              <h3 className="text-sm font-semibold text-blue-800 mb-2">INFORMATIONS DE L'ÉLÈVE</h3>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <h3 className="text-xs font-semibold text-blue-800 mb-1">INFORMATIONS DE L'ÉLÈVE</h3>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-1">
                 <Info label="Nom complet" value={`${student.name} ${student.first_name}`} />
                 <Info label="Matricule" value={student.registration_number} />
                 <Info label="Date de naissance" value={new Date(student.birth_date).toLocaleDateString("fr-FR")} />

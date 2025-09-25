@@ -18,6 +18,7 @@ import type { ValidationExpense, Transaction, Expense, User, Role, Setting } fro
 import { toast } from "sonner"
 import { generatePDFfromRef } from "@/lib/utils"
 import { generationNumero } from "@/lib/fonction";
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy";
 
 interface DecaissementPageProps {
   validationId: number
@@ -586,16 +587,22 @@ const ReceiptCopy = ({
       <div className="flex justify-between items-start border-b pb-2 mb-2">
         <div className="flex items-start gap-2">
           {schoolInfo.logo ? (
-            <img
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
-              alt="Logo"
-              width={60}
-              height={60}
-              className="school-logo"
-            />
+            <ProxiedImage
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
+            alt="Logo"
+            width={60}
+            height={60}
+            className="school-logo object-contain"
+            style={{ maxWidth: '80px', maxHeight: '80px' }}
+            fallbackComponent={
+              <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center text-white text-sm">
+                
+              </div>
+            }
+          />
           ) : (
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs">
-              Logo
+            <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center text-white text-xs">
+             
             </div>
           )}
           <div className="space-y-0">

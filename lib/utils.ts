@@ -7,6 +7,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { Table } from "@tanstack/react-table";
 import { Registration , AcademicYear  , Classe  , User , Role, Permission , CashRegisterSession , Student} from "./interface";
+import { getProxiedImageUrl } from "./imageProxy" 
 
 
 type DataSource<T> =
@@ -330,17 +331,13 @@ async function convertImageToBase64(
   } = {}
 ): Promise<string> {
   const {
-    timeout = 10000, // 10 secondes par défaut
-    maxSizeMB = 5, // 5MB par défaut
+    timeout = 10000,
+    maxSizeMB = 5,
     placeholderOnError = true
   } = options;
 
-  // Validation de l'URL
-  try {
-    new URL(imageUrl);
-  } catch (e) {
-    throw new Error('URL d\'image invalide');
-  }
+  // IMPORTANT: Utiliser le proxy pour les images externes
+  const proxiedUrl = getProxiedImageUrl(imageUrl);
 
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -367,16 +364,13 @@ async function convertImageToBase64(
       }
     };
 
-    // Timeout pour éviter les requêtes bloquantes
     timeoutId = setTimeout(() => {
       handleError(new Error('Le chargement de l\'image a pris trop de temps'));
     }, timeout);
 
-    img.crossOrigin = 'anonymous';
-
+    // Pas besoin de crossOrigin car le proxy gère déjà le CORS
     img.onload = function() {
       try {
-        // Vérification de la taille de l'image
         const sizeInMB = (img.src.length * 2) / (1024 * 1024);
         if (sizeInMB > maxSizeMB) {
           throw new Error(`L'image est trop volumineuse (${sizeInMB.toFixed(2)}MB > ${maxSizeMB}MB)`);
@@ -388,16 +382,13 @@ async function convertImageToBase64(
           throw new Error('Contexte Canvas non disponible');
         }
 
-        // Définition de la taille du canvas
         const width = img.naturalWidth || img.width;
         const height = img.naturalHeight || img.height;
         
-        // Vérification des dimensions
         if (width === 0 || height === 0) {
           throw new Error('Dimensions d\'image invalides');
         }
 
-        // Limite la taille maximale pour éviter les problèmes de mémoire
         const MAX_DIMENSION = 4096;
         let newWidth = width;
         let newHeight = height;
@@ -414,12 +405,9 @@ async function convertImageToBase64(
 
         canvas.width = newWidth;
         canvas.height = newHeight;
-
-        // Dessiner l'image redimensionnée
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
-        // Convertir en base64
-        const base64 = canvas.toDataURL('image/jpeg', 0.85); // Meilleure compression que PNG
+        const base64 = canvas.toDataURL('image/jpeg', 0.85);
         
         cleanup();
         resolve(base64);
@@ -432,8 +420,8 @@ async function convertImageToBase64(
       handleError(new Error('Impossible de charger l\'image'));
     };
 
-    // Charger l'image
-    img.src = imageUrl;
+    // Utiliser l'URL du proxy
+    img.src = proxiedUrl;
   });
 }
 
@@ -461,13 +449,9 @@ function getPlaceholderImage(): string {
 async function prepareImagesForPDF(
   element: HTMLElement,
   options: {
-    /** Temps d'attente maximum pour le chargement d'une image (en ms) */
     imageLoadTimeout?: number;
-    /** Taille maximale des images (en MB) */
     maxImageSizeMB?: number;
-    /** Afficher un placeholder en cas d'erreur */
     showPlaceholderOnError?: boolean;
-    /** Préserve les attributs de l'image (alt, class, style, etc.) */
     preserveImageAttributes?: boolean;
   } = {}
 ): Promise<HTMLElement> {
@@ -478,7 +462,6 @@ async function prepareImagesForPDF(
     preserveImageAttributes = true
   } = options;
 
-  // Cloner l'élément pour ne pas modifier l'original
   const clonedElement = element.cloneNode(true) as HTMLElement;
   const images = clonedElement.querySelectorAll('img');
   
@@ -486,19 +469,20 @@ async function prepareImagesForPDF(
     return clonedElement;
   }
   
-  // Créer un élément de chargement pour le suivi de la progression
   const loadingIndicator = document.createElement('div');
-  loadingIndicator.style.position = 'fixed';
-  loadingIndicator.style.top = '10px';
-  loadingIndicator.style.right = '10px';
-  loadingIndicator.style.padding = '10px';
-  loadingIndicator.style.background = 'rgba(0,0,0,0.7)';
-  loadingIndicator.style.color = 'white';
-  loadingIndicator.style.borderRadius = '4px';
-  loadingIndicator.style.zIndex = '10000';
+  loadingIndicator.style.cssText = `
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 10px;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    border-radius: 4px;
+    z-index: 10000;
+    font-size: 12px;
+  `;
   document.body.appendChild(loadingIndicator);
   
-  // Traiter chaque image avec gestion de la progression
   const updateProgress = (processed: number, total: number) => {
     loadingIndicator.textContent = `Préparation des images... ${processed}/${total}`;
   };
@@ -512,7 +496,6 @@ async function prepareImagesForPDF(
     }
     
     try {
-      // Sauvegarder les attributs si nécessaire
       const originalAttributes = preserveImageAttributes 
         ? Array.from(img.attributes).reduce((acc, attr) => {
             acc[attr.name] = attr.value;
@@ -520,17 +503,15 @@ async function prepareImagesForPDF(
           }, {} as Record<string, string>)
         : null;
       
-      // Convertir l'image en base64 avec les options
+      // Utiliser la fonction de conversion avec proxy
       const base64Image = await convertImageToBase64(originalSrc, {
         timeout: imageLoadTimeout,
         maxSizeMB: maxImageSizeMB,
         placeholderOnError: showPlaceholderOnError
       });
       
-      // Mettre à jour l'image avec la nouvelle source
       img.src = base64Image;
       
-      // Restaurer les attributs si nécessaire
       if (originalAttributes) {
         Object.entries(originalAttributes).forEach(([name, value]) => {
           if (name !== 'src') {
@@ -539,7 +520,6 @@ async function prepareImagesForPDF(
         });
       }
       
-      // Ajouter une classe pour indiquer que l'image est chargée
       img.classList.add('pdf-image-loaded');
     } catch (error) {
       console.warn(`Échec de la conversion de l'image: ${originalSrc}`, error);
@@ -554,9 +534,8 @@ async function prepareImagesForPDF(
     return clonedElement;
   } catch (error) {
     console.error('Erreur lors de la préparation des images:', error);
-    return clonedElement; // Retourner quand même l'élément même en cas d'erreur partielle
+    return clonedElement;
   } finally {
-    // Nettoyer l'indicateur de chargement
     if (document.body.contains(loadingIndicator)) {
       document.body.removeChild(loadingIndicator);
     }

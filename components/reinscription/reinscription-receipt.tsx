@@ -11,6 +11,7 @@ import { useRef, useState } from "react"
 import Image from "next/image"
 import { generationNumero } from "@/lib/fonction"
 import { TableauPaiement } from "@/components/common/tableauPaiement"
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy"
 
 interface ReinscriptionReceiptProps {
   onNewReinscription: () => void
@@ -80,18 +81,19 @@ export function ReinscriptionReceipt({ onNewReinscription }: ReinscriptionReceip
       <div className="flex justify-between items-start border-b pb-3 mb-4">
         <div className="flex items-start gap-3">
           {schoolInfo.logo ? (
-            <img
-              src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
-              alt="Logo"
-              width={80}
-              height={80}
-              className="school-logo"
-              crossOrigin="anonymous" // Ajoutez cette ligne
-              onError={(e) => {
-                // Gérer les erreurs de chargement d'image
-                e.currentTarget.src = '/images/default-logo.png'
-              }}
-            />
+            <ProxiedImage
+            src={`${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${schoolInfo.logo}`}
+            alt="Logo"
+            width={80}
+            height={80}
+            className="school-logo object-contain"
+            style={{ maxWidth: '80px', maxHeight: '80px' }}
+            fallbackComponent={
+              <div className="w-20 h-20 bg-gray-600 rounded-full flex items-center justify-center text-white text-sm">
+                
+              </div>
+            }
+          />
           ) : (
             <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">
               Logo

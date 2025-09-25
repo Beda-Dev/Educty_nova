@@ -60,6 +60,7 @@ export const EditStudentModal = ({
     status: "",
     photo: "",
   });
+  const [classroom, setClassroom] = useState<string | null>(null);
   const [matriculeError, setMatriculeError] = useState<string | null>(null);
   const [newPhoto, setNewPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -161,7 +162,7 @@ export const EditStudentModal = ({
       return photoPreview; // Nouvelle photo sélectionnée
     }
     if (formdata.photo) {
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL}/${formdata.photo}`;
+      return `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${formdata.photo}`;
     }
     return null;
   };
