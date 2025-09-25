@@ -405,6 +405,14 @@ async function convertImageToBase64(
 
         canvas.width = newWidth;
         canvas.height = newHeight;
+
+        // Remplir le fond en blanc pour éviter le noir lors de l'export JPEG (alpha -> noir)
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, newWidth, newHeight);
+        ctx.restore();
+
+        // Dessiner l'image par-dessus
         ctx.drawImage(img, 0, 0, newWidth, newHeight);
 
         const base64 = canvas.toDataURL('image/jpeg', 0.85);
@@ -564,6 +572,7 @@ export async function generatePDFfromRef(
     preparedElement.style.left = '-9999px'
     preparedElement.style.width = elementRef.current.offsetWidth + 'px'
     preparedElement.style.zIndex = '-1'
+    preparedElement.style.backgroundColor = 'white';
     document.body.appendChild(preparedElement)
     
     toast.loading("Génération du PDF...", { id: toastId })

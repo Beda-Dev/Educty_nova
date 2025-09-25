@@ -65,8 +65,9 @@ class IndexedDBStorageImpl implements IndexedDBStorage {
         request.onsuccess = () => resolve();
       });
     } catch (error) {
-      console.error('IndexedDB setItem error:', error);
-      throw error;
+      // En environnement SSR ou si IndexedDB est indisponible, on log et on no-op
+      console.warn('IndexedDB setItem skipped (unavailable):', error);
+      return;
     }
   }
 

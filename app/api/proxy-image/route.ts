@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
 
     // 7. Obtenir le type de contenu
     const contentType = response.headers.get('content-type') || 'image/jpeg';
+    console.log(contentType);
     
     // Vérifier que c'est bien une image
     if (!contentType.startsWith('image/')) {
