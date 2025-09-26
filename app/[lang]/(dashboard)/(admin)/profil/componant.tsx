@@ -33,6 +33,7 @@ import { useSchoolStore } from "@/store/index"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy"
 
 interface UserDetailsProps {
   user: User
@@ -216,7 +217,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
   const [passwordModalOpen, setPasswordModalOpen] = useState(false)
   const [showAllPermissions, setShowAllPermissions] = useState(false)
   const [activeTab, setActiveTab] = useState("permissions")
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL_2 || ""
+  const url = process.env.NEXT_PUBLIC_API_BASE_URL_2 as string
 
   const router = useRouter()
   const { userOnline } = useSchoolStore()
@@ -314,11 +315,23 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
               <div className="relative">
                 <Avatar className={cn("h-16 w-16", compact && "h-12 w-12")}>
                   {user.avatar ? (
-                    <img src={`${url}/${user.avatar}`} alt={user.name || "Avatar"} />
-                  ) : null}
-                  <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
-                    {getInitials(user.name)}
-                  </AvatarFallback>
+                    (() => {
+                      const raw = String(user.avatar);
+                      const src = /^https?:\/\//i.test(raw) ? raw : `${url}/${raw}`;
+                      return (
+                        <ProxiedImage
+                          src={src}
+                          alt={user.name || "Avatar"}
+                          className="h-full w-full rounded-full object-cover"
+                        />
+                      );
+                    })()
+                  ) : (
+                    <AvatarFallback className="text-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  )}
+
                 </Avatar>
                 {user.active ? (
                   <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-500 border-2 border-background rounded-full" />
@@ -371,7 +384,7 @@ export function UserDetails({ user, isLoading = false, showActions = true, compa
 
                   <Badge color={user.active ? "success" : "destructive"}>{user.active ? "Actif" : "Inactif"}</Badge>
                 </div>
-                
+
               </div>
             </CardHeader>
 

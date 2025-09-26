@@ -24,6 +24,7 @@ import {
 import { Registration, Student } from "@/lib/interface";
 import { Label } from "@/components/ui/label";
 import { Loader2, Upload, X } from "lucide-react";
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy";
 
 interface EditStudentModalProps {
   isOpen: boolean;
@@ -47,7 +48,7 @@ export const EditStudentModal = ({
   onOpenChangeAction,
   selectedStudent,
 }: EditStudentModalProps) => {
-  const { setRegistration, setStudents, registrations } = useSchoolStore();
+  const { setRegistration, setStudents, registrations, classes } = useSchoolStore();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formdata, setFormData] = useState<FormData>({
@@ -81,6 +82,7 @@ export const EditStudentModal = ({
         status: selectedStudent?.student?.status || "",
         photo: typeof selectedStudent?.student?.photo === 'string' ? selectedStudent.student.photo : ""
       });
+      setClassroom(String(selectedStudent.class_id));
     } else {
       setFormData({
         assignment_type_id: "",
@@ -91,6 +93,7 @@ export const EditStudentModal = ({
         sexe: "",
         status: "",
       });
+      setClassroom(null);
     }
     setNewPhoto(null);
     setPhotoPreview(null);
@@ -162,7 +165,13 @@ export const EditStudentModal = ({
       return photoPreview; // Nouvelle photo sélectionnée
     }
     if (formdata.photo) {
-      return `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${formdata.photo}`;
+      const url = formdata.photo;
+      // Si l'URL est déjà absolue, la retourner telle quelle
+      if (typeof url === "string" && /^https?:\/\//i.test(url)) {
+        return url;
+      }
+      // Sinon, préfixer avec la base API 2
+      return `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${url}`;
     }
     return null;
   };
@@ -244,6 +253,30 @@ export const EditStudentModal = ({
       }
 
       // Utilisation de Promise.all pour paralléliser les requêtes
+      // Si la classe a changé, mettre à jour l'inscription (registration)
+      if (
+        classroom &&
+        Number(classroom) !== (selectedStudent.class_id || 0)
+      ) {
+        const regResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/registration/${selectedStudent.id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ class_id: Number(classroom) }),
+          }
+        );
+
+        if (!regResponse.ok) {
+          const errorData = await regResponse.json().catch(() => ({}));
+          throw new Error(
+            errorData.message || "Erreur lors du changement de classe"
+          );
+        }
+      }
+
       const [updatedRegistrations, updatedStudents] = await Promise.all([
         fetchRegistration(),
         fetchStudents(),
@@ -287,7 +320,7 @@ export const EditStudentModal = ({
               <div className="relative">
                 {photoUrl ? (
                   <div className="relative w-full h-64 border-2 border-gray-200 rounded-lg overflow-hidden">
-                    <img
+                    <ProxiedImage
                       src={photoUrl}
                       alt="Photo de l'élève"
                       className="w-full h-full object-cover"
@@ -397,6 +430,42 @@ export const EditStudentModal = ({
                   <SelectContent className="z-[9999]">
                     <SelectItem value="Masculin">Masculin</SelectItem>
                     <SelectItem value="Feminin">Feminin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Changement de classe (même niveau uniquement) */}
+              <div className="space-y-2 md:col-span-2">
+                <Label>Classe</Label>
+                <Select
+                  value={classroom ?? ""}
+                  onValueChange={(value) => setClassroom(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue>
+                      {(() => {
+                        const current = classes.find(
+                          (c) => c.id.toString() === (classroom ?? "")
+                        );
+                        return (
+                          current?.label ||
+                          "Sélectionner la classe"
+                        );
+                      })()}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    {classes
+                      .filter(
+                        (c) =>
+                          Number(c.level_id) ===
+                          Number(selectedStudent?.classe?.level_id)
+                      )
+                      .map((c) => (
+                        <SelectItem key={c.id} value={c.id.toString()}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

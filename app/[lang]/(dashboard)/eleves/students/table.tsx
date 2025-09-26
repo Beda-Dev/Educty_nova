@@ -51,6 +51,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import ExportModal from "./modalColumn";
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy";
 
 interface ColumnConfig {
   id: string;
@@ -165,13 +166,21 @@ const StudentTableStatus = ({
         return (
           <div className="flex items-center gap-3">
             {student.photo ? (
-              <img
-                src={typeof student.photo === 'string' ? student.photo : ''}
-                alt={`${student.name} ${student.first_name}`}
-                width={30}
-                height={30}
-                className="rounded-full border border-gray-200 object-cover"
-              />
+              (() => {
+                const raw = typeof student.photo === 'string' ? student.photo : '';
+                const src = raw
+                  ? (/^https?:\/\//i.test(raw)
+                      ? raw
+                      : `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${raw}`)
+                  : '';
+                return (
+                  <ProxiedImage
+                    src={src}
+                    alt={`${student.name} ${student.first_name}`}
+                    className="h-[30px] w-[30px] rounded-full border border-gray-200 object-cover"
+                  />
+                );
+              })()
             ) : (
               <Avatar className="h-9 w-9">
                 <AvatarFallback className="bg-gray-100 text-sm font-medium">

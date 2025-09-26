@@ -38,6 +38,7 @@ import {
 } from "./fonction";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { ProxiedImage } from "@/components/ImagesLogO/imageProxy";
 
 interface StudentProfileProps {
   data: Student;
@@ -209,13 +210,21 @@ export default function StudentProfile({ data, pay }: StudentProfileProps) {
               <div className="flex-shrink-0">
                 <Avatar className="h-24 w-24">
                   {data.photo ? (
-                    <img
-                      src={typeof data.photo === 'string' ? data.photo : ''}
-                      alt={`${data.name} ${data.first_name}`}
-                      width={80}
-                      height={80}
-                      className="school-logo"
-                    />
+                    (() => {
+                      const raw = typeof data.photo === 'string' ? data.photo : '';
+                      const src = raw
+                        ? (/^https?:\/\//i.test(raw)
+                            ? raw
+                            : `${process.env.NEXT_PUBLIC_API_BASE_URL_2}/${raw}`)
+                        : '';
+                      return (
+                        <ProxiedImage
+                          src={src}
+                          alt={`${data.name} ${data.first_name}`}
+                          className="h-24 w-24 rounded-full object-cover"
+                        />
+                      );
+                    })()
                   ) : (
                     <AvatarFallback className="text-lg font-semibold">
                       {initials}
