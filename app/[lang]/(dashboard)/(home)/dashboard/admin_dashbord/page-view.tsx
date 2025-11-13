@@ -331,20 +331,22 @@ const DashboardView = ({ trans }: DashboardViewProps) => {
 
           {/* Statistiques principales avec vraies données */}
           {visibleWidgets.stats && (
-            <AdvancedStatsCards
-              totalStudents={totalStudents}
-              totalClasses={totalClasses}
-              totalRevenue={totalRevenue}
-              totalUsers={totalActiveUsers}
-              totalProfessors={totalActiveProfessors}
-              permanentProfessors={permanentProfessors}
-              vacataireProfessors={vacataireProfessors}
-              femaleStudents={femaleStudents}
-              maleStudents={maleStudents}
-              classOccupancyRate={classOccupancyRate}
-              showComparison={showComparison}
-              currency={settings?.[0]?.currency || "FCFA"}
-            />
+            <div className="mb-8">
+              <AdvancedStatsCards
+                totalStudents={totalStudents}
+                totalClasses={totalClasses}
+                totalRevenue={totalRevenue}
+                totalUsers={totalActiveUsers}
+                totalProfessors={totalActiveProfessors}
+                permanentProfessors={permanentProfessors}
+                vacataireProfessors={vacataireProfessors}
+                femaleStudents={femaleStudents}
+                maleStudents={maleStudents}
+                classOccupancyRate={classOccupancyRate}
+                showComparison={showComparison}
+                currency={settings?.[0]?.currency || "FCFA"}
+              />
+            </div>
           )}
 
           {/* Layout principal responsive */}
